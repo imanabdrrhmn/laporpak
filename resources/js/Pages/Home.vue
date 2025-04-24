@@ -16,13 +16,13 @@ import '@/assets/responsive.css'
 
 const page = usePage()
 const isLoggedIn = computed(() => !!page.props.auth?.user)
-
+const isVerified = computed(() => !!page.props.verified?.user)
 const showLogin = ref(false)
 const showRegister = ref(false)
 </script>
 
 <template>
-  <component :is="isLoggedIn ? AuthenticatedLayout : GuestLayout">
+  <component :is="isLoggedIn  ? AuthenticatedLayout : GuestLayout">
     <div class="main-container">
       <Beranda @trigger-login="showLogin = true" />
       <LoginModal
