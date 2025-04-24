@@ -37,6 +37,7 @@
 <script setup>
 import { usePage, Link } from '@inertiajs/vue3'
 
+
 const user = usePage().props.auth.user
 </script>
 
