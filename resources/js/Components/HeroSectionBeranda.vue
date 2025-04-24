@@ -69,11 +69,14 @@ export default {
     }
   },
   mounted() {
+    // Load Lottie player script dynamically
     if (typeof window !== 'undefined') {
       const script = document.createElement('script')
       script.src = 'https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js'
       script.async = true
-      script.onload = () => this.setupLottie()
+      script.onload = () => {
+        this.setupLottie()
+      }
       document.head.appendChild(script)
       this.setupIntersectionObserver()
     }
@@ -83,7 +86,9 @@ export default {
       this.lottieLoaded = true
       this.$nextTick(() => {
         const lottiePlayer = document.getElementById('lazyLottie')
-        if (lottiePlayer) lottiePlayer.style.opacity = '0.4'
+        if (lottiePlayer) {
+          lottiePlayer.style.opacity = '0.4'
+        }
       })
     },
     setupIntersectionObserver() {
@@ -105,6 +110,7 @@ export default {
         }, { threshold: 0.5 })
         observer.observe(this.$refs.lottieContainer)
       } else {
+        // Fallback for browsers without IntersectionObserver
         this.lottieLoaded = true
       }
     }

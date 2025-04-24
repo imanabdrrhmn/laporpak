@@ -1,6 +1,6 @@
 <script setup>
 import Navbar from '@/Components/NavBar.vue'
-import LoginModal from '@/Components/LoginModal.vue'
+import LoginModal from '@/Components/modals/LoginModal.vue'
 import { ref } from 'vue'
 import RegisterModal from '@/Components/RegisterModal.vue'
 

@@ -53,7 +53,7 @@
                 <div class="row">
                     <!-- Left Side: Mission Statement -->
                     <div class="col-lg-6 col-md-12 mb-4 mb-lg-0">
-                        <div class="mission-statement">
+                        <div class="mission-statement mt-4">
                             <h2 class="fw-bold fs-3 mt-3 text-center text-lg-start">Menjadi jembatan pelaporan penipuan yang cepat dan akurat</h2>
                             <p class="text-dark fs-6 text-center text-lg-start">
                                 Kami hadir di sini berkat dedikasi untuk menciptakan ruang yang aman dari penipuan
@@ -230,6 +230,11 @@ blockquote {
 /* Button sizing in search container */
 .search-container .btn {
     width: 150px;
+}
+
+/* Mission statement adjustment */
+.mission-statement {
+    padding-top: 10px;
 }
 
 /* Responsive adjustments */
