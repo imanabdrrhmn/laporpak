@@ -4,10 +4,10 @@
     <div class="shadow-sm navbar-full">
       <div class="container-fluid px-0">
         <div class="d-flex align-items-center justify-content-between py-2 px-3">
-          <router-link to="/" class="d-flex align-items-center text-decoration-none">
+          <Link href="/" class="d-flex align-items-center text-decoration-none">
             <img src="/logo.svg" alt="LaporPak Logo" class="logo-img me-2" />
             <span class="fw-bold text-primary fs-5 text-lp">LaporPak</span>
-          </router-link>
+          </Link>
 
           <!-- Mobile Toggle Button -->
           <button 
@@ -34,34 +34,34 @@
         <div class="container-fluid px-0">
           <ul class="nav nav-fill w-100">
             <li class="nav-item">
-              <router-link to="/beranda" class="nav-link py-3">
+              <Link href="/" class="nav-link py-3">
                 <i class="bi bi-house-fill me-2"></i>
                 <span>Beranda</span>
-              </router-link>
+              </Link>
             </li>
             <li class="nav-item">
-              <router-link to="/pelaporan" class="nav-link py-3">
+              <Link href="/pelaporan" class="nav-link py-3">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 <span>Pelaporan</span>
-              </router-link>
+              </Link>
             </li>
             <li class="nav-item">
-              <router-link to="/verifikasi" class="nav-link py-3">
+              <Link href="/verifikasi" class="nav-link py-3">
                 <i class="bi bi-check-square-fill me-2"></i>
                 <span>Verifikasi</span>
-              </router-link>
+              </Link>
             </li>
             <li class="nav-item">
-              <router-link to="/lapor-map" class="nav-link py-3">
+              <Link href="/lapor-map" class="nav-link py-3">
                 <i class="bi bi-geo-alt-fill me-2"></i>
                 <span>Lapor Map</span>
-              </router-link>
+              </Link>
             </li>
             <li class="nav-item">
-              <router-link to="/tentang-kami" class="nav-link py-3" exact-active-class="active-tentang-kami">
+              <Link href="/tentang-kami" class="nav-link py-3" :class="{ 'active-tentang-kami': $page.url === '/tentang-kami' }">
                 <i class="bi bi-people-fill me-2"></i>
                 <span>Tentang Kami</span>
-              </router-link>
+              </Link>
             </li>
           </ul>
         </div>
@@ -78,39 +78,38 @@
     <!-- Mobile Sidebar Navigation -->
     <div class="sidebar-nav d-lg-none" :class="{ 'open': mobileNavOpen }">
       <div class="sidebar-content">
-        <!-- Navigation Links -->
         <ul class="nav flex-column">
           <li class="nav-item">
-            <router-link to="/beranda" class="nav-link py-3" @click="closeMobileNav">
+            <Link href="/beranda" class="nav-link py-3" @click="closeMobileNav">
               <i class="bi bi-house-fill me-2"></i>
               <span>Beranda</span>
-            </router-link>
+            </Link>
           </li>
           <li class="nav-item">
-            <router-link to="/pelaporan" class="nav-link py-3" @click="closeMobileNav">
+            <Link href="/pelaporan" class="nav-link py-3" @click="closeMobileNav">
               <i class="bi bi-exclamation-triangle-fill me-2"></i>
               <span>Pelaporan</span>
-            </router-link>
+            </Link>
           </li>
           <li class="nav-item">
-            <router-link to="/verifikasi" class="nav-link py-3" @click="closeMobileNav">
+            <Link href="/verifikasi" class="nav-link py-3" @click="closeMobileNav">
               <i class="bi bi-check-square-fill me-2"></i>
               <span>Verifikasi</span>
-            </router-link>
+            </Link>
           </li>
           <li class="nav-item">
-            <router-link to="/lapor-map" class="nav-link py-3" @click="closeMobileNav">
+            <Link href="/lapor-map" class="nav-link py-3" @click="closeMobileNav">
               <i class="bi bi-geo-alt-fill me-2"></i>
               <span>Lapor Map</span>
-            </router-link>
+            </Link>
           </li>
           <li class="nav-item">
-            <router-link to="/tentang-kami" class="nav-link py-3" @click="closeMobileNav" exact-active-class="active-tentang-kami">
+            <Link href="/tentang-kami" class="nav-link py-3" @click="closeMobileNav" :class="{ 'active-tentang-kami': $page.url === '/tentang-kami' }">
               <i class="bi bi-people-fill me-2"></i>
               <span>Tentang Kami</span>
-            </router-link>
+            </Link>
           </li>
-          <!-- Login Button below Tentang Kami -->
+          <!-- Login Button -->
           <li class="nav-item mt-3 d-flex justify-content-center">
             <button
               class="btn btn-primary btn-sm rounded-2 py-1 px-4"
@@ -125,9 +124,15 @@
   </div>
 </template>
 
+
 <script>
+import { Link } from '@inertiajs/vue3';
+
 export default {
   name: 'NavbarLaporPak',
+  components : {
+    Link
+  },
   emits: ['trigger-login'],
   data() {
     return {

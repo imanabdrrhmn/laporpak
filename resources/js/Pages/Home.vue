@@ -11,7 +11,6 @@ import Feedback from '@/Components/Feedback.vue'
 import Footer from '@/Components/Footer.vue'
 import LoginModal from '@/Components/modals/LoginModal.vue'
 import RegisterModal from '@/Components/RegisterModal.vue'
-
 import '@/assets/responsive.css'
 
 const page = usePage()

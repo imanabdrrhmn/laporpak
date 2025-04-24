@@ -1,5 +1,5 @@
 <script setup>
-import NavbarAuthenticated from '@/Components/NavbarAuthenticated.vue'
+import NavbarAuthenticated from '@/Components/NavBarAuthenticated.vue'
 </script>
 
 <template>

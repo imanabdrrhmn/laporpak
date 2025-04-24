@@ -17,7 +17,7 @@ Route::get('/auth-home', function () {
     return Inertia::render('Home');
 })->middleware(['auth', 'verified'])->name('home');
 
-route:get('/tentang-kami', function () {
+Route::get('/tentang-kami', function () {
     return Inertia::render('TentangKami');
 })->name('tentang-kami');
 

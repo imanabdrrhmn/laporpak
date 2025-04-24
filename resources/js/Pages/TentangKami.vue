@@ -1,8 +1,6 @@
 <template>
+  <GuestLayout>
   <div>
-    <!-- Navbar Component will be imported and rendered here -->
-    <Navbar />
-
     <div class="container py-5">
       <div class="row justify-content-center">
         <div class="col-lg-10">
@@ -11,7 +9,7 @@
           <div class="row mb-5">
             <div class="col-md-4 mb-4 mb-md-0">
               <div class="text-center">
-                <img src="/public/tentangkami.svg" alt="LaporPak Illustration" class="img-fluid mb-3 hover-scale animate__animated animate__fadeInLeft" style="max-height: 250px;">
+                <img src="/tentangkami.svg" alt="LaporPak Illustration" class="img-fluid mb-3 hover-scale animate__animated animate__fadeInLeft" style="max-height: 250px;">
               </div>
             </div>
             <div class="col-md-8 animate__animated animate__fadeInRight">
@@ -207,20 +205,19 @@
         </div>
       </div>
     </div>
-
-    <!-- Footer Component will be imported and rendered here -->
-    <Footer />
   </div>
+  <Footer/>
+</GuestLayout>
 </template>
 
 <script>
-import Navbar from './navbar.vue'
-import Footer from './footer.vue'
+import GuestLayout from '@/Layouts/GuestLayout.vue';
+import Footer from '@/Components/Footer.vue';
 
 export default {
   name: 'TentangKami',
   components: {
-    Navbar,
+    GuestLayout,
     Footer
   },
   mounted() {
