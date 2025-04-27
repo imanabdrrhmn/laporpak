@@ -1,30 +1,21 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
-
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
-class EmailVerificationNotificationController extends Controller
-{
+class EmailVerificationNotificationController extends Controller{
     /**
      * Send a new email verification notification.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return response()->json([
-                'status' => 'already-verified',
-                'message' => 'Email sudah diverifikasi.'
-            ], 400); // 400 = Bad Request
+            return redirect()->intended(route('dashboard', absolute: false));
         }
 
         $request->user()->sendEmailVerificationNotification();
 
-        return response()->json([
-            'status' => 'verification-link-sent',
-            'message' => 'Link verifikasi telah dikirim.'
-        ]);
+        return back()->with('status', 'verification-link-sent');
     }
 }
