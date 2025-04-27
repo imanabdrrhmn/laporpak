@@ -18,7 +18,7 @@ class RegisteredUserController extends Controller
 {
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Home');
     }
 
     public function storeWithEmail(Request $request): RedirectResponse
@@ -40,7 +40,7 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
         Auth::login($user);
 
-        return redirect()->intended(route('home'));
+        return redirect()->intended(route('dashboard'));
     }
 
     public function storeWithNoHp(Request $request): RedirectResponse
@@ -62,6 +62,6 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
         Auth::login($user);
 
-        return redirect()->intended('/');
+        return redirect()->intended('dashboard');
     }
 }

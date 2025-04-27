@@ -2,7 +2,7 @@
   <div class="navbar-wrapper">
     <!-- Top Navigation Bar -->
     <div class="shadow-sm navbar-full">
-      <div class="container-fluid px-0">
+      <div class="container-fluid px-5">
         <div class="d-flex align-items-center justify-content-between py-2 px-3">
           <Link href="/" class="d-flex align-items-center text-decoration-none">
             <img src="/logo.svg" alt="LaporPak Logo" class="logo-img me-2" />
@@ -21,7 +21,7 @@
 
           <!-- Desktop Login Button -->
           <button
-            class="btn btn-primary rounded-2 px-3 py-2 d-none d-lg-block"
+            class="btn btn-primary rounded-2 px-4 py-2 d-none d-lg-block"
             @click="$emit('trigger-login')"
           >
             Masuk
@@ -80,7 +80,7 @@
       <div class="sidebar-content">
         <ul class="nav flex-column">
           <li class="nav-item">
-            <Link href="/beranda" class="nav-link py-3" @click="closeMobileNav">
+            <Link href="/" class="nav-link py-3" @click="closeMobileNav">
               <i class="bi bi-house-fill me-2"></i>
               <span>Beranda</span>
             </Link>

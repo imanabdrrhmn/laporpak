@@ -270,7 +270,7 @@ function clearError(field) {
 }
 
 function goToLogin() {
-  closeModal()
+  emit('update:visible', false)
   emit('switch-to-login')
 }
 

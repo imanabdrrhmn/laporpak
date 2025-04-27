@@ -10,7 +10,8 @@ import Section from '@/Components/Section.vue'
 import Feedback from '@/Components/Feedback.vue'
 import Footer from '@/Components/Footer.vue'
 import LoginModal from '@/Components/modals/LoginModal.vue'
-import RegisterModal from '@/Components/RegisterModal.vue'
+import RegisterModal from '@/Components/modals/RegisterModal.vue'
+
 import '@/assets/responsive.css'
 
 const page = usePage()
@@ -33,6 +34,7 @@ const showRegister = ref(false)
         v-if="!isLoggedIn"
         v-model:visible="showRegister"
       />
+      
 
       <Section />
       <Feedback />
