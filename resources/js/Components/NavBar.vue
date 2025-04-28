@@ -2,9 +2,9 @@
   <div class="navbar-wrapper">
     <!-- Top Navigation Bar -->
     <div class="shadow-sm navbar-full">
-      <div class="container-fluid px-5">
-        <div class="d-flex align-items-center justify-content-between py-2 px-3">
-          <Link href="/" class="d-flex align-items-center text-decoration-none">
+      <div class="container-fluid px-0">
+        <div class="d-flex align-items-center justify-content-between py-2 px-3 ">
+          <Link href="/" class="d-flex align-items-center text-decoration-none ms-5">
             <img src="/logo.svg" alt="LaporPak Logo" class="logo-img me-2" />
             <span class="fw-bold text-primary fs-5 text-lp">LaporPak</span>
           </Link>
@@ -21,7 +21,7 @@
 
           <!-- Desktop Login Button -->
           <button
-            class="btn btn-primary rounded-2 px-4 py-2 d-none d-lg-block"
+            class="btn btn-primary rounded-2 px-5 py-2 d-none d-lg-block me-5 "
             @click="$emit('trigger-login')"
           >
             Masuk
@@ -58,6 +58,18 @@
               </Link>
             </li>
             <li class="nav-item">
+              <Link href="/cari-laporan" class="nav-link py-3" :class="{ 'active-cari-laporan': $page.url === '/cari-laporan' }">
+                <i class="bi bi-search me-2"></i>
+                <span>Cari Laporan</span>
+              </Link>
+            </li>
+            <li class="nav-item">
+              <Link href="/feedback" class="nav-link py-3" :class="{ 'active-feedback': $page.url === '/feedback' }">
+                <i class="bi bi-chat-dots-fill me-2"></i>
+                <span>Feedback</span>
+              </Link>
+            </li>
+            <li class="nav-item">
               <Link href="/tentang-kami" class="nav-link py-3" :class="{ 'active-tentang-kami': $page.url === '/tentang-kami' }">
                 <i class="bi bi-people-fill me-2"></i>
                 <span>Tentang Kami</span>
@@ -80,7 +92,7 @@
       <div class="sidebar-content">
         <ul class="nav flex-column">
           <li class="nav-item">
-            <Link href="/" class="nav-link py-3" @click="closeMobileNav">
+            <Link href="/beranda" class="nav-link py-3" @click="closeMobileNav">
               <i class="bi bi-house-fill me-2"></i>
               <span>Beranda</span>
             </Link>
@@ -101,6 +113,18 @@
             <Link href="/lapor-map" class="nav-link py-3" @click="closeMobileNav">
               <i class="bi bi-geo-alt-fill me-2"></i>
               <span>Lapor Map</span>
+            </Link>
+          </li>
+          <li class="nav-item">
+            <Link href="/cari-laporan" class="nav-link py-3" @click="closeMobileNav" :class="{ 'active-cari-laporan': $page.url === '/cari-laporan' }">
+              <i class="bi bi-search me-2"></i>
+              <span>Cari Laporan</span>
+            </Link>
+          </li>
+          <li class="nav-item">
+            <Link href="/feedback" class="nav-link py-3" @click="closeMobileNav" :class="{ 'active-feedback': $page.url === '/feedback' }">
+              <i class="bi bi-chat-dots-fill me-2"></i>
+              <span>Feedback</span>
             </Link>
           </li>
           <li class="nav-item">
@@ -266,7 +290,9 @@ export default {
   }
 
   .nav-link.router-link-exact-active,
-  .nav-link.active-tentang-kami {
+  .nav-link.active-tentang-kami,
+  .nav-link.active-cari-laporan,
+  .nav-link.active-feedback {
     color: #0d6efd;
     font-weight: bold;
     background-color: #f8f9fa;
@@ -340,7 +366,9 @@ export default {
   }
 
   .nav-link.router-link-exact-active,
-  .nav-link.active-tentang-kami {
+  .nav-link.active-tentang-kami,
+  .nav-link.active-cari-laporan,
+  .nav-link.active-feedback {
     color: #0d6efd;
     font-weight: bold;
     background-color: #f8f9fa;
