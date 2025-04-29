@@ -19,7 +19,6 @@
                 type="text"
                 class="form-control border-primary"
                 v-model="form.phoneEmail"
-                :class="{'is-invalid': errors.phoneEmail}"
                 placeholder="masukkan nomor HP atau email anda"
               />
               <small class="error-message d-block">{{ errors.phoneEmail }}</small>
@@ -32,7 +31,6 @@
                   :type="passwordVisible ? 'text' : 'password'"
                   class="form-control border-primary pe-5"
                   v-model="form.password"
-                  :class="{'is-invalid': errors.password}"
                   placeholder="masukkan kata sandi anda"
                 />
                 <i
@@ -189,13 +187,17 @@ function handleLogin() {
   z-index: 1050;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-dialog-centered {
   display: flex;
   align-items: center;
   min-height: calc(100% - 1rem);
+  margin: auto;
 }
 
 .error-message {
@@ -204,6 +206,17 @@ function handleLogin() {
   margin: 0;
   padding: 0;
   min-height: 18px;
+}
+
+/* Hilangkan ikon validasi Bootstrap */
+.form-control.is-invalid {
+  background-image: none !important;
+  border-color: #dc3545;
+  padding-right: 0.75rem !important;
+}
+
+.form-control:focus {
+  box-shadow: none !important;
 }
 
 /* Toggle icon mata */

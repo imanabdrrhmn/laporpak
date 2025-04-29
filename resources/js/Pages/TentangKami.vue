@@ -1,6 +1,6 @@
 <template>
   <GuestLayout>
-  <div>
+  <div class="overflow-hidden"> <!-- Tambahkan overflow-hidden di sini -->
     <div class="container py-5">
       <div class="row justify-content-center">
         <div class="col-lg-10">
@@ -32,45 +32,44 @@
           
           <!-- Mission Section -->
           <div class="mb-5 reveal">
-  <h2 class="text-center mb-4 fw-bold">MISI</h2>
-  <div class="d-flex flex-wrap justify-content-center gap-3">
-    <!-- Ulangi untuk setiap misi -->
-    <div class="card border-0 shadow text-center p-4" style="flex: 1 1 220px; max-width: 250px;">
-      <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;">
-        <span class="h5 mb-0">1</span>
-      </div>
-      <p class="mb-0">Menyediakan platform pelaporan penipuan yang cepat, aman, dan terpercaya.</p>
-    </div>
+            <h2 class="text-center mb-4 fw-bold">MISI</h2>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+              <!-- Ulangi untuk setiap misi -->
+              <div class="card border-0 shadow text-center p-4" style="flex: 1 1 220px; max-width: 250px;">
+                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;">
+                  <span class="h5 mb-0">1</span>
+                </div>
+                <p class="mb-0">Menyediakan platform pelaporan penipuan yang cepat, aman, dan terpercaya.</p>
+              </div>
 
-    <div class="card border-0 shadow text-center p-4" style="flex: 1 1 220px; max-width: 250px;">
-      <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;">
-        <span class="h5 mb-0">2</span>
-      </div>
-      <p class="mb-0">Mengedukasi masyarakat tentang berbagai bentuk penipuan.</p>
-    </div>
+              <div class="card border-0 shadow text-center p-4" style="flex: 1 1 220px; max-width: 250px;">
+                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;">
+                  <span class="h5 mb-0">2</span>
+                </div>
+                <p class="mb-0">Mengedukasi masyarakat tentang berbagai bentuk penipuan.</p>
+              </div>
 
-    <div class="card border-0 shadow text-center p-4" style="flex: 1 1 220px; max-width: 250px;">
-      <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;">
-        <span class="h5 mb-0">3</span>
-      </div>
-      <p class="mb-0">Membangun komunitas yang peduli dan saling menjaga dari kejahatan digital.</p>
-    </div>
+              <div class="card border-0 shadow text-center p-4" style="flex: 1 1 220px; max-width: 250px;">
+                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;">
+                  <span class="h5 mb-0">3</span>
+                </div>
+                <p class="mb-0">Membangun komunitas yang peduli dan saling menjaga dari kejahatan digital.</p>
+              </div>
 
-    <div class="card border-0 shadow text-center p-4" style="flex: 1 1 220px; max-width: 250px;">
-      <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;">
-        <span class="h5 mb-0">4</span>
-      </div>
-      <p class="mb-0">Bekerja sama dengan pihak berwenang untuk menindaklanjuti laporan.</p>
-    </div>
-  </div>
-</div>
-
+              <div class="card border-0 shadow text-center p-4" style="flex: 1 1 220px; max-width: 250px;">
+                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;">
+                  <span class="h5 mb-0">4</span>
+                </div>
+                <p class="mb-0">Bekerja sama dengan pihak berwenang untuk menindaklanjuti laporan.</p>
+              </div>
+            </div>
+          </div>
           
           <!-- Why Choose Us & What We Do Section -->
           <div class="row mb-5 reveal">
-            <!-- Why Choose Us - now shifted left -->
+            <!-- Why Choose Us - peralihan diatur dengan offset-->
             <div class="col-md-6 mb-4 mb-md-0">
-              <div class="card info-card border-0 shadow h-100 card-hover card-shift-left">
+              <div class="card info-card border-0 shadow h-100 card-hover">
                 <div class="card-body p-4">
                   <h3 class="mb-4">
                     <i class="bi bi-lightbulb text-warning me-2 floating"></i>
@@ -83,9 +82,9 @@
               </div>
             </div>
             
-            <!-- What We Do - now shifted right -->
+            <!-- What We Do - peralihan diatur dengan offset -->
             <div class="col-md-6">
-              <div class="card info-card border-0 shadow h-100 card-hover card-shift-right">
+              <div class="card info-card border-0 shadow h-100 card-hover">
                 <div class="card-body p-4">
                   <h3 class="mb-4">
                     <i class="bi bi-gem text-warning me-2 rotating"></i>
@@ -256,6 +255,14 @@ export default {
 /* Import animate.css for ready-made animations */
 @import 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css';
 
+/* Prevent horizontal scrolling */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+}
+
 /* Custom styles */
 .bg-primary {
   background-color: #3498db !important;
@@ -279,19 +286,19 @@ export default {
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Card shift styles */
-.card-shift-left {
+/* Hapus card shift styles yang menyebabkan overflow */
+/* .card-shift-left {
   transform: translateX(-20px);
 }
 
 .card-shift-right {
   transform: translateX(20px);
-}
+} */
 
 /* Card size fixes */
 .mission-card {
-  width: 321px;
-  height: 213px;
+  width: 100%;
+  max-width: 750px;
   border-radius: 10px;
   display: flex;
   margin: 0 auto;
@@ -451,12 +458,6 @@ export default {
   .service-card,
   .info-card {
     min-height: auto;
-  }
-  
-  /* Remove shift on mobile devices */
-  .card-shift-left,
-  .card-shift-right {
-    transform: translateX(0);
   }
 }
 </style>
