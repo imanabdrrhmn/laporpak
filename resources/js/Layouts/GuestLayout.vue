@@ -22,6 +22,5 @@ const showLoginModal = ref(false)
     @switch-to-login="() => {showRegister = false; showLoginModal = true}"
     />
   </div>
-  
   <slot />
 </template>

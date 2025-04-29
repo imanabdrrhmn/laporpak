@@ -1,0 +1,132 @@
+<template>
+  <component :is="isLoggedIn ? AuthenticatedLayout : GuestLayout">
+    <div class="container mt-4">
+      <h1 class="mb-3">Daftar Feedback</h1>
+
+      <!-- Flash Message -->
+      <div v-if="$page.props.flash?.success" class="alert alert-success">{{ $page.props.flash.success }}</div>
+      <div v-if="$page.props.flash?.error" class="alert alert-danger">{{ $page.props.flash.error }}</div>
+
+      <!-- Tombol buka modal -->
+      <div v-if="canGiveFeedback">
+        <button class="btn btn-primary mb-3" @click="openModal('create')">Beri Feedback</button>
+      </div>
+
+      <!-- List Feedback -->
+      <div v-for="feedback in feedbacks" :key="feedback.id" class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ feedback.user.name }}</h5>
+          <p class="card-text">{{ feedback.message }}</p>
+          <p class="text-warning">
+            <span v-for="i in 5" :key="i">
+              <i class="bi" :class="i <= feedback.rating ? 'bi-star-fill' : 'bi-star'"></i>
+            </span>
+          </p>
+
+          <!-- Jika user yang login adalah pemilik feedback -->
+          <div v-if="page.props.auth?.user?.id === feedback.user_id || isAdmin">
+            <button class="btn btn-sm btn-outline-secondary me-2" @click="openModal('edit', feedback)">Edit</button>
+            <button class="btn btn-sm btn-outline-danger" @click="destroy(feedback.id)">Hapus</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Form -->
+      <div class="modal fade" id="feedbackModal" tabindex="-1" ref="modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form @submit.prevent="submit">
+              <div class="modal-header">
+                <h5 class="modal-title">{{ mode === 'create' ? 'Beri Feedback' : 'Edit Feedback' }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="message" class="form-label">Pesan</label>
+                  <textarea id="message" v-model="form.message" class="form-control" rows="3"></textarea>
+                  <div v-if="form.errors.message" class="text-danger">{{ form.errors.message }}</div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Rating</label>
+                  <div>
+                    <span v-for="i in 5" :key="i" @click="form.rating = i" style="cursor: pointer;">
+                      <i class="bi fs-5" :class="i <= form.rating ? 'bi-star-fill text-warning' : 'bi-star text-muted'"></i>
+                    </span>
+                  </div>
+                  <div v-if="form.errors.rating" class="text-danger">{{ form.errors.rating }}</div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-primary">{{ mode === 'create' ? 'Kirim' : 'Update' }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </component>
+</template>
+
+<script setup>
+import { ref, computed, watch } from 'vue';
+import { useForm, usePage, router } from '@inertiajs/vue3';
+import GuestLayout from '@/Layouts/GuestLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+
+const props = defineProps({
+  feedbacks: Array,
+  canGiveFeedback: Boolean
+});
+
+const page = usePage();
+const isLoggedIn = computed(() => !!page.props.auth?.user);
+const roles = page.props.auth?.user.roles || [];
+const isAdmin = roles.includes('admin');
+
+// Modal logic
+let modalInstance;
+const modal = ref(null);
+let currentEditId = null;
+const mode = ref('create');
+
+const form = useForm({
+  message: '',
+  rating: 0
+});
+
+const openModal = async (type, feedback = null) => {
+  mode.value = type;
+  if (type === 'edit' && feedback) {
+    form.message = feedback.message;
+    form.rating = feedback.rating;
+    currentEditId = feedback.id;
+  } else {
+    form.reset();
+    currentEditId = null;
+  }
+
+  const bootstrap = await import('bootstrap');
+  modalInstance = new bootstrap.Modal(modal.value);
+  modalInstance.show();
+};
+
+const submit = () => {
+  if (mode.value === 'create') {
+    form.post('/feedback', {
+      onSuccess: () => modalInstance.hide()
+    });
+  } else {
+    form.put(`/feedback/${currentEditId}`, {
+      onSuccess: () => modalInstance.hide()
+    });
+  }
+};
+
+const destroy = (id) => {
+  if (confirm('Yakin ingin menghapus feedback ini?')) {
+    router.delete(`/feedback/${id}`);
+  }
+};
+</script>
