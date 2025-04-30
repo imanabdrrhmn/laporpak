@@ -19,13 +19,77 @@
             <i class="bi" :class="mobileNavOpen ? 'bi-x-lg' : 'bi-list'"></i>
           </button>
 
-          <!-- Desktop Login Button -->
-          <button
-            class="btn btn-primary rounded-2 px-5 py-2 d-none d-lg-block me-5 "
-            @click="$emit('trigger-login')"
-          >
-            Masuk
-          </button>
+          <!-- Desktop Login Button or User Profile -->
+          <div class="d-none d-lg-block me-5">
+            <!-- Show login button when not logged in -->
+            <button
+              v-if="!isLoggedIn"
+              class="btn btn-primary rounded-2 px-5 py-2"
+              @click="$emit('trigger-login')"
+            >
+              Masuk
+            </button>
+            
+            <!-- Show user profile when logged in -->
+            <div v-else class="dropdown user-dropdown">
+              <button 
+                class="btn dropdown-toggle user-dropdown-btn d-flex align-items-center" 
+                type="button" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false"
+              >
+                <div class="avatar-wrapper me-2">
+                  <img v-if="user.avatar" :src="user.avatar" alt="User Avatar" class="user-avatar" />
+                  <div v-else class="user-avatar-placeholder">
+                    {{ getUserInitials() }}
+                  </div>
+                </div>
+                <span class="user-name me-1">{{ user.name }}</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li class="dropdown-user-info px-3 py-2">
+                  <div class="d-flex align-items-center">
+                    <div class="avatar-wrapper me-2">
+                      <img v-if="user.avatar" :src="user.avatar" alt="User Avatar" class="user-avatar" />
+                      <div v-else class="user-avatar-placeholder">
+                        {{ getUserInitials() }}
+                      </div>
+                    </div>
+                    <div>
+                      <div class="fw-bold">{{ user.name }}</div>
+                      <div class="small text-muted">{{ user.email }}</div>
+                    </div>
+                  </div>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item" href="/profile">
+                    <i class="bi bi-person-fill me-2"></i>
+                    Profil Saya
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/laporan-saya">
+                    <i class="bi bi-file-earmark-text-fill me-2"></i>
+                    Laporan Saya
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/pengaturan">
+                    <i class="bi bi-gear-fill me-2"></i>
+                    Pengaturan
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
+                    <i class="bi bi-box-arrow-right me-2"></i>
+                    Keluar
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -115,10 +179,26 @@
           ></button>
         </div>
         
+        <!-- Mobile User Profile Section (when logged in) -->
+        <div v-if="isLoggedIn" class="px-4 py-3 mb-3 border-bottom">
+          <div class="d-flex align-items-center">
+            <div class="avatar-wrapper me-3">
+              <img v-if="user.avatar" :src="user.avatar" alt="User Avatar" class="user-avatar" />
+              <div v-else class="user-avatar-placeholder">
+                {{ getUserInitials() }}
+              </div>
+            </div>
+            <div>
+              <div class="fw-bold">{{ user.name }}</div>
+              <div class="small text-muted">{{ user.email }}</div>
+            </div>
+          </div>
+        </div>
+        
         <ul class="nav flex-column">
           <li class="nav-item">
-            <Link href="/beranda" class="nav-link py-3" @click="closeMobileNav">
-              <i class="bi bi-house-fill me-2"></i>
+            <Link href="/beranda" class="nav-link" @click="closeMobileNav">
+              <i class="bi bi-house-fill"></i>
               <span>Beranda</span>
             </Link>
           </li>
@@ -168,8 +248,37 @@
               <span>Tentang Kami</span>
             </Link>
           </li>
-          <!-- Login Button -->
-          <li class="nav-item mt-4 mb-2 d-flex justify-content-center">
+          
+          <!-- User-specific links (when logged in) -->
+          <template v-if="isLoggedIn">
+            <li class="nav-item border-top mt-3 pt-2">
+              <Link href="/profile" class="nav-link" @click="closeMobileNav">
+                <i class="bi bi-person-fill"></i>
+                <span>Profil Saya</span>
+              </Link>
+            </li>
+            <li class="nav-item">
+              <Link href="/laporan-saya" class="nav-link" @click="closeMobileNav">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span>Laporan Saya</span>
+              </Link>
+            </li>
+            <li class="nav-item">
+              <Link href="/pengaturan" class="nav-link" @click="closeMobileNav">
+                <i class="bi bi-gear-fill"></i>
+                <span>Pengaturan</span>
+              </Link>
+            </li>
+            <li class="nav-item mt-3">
+              <a class="nav-link text-danger" href="#" @click.prevent="logout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Keluar</span>
+              </a>
+            </li>
+          </template>
+          
+          <!-- Login Button (when not logged in) -->
+          <li v-else class="nav-item mt-4 mb-2 d-flex justify-content-center">
             <button
               class="btn btn-primary rounded-pill px-5"
               @click="$emit('trigger-login'); closeMobileNav();"
@@ -188,10 +297,26 @@ import { Link } from '@inertiajs/vue3';
 
 export default {
   name: 'NavbarLaporPak',
-  components : {
+  components: {
     Link
   },
-  emits: ['trigger-login'],
+  props: {
+    // Add prop to check if user is logged in
+    isLoggedIn: {
+      type: Boolean,
+      default: false
+    },
+    // Add prop for user information
+    user: {
+      type: Object,
+      default: () => ({
+        name: '',
+        email: '',
+        avatar: null
+      })
+    }
+  },
+  emits: ['trigger-login', 'logout'],
   data() {
     return {
       mobileNavOpen: false,
@@ -254,6 +379,22 @@ export default {
       }
       
       this.touchStartX = null;
+    },
+    // Add method to get user initials for avatar placeholder
+    getUserInitials() {
+      if (!this.user.name) return '';
+      
+      return this.user.name
+        .split(' ')
+        .map(name => name[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+    },
+    // Add logout method
+    logout() {
+      this.$emit('logout');
+      this.closeMobileNav();
     }
   }
 };
@@ -290,6 +431,82 @@ export default {
   color: #2563EB;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
+}
+
+/* User Profile Styles */
+.user-dropdown {
+  position: relative;
+}
+
+.user-dropdown-btn {
+  background: transparent;
+  border: none;
+  color: #333;
+  padding: 0.5rem 0.75rem;
+  border-radius: 50px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+.user-dropdown-btn:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.avatar-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #0d6efd;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.user-name {
+  font-weight: 500;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-user-info {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* User dropdown menu styles */
+.user-dropdown .dropdown-menu {
+  padding: 0.5rem 0;
+  width: 260px;
+}
+
+.user-dropdown .dropdown-item {
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.user-dropdown .dropdown-item .bi {
+  font-size: 16px;
+  margin-right: 10px;
 }
 
 /* Desktop Navigation */
