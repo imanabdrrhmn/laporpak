@@ -430,8 +430,9 @@ function handleRegister() {
 
 <style scoped>
 .custom-login-modal {
-  width: 450px;
-  min-height: 450px;
+  width: 100%;
+  max-width: 450px;
+  min-height: auto;
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -455,7 +456,7 @@ function handleRegister() {
   z-index: 1050;
   width: 100%;
   height: 100%;
-  overflow-y: hidden;
+  overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -466,6 +467,8 @@ function handleRegister() {
   align-items: center;
   min-height: calc(100% - 1rem);
   margin: auto;
+  width: 100%;
+  padding: 0 15px;
 }
 
 .error-message {
@@ -562,5 +565,39 @@ button.active {
 
 .small {
   font-size: 0.75rem;
+}
+
+/* Media queries */
+@media (max-width: 576px) {
+  .custom-login-modal {
+    max-width: 100%;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  
+  .modal-dialog-centered {
+    padding: 0 10px;
+  }
+  
+  .password-requirements {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-label {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .modal {
+    align-items: flex-start;
+    padding: 20px 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .custom-login-modal {
+    max-width: 450px;
+  }
 }
 </style>

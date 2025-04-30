@@ -6,7 +6,7 @@
         <div class="modal-content custom-login-modal mx-auto">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h4 class="fw-bold">Selamat Datang</h4>
+              <h4 class="fw-bold modal-title">Selamat Datang</h4>
               <p class="text-muted mb-4">Silahkan masukkan akun anda</p>
             </div>
             <button type="button" class="btn-close" @click="closeModal"></button>
@@ -40,7 +40,7 @@
                 ></i>
               </div>
 
-              <div class="d-flex justify-content-between align-items-center mt-1">
+              <div class="d-flex justify-content-between align-items-center mt-1 flex-wrap">
                 <small class="error-message">{{ errors.password }}</small>
                 <a href="#" class="text-danger small text-decoration-none link-lupa-password">
                   Lupa kata sandi?
@@ -60,7 +60,7 @@
               width="20"
               class="me-2"
             />
-            Login dengan Google
+            <span>Login dengan Google</span>
           </button>
           <p class="text-center text-muted mt-4">
             Belum punya akun?
@@ -159,11 +159,11 @@ function handleLogin() {
 }
 </script>
 
-
 <style scoped>
 .custom-login-modal {
-  width: 650px;
-  min-height: 580px;
+  width: 90%;
+  max-width: 650px;
+  min-height: auto;
   border-radius: 24px;
   padding: 48px;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
@@ -187,7 +187,7 @@ function handleLogin() {
   z-index: 1050;
   width: 100%;
   height: 100%;
-  overflow-y: hidden;
+  overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -197,6 +197,7 @@ function handleLogin() {
   display: flex;
   align-items: center;
   min-height: calc(100% - 1rem);
+  width: 100%;
   margin: auto;
 }
 
@@ -239,13 +240,58 @@ function handleLogin() {
   color: #a71d2a;
 }
 
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .custom-login-modal {
+    width: 95%;
+    padding: 32px;
+  }
+  
+  .modal-title {
+    font-size: 1.3rem;
+  }
+}
+
 @media (max-width: 576px) {
   .custom-login-modal {
-    width: 100% !important;
-    height: auto;
-    margin: 1rem;
+    width: 95% !important;
+    padding: 24px;
     border-radius: 16px;
-    padding: 1.5rem;
+  }
+  
+  .modal-title {
+    font-size: 1.2rem;
+  }
+  
+  .form-control {
+    font-size: 0.95rem;
+  }
+  
+  .btn {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .custom-login-modal {
+    width: 98% !important;
+    padding: 16px;
+  }
+  
+  .modal-title {
+    font-size: 1.1rem;
+  }
+}
+
+/* Fix for very small screens */
+@media (max-height: 600px) {
+  .modal {
+    align-items: flex-start;
+    padding: 10px 0;
+  }
+  
+  .modal-dialog-centered {
+    min-height: auto;
   }
 }
 </style>
