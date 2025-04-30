@@ -117,8 +117,8 @@
         
         <ul class="nav flex-column">
           <li class="nav-item">
-            <Link href="/beranda" class="nav-link" @click="closeMobileNav">
-              <i class="bi bi-house-fill"></i>
+            <Link href="/beranda" class="nav-link py-3" @click="closeMobileNav">
+              <i class="bi bi-house-fill me-2"></i>
               <span>Beranda</span>
             </Link>
           </li>
