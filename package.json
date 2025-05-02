@@ -19,6 +19,7 @@
         "@inertiajs/inertia": "^0.11.1",
         "@popperjs/core": "^2.11.8",
         "axios": "^1.8.4",
-        "bootstrap": "^5.3.5"
+        "bootstrap": "^5.3.5",
+        "leaflet": "^1.9.4"
     }
 }
