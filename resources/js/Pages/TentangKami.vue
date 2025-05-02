@@ -1,6 +1,7 @@
 <template>
-  <GuestLayout>
-  <div class="overflow-hidden"> <!-- Tambahkan overflow-hidden di sini -->
+  <Head title="Tentang Kami" />
+  <AppLayout>
+    <div class="overflow-hidden"> <!-- Tambahkan overflow-hidden di sini -->
     <div class="container py-5">
       <div class="row justify-content-center">
         <div class="col-lg-10">
@@ -205,51 +206,43 @@
       </div>
     </div>
   </div>
-  <Footer/>
-</GuestLayout>
+</AppLayout>
 </template>
 
-<script>
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import Footer from '@/Components/Footer.vue';
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { usePage, Head } from '@inertiajs/vue3'
+import AppLayout from '@/Layouts/AppLayout.vue';
 
-export default {
-  name: 'TentangKami',
-  components: {
-    GuestLayout,
-    Footer
-  },
-  mounted() {
-    // For scroll reveal animations
-    this.initScrollReveal();
-  },
-  methods: {
-    initScrollReveal() {
-      // Check if we're in the browser environment
-      if (typeof window !== 'undefined') {
-        // Scroll reveal effect
-        const revealElements = document.querySelectorAll('.reveal');
-        
-        const revealOnScroll = () => {
-          for (let i = 0; i < revealElements.length; i++) {
-            const windowHeight = window.innerHeight;
-            const elementTop = revealElements[i].getBoundingClientRect().top;
-            const elementVisible = 150;
-            
-            if (elementTop < windowHeight - elementVisible) {
-              revealElements[i].classList.add('active');
-            }
-          }
-        };
-        
-        window.addEventListener('scroll', revealOnScroll);
-        // Initial check
-        revealOnScroll();
+const page = usePage();
+page.layout = AppLayout;
+
+const initScrollReveal = () => {
+  if (typeof window !== 'undefined') {
+    const revealElements = document.querySelectorAll('.reveal');
+
+    const revealOnScroll = () => {
+      for (let i = 0; i < revealElements.length; i++) {
+        const windowHeight = window.innerHeight;
+        const elementTop = revealElements[i].getBoundingClientRect().top;
+        const elementVisible = 150;
+
+        if (elementTop < windowHeight - elementVisible) {
+          revealElements[i].classList.add('active');
+        }
       }
-    }
+    };
+
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll(); // initial trigger
   }
-}
+};
+
+onMounted(() => {
+  initScrollReveal();
+});
 </script>
+
 
 <style scoped>
 /* Import animate.css for ready-made animations */

@@ -1,5 +1,6 @@
 <template>
-  <component :is="isLoggedIn ? AuthenticatedLayout : GuestLayout">
+  <Head title="Ulasan" />
+  <AppLayout>
     <div class="container mt-4">
       <h1 class="mb-3">Daftar Feedback</h1>
 
@@ -66,24 +67,28 @@
       </div>
 
     </div>
-  </component>
+  </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { useForm, usePage, router } from '@inertiajs/vue3';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { useForm, usePage, router, Head } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue';
 
 const props = defineProps({
   feedbacks: Array,
   canGiveFeedback: Boolean
 });
 
+
+
+
 const page = usePage();
+page.layout = AppLayout;
 const isLoggedIn = computed(() => !!page.props.auth?.user);
-const roles = page.props.auth?.user.roles || [];
+const roles = page.props.auth?.user?.roles || [];
 const isAdmin = roles.includes('admin');
+
 
 // Modal logic
 let modalInstance;

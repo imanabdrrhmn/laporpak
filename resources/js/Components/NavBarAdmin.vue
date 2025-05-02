@@ -8,7 +8,7 @@
             <img src="/logo.svg" alt="LaporPak Logo" class="logo-img me-2" />
             <span class="fw-bold text-primary fs-5 text-lp">LaporPak</span>
           </Link>
-
+          
           <!-- Mobile Toggle Button -->
           <button 
             class="navbar-toggler d-lg-none" 
@@ -62,12 +62,6 @@
                   </div>
                 </li>
                 <li><hr class="dropdown-divider"></li>
-                <li>
-                  <a class="dropdown-item" href="/dashboard">
-                    <i class="bi bi-file-bar-graph-fill"></i>
-                    Dashboard
-                  </a>
-                </li>
                 <li>
                   <a class="dropdown-item" href="/profile">
                     <i class="bi bi-person-fill me-2"></i>
@@ -258,12 +252,6 @@
           <!-- User-specific links (when logged in) -->
           <template v-if="isLoggedIn">
             <li class="nav-item border-top mt-3 pt-2">
-                  <Link href="/dashboard" class="nav-link" @click="closeMobileNav">
-                    <i class="bi bi-file-bar-graph-fill"></i>
-                    <span>Dashboard</span>
-                  </Link>
-                </li>
-            <li class="nav-item">
               <Link href="/profile" class="nav-link" @click="closeMobileNav">
                 <i class="bi bi-person-fill"></i>
                 <span>Profil Saya</span>

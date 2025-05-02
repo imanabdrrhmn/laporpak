@@ -7,7 +7,7 @@
           <h1 class="display-6 fw-bold mb-2">Membangun Indonesia</h1>
           <h1 class="display-6 fw-bold mb-4">Bebas Penipuan</h1>
           <div class="title-underline mb-4"></div>
-
+          <div></div>
           <button
             class="btn btn-light px-4 py-2 d-flex align-items-center shadow-button"
             @click="$emit('trigger-login')"
@@ -69,18 +69,13 @@ export default {
     }
   },
   mounted() {
-    // Load Lottie player script dynamically
-    if (typeof window !== 'undefined') {
-      const script = document.createElement('script')
-      script.src = 'https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js'
-      script.async = true
-      script.onload = () => {
-        this.setupLottie()
-      }
-      document.head.appendChild(script)
-      this.setupIntersectionObserver()
-    }
-  },
+  const script = document.createElement("script");
+  script.src = "https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js";
+  script.onload = () => {
+    this.lottieLoaded = true;
+  };
+  document.head.appendChild(script);
+},
   methods: {
     setupLottie() {
       this.lottieLoaded = true
@@ -159,7 +154,8 @@ export default {
   border-radius: 50%;
   border: 2px solid white;
   object-fit: cover;
-  margin-left: -10px;
+  transform: translateX(-10px);
+  margin-left: 0;
   z-index: 1;
 }
 
@@ -182,7 +178,8 @@ export default {
   color: #2563EB;
   font-weight: bold;
   font-size: 14px;
-  margin-left: -10px;
+  transform: translateX(-10px);
+  margin-left: 0;
   z-index: 0;
 }
 
@@ -296,4 +293,5 @@ export default {
     width: 80%;
   }
 }
+
 </style>

@@ -24,4 +24,15 @@
     <body class="font-sans antialiased">
         @inertia
     </body>
+
+    <style>
+    #app {
+    text-align: left;
+    padding: 0;
+    max-width: none;
+    min-height: 100vh;
+    width: 100%;
+    }
+    </style>
 </html>
+
