@@ -20,7 +20,7 @@ Route::get('/dashboard', function (){
 
 Route::get('/pelaporan', function (){
     return Inertia::render('Pelaporan');
-})->middleware(['auth', 'verified'])->name('pelaporan');
+})->name('pelaporan');
 
 Route::get('/tentang-kami', function () {
     return Inertia::render('TentangKami');
