@@ -187,6 +187,9 @@
     </div>
   </section>
 
+
+
+  <Alur/>
   <!-- SECTION COMPONENT -->
   <Section />
   
@@ -205,7 +208,7 @@ import L from 'leaflet';
 // Import komponen-komponen
 import Section from '@/Components/Section.vue'
 import Feedback from '@/Components/Feedback.vue'
-import Footer from '@/Components/Footer.vue'
+import Alur from '@/Components/alurPelaporan.vue'
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 const page = usePage()

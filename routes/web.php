@@ -24,6 +24,10 @@ Route::get('/pelaporan', function (){
     return Inertia::render('Pelaporan');
 })->name('pelaporan');
 
+Route::get('/verifikasi', function (){
+    return Inertia::render('Verifikasi');
+})->name('verifikasi');
+
 
 // Pelaporan Route
 Route::get('/pelaporan', function () {
@@ -31,6 +35,7 @@ Route::get('/pelaporan', function () {
         'user' => auth()->user(), 
     ]);
 })->name('pelaporan');
+
 
 
 // Tentang Kami Route
