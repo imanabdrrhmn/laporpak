@@ -140,7 +140,6 @@ const handleFileUpload = (event) => {
 };
 
 const handleSubmit = () => {
-  console.log('Data dikirim:', formData.value);
   alert('Laporan berhasil dikirim!');
   formData.value = {
     category: '',

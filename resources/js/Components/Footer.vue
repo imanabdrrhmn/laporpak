@@ -23,9 +23,9 @@
         <div class="col-md-3 offset-md-1">
           <h5 class="mb-4">Fitur</h5>
           <div v-for="feature in features" :key="feature.name" class="feature-item">
-            <router-link :to="feature.route">
+            <Link >
               <i class="bi bi-chevron-right me-2"></i>{{ feature.name }}
-            </router-link>
+            </Link>
           </div>
         </div>
 
@@ -55,20 +55,17 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'LaporPakFooter',
-  data() {
-    return {
-      features: [
-        { name: 'Pelaporan', route: '/pelaporan' },
-        { name: 'Verifikasi', route: '/verifikasi' },
-        { name: 'Lapor Map', route: '/lapor-map' }
-      ]
-    }
-  }
-}
+<script setup>
+import { ref } from 'vue';
+import { Link } from '@inertiajs/vue3';
+
+const features = ref([
+  { name: 'Pelaporan', route: '/pelaporan' },
+  { name: 'Verifikasi', route: '/verifikasi' },
+  { name: 'Lapor Map', route: '/lapor-map' }
+])
 </script>
+
 
 <style scoped>
 .footer {

@@ -1,6 +1,7 @@
 <template>
-  <AuthenticatedLayout>
-  <section class="py-3">
+  <Head title="Pelaporan" />
+  <AppLayout>
+    <section class="py-3">
     <div class="container">
       <div class="row align-items-center g-5">
         <!-- Judul + Deskripsi -->
@@ -97,12 +98,16 @@
       </div>
     </div>
   </section>
-</AuthenticatedLayout>
+</AppLayout>
 </template>
 
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { ref, computed, onMounted } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue';
+
+const page = usePage();
+page.layout = AppLayout;
 
 const services = [
   { label: 'Penipuan', value: 'fraud' },
@@ -143,7 +148,6 @@ const handleFileUpload = (event) => {
 };
 
 const handleSubmit = () => {
-  console.log('Data dikirim:', formData.value);
   alert('Laporan berhasil dikirim!');
   formData.value = {
     category: '',

@@ -1,28 +1,28 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { usePage } from '@inertiajs/vue3'
+import { usePage, Head} from '@inertiajs/vue3'
 
-import GuestLayout from '@/Layouts/GuestLayout.vue'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import UserLayout from '@/Layouts/UserLayout.vue'
+import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 import Beranda from '@/Components/HeroSectionBeranda.vue'
 import Section from '@/Components/Section.vue'
 import Feedback from '@/Components/Feedback.vue'
-import Footer from '@/Components/Footer.vue'
 import LoginModal from '@/Components/modals/LoginModal.vue'
 import RegisterModal from '@/Components/modals/RegisterModal.vue'
 
 import '@/assets/responsive.css'
+import AppLayout from '@/Layouts/AppLayout.vue'
 
 const page = usePage()
-const isLoggedIn = computed(() => !!page.props.auth?.user)
-const isVerified = computed(() => !!page.props.verified?.user)
+page.layout = AppLayout
 const showLogin = ref(false)
 const showRegister = ref(false)
 </script>
 
-<template>
-  <component :is="isLoggedIn  ? AuthenticatedLayout : GuestLayout">
+<template>  
+  <Head title="Beranda" />
+  <AppLayout>
     <div class="main-container">
       <Beranda @trigger-login="showLogin = true" />
       <LoginModal
@@ -34,20 +34,20 @@ const showRegister = ref(false)
         v-if="!isLoggedIn"
         v-model:visible="showRegister"
       />
-      
-
       <Section />
       <Feedback />
-      <Footer />
     </div>
-  </component>
+  </AppLayout>
 </template>
 
 <style>
+
+
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  max-width: 100vw;
   background-color: #f8f9fa;
   font-family: 'poppins', sans-serif;
 }

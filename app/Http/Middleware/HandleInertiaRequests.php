@@ -38,8 +38,8 @@ class HandleInertiaRequests extends Middleware
                     'roles' => $request->user()->getRoleNames(), 
                     'permissions' => $request->user()->getPermissionNames(),    
                 ] : null,
+                'isAdmin' => $request->user()?->hasAnyRole(['admin', 'verifier']),
             ],
         ]);
-    }
-    
+    }    
 }
