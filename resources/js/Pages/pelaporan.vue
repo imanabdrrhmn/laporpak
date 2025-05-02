@@ -12,7 +12,13 @@
               Laporkan nomor HP yang terindikasi melakukan penipuan agar orang lain lebih waspada.
             </p>
           </div>
-        </div>
+        </div>console.log('Selected Service:', selectedService.value);
+console.log('Form Data:', formData.value);
+console.log('Validation Errors:', validationErrors);
+console.log('Current Categories:', currentCategories.value);
+console.log('Map Reference:', mapRef.value);
+console.log('Marker:', marker);
+console.log('Page:', page);
 
         <!-- Form on Right Side - Narrower -->
         <div class="col-md-7 col-12">
