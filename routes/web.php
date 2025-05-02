@@ -24,9 +24,9 @@ Route::get('/pelaporan', function (){
     return Inertia::render('Pelaporan');
 })->name('pelaporan');
 
-Route::get('/verifikasi', function (){
-    return Inertia::render('Verifikasi');
-})->name('verifikasi');
+// Route::get('/verifikasi', function (){
+//     return Inertia::render('Verifikasi');
+// })->name('verifikasi');
 
 
 // Pelaporan Route
