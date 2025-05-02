@@ -20,6 +20,7 @@
         "@popperjs/core": "^2.11.8",
         "axios": "^1.8.4",
         "bootstrap": "^5.3.5",
-        "leaflet": "^1.9.4"
+        "leaflet": "^1.9.4",
+        "leaflet.markercluster": "^1.5.3"
     }
 }

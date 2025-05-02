@@ -19,19 +19,22 @@ Route::get('/dashboard', function (){
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
-
 Route::get('/pelaporan', function (){
-    return Inertia::render('Pelaporan');
+    return Inertia::render('pelaporan');
 })->name('pelaporan');
 
-// Route::get('/verifikasi', function (){
-//     return Inertia::render('Verifikasi');
-// })->name('verifikasi');
+ Route::get('/verifikasi', function (){
+     return Inertia::render('verifikasi');
+ })->name('verifikasi');
+
+ Route::get('/LaporMap', function (){
+     return Inertia::render('LaporMap');
+ })->name('LaporMap');
 
 
 // Pelaporan Route
 Route::get('/pelaporan', function () {
-    return Inertia::render('Pelaporan', [
+    return Inertia::render('pelaporan', [
         'user' => auth()->user(), 
     ]);
 })->name('pelaporan');

@@ -130,7 +130,7 @@
                   </Link>
                 </li>
                 <li>
-                  <Link href="/lapor-map" class="dropdown-item" :class="{ 'active': $page.url === '/lapor-map' }">
+                  <Link href="/lapor-map" class="dropdown-item" :class="{ 'active': $page.url === '/LaporMap' }">
                     <i class="bi bi-geo-alt-fill"></i>
                     Lapor Map
                   </Link>
