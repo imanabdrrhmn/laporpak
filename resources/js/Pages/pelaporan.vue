@@ -1,24 +1,43 @@
 <template>
-  <Head title="Pelaporan" />
   <AppLayout>
-    <section class="py-3">
+    <Head title="Pelaporan"/>
+  <section class="hero-section py-4">
     <div class="container">
-      <div class="row align-items-center g-5">
-        <!-- Judul + Deskripsi -->
-        <div class="col-lg-6">
-          <div class="text-section px-3">
-            <h1 class="display-5 fw-bold mb-3">Laporkan Penipuan</h1>
-            <p class="lead fs-5 text-secondary">
-              Laporkan nomor HP yang terindikasi melakukan penipuan agar orang lain lebih waspada.
+      <div class="row g-4">
+        <!-- Title + Description on Left Side - DYNAMIC CONTENT -->
+        <div class="col-md-5 col-12 d-flex align-items-center">
+          <div class="text-section px-0 text-md-start text-center"> 
+        
+            <h1 class="fs-2 fw-bold mb-3">
+              <i :class="serviceInfo[selectedService].titleIcon + ' me-2'"></i>
+              {{ serviceInfo[selectedService].title }}
+            </h1>
+            <p class="text-white text-opacity-75 mb-3">
+              {{ serviceInfo[selectedService].description }}
             </p>
+            
+            <div class="features mt-3 d-flex flex-column align-items-md-start align-items-center">
+              <div class="feature-item d-flex align-items-start mb-3">
+                <div class="feature-icon bg-primary bg-opacity-20 p-2 rounded-circle me-3 shadow-sm">
+                  <i :class="serviceInfo[selectedService].feature1.icon + ' text-w'"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0 text-start fw-bold">{{ serviceInfo[selectedService].feature1.title }}</h6>
+                  <p class="text-white text-opacity-85 mb-0 text-start">{{ serviceInfo[selectedService].feature1.subtitle }}</p>
+                </div>
+              </div>
+              <div class="feature-item d-flex align-items-start">
+                <div class="feature-icon bg-primary bg-opacity-20 p-2 rounded-circle me-3 shadow-sm">
+                  <i :class="serviceInfo[selectedService].feature2.icon + ' text-w'"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0 text-start fw-bold">{{ serviceInfo[selectedService].feature2.title }}</h6>
+                  <p class="text-white text-opacity-85 mb-0 text-start">{{ serviceInfo[selectedService].feature2.subtitle }}</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>console.log('Selected Service:', selectedService.value);
-console.log('Form Data:', formData.value);
-console.log('Validation Errors:', validationErrors);
-console.log('Current Categories:', currentCategories.value);
-console.log('Map Reference:', mapRef.value);
-console.log('Marker:', marker);
-console.log('Page:', page);
+        </div>
 
         <!-- Form on Right Side - Narrower -->
         <div class="col-md-7 col-12">
@@ -167,17 +186,32 @@ console.log('Page:', page);
       </div>
     </div>
   </section>
+
+  <!-- SECTION COMPONENT -->
+  <Section />
+  
+  <!-- FEEDBACK COMPONENT -->
+  <feedback /> 
 </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, reactive, watch } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+
+// Import komponen-komponen
+import Section from '@/Components/Section.vue'
+import Feedback from '@/Components/Feedback.vue'
+import Footer from '@/Components/Footer.vue'
 import AppLayout from '@/Layouts/AppLayout.vue';
 
-const page = usePage();
-page.layout = AppLayout;
+const page = usePage()
+page.layout = AppLayout
 
+// Service options with icons
 const services = [
   { label: 'Pelaporan', value: 'fraud', icon: 'bi bi-shield-exclamation' },
   { label: 'Infrastruktur', value: 'infrastructure', icon: 'bi bi-building-gear' }

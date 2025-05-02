@@ -18,6 +18,12 @@ Route::get('/dashboard', function (){
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+<<<<<<< HEAD
+=======
+Route::get('/pelaporan', function (){
+    return Inertia::render('Pelaporan');
+})->name('pelaporan');
+>>>>>>> 1615c7240a7e00f50389851bcac38ef8caf29f5c
 
 // Pelaporan Route
 Route::get('/pelaporan', function () {
