@@ -1,3 +1,4 @@
+```vue
 <template>
   <AppLayout>
     <Head title="Verifikasi"/>
@@ -69,20 +70,21 @@
               <p class="text-center text-muted mb-4">Pilih jenis layanan terlebih dahulu untuk melanjutkan pengisian formulir.</p>
               
               <!-- Global Alert -->
-              <div class="alert alert-danger alert-dismissible fade show" role="alert" v-if="formError">
+              <div class="alert alert-danger alert-dismissible fade show" role="alert" v-if="formError" aria-live="polite">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 {{ formError }}
-                <button type="button" class="btn-close" @click="formError = ''"></button>
+                <button type="button" class="btn-close" @click="formError = ''" aria-label="Tutup"></button>
               </div>
               
               <form @submit.prevent="validateAndSubmit" novalidate>
                 <div class="mb-4">
                   <label for="serviceType" class="form-label fw-bold">Pilih Layanan:</label>
                   <select 
-                    class="form-select form-select-lg" 
+                    class="form-select w-100" 
                     id="serviceType" 
                     v-model="selectedService" 
                     :class="{'is-invalid': validation.serviceType}"
+                    aria-describedby="serviceTypeError"
                     required
                   >
                     <option value="" disabled selected>-- Pilih Layanan Verifikasi --</option>
@@ -90,7 +92,7 @@
                       {{ service.name }} ({{ service.price }} / {{ service.type }})
                     </option>
                   </select>
-                  <div class="invalid-feedback" v-if="validation.serviceType">{{ validation.serviceType }}</div>
+                  <div id="serviceTypeError" class="invalid-feedback" v-if="validation.serviceType">{{ validation.serviceType }}</div>
                 </div>
                 
                 <div v-if="selectedService" class="fade-in">
@@ -105,9 +107,10 @@
                         placeholder="Masukkan nama lengkap" 
                         v-model="formData.fullName"
                         :class="{'is-invalid': validation.fullName}"
+                        aria-describedby="fullNameError"
                         required
                       >
-                      <div class="invalid-feedback" v-if="validation.fullName">{{ validation.fullName }}</div>
+                      <div id="fullNameError" class="invalid-feedback" v-if="validation.fullName">{{ validation.fullName }}</div>
                     </div>
                   </div>
                   
@@ -122,10 +125,11 @@
                         placeholder="Masukkan 16 digit NIK" 
                         v-model="formData.idNumber"
                         :class="{'is-invalid': validation.idNumber}"
+                        aria-describedby="idNumberError"
                         required 
                         maxlength="16"
                       >
-                      <div class="invalid-feedback" v-if="validation.idNumber">{{ validation.idNumber }}</div>
+                      <div id="idNumberError" class="invalid-feedback" v-if="validation.idNumber">{{ validation.idNumber }}</div>
                     </div>
                   </div>
                   
@@ -140,9 +144,10 @@
                         placeholder="Contoh: 08123456789" 
                         v-model="formData.phoneNumber"
                         :class="{'is-invalid': validation.phoneNumber}"
+                        aria-describedby="phoneNumberError"
                         required
                       >
-                      <div class="invalid-feedback" v-if="validation.phoneNumber">{{ validation.phoneNumber }}</div>
+                      <div id="phoneNumberError" class="invalid-feedback" v-if="validation.phoneNumber">{{ validation.phoneNumber }}</div>
                     </div>
                   </div>
                   
@@ -157,9 +162,10 @@
                         placeholder="Masukkan nomor NPWP" 
                         v-model="formData.npwpNumber"
                         :class="{'is-invalid': validation.npwpNumber}"
+                        aria-describedby="npwpNumberError"
                         required
                       >
-                      <div class="invalid-feedback" v-if="validation.npwpNumber">{{ validation.npwpNumber }}</div>
+                      <div id="npwpNumberError" class="invalid-feedback" v-if="validation.npwpNumber">{{ validation.npwpNumber }}</div>
                     </div>
                   </div>
                   
@@ -170,12 +176,13 @@
                       id="termsCheck" 
                       v-model="formData.termsAgreed"
                       :class="{'is-invalid': validation.termsAgreed}"
+                      aria-describedby="termsCheckError"
                       required
                     >
                     <label class="form-check-label small" for="termsCheck">
                       Saya menyetujui <a href="#" class="text-primary">syarat dan ketentuan</a> yang berlaku
                     </label>
-                    <div class="invalid-feedback" v-if="validation.termsAgreed">{{ validation.termsAgreed }}</div>
+                    <div id="termsCheckError" class="invalid-feedback" v-if="validation.termsAgreed">{{ validation.termsAgreed }}</div>
                   </div>
                   
                   <div class="d-grid gap-2">
@@ -193,12 +200,12 @@
       </div>
     </div>
 
-   <Alur/>
-  <!-- SECTION COMPONENT -->
-  <Section />
-  
-  <!-- FEEDBACK COMPONENT -->
-  <Feedback /> 
+    <Alur/>
+    <!-- SECTION COMPONENT -->
+    <Section />
+    
+    <!-- FEEDBACK COMPONENT -->
+    <Feedback /> 
   </AppLayout>
 </template>
 
@@ -417,6 +424,8 @@ export default {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   backdrop-filter: blur(5px);
+  padding: 0.75rem !important;
+  min-height: 60px;
 }
 
 .fade-in {
@@ -426,6 +435,16 @@ export default {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ensure minimum font size for accessibility */
+.small {
+  font-size: 0.875rem; /* 14px minimum */
+}
+
+/* Improve touch target for checkbox */
+.form-check-label {
+  padding-left: 0.5rem;
 }
 
 /* Extra small devices (phones, 576px and down) */
@@ -451,6 +470,26 @@ export default {
   
   .lead {
     font-size: 1rem;
+  }
+  
+  /* Adjust dropdown size for mid-tier mobile */
+  .form-select {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Very small devices (<360px) to prevent overflow */
+@media (max-width: 360px) {
+  .lead,
+  .display-4 {
+    word-break: break-word;
+    hyphens: auto;
+  }
+  
+  .form-select {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
   }
 }
 
@@ -479,6 +518,11 @@ export default {
   
   .highlight-bar {
     margin: 0 auto;
+  }
+  
+  .form-container {
+    max-width: 90%;
+    padding: 2rem !important;
   }
 }
 
@@ -509,3 +553,4 @@ export default {
   }
 }
 </style>
+```

@@ -31,6 +31,12 @@ Route::get('/pelaporan', function (){
      return Inertia::render('LaporMap');
  })->name('LaporMap');
 
+  Route::get('/CariLaporan', function (){
+     return Inertia::render('CariLaporan');
+ })->name('CariLaporan');
+
+
+
 
 // Pelaporan Route
 Route::get('/pelaporan', function () {

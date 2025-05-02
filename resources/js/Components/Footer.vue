@@ -62,7 +62,8 @@ import { Link } from '@inertiajs/vue3';
 const features = ref([
   { name: 'Pelaporan', route: '/pelaporan' },
   { name: 'Verifikasi', route: '/verifikasi' },
-  { name: 'Lapor Map', route: '/lapor-map' }
+  { name: 'Lapor Map', route: '/LaporMap' },
+  { name: 'Cari Laporan', route: '/CariLaporan' }
 ])
 </script>
 

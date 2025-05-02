@@ -104,7 +104,7 @@
         <div class="container-fluid px-0">
           <ul class="nav nav-fill w-100">
             <li class="nav-item">
-              <Link href="/" class="nav-link py-3">
+              <Link href="/Beranda" class="nav-link py-3":class="{ 'active': $page.url === '/Beranda' }">
                 <i class="bi bi-house-fill me-2"></i>
                 <span>Beranda</span>
               </Link>
@@ -130,13 +130,13 @@
                   </Link>
                 </li>
                 <li>
-                  <Link href="/lapor-map" class="dropdown-item" :class="{ 'active': $page.url === '/LaporMap' }">
+                  <Link href="/LaporMap" class="dropdown-item" :class="{ 'active': $page.url === '/LaporMap' }">
                     <i class="bi bi-geo-alt-fill"></i>
                     Lapor Map
                   </Link>
                 </li>
                 <li>
-                  <Link href="/cari-laporan" class="dropdown-item" :class="{ 'active': $page.url === '/cari-laporan' }">
+                  <Link href="/CariLaporan" class="dropdown-item" :class="{ 'active': $page.url === '/CariLaporan' }">
                     <i class="bi bi-search"></i>
                     Cari Laporan
                   </Link>
@@ -221,20 +221,19 @@
             </a>
             <div class="collapse" :class="{ 'show': toggleLayananMobile }">
               <div class="nav flex-column ms-4">
-                <Link href="/pelaporan" class="nav-link" @click="closeMobileNav">
+                <Link href="/pelaporan" class="nav-link" @click="closeMobileNav":class="{ 'active-pelaporan': $page.url === '/pelaporan' }">
                   <i class="bi bi-exclamation-triangle-fill"></i>
                   <span>Pelaporan</span>
                 </Link>
-                <Link href="/verifikasi" class="nav-link" @click="closeMobileNav">
+                <Link href="/verifikasi" class="nav-link" @click="closeMobileNav" :class="{ 'active-verifikasi': $page.url === '/verifikasi' }">
                   <i class="bi bi-check-square-fill"></i>
                   <span>Verifikasi</span>
                 </Link>
-                <Link href="/lapor-map" class="nav-link" @click="closeMobileNav">
+                <Link href="/LaporMap" class="nav-link" @click="closeMobileNav":class="{ 'active-LaporMap': $page.url === '/LaporMap' }">
                   <i class="bi bi-geo-alt-fill"></i>
                   <span>Lapor Map</span>
                 </Link>
-                <Link href="/cari-laporan" class="nav-link" @click="closeMobileNav" 
-                      :class="{ 'active-cari-laporan': $page.url === '/cari-laporan' }">
+                <Link href="/CariLaporan" class="nav-link" @click="closeMobileNav" :class="{ 'active-CariLaporan': $page.url === '/CariLaporan' }">
                   <i class="bi bi-search"></i>
                   <span>Cari Laporan</span>
                 </Link>
@@ -640,8 +639,11 @@ export default {
     color: #0d6efd !important;
   }
 
-  .nav-link.active,
-  .nav-link.active-cari-laporan,
+ .nav-link.active,
+  .nav-link.active-CariLaporan,
+  .nav-link.active-verifikasi,
+  .nav-link.active-pelaporan,
+  .nav-link.active-LaporMap,
   .nav-link.active-feedback,
   .nav-link.active-tentang-kami {
     color: #0d6efd !important;
@@ -679,7 +681,10 @@ export default {
   }
 
   .nav-link.active,
-  .nav-link.active-cari-laporan,
+  .nav-link.active-CariLaporan,
+  .nav-link.active-verifikasi,
+  .nav-link.active-pelaporan,
+  .nav-link.active-LaporMap,
   .nav-link.active-feedback,
   .nav-link.active-tentang-kami {
     color: #0d6efd !important;

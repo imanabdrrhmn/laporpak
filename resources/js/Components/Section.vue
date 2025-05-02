@@ -9,7 +9,7 @@
                         LaporPak adalah platform digital yang mendorong partisipasi masyarakat dalam melaporkan masalah infrastruktur, layanan publik, dan penipuan melalui nomor HP. Suara masyarakat diubah menjadi data berharga untuk mendukung kinerja pemerintah dan perusahaan.
                     </p>
                     <div class="text-center text-lg-start">
-                        <a href="#" class="btn btn-primary px-4 py-2 mt-2">Selengkapnya</a>
+                        <a href="/tentang-kami" class="btn btn-primary px-4 py-2 mt-2">Selengkapnya</a>
                     </div>
                 </div>
 
