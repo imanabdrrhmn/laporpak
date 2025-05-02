@@ -39,9 +39,9 @@
           </div>
         </div>
 
-        <!-- Form on Right Side - Narrower -->
-        <div class="col-md-7 col-12">
-          <div class="bg-white p-4 rounded-3 shadow-lg border-top border-primary border-3 form-container mx-auto">
+        <!-- Form on Right Side - Updated for desktop view -->
+        <div class="col-md-7 col-12 d-flex justify-content-center">
+          <div class="bg-white p-4 p-lg-5 rounded-3 shadow-lg border-top border-primary border-3 form-container mx-auto">
             <h5 class="text-start fw-bold mb-3">
               <i class="bi bi-exclamation-triangle text-warning me-2"></i>
               {{ serviceInfo[selectedService].formTitle }}
@@ -578,8 +578,16 @@ function getCurrentLocation() {
   position: relative;
   z-index: 1;
   backdrop-filter: blur(10px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  max-width: 100%;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1); /* Updated box-shadow to match specs */
+  max-width: 580px; /* Set max-width to 580px for desktop */
+  border-radius: 15px; /* Updated border-radius to 15px */
+}
+
+/* Add the desktop-specific padding */
+@media (min-width: 992px) {
+  .form-container {
+    padding: 3rem !important; /* p-lg-5 equivalent is 3rem or 48px */
+  }
 }
 
 /* Form controls styling */
