@@ -208,7 +208,7 @@ import L from 'leaflet';
 // Import komponen-komponen
 import Section from '@/Components/Section.vue'
 import Feedback from '@/Components/Feedback.vue'
-import Alur from '@/Components/alurPelaporan.vue'
+import Alur from '@/Components/alurpelaporan.vue'
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 const page = usePage()
