@@ -1,6 +1,8 @@
 <template>
   <AppLayout>
+    <Head title="Cari Laporan "/>
     <div class="search-container">
+      
       <h2 class="mb-4">Pencarian Laporan Penipuan</h2>
 
       <!-- Filter and search section -->
@@ -157,7 +159,7 @@
       </div>
 
       <!-- No results message -->
-      <div v-else-if="!loading && filteredReports.length === 0" class="no-results">
+      <div v-if="!loading && filteredReports.length === 0" class="no-results">
         <div class="text-center">
           <i class="fas fa-search fa-3x text-muted mb-3" aria-hidden="true"></i>
           <h5>Tidak ada hasil ditemukan</h5>
@@ -410,7 +412,7 @@
             <div class="modal-body">
               <form @submit.prevent="submitReport">
                 <div class="mb-3">
-                  <label for="reportContact" class="form-label">Kontak yang Dilaporkan</label>
+                  <label Sty for="reportContact" class="form-label">Kontak yang Dilaporkan</label>
                   <input
                     type="text"
                     class="form-control"
@@ -714,7 +716,7 @@ export default {
             'Penipuan berkedok petugas BPJS yang meminta verifikasi data dan transfer biaya pembaruan kartu. Pelaku menghubungi dengan nomor pribadi dan mengancam akan memblokir layanan BPJS jika tidak segera diproses.',
           rating: 4.6,
           reportCount: 33,
-          date: '8 Apr2025',
+          date: '8 Apr 2025',
           status: 'danger',
         },
         {

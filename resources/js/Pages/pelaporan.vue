@@ -1,201 +1,229 @@
 <template>
   <AppLayout>
     <Head title="Pelaporan"/>
-  <section class="hero-section py-4">
-    <div class="container">
-      <div class="row g-4">
-        <!-- Title + Description on Left Side - DYNAMIC CONTENT -->
-        <div class="col-md-5 col-12 d-flex align-items-center">
-          <div class="text-section px-0 text-md-start text-center"> 
-        
-            <h1 class="fs-2 fw-bold mb-3">
-              <i :class="serviceInfo[selectedService].titleIcon + ' me-2'"></i>
-              {{ serviceInfo[selectedService].title }}
-            </h1>
-            <p class="text-white text-opacity-75 mb-3">
-              {{ serviceInfo[selectedService].description }}
-            </p>
+    <section class="hero-section py-4">
+      <div class="container-fluid px-0">
+        <div class="row g-0 min-vh-100">
+          <!-- Title + Description on Left Side - DYNAMIC CONTENT -->
+          <div class="col-lg-6 d-flex flex-column justify-content-center text-white hero-content p-4 p-sm-5">
+            <div class="text-section"> 
+              <h1 class="display-4 fw-bold mb-3">
+                <i :class="serviceInfo[selectedService].titleIcon + ' me-2'"></i>
+                {{ serviceInfo[selectedService].title }}
+              </h1>
+              <div class="highlight-bar mb-4"></div>
+              <p class="lead mb-4">
+                {{ serviceInfo[selectedService].description }}
+              </p>
             
-            <div class="features mt-3 d-flex flex-column align-items-md-start align-items-center">
-              <div class="feature-item d-flex align-items-start mb-3">
-                <div class="feature-icon bg-primary bg-opacity-20 p-2 rounded-circle me-3 shadow-sm">
-                  <i :class="serviceInfo[selectedService].feature1.icon + ' text-w'"></i>
-                </div>
-                <div>
-                  <h6 class="mb-0 text-start fw-bold">{{ serviceInfo[selectedService].feature1.title }}</h6>
-                  <p class="text-white text-opacity-85 mb-0 text-start">{{ serviceInfo[selectedService].feature1.subtitle }}</p>
+              <!-- Service Info Cards -->
+              <div class="d-none d-lg-block">
+                <div class="row mt-4 g-3">
+                  <div class="col-md-4">
+                    <div class="feature-box p-3">
+                      <i class="bi bi-shield-check fs-2 mb-2"></i>
+                      <h5>Keamanan</h5>
+                      <p class="small">Data terenkripsi dan terlindungi dengan standar tinggi</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="feature-box p-3">
+                      <i class="bi bi-lightning fs-2 mb-2"></i>
+                      <h5>Kecepatan</h5>
+                      <p class="small">Hasil verifikasi instan dalam hitungan detik</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="feature-box p-3">
+                      <i class="bi bi-graph-up fs-2 mb-2"></i>
+                      <h5>Akurasi</h5>
+                      <p class="small">Data terverifikasi dengan tingkat akurasi tinggi</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="feature-item d-flex align-items-start">
-                <div class="feature-icon bg-primary bg-opacity-20 p-2 rounded-circle me-3 shadow-sm">
-                  <i :class="serviceInfo[selectedService].feature2.icon + ' text-w'"></i>
-                </div>
-                <div>
-                  <h6 class="mb-0 text-start fw-bold">{{ serviceInfo[selectedService].feature2.title }}</h6>
-                  <p class="text-white text-opacity-85 mb-0 text-start">{{ serviceInfo[selectedService].feature2.subtitle }}</p>
+            
+              <!-- Features for mobile/tablet -->
+              <div class="d-block d-lg-none mt-4">
+                <div class="row g-2">
+                  <div class="col-4 text-center">
+                    <div class="mobile-feature p-2">
+                      <i class="bi bi-shield-check fs-4"></i>
+                      <div class="small mt-1">Keamanan</div>
+                    </div>
+                  </div>
+                  <div class="col-4 text-center">
+                    <div class="mobile-feature p-2">
+                      <i class="bi bi-lightning fs-4"></i>
+                      <div class="small mt-1">Kecepatan</div>
+                    </div>
+                  </div>
+                  <div class="col-4 text-center">
+                    <div class="mobile-feature p-2">
+                      <i class="bi bi-graph-up fs-4"></i>
+                      <div class="small mt-1">Akurasi</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Form on Right Side - Updated for desktop view -->
-        <div class="col-md-7 col-12 d-flex justify-content-center">
-          <div class="bg-white p-4 p-lg-5 rounded-3 shadow-lg border-top border-primary border-3 form-container mx-auto">
-            <h5 class="text-start fw-bold mb-3">
-              <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-              {{ serviceInfo[selectedService].formTitle }}
-            </h5>
+          <!-- Form on Right Side -->
+          <div class="col-lg-6 d-flex align-items-center justify-content-center p-3 p-md-4 bg-light">
+            <div class="form-container p-3 p-sm-4 p-lg-5 w-100">
+              <h5 class="text-start fw-bold mb-3">
+                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                {{ serviceInfo[selectedService].formTitle }}
+              </h5>
 
-            <!-- Service Selection with Tab-like Buttons -->
-            <div class="service-tabs mb-4">
-              <div class="d-flex gap-2">
-                <button
-                  v-for="service in services"
-                  :key="service.value"
-                  type="button"
-                  class="btn flex-fill position-relative service-btn py-2"
-                  :class="selectedService === service.value ? 'btn-primary text-white' : 'btn-outline-secondary'"
-                  @click="selectService(service.value)"
-                >
-                  <i :class="service.icon + ' me-2'"></i>
-                  {{ service.label }}
-                  <span v-if="selectedService === service.value" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                    <span class="visually-hidden">Selected</span>
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            <form @submit.prevent="handleSubmit" ref="formRef">
-              <div class="row g-3">
-                <!-- Category -->
-                <div class="col-12">
-                  <label for="category" class="form-label mb-2">Kategori</label>
-                  <select 
-                    id="category"
-                    v-model="formData.category"
-                    class="form-select custom-select"
-                    required
-                    :class="{'is-invalid': validationErrors.category}"
-                    @change="validationErrors.category = false"
-                    aria-label="Kategori"
+              <!-- Service Selection with Tab-like Buttons -->
+              <div class="service-tabs mb-4">
+                <div class="d-flex gap-2">
+                  <button
+                    v-for="service in services"
+                    :key="service.value"
+                    type="button"
+                    class="btn flex-fill position-relative service-btn py-2"
+                    :class="selectedService === service.value ? 'btn-primary text-white' : 'btn-outline-secondary'"
+                    @click="selectService(service.value)"
                   >
-                    <option disabled value="">Pilih Kategori</option>
-                    <option 
-                      v-for="category in currentCategories"
-                      :key="category.value"
-                      :value="category.value"
-                    >
-                      {{ category.label }}
-                    </option>
-                  </select>
-                  <div v-if="validationErrors.category" class="invalid-feedback">
-                    Kategori harus dipilih
-                  </div>
-                </div>
-
-                <!-- Evidence -->
-                <div class="col-12">
-                  <label for="evidence" class="form-label mb-2">Bukti</label>
-                  <div class="input-group custom-file-input">
-                    <input
-                      id="evidence"
-                      type="file"
-                      class="form-control"
-                      accept="image/*,.pdf"
-                      @change="handleFileUpload"
-                      aria-label="Bukti"
-                    />
-                    <span class="input-group-text py-0 px-2">
-                      <i class="bi bi-image text-primary"></i>
+                    <i :class="service.icon + ' me-2'"></i>
+                    {{ service.label }}
+                    <span v-if="selectedService === service.value" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                      <span class="visually-hidden">Selected</span>
                     </span>
-                  </div>
-                  <div class="form-text">
-                    Format: JPEG, PNG, PDF (Max: 5MB)
-                  </div>
-                </div>
-
-                <!-- Incident Description -->
-                <div class="col-12">
-                  <label for="description" class="form-label mb-2">Deskripsi Kejadian</label>
-                  <textarea
-                    id="description"
-                    v-model="formData.description"
-                    class="form-control custom-textarea"
-                    :class="{'is-invalid': validationErrors.description}"
-                    :placeholder="serviceInfo[selectedService].descriptionPlaceholder"
-                    rows="4"
-                    required
-                    maxlength="1500"
-                    @input="validateDescription"
-                    @focus="validationErrors.description = false"
-                    aria-label="Deskripsi"
-                  ></textarea>
-                  <div class="form-text d-flex justify-content-between">
-                    <span v-if="validationErrors.description" class="text-danger">
-                      Deskripsi harus diisi
-                    </span>
-                    <span :class="{'text-danger': formData.description.length > 1500}">
-                      {{ formData.description.length }}/1500
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Location & OpenStreetMap -->
-                <div class="col-12">
-                  <div class="mb-2">
-                    <span class="form-label fw-semibold mb-0">
-                      <i class="bi bi-geo-alt me-2"></i>Lokasi
-                    </span>
-                  </div>
-                  <div 
-                    id="map" 
-                    ref="mapRef" 
-                    style="width: 100%; height: 250px;" 
-                    class="mb-2 rounded-2 border map-container"
-                    :class="{'border-danger': validationErrors.location}"
-                  ></div>
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div v-if="validationErrors.location" class="text-danger">
-                      Lokasi harus dipilih pada peta
-                    </div>
-                    <button type="button" class="btn btn-outline-primary w-100 py-2 px-3" @click="getCurrentLocation">
-                      <i class="bi bi-geo-fill me-1"></i> Lokasi Saya
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="col-12">
-                  <div class="d-grid">
-                    <button 
-                      type="submit" 
-                      class="btn btn-primary position-relative overflow-hidden submit-btn py-3"
-                      :disabled="!isFormValid"
-                    >
-                      <span class="btn-animation"></span>
-                      <i class="bi bi-send me-2"></i> Kirim Laporan
-                    </button>
-                  </div>
+                  </button>
                 </div>
               </div>
-            </form>
+
+              <form @submit.prevent="handleSubmit" ref="formRef">
+                <div class="row g-3">
+                  <!-- Category -->
+                  <div class="col-12">
+                    <label for="category" class="form-label mb-2">Kategori</label>
+                    <select 
+                      id="category"
+                      v-model="formData.category"
+                      class="form-select custom-select"
+                      required
+                      :class="{'is-invalid': validationErrors.category}"
+                      @change="validationErrors.category = false"
+                      aria-label="Kategori"
+                    >
+                      <option disabled value="">Pilih Kategori</option>
+                      <option 
+                        v-for="category in currentCategories"
+                        :key="category.value"
+                        :value="category.value"
+                      >
+                        {{ category.label }}
+                      </option>
+                    </select>
+                    <div v-if="validationErrors.category" class="invalid-feedback">
+                      Kategori harus dipilih
+                    </div>
+                  </div>
+
+                  <!-- Evidence -->
+                  <div class="col-12">
+                    <label for="evidence" class="form-label mb-2">Bukti</label>
+                    <div class="input-group custom-file-input">
+                      <input
+                        id="evidence"
+                        type="file"
+                        class="form-control"
+                        accept="image/*,.pdf"
+                        @change="handleFileUpload"
+                        aria-label="Bukti"
+                      />
+                      <span class="input-group-text py-0 px-2">
+                        <i class="bi bi-image text-primary"></i>
+                      </span>
+                    </div>
+                    <div class="form-text">
+                      Format: JPEG, PNG, PDF (Max: 5MB)
+                    </div>
+                  </div>
+
+                  <!-- Incident Description -->
+                  <div class="col-12">
+                    <label for="description" class="form-label mb-2">Deskripsi Kejadian</label>
+                    <textarea
+                      id="description"
+                      v-model="formData.description"
+                      class="form-control custom-textarea"
+                      :class="{'is-invalid': validationErrors.description}"
+                      :placeholder="serviceInfo[selectedService].descriptionPlaceholder"
+                      rows="4"
+                      required
+                      maxlength="1500"
+                      @input="validateDescription"
+                      @focus="validationErrors.description = false"
+                      aria-label="Deskripsi"
+                    ></textarea>
+                    <div class="form-text d-flex justify-content-between">
+                      <span v-if="validationErrors.description" class="text-danger">
+                        Deskripsi harus diisi
+                      </span>
+                      <span :class="{'text-danger': formData.description.length > 1500}">
+                        {{ formData.description.length }}/1500
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Location & OpenStreetMap -->
+                  <div class="col-12">
+                    <div class="mb-2">
+                      <span class="form-label fw-semibold mb-0">
+                        <i class="bi bi-geo-alt me-2"></i>Lokasi
+                      </span>
+                    </div>
+                    <div 
+                      id="map" 
+                      ref="mapRef" 
+                      style="width: 100%; height: 250px;" 
+                      class="mb-2 rounded-2 border map-container"
+                      :class="{'border-danger': validationErrors.location}"
+                    ></div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <div v-if="validationErrors.location" class="text-danger">
+                        Lokasi harus dipilih pada peta
+                      </div>
+                      <button type="button" class="btn btn-outline-primary w-100 py-2 px-3" @click="getCurrentLocation">
+                        <i class="bi bi-geo-fill me-1"></i> Lokasi Saya
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Submit Button -->
+                  <div class="col-12">
+                    <div class="d-grid">
+                      <button 
+                        type="submit" 
+                        class="btn btn-primary position-relative overflow-hidden submit-btn py-3"
+                        :disabled="!isFormValid"
+                      >
+                        <span class="btn-animation"></span>
+                        <i class="bi bi-send me-2"></i> Kirim Laporan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-
-
-  <Alur/>
-  <!-- SECTION COMPONENT -->
-  <Section />
+    <Alur/>
+    <!-- SECTION COMPONENT -->
+    <Section />
   
-  <!-- FEEDBACK COMPONENT -->
-  <feedback /> 
-</AppLayout>
+    <!-- FEEDBACK COMPONENT -->
+    <Feedback /> 
+  </AppLayout>
 </template>
 
 <script setup>
@@ -204,15 +232,14 @@ import { Head, usePage } from '@inertiajs/vue3';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-
 // Import komponen-komponen
-import Section from '@/Components/Section.vue'
-import Feedback from '@/Components/Feedback.vue'
-import Alur from '@/Components/alurpelaporan.vue'
+import Section from '@/Components/Section.vue';
+import Feedback from '@/Components/Feedback.vue';
+import Alur from '@/Components/alurpelaporan.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
-const page = usePage()
-page.layout = AppLayout
+const page = usePage();
+page.layout = AppLayout;
 
 // Service options with icons
 const services = [
@@ -451,7 +478,7 @@ function initMap() {
     
     // Add OpenStreetMap tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19
     }).addTo(map);
     
@@ -552,45 +579,83 @@ function getCurrentLocation() {
 
 <style scoped>
 .hero-section {
-  background: linear-gradient(135deg, #1a56db, #1e429f);
-  min-height: auto;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  position: relative;
+  background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
+  min-height: 100vh;
   overflow: hidden;
-  padding: 2rem 0;
+  position: relative;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
 }
 
 .text-section {
   color: #fff;
   position: relative;
   z-index: 1;
+  margin-top: -30rem; /* Added to shift text section slightly upwards */
 }
 
-.feature-icon {
-  width: 32px;
-  height: 32px;
+/* Feature boxes styling */
+.feature-box {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease;
+  text-align: left;
+
+}
+
+.feature-box:hover {
+  transform: translateY(-5px);
+}
+
+.feature-box i {
+  color: #ffffff;
+}
+
+.feature-box h5 {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature-box p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
+.mobile-feature {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  padding: 0.75rem !important;
+  min-height: 60px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+}
+
+.mobile-feature i {
+  color: #ffffff;
+}
+
+.mobile-feature .small {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.75rem;
+  line-height: 1.2;
 }
 
 .form-container {
-  position: relative;
-  z-index: 1;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1); /* Updated box-shadow to match specs */
-  max-width: 580px; /* Set max-width to 580px for desktop */
-  border-radius: 15px; /* Updated border-radius to 15px */
-}
-
-/* Add the desktop-specific padding */
-@media (min-width: 992px) {
-  .form-container {
-    padding: 3rem !important; /* p-lg-5 equivalent is 3rem or 48px */
-  }
+  background: white;
+  border-radius: 15px;
+  max-width: 580px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
 }
 
 /* Form controls styling */
@@ -688,6 +753,14 @@ function getCurrentLocation() {
   padding-bottom: 1rem;
 }
 
+/* Highlight bar styling */
+.highlight-bar {
+  width: 60px;
+  height: 4px;
+  background-color: #ffc107;
+  border-radius: 2px;
+}
+
 /* Animations */
 @keyframes shake {
   0% { transform: translateX(0); }
@@ -720,63 +793,92 @@ function getCurrentLocation() {
   background-image: url("https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png");
 }
 
-/* Service transition animation */
-.text-section,
-.form-container h5,
-.features {
-  transition: all 0.3s ease-in-out;
-}
-
 /* Responsive layout adjustments */
-@media (max-width: 767.98px) {
-  .text-section {
-    margin-bottom: 2rem;
-  }
-  
-  .features {
-    flex-direction: row !important;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  
-  .feature-item {
-    margin-right: 1.5rem;
-  }
-  
-  /* Adjust spacing for better mobile display */
-  .hero-section {
-    padding: 1.5rem 0;
+@media (max-width: 576px) {
+  .hero-content {
+    padding: 2rem 1rem !important;
+    text-align: center;
   }
   
   .form-container {
-    padding: 1.5rem !important;
+    width: 100%;
+    margin: 0;
+    border-radius: 10px;
+  }
+  
+  .display-4 {
+    font-size: 2.5rem !important;
+  }
+  
+  .lead {
+    font-size: 1rem;
+  }
+  
+  .form-select {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .text-section {
+    margin-top: -1.5rem; /* Adjusted for smaller screens */
   }
 }
 
-/* Extra small devices */
-@media (max-width: 575.98px) {
-  .d-flex.justify-content-between.align-items-center {
-    flex-direction: column;
-    align-items: stretch !important;
+@media (max-width: 360px) {
+  .lead,
+  .display-4 {
+    word-break: break-word;
+    hyphens: auto;
   }
   
-  .d-flex.justify-content-between.align-items-center .ms-auto {
-    margin-left: 0 !important;
-    margin-top: 0.75rem;
-    width: 100%;
+  .form-select {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
   }
   
-  .hero-section {
-    padding: 1rem 0;
+  .text-section {
+    margin-top: -1rem; /* Further adjusted for very small screens */
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .hero-content {
+    padding: 2.5rem 1.5rem !important;
+    text-align: center;
   }
   
   .form-container {
-    padding: 1rem !important;
+    max-width: 90%;
+    padding: 2rem !important;
   }
   
-  /* Make map slightly smaller on very small screens */
-  #map {
-    height: 200px !important;
+  .text-section {
+    margin-top: -1.5rem; /* Adjusted for medium screens */
+  }
+}
+
+@media (min-width: 992px) {
+  .hero-content {
+    padding-left: 4rem !important;
+  }
+  
+  .bg-light {
+    background: transparent !important;
+  }
+  
+  .form-container {
+    z-index: 2;
+  }
+}
+
+@media (min-height: 600px) and (orientation: landscape) {
+  .min-vh-100 {
+    min-height: auto !important;
+  }
+  
+  .hero-section {
+    min-height: auto;
+    overflow-y: auto;
   }
 }
 </style>
