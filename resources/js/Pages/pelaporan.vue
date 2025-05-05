@@ -233,15 +233,9 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
 // Import komponen-komponen
-<<<<<<< HEAD
-import Section from '@/Components/Section.vue'
-import Feedback from '@/Components/Feedback.vue'
-import Alur from '@/Components/alurpelaporan.vue'
-=======
 import Section from '@/Components/Section.vue';
 import Feedback from '@/Components/Feedback.vue';
 import Alur from '@/Components/alurpelaporan.vue';
->>>>>>> 42ee09304e8f776ef3124f4b95e14db80dc4a065
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 const page = usePage();
