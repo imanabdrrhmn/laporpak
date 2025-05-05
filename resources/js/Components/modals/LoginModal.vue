@@ -42,7 +42,9 @@
 
               <div class="d-flex justify-content-between align-items-center mt-1 flex-wrap">
                 <small class="error-message">{{ errors.password }}</small>
-                <a href="#" class="text-danger small text-decoration-none link-lupa-password">
+                <a
+                  class="text-danger small text-decoration-none link-lupa-password"
+                  @click.prevent="triggerResetPassword">
                   Lupa kata sandi?
                 </a>
               </div>
@@ -53,7 +55,8 @@
 
           <div class="text-center text-muted my-3">ATAU</div>
 
-          <button class="btn btn-light border w-100 py-2 d-flex align-items-center justify-content-center shadow-sm">
+          <!-- Google Login Button -->
+          <a href="/login/google" class="btn btn-light border w-100 py-2 d-flex align-items-center justify-content-center shadow-sm">
             <img
               src="https://www.svgrepo.com/show/475656/google-color.svg"
               alt="Google"
@@ -61,7 +64,7 @@
               class="me-2"
             />
             <span>Login dengan Google</span>
-          </button>
+          </a>
           <p class="text-center text-muted mt-4">
             Belum punya akun?
             <span class="text-primary fw-bold cursor-pointer" @click="triggerRegister">
@@ -82,7 +85,7 @@ const props = defineProps({
   visible: Boolean,
 })
 
-const emit = defineEmits(['update:visible', 'open-register'])
+const emit = defineEmits(['update:visible', 'open-register', 'open-reset-password'])
 
 // State untuk input form dari user
 const form = ref({
@@ -114,6 +117,11 @@ function triggerRegister() {
   emit('open-register')
 }
 
+function triggerResetPassword() {
+  emit('update:visible', false)
+  emit('open-reset-password')
+}
+
 // Toggle show/hide password
 function togglePasswordVisibility() {
   passwordVisible.value = !passwordVisible.value
@@ -143,7 +151,7 @@ function handleLogin() {
   }
 
   // Kirim ke server pakai Inertia
-  useForm(loginData).post(route('login'), {
+  useForm(loginData).post(route('login.submit'), {
     onSuccess: () => {
       closeModal()
     },

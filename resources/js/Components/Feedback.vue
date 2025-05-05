@@ -197,15 +197,22 @@
     </div>
     
     <div class="text-center mt-4 mt-md-5">
+      <Link href="/feedback">
       <button class="btn btn-primary px-3 px-md-4 py-2">
         Lihat semua <i class="bi bi-arrow-right ms-1"></i>
       </button>
+    </Link>
     </div>
   </div>
 </template>
 
 <script>
+import { Link } from '@inertiajs/vue3';
+
 export default {
+  components : {
+    Link
+  },
   data() {
     return {
       scrollPosition1: 0,

@@ -1,5 +1,6 @@
 <template>
-  <div class="page-wrapper">
+  <AppLayout>
+  <div class="page-wrapper p-0">
     <!-- Card content -->
     <div class="card">
       <h1 class="title">Verifikasi Email</h1>
@@ -25,11 +26,13 @@
       </div>
     </div>
   </div>
+</AppLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
+import AppLayout from '@/Layouts/AppLayout.vue'
 
 const processing = ref(false)
 const countdown = ref(60)

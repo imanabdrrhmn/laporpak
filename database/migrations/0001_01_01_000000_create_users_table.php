@@ -17,19 +17,22 @@ return new class extends Migration
             $table->string('email')->unique()->nullable();
             $table->string('no_hp')->unique()->nullable(); 
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->enum('role', ['admin', 'user', 'verifier'])->default('user');
             $table->rememberToken();
             $table->timestamps();
+            $table->string('google_id')->nullable()->unique();
+            $table->string('avatar')->nullable();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->nullable()->primary();
-            $table->string('no_hp')->nullable()->unique();
+            $table->id();
+            $table->string('email')->nullable()->index(); 
+            $table->string('no_hp')->nullable()->index(); 
             $table->string('token');
             $table->timestamp('created_at')->nullable();
+            $table->timestamp('expires_at')->nullable(); 
         });
-        
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();

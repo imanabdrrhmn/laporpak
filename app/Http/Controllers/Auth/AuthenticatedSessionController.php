@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -54,7 +55,7 @@ class AuthenticatedSessionController extends Controller
                 'password' => ['Email, No HP, atau password salah.'],
             ]);
         }
-
+        
         
         Auth::login($user);
         $request->session()->regenerate();
@@ -74,5 +75,36 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Handle Google callback.
+     */
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            
+            // Check if the user already exists in the database
+            $user = User::firstOrCreate([
+                'email' => $googleUser->getEmail(),
+            ], [
+                'name' => $googleUser->getName(),
+                'google_id' => $googleUser->getId(),
+                'avatar' => $googleUser->getAvatar(),
+                'password' => null
+            ]);
+
+            Auth::login($user);
+
+            return redirect()->intended(route('/dashboard', absolute: false));
+        } catch (\Exception $e) {
+            return redirect('/')->withErrors('Google login failed.');
+        }
     }
 }

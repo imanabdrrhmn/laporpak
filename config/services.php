@@ -34,5 +34,16 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'wablas' => [
+        'token' => env('WABLAS_API_TOKEN'),
+        'secret_key' => env('WABLAS_SECRET_KEY'),
+        'base_url' => env('WABLAS_BASE_URL', 'https://bdg.wablas.com'),
+    ],
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+    ],
+
 
 ];

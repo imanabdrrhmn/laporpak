@@ -9,8 +9,13 @@
       <div v-if="$page.props.flash?.error" class="alert alert-danger">{{ $page.props.flash.error }}</div>
 
       <!-- Tombol buka modal -->
-      <div v-if="canGiveFeedback">
+      <div v-if="isLoggedIn && contactVerified">
         <button class="btn btn-primary mb-3" @click="openModal('create')">Beri Feedback</button>
+      </div>
+      <div v-else-if="isLoggedIn && !contactVerified">
+        <div class="alert alert-warning">
+          Anda perlu verifikasi email atau nomor HP terlebih dahulu untuk memberi feedback.
+        </div>
       </div>
 
       <!-- List Feedback -->
@@ -24,7 +29,7 @@
             </span>
           </p>
 
-          <!-- Jika user yang login adalah pemilik feedback -->
+          <!-- Jika user yang login adalah pemilik feedback atau admin -->
           <div v-if="page.props.auth?.user?.id === feedback.user_id || isAdmin">
             <button class="btn btn-sm btn-outline-secondary me-2" @click="openModal('edit', feedback)">Edit</button>
             <button class="btn btn-sm btn-outline-danger" @click="destroy(feedback.id)">Hapus</button>
@@ -71,24 +76,21 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm, usePage, router, Head } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 const props = defineProps({
   feedbacks: Array,
-  canGiveFeedback: Boolean
+  contactVerified: Boolean,
 });
-
-
-
 
 const page = usePage();
 page.layout = AppLayout;
-const isLoggedIn = computed(() => !!page.props.auth?.user);
-const roles = page.props.auth?.user?.roles || [];
-const isAdmin = roles.includes('admin');
 
+const isLoggedIn = computed(() => !!page.props.auth?.user);
+const roles = page.props.auth?.user?.role ? [page.props.auth.user.role] : [];
+const isAdmin = roles.includes('admin');
 
 // Modal logic
 let modalInstance;

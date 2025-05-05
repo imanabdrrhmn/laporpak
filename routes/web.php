@@ -16,8 +16,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function (){
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
+})->middleware(['auth', 'contact.verified'])->name('dashboard');
 
 Route::get('/pelaporan', function (){
     return Inertia::render('pelaporan');
@@ -34,9 +33,6 @@ Route::get('/pelaporan', function (){
   Route::get('/CariLaporan', function (){
      return Inertia::render('CariLaporan');
  })->name('CariLaporan');
-
-
-
 
 // Pelaporan Route
 Route::get('/pelaporan', function () {
@@ -61,7 +57,7 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
 
-Route::middleware(['auth', 'verified',])->group(function () {
+Route::middleware(['auth', 'contact.verified'])->group(function () {
     Route::resource('feedback', FeedbackController::class)->except(['index', 'show']);
 });
 

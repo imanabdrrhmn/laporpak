@@ -26,7 +26,7 @@ class RegisteredUserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
-            'role' => ['nullable', Rule::in(Role::pluck('name')->toArray())], // validasi role dari DB
+            'role' => ['nullable', Rule::in(Role::pluck('name')->toArray())],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -61,9 +61,9 @@ class RegisteredUserController extends Controller
 
         $user->assignRole($validated['role'] ?? 'user');
 
-        event(new Registered($user));
         Auth::login($user);
 
-        return redirect()->intended('dashboard');
+        return redirect()->route('verification.phone.notice');
     }
+
 }

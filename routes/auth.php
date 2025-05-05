@@ -1,51 +1,52 @@
 <?php
-use App\Http\Controllers\Auth\ForgotPasswordWithPhoneController;
-use App\Http\Controllers\Auth\ResetPasswordWithPhoneController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\PhoneVerificationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\EnsureContactVerified;
+use Inertia\Inertia;
+use Illuminate\Http\Request;
+
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
     Route::post('register/email', [RegisteredUserController::class, 'storeWithEmail'])->name('register.email');
-    Route::post('register/no_hp', [RegisteredUserController::class, 'storeWithNoHp'])->name('register.no_hp');
+    Route::post('register/phone', [RegisteredUserController::class, 'storeWithNoHp'])->name('register.no_hp');
 
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+        ->name('login.form');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.submit');
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('password.request');
+    Route::get('login/google', [AuthenticatedSessionController::class, 'redirectToGoogle'])->name('login.google');
+    Route::get('login/google/callback', [AuthenticatedSessionController::class, 'handleGoogleCallback']);
 
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email');
+    Route::inertia('/forgot-password', 'ForgotPassword')->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
 
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
+    Route::get('/reset-password', function (Request $request) {
+        return Inertia::render('ResetPassword', [
+            'token' => $request->query('token'),
+            'email' => $request->query('email'),
+            'no_hp' => $request->query('no_hp')
+        ]);
+    })->name('password.reset');
 
-    Route::post('reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.store');
+    // Proses reset password
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-    // Request OTP
-    Route::get('/forgot-password-phone', [ForgotPasswordWithPhoneController::class, 'showRequestForm'])->name('password.request.phone');
-    Route::post('/forgot-password-phone', [ForgotPasswordWithPhoneController::class, 'sendOtp'])->name('password.otp.send');
-
-    // Reset Password via OTP
-    Route::get('/reset-password-phone', [ResetPasswordWithPhoneController::class, 'showResetForm'])->name('password.reset.phone');
-    Route::post('/reset-password-phone', [ResetPasswordWithPhoneController::class, 'reset'])->name('password.update.phone');
-
-});
+    });
 
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)
@@ -59,12 +60,12 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('verification.send');
 
-    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
-        ->name('password.confirm');
+    Route::get('/verify-phone', function () {
+    return Inertia::render('VerifyPhone');})->name('verification.phone.notice');
 
-    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
+    Route::post('/phone/send-verification', [PhoneVerificationController::class, 'send'])->name('phone.send');
+    Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');
 
-    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

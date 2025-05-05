@@ -7,15 +7,13 @@
           <h1 class="display-6 fw-bold mb-2">Membangun Indonesia</h1>
           <h1 class="display-6 fw-bold mb-4">Bebas Penipuan</h1>
           <div class="title-underline mb-4"></div>
-          <div></div>
-          <button
-            class="btn btn-light px-4 py-2 d-flex align-items-center shadow-button"
-            @click="$emit('trigger-login')"
-          >
+          <Link href="/pelaporan">
+            <button class="btn btn-light px-4 py-2 d-flex align-items-center shadow-button">
             Mulai Laporkan
             <i class="bi bi-arrow-right ms-2"></i>
           </button>
-
+          </Link>
+          
           <!-- Avatar Group with Count and Text -->
           <div class="d-flex align-items-center mt-4 flex-wrap">
             <div class="d-flex align-items-center">
@@ -61,8 +59,13 @@
 </template>
 
 <script>
+import { Link } from '@inertiajs/vue3';
+
 export default {
   name: 'HeroSection',
+  components : {
+    Link
+  },
   data() {
     return {
       lottieLoaded: false

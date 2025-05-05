@@ -104,7 +104,7 @@
         <div class="container-fluid px-0">
           <ul class="nav nav-fill w-100">
             <li class="nav-item">
-              <Link href="/Beranda" class="nav-link py-3":class="{ 'active': $page.url === '/Beranda' }">
+              <Link href="/" class="nav-link py-3":class="{ 'active': $page.url === '/Beranda' }">
                 <i class="bi bi-house-fill me-2"></i>
                 <span>Beranda</span>
               </Link>
