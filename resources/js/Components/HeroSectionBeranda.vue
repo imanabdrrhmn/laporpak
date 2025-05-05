@@ -118,7 +118,7 @@ export default {
 
 <style scoped>
 .hero-section {
-  background-color: #2563EB;
+  background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
   padding: 80px 0;
   min-height: 80vh;
   display: flex;

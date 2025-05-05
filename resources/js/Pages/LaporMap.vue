@@ -541,7 +541,7 @@ export default {
 <style scoped>
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #4285f4 0%, #0d47a1 100%);
+  background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
   color: white;
   padding: 100px 0;
   min-height: 100vh;

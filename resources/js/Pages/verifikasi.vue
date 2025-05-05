@@ -1,13 +1,14 @@
-```vue
 <template>
   <AppLayout>
     <Head title="Verifikasi"/>
     <div class="hero-section">
-      <div class="container-fluid px-0">
+      <div class="container-fluid px-0">  
         <div class="row g-0 min-vh-100">
           <!-- Left Side - Text Content -->
           <div class="col-lg-6 d-flex flex-column justify-content-center text-white hero-content p-4 p-sm-5">
-            <h1 class="display-4 fw-bold mb-3">Verifikasi Data Terpercaya</h1>
+            <h1 class="display-4 fw-bold mb-3">
+              <i class="bi bi-check-circle me-2"></i> Verifikasi Data
+            </h1>
             <div class="highlight-bar mb-4"></div>
             <p class="lead mb-4">Akses layanan verifikasi data premium untuk memastikan keabsahan dan menjaga integritas informasi bisnis Anda. Solusi cepat dan akurat untuk kebutuhan verifikasi.</p>
             
@@ -397,9 +398,10 @@ export default {
 
 .highlight-bar {
   height: 4px;
-  width: 80px;
+  width: 100px; /* Lebar disesuaikan untuk proporsi dengan ikon + teks */
   background-color: #ffc107;
   border-radius: 2px;
+  margin-top: 0.5rem; /* Jarak dari ikon + teks */
 }
 
 .form-container {
@@ -437,6 +439,12 @@ export default {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Styling untuk ikon di h1 */
+.display-4 i {
+  font-size: 0.8em; /* Ikon sedikit lebih kecil dari teks */
+  vertical-align: middle; /* Sejajar dengan teks */
+}
+
 /* Ensure minimum font size for accessibility */
 .small {
   font-size: 0.875rem; /* 14px minimum */
@@ -455,7 +463,7 @@ export default {
   }
   
   .highlight-bar {
-    margin: 0 auto;
+    margin: 0.5rem auto; /* Pusatkan pada mobile */
   }
   
   .form-container {
@@ -501,7 +509,7 @@ export default {
   }
   
   .highlight-bar {
-    margin: 0 auto;
+    margin: 0.5rem auto;
   }
   
   .display-4 {
@@ -517,7 +525,7 @@ export default {
   }
   
   .highlight-bar {
-    margin: 0 auto;
+    margin: 0.5rem auto;
   }
   
   .form-container {
@@ -553,4 +561,3 @@ export default {
   }
 }
 </style>
-```
