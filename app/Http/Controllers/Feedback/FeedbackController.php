@@ -59,8 +59,12 @@ public function store(Request $request)
         return redirect()->route('feedback.index')->with('error', 'Akun kamu belum diverifikasi. Silakan verifikasi email atau nomor HP terlebih dahulu.');
     }
 
-    if (Feedback::where('user_id', $user->id)->exists()) {
-        return redirect()->route('feedback.index')->with('error', 'Kamu hanya bisa memberikan feedback satu kali.');
+    $existingFeedback = Feedback::where('user_id', $user->id)
+                                ->where('kategori', $request->kategori)
+                                ->first();
+
+    if ($existingFeedback) {
+        return redirect()->route('feedback.index')->with('error', 'Kamu sudah pernah memberikan feedback untuk kategori ini.');
     }
 
     $request->validate([
