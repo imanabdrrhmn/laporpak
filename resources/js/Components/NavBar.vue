@@ -63,32 +63,38 @@
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
-                  <a class="dropdown-item nav-link" href="/dashboard">
+                  <a class="dropdown-item" href="/dashboard">
                     <i class="bi bi-file-bar-graph-fill me-2"></i>
                     Dashboard
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item nav-link" href="/profile">
+                  <a class="dropdown-item" href="/profile">
                     <i class="bi bi-person-fill me-2"></i>
                     Profil Saya
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item nav-link" href="/laporan-saya">
+                  <a class="dropdown-item" href="/laporan-saya">
                     <i class="bi bi-file-earmark-text-fill me-2"></i>
                     Laporan Saya
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item nav-link" href="/pengaturan">
+                  <a class="dropdown-item" href="/credit">
+                    <i class="bi bi-wallet-fill me-2"></i>
+                    Credit
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/pengaturan">
                     <i class="bi bi-gear-fill me-2"></i>
                     Pengaturan
                   </a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
-                  <a class="dropdown-item nav-link text-danger" href="#" @click.prevent="logout">
+                  <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
                     <i class="bi bi-box-arrow-right me-2"></i>
                     Keluar
                   </a>
@@ -357,6 +363,12 @@
               <Link href="/laporan-saya" class="nav-link" @click="closeMobileNav">
                 <i class="bi bi-file-earmark-text-fill me-2"></i>
                 <span>Laporan Saya</span>
+              </Link>
+            </li>
+            <li class="nav-item">
+              <Link href="/credit" class="nav-link" @click="closeMobileNav">
+                <i class="bi bi-wallet-fill me-2"></i>
+                <span>Credit</span>
               </Link>
             </li>
             <li class="nav-item">
@@ -634,7 +646,6 @@ export default {
   .dropdown:hover .nav-link {
     color: #0d6efd !important;
     background-color: rgba(13, 110, 253, 0.03);
-    transform: scale(1.02);
   }
 
   /* Dropdown arrow styling */
@@ -736,7 +747,6 @@ export default {
     background-color: rgba(13, 110, 253, 0.05);
     border-left-color: rgba(13, 110, 253, 0.3);
     color: #0d6efd !important;
-    transform: scale(1.02);
   }
 
   .nav-link.active,
@@ -745,7 +755,8 @@ export default {
   .nav-link.active-pelaporan,
   .nav-link.active-LaporMap,
   .nav-link.active-feedback,
-  .nav-link.active-tentang-kami {
+  .nav-link.active-tentang-kami,
+  .nav-link.active-credit {
     color: #0d6efd !important;
     font-weight: 600;
     background-color: rgba(13, 110, 253, 0.1);
@@ -778,7 +789,6 @@ export default {
   .nav-link:hover {
     color: #0d6efd !important;
     border-bottom-color: rgba(13, 110, 253, 0.3);
-    transform: scale(1.02);
   }
 
   .nav-link.active,
@@ -787,7 +797,8 @@ export default {
   .nav-link.active-pelaporan,
   .nav-link.active-LaporMap,
   .nav-link.active-feedback,
-  .nav-link.active-tentang-kami {
+  .nav-link.active-tentang-kami,
+  .nav-link.active-credit {
     color: #0d6efd !important;
     font-weight: bold;
     border-bottom: 3px solid #0d6efd;
@@ -799,7 +810,7 @@ export default {
   }
 
   .dropdown-item:hover {
-    background-color: #f8f9fa;
+    color:#0d6efd;
     transform: translateX(3px);
   }
 
