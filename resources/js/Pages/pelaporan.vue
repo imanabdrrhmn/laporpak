@@ -585,10 +585,10 @@ function getCurrentLocation() {
   position: relative;
 }
 
-/* .hero-content { 
-  position: absolute;
+.hero-content {
+  position: relative;
   z-index: 1;
-} */
+}
 
 .text-section {
   color: #fff;
