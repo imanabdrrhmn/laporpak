@@ -221,8 +221,8 @@
     <!-- SECTION COMPONENT -->
     <Section />
   
-    <!-- FEEDBACK COMPONENT -->
-    <Feedback /> 
+    <!-- FEEDBACK COMPONENT
+    <Feedback />  -->
   </AppLayout>
 </template>
 
