@@ -39,12 +39,12 @@ Route::get('/pelaporan', function (){
      return Inertia::render('CariLaporan');
  })->name('CariLaporan');
 
-// Pelaporan Route
-Route::get('/pelaporan', function () {
-    return Inertia::render('pelaporan', [
-        'user' => auth()->user(), 
-    ]);
-})->name('pelaporan');
+// // Pelaporan Route
+// Route::get('/pelaporan', function () {
+//     return Inertia::render('pelaporan', [
+//         'user' => auth()->user(), 
+//     ]);
+// })->name('pelaporan');
 
 
 
