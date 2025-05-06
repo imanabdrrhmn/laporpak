@@ -49,7 +49,6 @@ const form = useForm({
             {{ form.errors.name }}
           </div>
         </div>
-
         <!-- Email Field -->
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 mb-2 mt-2">Email</label>

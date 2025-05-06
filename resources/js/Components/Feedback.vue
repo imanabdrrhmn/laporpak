@@ -19,14 +19,16 @@
                       </div>
                       <div class="user-info">
                         <h4 class="user-name">{{ testimonial.name }}</h4>
-                        <p class="user-category" :class="getCategoryClass(testimonial.kategori)">
+                        <p class="user-category" :class="getCategoryClassMethod(testimonial.kategori)">
                           {{ testimonial.kategori }}
                         </p>
                       </div>
                     </div>
                     <div class="ms-auto mt-2 mt-sm-0">
                       <div class="rating">
-                        <span v-for="star in 5" :key="star" class="star-icon">★</span>
+                        <span v-for="star in 5" :key="star" class="star-icon" :style="{ color: star <= testimonial.rating ? '#ff9800' : '#ccc' }">
+                        ★
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -48,14 +50,16 @@
                       </div>
                       <div class="user-info">
                         <h4 class="user-name">{{ testimonial.name }}</h4>
-                        <p class="user-category" :class="getCategoryClass(testimonial.kategori)">
+                        <p class="user-category" :class="getCategoryClassMethod(testimonial.kategori)">
                           {{ testimonial.kategori }}
                         </p>
                       </div>
                     </div>
                     <div class="ms-auto mt-2 mt-sm-0">
                       <div class="rating">
-                        <span v-for="star in 5" :key="star" class="star-icon">★</span>
+                        <span v-for="star in 5" :key="star" class="star-icon" :style="{ color: star <= testimonial.rating ? '#ff9800' : '#ccc' }">
+                        ★
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -77,14 +81,16 @@
                       </div>
                       <div class="user-info">
                         <h4 class="user-name">{{ testimonial.name }}</h4>
-                        <p class="user-category" :class="getCategoryClass(testimonial.kategori)">
+                        <p class="user-category" :class="getCategoryClassMethod(testimonial.kategori)">
                           {{ testimonial.kategori }}
                         </p>
                       </div>
                     </div>
                     <div class="ms-auto mt-2 mt-sm-0">
                       <div class="rating">
-                        <span v-for="star in 5" :key="star" class="star-icon">★</span>
+                        <span v-for="star in 5" :key="star" class="star-icon" :style="{ color: star <= testimonial.rating ? '#ff9800' : '#ccc' }">
+                        ★
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -115,14 +121,16 @@
                       </div>
                       <div class="user-info">
                         <h4 class="user-name">{{ testimonial.name }}</h4>
-                        <p class="user-category" :class="getCategoryClass(testimonial.kategori)">
+                        <p class="user-category" :class="getCategoryClassMethod(testimonial.kategori)">
                           {{ testimonial.kategori }}
                         </p>
                       </div>
                     </div>
                     <div class="ms-auto mt-2 mt-sm-0">
                       <div class="rating">
-                        <span v-for="star in 5" :key="star" class="star-icon">★</span>
+                        <span v-for="star in 5" :key="star" class="star-icon" :style="{ color: star <= testimonial.rating ? '#ff9800' : '#ccc' }">
+                        ★
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -144,14 +152,16 @@
                       </div>
                       <div class="user-info">
                         <h4 class="user-name">{{ testimonial.name }}</h4>
-                        <p class="user-category" :class="getCategoryClass(testimonial.kategori)">
+                        <p class="user-category" :class="getCategoryClassMethod(testimonial.kategori)">
                           {{ testimonial.kategori }}
                         </p>
                       </div>
                     </div>
                     <div class="ms-auto mt-2 mt-sm-0">
                       <div class="rating">
-                        <span v-for="star in 5" :key="star" class="star-icon">★</span>
+                        <span v-for="star in 5" :key="star" class="star-icon" :style="{ color: star <= testimonial.rating ? '#ff9800' : '#ccc' }">
+                        ★
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -173,14 +183,16 @@
                       </div>
                       <div class="user-info">
                         <h4 class="user-name">{{ testimonial.name }}</h4>
-                        <p class="user-category" :class="getCategoryClass(testimonial.kategori)">
+                        <p class="user-category" :class="getCategoryClassMethod(testimonial.kategori)">
                           {{ testimonial.kategori }}
                         </p>
                       </div>
                     </div>
                     <div class="ms-auto mt-2 mt-sm-0">
-                      <div class="rating">
-                        <span v-for="star in 5" :key="star" class="star-icon">★</span>
+                        <div class="rating">
+                        <span v-for="star in 5" :key="star" class="star-icon" :style="{ color: star <= testimonial.rating ? '#ff9800' : '#ccc' }">
+                        ★
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -210,77 +222,49 @@
 import { Link } from '@inertiajs/vue3';
 
 export default {
-  components : {
+  components: {
     Link
+  },
+  props: {
+    feedbacks: {
+      type: Array,
+      required: true
+    }
   },
   data() {
     return {
       scrollPosition1: 0,
       scrollPosition2: 0,
-      scrollSpeed1: 0.5, // Reduced speed for better mobile experience
-      scrollSpeed2: 0.3, // Reduced speed for better mobile experience
+      scrollSpeed1: 0.5,
+      scrollSpeed2: 0.3,
       animationFrameId: null,
       cardWidth: 0,
       cardMargin: 0,
-      testimonials: [
-        {
-          id: 1,
-          name: 'Crystal Maiden',
-          kategori: 'Pelaporan',
-          avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-          content: "Sistem pelaporan sangat mudah digunakan. Saya bisa melacak status laporan saya secara real-time dan mendapat tanggapan yang cepat dari petugas terkait."
-        },
-        {
-          id: 2,
-          name: 'Dazzle Healer',
-          kategori: 'Verifikasi',
-          avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
-          content: "Proses verifikasi sangat transparan. Semua tahapan dijelaskan dengan baik dan saya merasa aman dengan prosedur yang diterapkan oleh tim LaporPak."
-        },
-        {
-          id: 3,
-          name: 'Luna Moonfang',
-          kategori: 'Pelaporan',
-          avatar: 'https://randomuser.me/api/portraits/women/3.jpg',
-          content: "Fitur pelacakan status laporan sangat membantu. Saya tidak perlu berulang kali menghubungi petugas untuk mengetahui perkembangan laporan saya."
-        },
-        {
-          id: 4,
-          name: 'Mirana Marci',
-          kategori: 'Verifikasi',
-          avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
-          content: "Sistem verifikasi yang aman dan cepat. Dokumen saya diverifikasi dalam waktu kurang dari 24 jam. Tim verifikasi sangat profesional."
-        },
-        {
-          id: 5,
-          name: 'Bimosaurus',
-          kategori: 'Pelaporan',
-          avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
-          content: "Aplikasi yang sangat responsif dan intuitif. Saya bisa melaporkan masalah di lingkungan saya dengan cepat dan mudah. Terima kasih LaporPak!"
-        },
-        {
-          id: 6,
-          name: 'Lina Inverse',
-          kategori: 'Verifikasi',
-          avatar: 'https://randomuser.me/api/portraits/women/6.jpg',
-          content: "Proses verifikasi yang terstruktur dengan baik. Notifikasi update status dikirimkan secara berkala, sehingga saya selalu mengetahui tahap verifikasi saya."
-        }
-      ],
-      shuffledTestimonials: [],
       totalWidth: 0,
       isMobile: false
     };
   },
-  created() {
-    // Shuffle testimonials untuk baris kedua
-    this.shuffledTestimonials = [...this.testimonials].sort(() => 0.5 - Math.random());
+  computed: {
+    testimonials() {
+      return this.feedbacks.map(f => ({
+        id: f.id,
+        name: f.user?.name || 'Anonim',
+        avatar: f.user?.avatar || 'https://via.placeholder.com/50',
+        content: f.message,
+        rating: f.rating || 5,
+        kategori: f.kategori || 'Umum',
+      }));
+    },
+    shuffledTestimonials() {
+      return [...this.testimonials].sort(() => 0.5 - Math.random());
+    }
   },
   mounted() {
     this.checkMobile();
     this.$nextTick(() => {
       this.initCarousel();
     });
-    
+
     window.addEventListener('resize', this.handleResize);
     window.addEventListener('visibilitychange', this.handleVisibilityChange);
     window.addEventListener('orientationchange', this.handleResize);
@@ -294,80 +278,54 @@ export default {
   methods: {
     checkMobile() {
       this.isMobile = window.innerWidth < 768;
-      // Adjust scroll speed based on device
-      if (this.isMobile) {
-        this.scrollSpeed1 = 0.3;
-        this.scrollSpeed2 = 0.2;
-      } else {
-        this.scrollSpeed1 = 0.5;
-        this.scrollSpeed2 = 0.3;
-      }
+      this.scrollSpeed1 = this.isMobile ? 0.3 : 0.5;
+      this.scrollSpeed2 = this.isMobile ? 0.2 : 0.3;
     },
+    getCategoryClassMethod(kategori) {
+    switch (kategori) {
+      case 'Pelaporan':
+        return 'category-pelaporan';
+      case 'Verifikasi':
+        return 'category-verifikasi';
+      default:
+        return 'category-umum';
+    }
+  },
     initCarousel() {
-      // Mendapatkan lebar kartu untuk kalkulasi
       const card = document.querySelector('.testimonial-card');
       if (card) {
-        // Mendapatkan lebar kartu aktual termasuk padding
-        this.cardWidth = card.offsetWidth;
-        
-        // Mendapatkan margin
         const style = window.getComputedStyle(card);
         const marginLeft = parseInt(style.marginLeft.replace('px', ''));
         const marginRight = parseInt(style.marginRight.replace('px', ''));
+        this.cardWidth = card.offsetWidth;
         this.cardMargin = marginLeft + marginRight;
-        
-        // Menghitung total lebar satu set kartu
         this.totalWidth = (this.cardWidth + this.cardMargin) * this.testimonials.length;
-        
-        // Mengatur posisi awal untuk mulai dari kartu asli (bukan clone)
         this.scrollPosition1 = this.totalWidth;
         this.scrollPosition2 = this.totalWidth;
-        
-        // Mulai animasi
         this.startScrolling();
       }
     },
-    getCategoryClass(kategori) {
-      return kategori === 'Pelaporan' ? 'category-pelaporan' : 'category-verifikasi';
-    },
     startScrolling() {
-      // Pause animation on very small screens
-      if (window.innerWidth < 320) {
-        return;
-      }
-      
+      if (window.innerWidth < 320) return;
+
       const animate = () => {
-        // Increment scroll position untuk baris atas
         this.scrollPosition1 += this.scrollSpeed1;
-        
-        // Reset ketika sudah mencapai akhir set tengah
-        if (this.scrollPosition1 >= this.totalWidth * 2) {
-          this.scrollPosition1 = this.totalWidth;
-        }
-        
-        // Increment scroll position untuk baris bawah
+        if (this.scrollPosition1 >= this.totalWidth * 2) this.scrollPosition1 = this.totalWidth;
+
         this.scrollPosition2 += this.scrollSpeed2;
-        
-        // Reset ketika sudah mencapai akhir set tengah
-        if (this.scrollPosition2 >= this.totalWidth * 2) {
-          this.scrollPosition2 = this.totalWidth;
-        }
-        
+        if (this.scrollPosition2 >= this.totalWidth * 2) this.scrollPosition2 = this.totalWidth;
+
         this.animationFrameId = requestAnimationFrame(animate);
       };
-      
+
       this.animationFrameId = requestAnimationFrame(animate);
     },
     stopScrolling() {
-      if (this.animationFrameId) {
-        cancelAnimationFrame(this.animationFrameId);
-      }
+      if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
     },
     handleResize() {
       this.stopScrolling();
       this.checkMobile();
-      
-      // Add debounce to avoid too many calculations during resize
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => {
         this.$nextTick(() => {
@@ -376,15 +334,12 @@ export default {
       }, 250);
     },
     handleVisibilityChange() {
-      if (document.hidden) {
-        this.stopScrolling();
-      } else {
-        this.startScrolling();
-      }
+      document.hidden ? this.stopScrolling() : this.startScrolling();
     }
   }
 };
 </script>
+
 
 <style scoped>
 .testimonial-carousel {
@@ -481,14 +436,23 @@ export default {
   background-color: #198754;
 }
 
+.category-umum {
+  color: #fff;
+  background-color: #000;
+}
+
+
 .rating {
   display: flex;
 }
 
 .star-icon {
-  color: #ff9800;
+  color: #ccc;
   font-size: 18px;
   margin-left: 1px;
+}
+.star-icon.active {
+  color: #ff9800;
 }
 
 .divider {

@@ -21,6 +21,7 @@
       <!-- List Feedback -->
       <div v-for="feedback in feedbacks" :key="feedback.id" class="card mb-3">
         <div class="card-body">
+          <p class="user-category">{{ feedback.kategori }}</p>
           <h5 class="card-title">{{ feedback.user.name }}</h5>
           <p class="card-text">{{ feedback.message }}</p>
           <p class="text-warning">
@@ -47,6 +48,15 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
+                <div class="mb-3">
+                  <label for="kategori" class="form-label">Kategori</label>
+                  <select v-model="form.kategori" class="form-control" id="kategori">
+                    <option value="Pelaporan">Pelaporan</option>
+                    <option value="Verifikasi">Verifikasi</option>
+                    <option value="Umum">Umum</option>
+                  </select>
+                  <div v-if="form.errors.kategori" class="text-danger">{{ form.errors.kategori }}</div>
+                </div>
                 <div class="mb-3">
                   <label for="message" class="form-label">Pesan</label>
                   <textarea id="message" v-model="form.message" class="form-control" rows="3"></textarea>
@@ -100,7 +110,8 @@ const mode = ref('create');
 
 const form = useForm({
   message: '',
-  rating: 0
+  rating: 0,
+  kategori: 'Umum'
 });
 
 const openModal = async (type, feedback = null) => {

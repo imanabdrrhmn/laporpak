@@ -66,12 +66,14 @@ public function store(Request $request)
     $request->validate([
         'message' => 'required|string|max:5000',
         'rating' => 'required|integer|min:1|max:5',
+        'kategori' => 'required|string|max:255',
     ]);
 
     Feedback::create([
         'user_id' => $user->id,
         'message' => $request->message,
         'rating' => $request->rating,
+        'kategori' => $request->kategori,
     ]);
 
     return redirect()->route('feedback.index')->with('success', 'Feedback berhasil dikirim.');
@@ -94,11 +96,13 @@ public function store(Request $request)
         $request->validate([
             'message' => 'required|string|max:5000',
             'rating' => 'required|integer|min:1|max:5',
+            'kategori' => 'required|string|max:255',
         ]);
 
         $feedback->update([
             'message' => $request->message,
             'rating' => $request->rating,
+            'kategori' => $request->kategori,
         ]);
 
         return redirect()->route('feedback.index')->with('success', 'Feedback berhasil diperbarui.');

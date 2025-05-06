@@ -10,6 +10,9 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 
 const page = usePage()
 page.layout = AppLayout
+const feedbacks = page.props.feedbacks;
+console.log('feedbacks:', feedbacks);
+
 
 </script>
 
@@ -19,7 +22,7 @@ page.layout = AppLayout
     <div class="main-container">
       <Beranda />
       <Section />
-      <Feedback />
+      <Feedback :feedbacks="feedbacks" />    
     </div>
   </AppLayout>
 </template>
