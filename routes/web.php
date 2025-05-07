@@ -47,11 +47,11 @@ Route::get('/pelaporan', function (){
 // })->name('pelaporan');
 
 
-
 // Tentang Kami Route
 Route::get('/tentang-kami', function () {
     return Inertia::render('TentangKami');
 })->name('tentang-kami');
+
 
 
 Route::middleware('auth')->group(function () {
