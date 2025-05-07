@@ -38,7 +38,7 @@
                                 v-model="searchQuery"
                                 aria-label="Search for reports">
                             <button 
-                                class="btn btn-primary px-4 py-2 rounded-pill" 
+                                class="btn btn-primary px-4 py-2 mt-2" 
                                 type="button" 
                                 @click="checkReport">
                                 Telusuri

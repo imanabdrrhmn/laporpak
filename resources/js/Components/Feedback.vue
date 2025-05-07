@@ -210,7 +210,7 @@
     
     <div class="text-center mt-4 mt-md-5">
       <Link href="/feedback">
-      <button class="btn btn-primary px-3 px-md-4 py-2">
+      <button class="btn btn-primary px-4 py-2 mt-2">
         Lihat semua <i class="bi bi-arrow-right ms-1"></i>
       </button>
     </Link>
@@ -553,6 +553,7 @@ export default {
   
   .btn-primary {
     font-size: 16px;
+    font-weight: lighter;
   }
 }
 

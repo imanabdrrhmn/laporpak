@@ -7,12 +7,14 @@
           <h1 class="display-6 fw-bold mb-2">Membangun Indonesia</h1>
           <h1 class="display-6 fw-bold mb-4">Bebas Penipuan</h1>
           <div class="title-underline mb-4"></div>
-          <Link href="/pelaporan">
-            <button class="btn btn-light px-4 py-2 d-flex align-items-center shadow-button">
+          
+          <!-- Button with login check logic -->
+          <button 
+            @click="handleReportButtonClick" 
+            class="btn btn-light px-4 py-2 d-flex align-items-center shadow-button">
             Mulai Laporkan
             <i class="bi bi-arrow-right ms-2"></i>
           </button>
-          </Link>
           
           <!-- Avatar Group with Count and Text -->
           <div class="d-flex align-items-center mt-4 flex-wrap">
@@ -55,16 +57,22 @@
         </div>
       </div>
     </div>
+    
+    <!-- Import LoginModal component -->
+    <LoginModal ref="loginModal" />
   </section>
 </template>
 
 <script>
 import { Link } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
+import LoginModal from './modals/LoginModal.vue';
 
 export default {
   name: 'HeroSection',
-  components : {
-    Link
+  components: {
+    Link,
+    LoginModal
   },
   data() {
     return {
@@ -72,14 +80,26 @@ export default {
     }
   },
   mounted() {
-  const script = document.createElement("script");
-  script.src = "https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js";
-  script.onload = () => {
-    this.lottieLoaded = true;
-  };
-  document.head.appendChild(script);
-},
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js";
+    script.onload = () => {
+      this.lottieLoaded = true;
+    };
+    document.head.appendChild(script);
+  },
   methods: {
+    handleReportButtonClick() {
+      // Check if user is logged in
+      // Assuming you have some global user state or auth check function
+      // This might vary depending on how authentication is implemented in your app
+      if (this.$page.props.auth && this.$page.props.auth.user) {
+        // User is logged in, redirect to report page
+        router.visit('/pelaporan');
+      } else {
+        // User is not logged in, show login modal
+        this.$refs.loginModal.show();
+      }
+    },
     setupLottie() {
       this.lottieLoaded = true
       this.$nextTick(() => {
@@ -296,5 +316,4 @@ export default {
     width: 80%;
   }
 }
-
 </style>
