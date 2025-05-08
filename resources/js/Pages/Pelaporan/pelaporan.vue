@@ -172,29 +172,40 @@
                     </div>
                   </div>
 
-                  <!-- Location & OpenStreetMap -->
-                  <div class="col-12">
-                    <div class="mb-2">
-                      <span class="form-label fw-semibold mb-0">
-                        <i class="bi bi-geo-alt me-2"></i>Lokasi
-                      </span>
-                    </div>
-                    <div 
-                      id="map" 
-                      ref="mapRef" 
-                      style="width: 100%; height: 250px;" 
-                      class="mb-2 rounded-2 border map-container"
-                      :class="{'border-danger': validationErrors.location}"
-                    ></div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                      <div v-if="validationErrors.location" class="text-danger">
-                        Lokasi harus dipilih pada peta
-                      </div>
-                      <button type="button" class="btn btn-outline-primary w-100 py-2 px-3" @click="getCurrentLocation">
-                        <i class="bi bi-geo-fill me-1"></i> Lokasi Saya
-                      </button>
-                    </div>
-                  </div>
+               <!-- Location & OpenStreetMap -->
+<div class="col-12">
+  <div class="mb-2">
+    <span class="form-label fw-semibold mb-0">
+      <i class="bi bi-geo-alt me-2"></i>Lokasi
+    </span>
+  </div>
+  <div 
+    id="map" 
+    ref="mapRef" 
+    style="width: 100%; height: 250px;" 
+    class="mb-2 rounded-2 border map-container"
+    :class="{'border-danger': validationErrors.location}"
+  ></div>
+  <div class="mb-3">
+    <label for="address" class="form-label mb-2">Alamat</label>
+    <input
+      id="address"
+      v-model="formData.address"
+      class="form-control"
+      placeholder="Lokasi Anda"
+      readonly
+      aria-label="Alamat"
+    />
+  </div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div v-if="validationErrors.location" class="text-danger">
+      Lokasi harus dipilih pada peta
+    </div>
+    <button type="button" class="btn btn-outline-primary w-100 py-2 px-3" @click="getCurrentLocation">
+      <i class="bi bi-geo-fill me-1"></i> Lokasi Saya
+    </button>
+  </div>
+</div>
 
                   <!-- Submit Button -->
                   <div class="col-12">
@@ -250,8 +261,8 @@ const services = [
 // Categories for each service type
 const fraudCategories = [
   { label: 'Nomor Telepon', value: 'NomerHp' },
-  { label: 'Email', value: 'Email' } ]
-
+  { label: 'Email', value: 'Email' } 
+];
 
 const infrastructureCategories = [
   { label: 'Jalan Rusak', value: 'jalan' },
@@ -309,7 +320,8 @@ const formData = ref({
   category: '',
   description: '',
   evidence: null,
-  location: null
+  location: null,
+  address: '' // Tambahkan field address
 });
 const formRef = ref(null);
 
@@ -378,6 +390,23 @@ const handleFileUpload = (event) => {
   }
 };
 
+// Fungsi untuk reverse geocoding menggunakan Nominatim API
+async function reverseGeocode(lat, lng) {
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+    
+    if (!response.ok) {
+      throw new Error('Gagal mendapatkan alamat');
+    }
+    
+    const data = await response.json();
+    return data.display_name || 'Alamat tidak ditemukan';
+  } catch (error) {
+    console.error('Error saat reverse geocoding:', error);
+    return 'Alamat tidak tersedia';
+  }
+}
+
 // Form submission handler with improved validation
 const handleSubmit = () => {
   // Reset validation errors
@@ -415,9 +444,12 @@ const handleSubmit = () => {
   const dataToSubmit = new FormData();
   dataToSubmit.append('category', formData.value.category);
   dataToSubmit.append('description', formData.value.description);
-  dataToSubmit.append('evidence', formData.value.evidence);
+  if (formData.value.evidence) {
+    dataToSubmit.append('evidence', formData.value.evidence);
+  }
   dataToSubmit.append('location[lat]', formData.value.location.lat);
   dataToSubmit.append('location[lng]', formData.value.location.lng);
+  dataToSubmit.append('address', formData.value.address); // Mengirim alamat ke backend
   dataToSubmit.append('service', selectedService.value);
 
   // Send data to the backend using Inertia POST
@@ -428,7 +460,8 @@ const handleSubmit = () => {
         category: '',
         description: '',
         evidence: null,
-        location: null
+        location: null,
+        address: ''
       };
       alert('Laporan berhasil dikirim!');
     },
@@ -513,6 +546,11 @@ function placeMarker(latlng) {
       lat: latlng.lat,
       lng: latlng.lng
     };
+    
+    // Lakukan reverse geocoding untuk mendapatkan alamat
+    reverseGeocode(latlng.lat, latlng.lng).then(address => {
+      formData.value.address = address;
+    });
   } catch (error) {
     console.error("Error placing marker:", error);
   }
@@ -520,8 +558,11 @@ function placeMarker(latlng) {
 
 function getCurrentLocation() {
   if (navigator.geolocation) {
+    // Menampilkan indikator loading untuk alamat
+    formData.value.address = 'Mendapatkan alamat...';
+    
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const userLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
@@ -532,6 +573,10 @@ function getCurrentLocation() {
         
         // Place marker at user location
         placeMarker(userLocation);
+        
+        // Dapatkan alamat berdasarkan koordinat
+        const address = await reverseGeocode(userLocation.lat, userLocation.lng);
+        formData.value.address = address;
         
         // Clear location validation error
         validationErrors.location = false;
@@ -552,6 +597,7 @@ function getCurrentLocation() {
             message = "Terjadi kesalahan saat mendapatkan lokasi.";
         }
         alert(message);
+        formData.value.address = '';
       },
       { enableHighAccuracy: true }
     );
