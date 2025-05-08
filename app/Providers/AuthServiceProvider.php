@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\Feedback;
 use App\Policies\FeedbackPolicy;
 
+use App\Models\Report;
+use App\Policies\ReportPolicy;
+
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [

@@ -14,6 +14,8 @@ class Feedback extends Model
         'message',
         'rating',
         'kategori',
+        'created_at',
+        'updated_at',
     ];
 
     public function user()

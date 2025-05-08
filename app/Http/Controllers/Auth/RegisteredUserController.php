@@ -36,8 +36,8 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        $user->assignRole($validated['role'] ?? 'user');
-
+        $user->assignRole('user');
+        
         event(new Registered($user));
         Auth::login($user);
 
@@ -59,7 +59,7 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        $user->assignRole($validated['role'] ?? 'user');
+        $user->assignRole('user');
 
         Auth::login($user);
 

@@ -28,6 +28,10 @@
             <div>
               <span class="badge bg-primary mb-2">{{ feedback.kategori }}</span>
               <h5 class="card-title">{{ feedback.user.name }}</h5>
+              <small class="text-muted">
+                Dikirim {{ feedback.created_at }}
+                <template v-if="feedback.is_updated"> (diperbarui {{ feedback.updated_at }})</template>
+              </small>
             </div>
             <div class="text-warning">
               <span v-for="i in 5" :key="i">
@@ -77,7 +81,7 @@ const page = usePage();
 page.layout = AppLayout;
 
 const isLoggedIn = computed(() => !!page.props.auth?.user);
-const roles = page.props.auth?.user?.role ? [page.props.auth.user.role] : [];
+const roles = page.props.auth?.user?.roles ?? [];
 const isAdmin = computed(() => roles.includes('admin'));
 
 // Refs for modal management

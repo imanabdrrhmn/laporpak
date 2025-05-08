@@ -17,8 +17,4 @@ class FeedbackPolicy
         return $user->hasRole('admin') || $user->id === $feedback->user_id;
     }
 
-    public function create(User $user): bool
-    {
-        return !$user->feedback()->exists();
-    }
 }

@@ -61,7 +61,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended()->header('Location', url()->previous());
     }
 
     /**
@@ -99,10 +99,12 @@ class AuthenticatedSessionController extends Controller
                 'password' => null
             ]);
 
+            $user->assignRole('user');
+
             Auth::login($user);
 
-            return redirect()->intended(route('dashboard', absolute: false));
-        } catch (\Exception $e) {
+            return redirect()->intended()->header('Location', url()->previous());
+                } catch (\Exception $e) {
             return redirect('/')->withErrors('Google login failed.');
         }
     }
