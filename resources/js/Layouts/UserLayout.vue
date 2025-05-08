@@ -2,34 +2,66 @@
 import Navbar from '@/Components/NavBar.vue'
 import LoginModal from '@/Components/modals/LoginModal.vue'
 import RegisterModal from '@/Components/modals/RegisterModal.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { usePage } from '@inertiajs/vue3'
-import ForgotPassword from '@/Components/modals/ResetPasswordModal.vue'
+import ForgotPasswordModal from '@/Components/modals/ResetPasswordModal.vue'
 
 const page = usePage()
 
+const showLogin = ref(false)
 const showRegister = ref(false)
-const showLoginModal = ref(false)
 const showForgotPassword = ref(false)
 
+watch(
+  () => page.props.auth.user,
+  (newUser) => {
+    if (newUser) {
+      showLogin.value = false
+      showRegister.value = false
+      showForgotPassword.value = false
+    }
+  },
+  { immediate: true }
+)
+
+function switchModal(target) {
+  showLogin.value = target === 'login'
+  showRegister.value = target === 'register'
+  showForgotPassword.value = target === 'forgot'
+}
+
+function openLoginModal() {
+  switchModal('login')
+}
+
+watch(
+  () => page.props.auth.user,
+  (newUser) => {
+    if (newUser) switchModal(null)
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
   <div>
-    <Navbar @trigger-login="showLoginModal = true" />
-    <LoginModal v-model:visible="showLoginModal"
-      @open-register="() => { showLoginModal = false; showRegister = true }"
-      @open-reset-password="() => { showLoginModal = false; showForgotPassword = true }"   
-    />
-    <RegisterModal v-model:visible="showRegister" 
-    @switch-to-login="() => {showRegister = false; showLoginModal = true}"
-    />
-    <ForgotPassword 
-      v-model:visible="showForgotPassword"
-      :status="page.props.status"
-      @update:visible="val => showForgotPassword = val"
-      @triggerLogin="() =>  { showLoginModal = true; showForgotPassword = false }"
-    />
+    <Navbar @trigger-login="openLoginModal()" />
+    <LoginModal 
+        :visible="showLogin" 
+        @update:visible="showLogin = $event"
+        @open-register="() => switchModal('register')"
+        @open-reset-password="() => switchModal('forgot')"
+      />
+      <RegisterModal 
+        :visible="showRegister" 
+        @update:visible="showRegister = $event"
+        @open-login="() => switchModal('login')"
+      />
+      <ForgotPasswordModal 
+        :visible="showForgotPassword"
+        @update:visible="showForgotPassword = $event"
+        @open-login="() => switchModal('login')"
+      />
   </div>
   <slot />
 </template>

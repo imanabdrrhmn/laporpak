@@ -45,7 +45,7 @@
           <p class="text-center text-muted mt-4">
             Ingat kata sandi?
             <span class="text-primary fw-bold cursor-pointer" @click.prevent="triggerLogin">
-              Login
+              Masuk
             </span>
           </p>
         </div>
@@ -84,40 +84,32 @@ function triggerLogin() {
   emit('open-login')
 }
 
-// Handle the Reset Password
 function handleReset() {
   form.clearErrors()
-  successMessage.value = ''  // Clear the success message
+  successMessage.value = '' 
 
-  // Validate if phone/email is filled
   if (!form.phoneEmail) {
     form.setError('phoneEmail', 'Email atau nomor HP wajib diisi')
     return
   }
 
-  // Check if it's an email or phone number
   const isEmail = form.phoneEmail.includes('@')
   const payload = isEmail
     ? { email: form.phoneEmail }
     : { no_hp: form.phoneEmail }
 
-  // Start loading state
   isLoading.value = true
 
-  // Send the request
   Inertia.post('/forgot-password', payload, {
     preserveScroll: true,
     onSuccess: (response) => {
-      // Update success message after response
       successMessage.value = response.props?.successMessage || 'Link reset password berhasil dikirim ke email Anda.'
-      form.reset()  // Reset the form after success
+      form.reset()  
     },
     onError: (errors) => {
-      // Optionally handle errors and display them
       form.setError('phoneEmail', 'Terjadi kesalahan. Pastikan email atau nomor HP terdaftar.')
     },
     finally: () => {
-      // Stop loading state
       isLoading.value = false
     }
   })

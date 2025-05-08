@@ -295,7 +295,7 @@ function clearError(field) {
 
 function goToLogin() {
   emit('update:visible', false)
-  emit('switch-to-login')
+  emit('open-login')
 }
 
 // Validasi input saat field kehilangan fokus
