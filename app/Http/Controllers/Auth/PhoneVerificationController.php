@@ -23,7 +23,7 @@ class PhoneVerificationController extends Controller
 
         // Cek apakah pengiriman berhasil
         if ($result && ($result['status'] ?? false)) {
-            return redirect()->route('verification.phone.notice')
+            return redirect()->intended()->header('Location', url()->previous())
                 ->with('success', 'Kode verifikasi berhasil dikirim ke WhatsApp.');
         }
 

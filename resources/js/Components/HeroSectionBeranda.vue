@@ -57,16 +57,13 @@
         </div>
       </div>
     </div>
-    
-    <!-- Import LoginModal component -->
-    <LoginModal ref="loginModal" />
   </section>
 </template>
 
 <script>
-import { Link } from '@inertiajs/vue3';
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import LoginModal from './modals/LoginModal.vue';
+
 
 export default {
   name: 'HeroSection',
@@ -76,7 +73,7 @@ export default {
   },
   data() {
     return {
-      lottieLoaded: false
+      lottieLoaded: false,
     }
   },
   mounted() {
@@ -97,7 +94,7 @@ export default {
         router.visit('/pelaporan');
       } else {
         // User is not logged in, show login modal
-        this.$refs.loginModal.show();
+        this.$emit('show-login-modal');     
       }
     },
     setupLottie() {
