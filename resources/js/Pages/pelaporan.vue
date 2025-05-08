@@ -172,6 +172,8 @@
                     </div>
                   </div>
 
+                  
+
                   <!-- Location & OpenStreetMap -->
                   <div class="col-12">
                     <div class="mb-2">
@@ -195,6 +197,7 @@
                       </button>
                     </div>
                   </div>
+                  
 
                   <!-- Submit Button -->
                   <div class="col-12">
@@ -231,8 +234,9 @@ import { ref, computed, onMounted, reactive, watch } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import axios from 'axios'; // Import axios for API calls
 
-// Import komponen-komponen
+// Import components
 import Section from '@/Components/Section.vue';
 import Feedback from '@/Components/Feedback.vue';
 import Alur from '@/Components/alurpelaporan.vue';
@@ -311,7 +315,8 @@ const formData = ref({
   category: '',
   description: '',
   evidence: null,
-  location: null
+  location: null,
+  address: '' // Added address field
 });
 const formRef = ref(null);
 
@@ -319,6 +324,7 @@ const formRef = ref(null);
 watch(selectedService, () => {
   formData.value.category = '';
   formData.value.description = '';
+  formData.value.address = ''; // Reset address
   // Reset validation errors
   Object.keys(validationErrors).forEach(key => {
     validationErrors[key] = false;
@@ -339,10 +345,11 @@ const isFormValid = computed(() => {
          formData.value.description &&
          formData.value.description.trim() !== '' &&
          formData.value.description.length <= 1500 &&
-         formData.value.location !== null;
+         formData.value.location !== null &&
+         formData.value.address !== ''; // Ensure address is filled
 });
 
-// Fungsi untuk validasi deskripsi
+// Function to validate description
 const validateDescription = () => {
   if (formData.value.description.length > 1500) {
     formData.value.description = formData.value.description.substring(0, 1500);
@@ -367,7 +374,7 @@ const selectService = (value) => {
 };
 
 // File upload handler
-const handleFileUpload = (event) => {
+const handleFileUpload = ( گیتevent) => {
   const file = event.target.files[0];
   if (file) {
     // Check file size (5MB limit)
@@ -415,9 +422,13 @@ const handleSubmit = () => {
   }
 
   console.log('Data dikirim:', {
-    ...formData.value,
+    
     service: selectedService.value,
+    category: formData.value.category,
+    description: formData.value.description,
     evidenceName: formData.value.evidence?.name || 'Tidak ada bukti',
+    location: formData.value.location,
+    address: formData.value.address,
     timestamp: new Date().toISOString()
   });
   
@@ -425,7 +436,6 @@ const handleSubmit = () => {
   const successAlert = document.createElement('div');
   successAlert.classList.add('alert', 'alert-success', 'alert-dismissible', 'fade', 'show', 'mt-3', 'py-2');
   
-  // Set message based on selected service
   const successMessage = selectedService.value === 'fraud' 
     ? 'Data berhasil dikirim untuk verifikasi!' 
     : 'Laporan infrastruktur berhasil dikirim!';
@@ -435,7 +445,6 @@ const handleSubmit = () => {
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   `;
   
-  // Append the alert to the form
   if (formRef.value) {
     formRef.value.prepend(successAlert);
   }
@@ -445,7 +454,8 @@ const handleSubmit = () => {
     category: '',
     description: '',
     evidence: null,
-    location: null
+    location: null,
+    address: ''
   };
   
   // Remove marker from map
@@ -460,35 +470,29 @@ const mapRef = ref(null);
 let map, marker;
 
 onMounted(() => {
-  // Use a short timeout to ensure the DOM is fully rendered
   setTimeout(() => {
     initMap();
-  }, 300); // Increased timeout for better reliability
+  }, 300);
 });
 
 function initMap() {
-  // Default coordinates (Jakarta, Indonesia)
   const defaultPosition = [-6.2, 106.8];
   
   if (!mapRef.value) return;
   
   try {
-    // Initialize the map
     map = L.map(mapRef.value).setView(defaultPosition, 12);
     
-    // Add OpenStreetMap tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19
     }).addTo(map);
     
-    // Add click event listener to the map
     map.on('click', (e) => {
       placeMarker(e.latlng);
       validationErrors.location = false;
     });
     
-    // Fix map display issue by triggering a resize event
     setTimeout(() => {
       map.invalidateSize();
     }, 500);
@@ -497,14 +501,25 @@ function initMap() {
   }
 }
 
+async function fetchAddress(latlng) {
+  try {
+    const response = await axios.post('/api/reverse-geocode', {
+      lat: latlng.lat,
+      lon: latlng.lng
+    });
+    formData.value.address = response.data.address || 'Alamat tidak ditemukan';
+  } catch (error) {
+    console.error('Error fetching address:', error);
+    formData.value.address = 'Gagal memuat alamat';
+  }
+}
+
 function placeMarker(latlng) {
-  // Remove existing marker if any
   if (marker) {
     map.removeLayer(marker);
   }
   
   try {
-    // Create custom marker icon with proper path handling
     const customIcon = L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
       iconSize: [25, 41],
@@ -514,21 +529,21 @@ function placeMarker(latlng) {
       shadowSize: [41, 41]
     });
     
-    // Create new marker
     marker = L.marker(latlng, { icon: customIcon }).addTo(map);
     
-    // Add popup with content based on selected service
     const popupContent = selectedService.value === 'fraud' 
       ? "<b>Lokasi Pelaporan</b>" 
       : "<b>Lokasi Kerusakan Infrastruktur</b>";
       
     marker.bindPopup(popupContent).openPopup();
     
-    // Store the location in form data
     formData.value.location = {
       lat: latlng.lat,
       lng: latlng.lng
     };
+    
+    // Fetch address for the new marker location
+    fetchAddress(latlng);
   } catch (error) {
     console.error("Error placing marker:", error);
   }
@@ -543,13 +558,10 @@ function getCurrentLocation() {
           lng: position.coords.longitude
         };
         
-        // Center map on user location
         map.setView([userLocation.lat, userLocation.lng], 16);
         
-        // Place marker at user location
         placeMarker(userLocation);
         
-        // Clear location validation error
         validationErrors.location = false;
       },
       (error) => {
