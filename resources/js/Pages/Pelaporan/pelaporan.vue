@@ -250,10 +250,8 @@ const services = [
 // Categories for each service type
 const fraudCategories = [
   { label: 'Nomor Telepon', value: 'NomerHp' },
-  { label: 'Email', value: 'Email' },
-  { label: 'Akun Media Sosial', value: 'MediaSosial' },
-  { label: 'Website', value: 'Website' }
-];
+  { label: 'Email', value: 'Email' } ]
+
 
 const infrastructureCategories = [
   { label: 'Jalan Rusak', value: 'jalan' },
