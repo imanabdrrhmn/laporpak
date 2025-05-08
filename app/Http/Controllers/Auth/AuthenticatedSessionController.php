@@ -90,7 +90,6 @@ class AuthenticatedSessionController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
             
-            // Check if the user already exists in the database
             $user = User::firstOrCreate([
                 'email' => $googleUser->getEmail(),
             ], [
@@ -102,7 +101,7 @@ class AuthenticatedSessionController extends Controller
 
             Auth::login($user);
 
-            return redirect()->intended(route('/dashboard', absolute: false));
+            return redirect()->intended(route('dashboard', absolute: false));
         } catch (\Exception $e) {
             return redirect('/')->withErrors('Google login failed.');
         }

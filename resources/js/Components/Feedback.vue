@@ -246,13 +246,15 @@ export default {
   },
   computed: {
     testimonials() {
+      if (!Array.isArray(this.feedbacks)) {
+    return [];
+    }
       return this.feedbacks.map(f => ({
         id: f.id,
-        name: f.user?.name || 'Anonim',
-        avatar: f.user?.avatar || 'https://via.placeholder.com/50',
-        content: f.message,
-        rating: f.rating || 5,
-        kategori: f.kategori || 'Umum',
+        name: f.user?.name || 'Anonim', 
+        avatar: f.user?.avatar ? `/storage/${f.user.avatar}` : 'https://via.placeholder.com/50', 
+        rating: f.rating || 5, 
+        kategori: f.kategori || 'Umum', 
       }));
     },
     shuffledTestimonials() {

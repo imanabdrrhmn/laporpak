@@ -12,10 +12,11 @@ class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
         Feedback::class => FeedbackPolicy::class,
+        Report::class => ReportPolicy::class,
     ];
 
     public function boot(): void
     {
-        //
+        
     }
 }

@@ -8,9 +8,9 @@ import { Head, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
 const page = usePage();
-const user = usePage().props.auth.user;
+const user = page.props.auth.user;
 const showModal = ref(false);
-const avatarPreview = ref(user?.avatar ? '/storage/${user.avatar}' : 'https://placehold.co/120x120?text=Avatar');
+const avatarPreview = ref(user?.avatar ? `/storage/${user.avatar}` : 'https://placehold.co/120x120?text=Avatar');
 page.layout = AppLayout;
 
 defineProps({
@@ -35,7 +35,7 @@ defineProps({
 
         <div class="py-12">
             <div>
-                <div class="d-flex justify-content-center m-3 bg-white">
+                <div class="d-flex justify-content-center mb-3 bg-white">
                     <img
                         :src="avatarPreview"
                         class="rounded-circle"

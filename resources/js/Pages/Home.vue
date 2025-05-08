@@ -11,7 +11,6 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 const page = usePage()
 page.layout = AppLayout
 const feedbacks = page.props.feedbacks;
-console.log('feedbacks:', feedbacks);
 
 
 </script>
