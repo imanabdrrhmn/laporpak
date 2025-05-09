@@ -43,7 +43,7 @@ class PhoneVerificationController extends Controller
             $user->markPhoneAsVerified();
             Cache::forget('wa_verify_' . $user->id);
 
-            return redirect()->route('dashboard')->with('success', 'Nomor HP berhasil diverifikasi.');
+            return redirect(url()->previous());
         }
 
         return back()->withErrors(['code' => 'Kode salah atau sudah kedaluwarsa']);

@@ -25,9 +25,9 @@ Route::get('/dashboard', function (){
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'contact.verified'])->name('dashboard');
 
- Route::get('/verifikasi', function (){
-     return Inertia::render('verifikasi');
- })->name('verifikasi');
+Route::middleware('auth')->get('/verifikasi', function () {
+    return Inertia::render('verifikasi');
+});
 
  Route::get('/LaporMap', function (){
      return Inertia::render('LaporMap');
@@ -74,9 +74,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
     Route::get('/pelaporan/history', [ReportController::class, 'history'])->name('laporan.history');
     Route::get('/Cari-laporan', [ReportController::class, 'search'])->name('laporan.cari');
+    Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.create');
 
 });
 
-    Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.create');
 
 require __DIR__.'/auth.php';

@@ -21,9 +21,6 @@ Route::middleware('guest')->group(function () {
     Route::post('register/phone', [RegisteredUserController::class, 'storeWithNoHp'])->name('register.no_hp');
 
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login.form');
-
     Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.submit');
 
     Route::get('login/google', [AuthenticatedSessionController::class, 'redirectToGoogle'])->name('login.google');
