@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\Feedback;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +31,14 @@ class ReportController extends Controller
 
     public function create(Request $request)
     {
-        return Inertia::render('Pelaporan/pelaporan');
+        $feedbacks = Feedback::where('kategori', 'Pelaporan')->with('user')->latest()->take(10)->get();
+        // $feedbacksVerifikasi = Feedback::where('kategori', 'Verifikasi')->get();
+        // $feedbacksLaporMap = Feedback::where('kategori', 'Lapor Map')->get();
+        return Inertia::render('Pelaporan/pelaporan',[
+            'feedbacks' => $feedbacks,
+            // 'feedbacksVerifikasi' => $feedbacksVerifikasi,
+            // 'feedbacksLaporMap' => $feedbacksLaporMap,
+        ]);
     }
 
     public function store(Request $request)

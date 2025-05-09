@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/Cari-laporan', [ReportController::class, 'search'])->name('laporan.cari');
 
 });
+
     Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.create');
 
 

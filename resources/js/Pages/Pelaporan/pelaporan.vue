@@ -233,7 +233,7 @@
     <Section />
   
     <!-- FEEDBACK COMPONENT -->
-    <Feedback /> 
+    <Feedback :feedbacks="feedbacks" /> 
   </AppLayout>
 </template>
 
@@ -251,6 +251,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 
 const page = usePage();
 page.layout = AppLayout;
+const feedbacks = page.props.feedbacks
 
 // Service options with icons
 const services = [
