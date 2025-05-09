@@ -134,24 +134,24 @@
               </a>
               <ul class="dropdown-menu">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    href="/pelaporan"
                     class="dropdown-item"
-                    @click.prevent="handleNavClick('/pelaporan')"
+                    :class="{ active: $page.url === '/pelaporan' }"
                   >
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     Pelaporan
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/verifikasi"
                     class="dropdown-item"
-                    @click.prevent="handleNavClick('/verifikasi')"
+                    :class="{ active: $page.url === '/verifikasi' }"
                   >
                     <i class="bi bi-check-square-fill me-2"></i>
                     Verifikasi
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <Link
@@ -282,24 +282,24 @@
             </a>
             <div class="collapse" :class="{ show: toggleLayananMobile }">
               <div class="nav flex-column ms-4">
-                <a
-                  href="#"
+                <Link
+                  href="/pelaporan"
                   class="nav-link"
                   @click="closeMobileNav"
-                  @click.prevent="handleNavClick('/pelaporan')"
+                  :class="{ 'active-pelaporan': $page.url === '/pelaporan' }"
                 >
                   <i class="bi bi-exclamation-triangle-fill me-2"></i>
                   <span>Pelaporan</span>
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/verifikasi"
                   class="nav-link"
                   @click="closeMobileNav"
-                  @click.prevent="handleNavClick('/verifikasi')"
+                  :class="{ 'active-verifikasi': $page.url === '/verifikasi' }"
                 >
                   <i class="bi bi-check-square-fill me-2"></i>
                   <span>Verifikasi</span>
-                </a>
+                </Link>
                 <Link
                   href="/LaporMap"
                   class="nav-link"
@@ -401,7 +401,7 @@
 </template>
 
 <script>
-import { Link, usePage, router } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 export default {
@@ -410,7 +410,7 @@ export default {
     Link,
   },
   emits: ['trigger-login'],
-  setup(props, { emit }) {
+  setup() {
     const page = usePage();
     const mobileNavOpen = ref(false);
     const toggleLayananMobile = ref(false);
@@ -437,16 +437,8 @@ export default {
     const closeMobileNav = () => {
       mobileNavOpen.value = false;
     };
-    const handleNavClick = (url) => {
-    if (!isLoggedIn.value) {
-      emit('trigger-login');
-    } else {
-      router.visit(url); 
-    }
-};
 
     return {
-      handleNavClick,
       mobileNavOpen,
       toggleLayananMobile,
       isLoggedIn,
