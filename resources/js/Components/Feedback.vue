@@ -252,9 +252,10 @@ export default {
       return this.feedbacks.map(f => ({
         id: f.id,
         name: f.user?.name || 'Anonim', 
-        avatar: f.user?.avatar ? `/storage/${f.user.avatar}` : 'https://via.placeholder.com/50', 
+        avatar: this.resolveAvatar(f.user?.avatar),
         rating: f.rating || 5, 
         kategori: f.kategori || 'Umum', 
+        content: f.message || null,
       }));
     },
     shuffledTestimonials() {
@@ -278,6 +279,17 @@ export default {
     window.removeEventListener('orientationchange', this.handleResize);
   },
   methods: {
+    resolveAvatar(avatarPath) {
+      if (!avatarPath) {
+        return 'https://placehold.co/50x50?text=?'
+      }
+
+      if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+        return avatarPath;
+      }
+
+      return `/storage/${avatarPath}`;
+    },
     checkMobile() {
       this.isMobile = window.innerWidth < 768;
       this.scrollSpeed1 = this.isMobile ? 0.3 : 0.5;
@@ -392,8 +404,8 @@ export default {
 }
 
 .avatar {
-  width: 50px;
-  height: 50px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   background-color: #f0f8ff;
@@ -547,6 +559,7 @@ export default {
     line-height: 1.5;
     -line-clamp: 5;
   }
+  
   
   .star-icon {
     font-size: 22px;
