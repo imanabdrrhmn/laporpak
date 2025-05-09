@@ -1,215 +1,192 @@
+<template>
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 border-0">
+      <h5 class="card-title mb-0 d-flex align-items-center">
+        <i class="bi bi-shield-lock me-2 text-primary"></i>
+        Keamanan Akun
+      </h5>
+    </div>
+    <div class="card-body">
+      <form @submit.prevent="updatePassword" class="space-y-6">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="currentPassword" class="form-label small fw-medium">Password Saat Ini</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-key"></i>
+              </span>
+              <input
+                id="currentPassword"
+                ref="currentPasswordInput"
+                v-model="form.current_password"
+                type="password"
+                class="form-control"
+                placeholder="Masukkan password saat ini"
+                autocomplete="current-password"
+              />
+            </div>
+            <div v-if="form.errors.current_password" class="mt-2 text-sm text-red-600">
+              {{ form.errors.current_password }}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="newPassword" class="form-label small fw-medium">Password Baru</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-lock"></i>
+              </span>
+              <input
+                id="newPassword"
+                ref="passwordInput"
+                v-model="form.password"
+                type="password"
+                class="form-control"
+                placeholder="Masukkan password baru"
+                autocomplete="new-password"
+              />
+            </div>
+            <div v-if="form.errors.password" class="mt-2 text-sm text-red-600">
+              {{ form.errors.password }}
+            </div>
+          </div>
+          <div class="col-12">
+            <label for="confirmPassword" class="form-label small fw-medium">Konfirmasi Password Baru</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-lock-fill"></i>
+              </span>
+              <input
+                id="confirmPassword"
+                v-model="form.password_confirmation"
+                type="password"
+                class="form-control"
+                placeholder="Konfirmasi password baru"
+                autocomplete="new-password"
+              />
+            </div>
+            <div v-if="form.errors.password_confirmation" class="mt-2 text-sm text-red-600">
+              {{ form.errors.password_confirmation }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-3 p-3 rounded bg-light-subtle border border-light">
+          <div class="d-flex">
+            <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
+            <div>
+              <div class="fw-medium">Persyaratan Password</div>
+              <div class="small text-secondary mt-1">
+                <ul class="ps-3 mb-0">
+                  <li>Minimal 8 karakter</li>
+                  <li>Harus mengandung huruf kecil dan huruf besar</li>
+                  <li>Harus mengandung setidaknya satu angka</li>
+                  <li>Harus mengandung setidaknya satu simbol</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-end mt-4 gap-2">
+          <button type="button" class="btn btn-outline-secondary" @click="form.reset()">
+            <i class="bi bi-x-lg me-1"></i>
+            Batal
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary px-4"
+            :disabled="form.processing"
+          >
+            <i class="bi bi-shield-check me-2"></i>
+            Perbarui Password
+          </button>
+          <transition
+            enter-active-class="transition ease-in-out"
+            enter-from-class="opacity-0"
+            leave-active-class="transition ease-in-out"
+            leave-to-class="opacity-0"
+          >
+            <p v-if="form.recentlySuccessful" class="text-sm text-gray-600 ms-2">
+              Saved.
+            </p>
+          </transition>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 defineProps({
-    mustVerifyEmail: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
+  mustVerifyEmail: {
+    type: Boolean,
+  },
+  status: {
+    type: String,
+  },
 });
 
 const user = usePage().props.auth.user;
 
 const form = useForm({
-    current_password: '',
-    password: '',
-    password_confirmation: '',
+  current_password: '',
+  password: '',
+  password_confirmation: '',
 });
 
+const currentPasswordInput = ref(null);
+const passwordInput = ref(null);
+
 const updatePassword = () => {
-    form.put(route('password.update'), {
-        preserveScroll: true,
-        onSuccess: () => form.reset(),
-        onError: () => {
-            if (form.errors.password) {
-                form.reset('password', 'password_confirmation');
-                passwordInput.value.focus();
-            }
-            if (form.errors.current_password) {
-                form.reset('current_password');
-                currentPasswordInput.value.focus();
-            }
-        },
-    });
+  form.put(route('password.update'), {
+    preserveScroll: true,
+    onSuccess: () => form.reset(),
+    onError: () => {
+      if (form.errors.password) {
+        form.reset('password', 'password_confirmation');
+        passwordInput.value.focus();
+      }
+      if (form.errors.current_password) {
+        form.reset('current_password');
+        currentPasswordInput.value.focus();
+      }
+    },
+  });
 };
 </script>
 
-<template>
-    <section class="py-12">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <header class="mb-6">
-                <h2 class="text-2xl font-semibold text-gray-800">
-                    Update Password
-                </h2>
-                <p class="mt-1 text-sm text-gray-600">
-                    Ensure your account is using a long, random password to stay secure.
-                </p>
-            </header>
-
-            <form
-                @submit.prevent="updatePassword"
-                class="space-y-6 bg-white p-6 rounded-lg shadow-md"
-            >
-                <!-- Current Password -->
-                <div>
-                    <label for="current_password" class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                    <input
-                        id="current_password"
-                        ref="currentPasswordInput"
-                        v-model="form.current_password"
-                        type="password"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        autocomplete="current-password"
-                    />
-                    <div v-if="form.errors.current_password" class="mt-2 text-sm text-red-600">
-                        {{ form.errors.current_password }}
-                    </div>
-                </div>
-
-                <!-- New Password -->
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2 mt-2">New Password</label>
-                    <input
-                        id="password"
-                        ref="passwordInput"
-                        v-model="form.password"
-                        type="password"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        autocomplete="new-password"
-                    />
-                    <div v-if="form.errors.password" class="mt-2 text-sm text-red-600">
-                        {{ form.errors.password }}
-                    </div>
-                </div>
-
-                <!-- Confirm Password -->
-                <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2 mt-2">Confirm Password</label>
-                    <input
-                        id="password_confirmation"
-                        v-model="form.password_confirmation"
-                        type="password"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        autocomplete="new-password"
-                    />
-                    <div v-if="form.errors.password_confirmation" class="mt-2 text-sm text-red-600">
-                        {{ form.errors.password_confirmation }}
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="flex items-center gap-4 mt-3">
-                    <button
-                        type="submit"
-                        :disabled="form.processing"
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                        Save
-                    </button>
-
-                    <transition
-                        enter-active-class="transition ease-in-out"
-                        enter-from-class="opacity-0"
-                        leave-active-class="transition ease-in-out"
-                        leave-to-class="opacity-0"
-                    >
-                        <p v-if="form.recentlySuccessful" class="text-sm text-gray-600">
-                            Saved.
-                        </p>
-                    </transition>
-                </div>
-            </form>
-        </div>
-    </section>
-</template>
-
 <style scoped>
-body {
-  font-family: 'Poppins', sans-serif;
+.btn-primary {
+  background-color: #4361ee;
+  border-color: #4361ee;
 }
-
-.bg-white {
+.btn-primary:hover {
+  background-color: #3a56d4;
+  border-color: #3a56d4;
+}
+.text-primary {
+  color: #4361ee !important;
+}
+.form-control {
   background-color: #ffffff;
+  color: #333333;
+  border: 1px solid #ccc;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.375rem;
 }
-
-.text-indigo-600 {
-  color: #5a67d8;
+.form-control:focus {
+  background-color: #f7fafc;
+  border-color: #5a67d8;
+  outline: none;
 }
-
-.text-indigo-800 {
-  color: #4c51bf;
-}
-
-.text-gray-600 {
-  color: #718096;
-}
-
-.text-gray-700 {
-  color: #4a5568;
-}
-
-.text-gray-800 {
-  color: #2d3748;
-}
-
 .text-red-600 {
   color: #e53e3e;
 }
-
-.focus\:ring-indigo-500:focus {
-  ring-color: #5a67d8;
-}
-
-.focus\:border-indigo-500:focus {
-  border-color: #5a67d8;
-}
-
-input {
-    background-color: #ffffff; 
-    color: #333333; 
-    border: 1px solid #ccc; 
-    padding: 0.75rem; 
-    margin-top: 0.5rem;
-    font-size: 1rem; 
-    width: 100%; 
-    border-radius: 0.375rem; 
-}
-
-input:focus {
-    background-color: #f7fafc; 
-    border-color: #5a67d8; 
-    outline: none; 
-}
-
-button {
-    background-color: #2563EB; 
-    color: white;
-    padding: 0.75rem 1.5rem; 
-    font-size: 1rem; 
-    border-radius: 0.375rem;
-    display: inline-block;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #2459ca; 
-}
-
-button:disabled {
-    background-color: #d2d6dc; 
-}
-
-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7); 
-}
-
-p.text-red-600 {
-    color: #e53e3e;
-}
-
-p.text-gray-600 {
-    color: #718096;
+.text-gray-600 {
+  color: #718096;
 }
 </style>

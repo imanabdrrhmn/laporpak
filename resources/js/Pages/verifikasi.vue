@@ -206,7 +206,7 @@
     <Section />
     
     <!-- FEEDBACK COMPONENT -->
-    <!-- <Feedback />  -->
+    <Feedback /> 
   </AppLayout>
 </template>
 

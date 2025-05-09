@@ -224,8 +224,8 @@
     <!-- SECTION COMPONENT -->
     <Section />
   
-    <!-- FEEDBACK COMPONENT
-    <Feedback />  -->
+    <!-- FEEDBACK COMPONENT  -->
+    <Feedback /> 
   </AppLayout>
 </template>
 
@@ -254,9 +254,8 @@ const services = [
 // Categories for each service type
 const fraudCategories = [
   { label: 'Nomor Telepon', value: 'NomerHp' },
-  { label: 'Email', value: 'Email' },
-  { label: 'Akun Media Sosial', value: 'MediaSosial' },
-  { label: 'Website', value: 'Website' }
+  { label: 'Email', value: 'Email' }
+
 ];
 
 const infrastructureCategories = [
