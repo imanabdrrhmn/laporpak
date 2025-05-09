@@ -600,6 +600,7 @@ export default {
   },
   data() {
     return {
+      feedbacks: [],
       searchQuery: '',
       statusFilter: 'all',
       typeFilter: 'all',
@@ -940,10 +941,15 @@ export default {
     truncateText(text, length) {
       if (text.length <= length) return text;
       return text.substring(0, length) + '...';
-    }
+    },
+    fetchFeedbacks() {
+      const page = usePage();
+      this.feedbacks = page.props.feedbacks;
+    },
   },
   mounted() {
     this.searchReports();
+    this.fetchFeedbacks();
   }
 };
 </script>

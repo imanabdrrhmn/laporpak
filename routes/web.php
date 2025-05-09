@@ -26,7 +26,10 @@ Route::get('/dashboard', function (){
 })->middleware(['auth', 'contact.verified'])->name('dashboard');
 
 Route::get('/verifikasi', function () {
-    return Inertia::render('verifikasi');
+    $feedbacks = Feedback::with('user')->where('kategori', 'Verifikasi')->latest()->take(10)->get();
+    return Inertia::render('verifikasi', [
+        'feedbacks' => $feedbacks
+    ]);
 });
 
  Route::get('/LaporMap', function (){
@@ -34,7 +37,10 @@ Route::get('/verifikasi', function () {
  })->name('LaporMap');
 
   Route::get('/CariLaporan', function (){
-     return Inertia::render('Pelaporan/CariLaporan');
+    $feedbacks = Feedback::where('kategori', 'Cari Laporan')->latest()->take(10)->get();
+     return Inertia::render('Pelaporan/CariLaporan', [
+        'feedbacks' => $feedbacks
+     ]);
  })->name('CariLaporan');
 
 Route::get('/tentang-kami', function () {

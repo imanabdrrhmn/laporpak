@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Report;
@@ -13,6 +14,7 @@ class ReportController extends Controller
 {
     use AuthorizesRequests;
 
+    // Menampilkan semua laporan
     public function index(Request $request)
     {
         $user = $request->user();
@@ -28,19 +30,17 @@ class ReportController extends Controller
         ]);
     }
 
-
+    // Menampilkan form untuk membuat laporan
     public function create(Request $request)
     {
         $feedbacks = Feedback::where('kategori', 'Pelaporan')->with('user')->latest()->take(10)->get();
-        // $feedbacksVerifikasi = Feedback::where('kategori', 'Verifikasi')->get();
-        // $feedbacksLaporMap = Feedback::where('kategori', 'Lapor Map')->get();
-        return Inertia::render('Pelaporan/pelaporan',[
+
+        return Inertia::render('Pelaporan/pelaporan', [
             'feedbacks' => $feedbacks,
-            // 'feedbacksVerifikasi' => $feedbacksVerifikasi,
-            // 'feedbacksLaporMap' => $feedbacksLaporMap,
         ]);
     }
 
+    // Menyimpan laporan baru
     public function store(Request $request)
     {
         $user = $request->user();
@@ -60,6 +60,8 @@ class ReportController extends Controller
             'location.lat' => 'required|numeric',
             'location.lng' => 'required|numeric',
             'service' => 'required|string',
+            'source' => 'require|string',  
+            'address' => 'nullable|string', 
         ]);
 
         $evidencePath = $request->file('evidence')->store('evidence', 'public');
@@ -73,6 +75,8 @@ class ReportController extends Controller
             'longitude' => $request->input('location.lng'),
             'service' => $request->service,
             'status' => 'pending',
+            'source' => $request->source,  
+            'address' => $request->address,
         ]);
 
         return redirect()->route('laporan.history')->with('success', 'Laporan berhasil diajukan');
@@ -85,7 +89,7 @@ class ReportController extends Controller
         $this->authorize('update', $report);
 
         return Inertia::render('Pelaporan/Edit', [
-            'report' => $report
+            'report' => $report,
         ]);
     }
 
@@ -100,18 +104,21 @@ class ReportController extends Controller
             'category' => 'required|string',
             'description' => 'required|string|max:1500',
             'service' => 'required|string',
+            'source' => 'required|string',
+            'address' => 'nullable|string', 
         ]);
 
         $report->update([
             'category' => $request->category,
             'description' => $request->description,
             'service' => $request->service,
+            'source' => $request->source, 
+            'address' => $request->address,  
         ]);
 
         return redirect()->route('laporan.index')->with('success', 'Laporan berhasil diperbarui.');
     }
 
-    // Menghapus laporan
     public function destroy(Request $request, Report $report)
     {
         $this->authorize('delete', $report);
@@ -121,60 +128,50 @@ class ReportController extends Controller
         return redirect()->route('laporan.index')->with('success', 'Laporan berhasil dihapus');
     }
 
-    // Verifier menerima laporan
     public function accept(Report $report)
     {
         $this->authorize('approve', $report);
 
-        // Ubah status menjadi approved
         $report->status = 'approved';
         $report->save();
 
         return redirect()->route('laporan.index')->with('success', 'Laporan diterima');
     }
 
-    // Verifier menolak laporan
     public function reject(Report $report)
     {
         $this->authorize('reject', $report);
 
-        // Ubah status menjadi rejected
         $report->status = 'rejected';
         $report->save();
 
         return redirect()->route('laporan.index')->with('error', 'Laporan ditolak');
     }
 
-    // Verifier mempublikasikan laporan
     public function publish(Report $report)
     {
         $this->authorize('publish', $report);
 
-        // Pastikan laporan sudah disetujui (approved) sebelum dipublikasikan
         if ($report->status !== 'approved') {
             return redirect()->route('laporan.index')->with('error', 'Laporan harus disetujui terlebih dahulu sebelum dipublikasikan.');
         }
 
-        // Ubah status menjadi published
         $report->status = 'published';
         $report->save();
 
         return redirect()->route('laporan.index')->with('success', 'Laporan dipublikasikan');
     }
 
-
     public function history(Request $request)
     {
-    $user = $request->user();
+        $user = $request->user();
 
-    // Ambil semua laporan yang diajukan oleh user yang sedang login
-    $reports = Report::where('user_id', $user->id)->latest()->get();
+        $reports = Report::where('user_id', $user->id)->latest()->get();
 
-    return Inertia::render('Pelaporan/History', [
-        'reports' => $reports
-    ]);
+        return Inertia::render('Pelaporan/History', [
+            'reports' => $reports
+        ]);
     }
-
 
     public function search()
     {

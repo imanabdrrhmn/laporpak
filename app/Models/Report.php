@@ -21,6 +21,8 @@ class Report extends Model
         'longitude',
         'status',
         'service',
+        'source', 
+        'address'
     ];
 
     /**

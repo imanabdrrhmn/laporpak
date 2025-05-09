@@ -206,16 +206,17 @@
     <Section />
     
     <!-- FEEDBACK COMPONENT -->
-    <Feedback /> 
+    <Feedback :feedbacks="feedbacks" /> 
   </AppLayout>
 </template>
 
 <script>
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Alur from '@/Components/alurverifikasi.vue'; 
 import Section from '@/Components/Section.vue';
 import Feedback from '@/Components/Feedback.vue';
+
 
 export default {
   components: {
@@ -223,10 +224,11 @@ export default {
     Head,
     Alur,
     Section,
-    Feedback
+    Feedback,
   },
   data() {
     return {
+      feedbacks: [],
       services: [
         { id: 'npwp-v2', name: 'NPWP Check V2', price: 'IDR 7,200', type: 'Success' },
         { id: 'income-tax', name: 'Income Tax Grade', price: 'IDR 10,000', type: 'Success' },
@@ -260,6 +262,9 @@ export default {
       loading: false,
       successMessage: ''
     }
+  },
+  mounted() {
+    this.fetchFeedbacks();
   },
   computed: {
     showNpwpField() {
@@ -378,7 +383,13 @@ export default {
     getServiceName(serviceId) {
       const service = this.services.find(s => s.id === serviceId);
       return service ? service.name : serviceId;
-    }
+    },
+    fetchFeedbacks() {
+      // Mendapatkan data feedbacks dari props Inertia
+      const page = usePage();
+      this.feedbacks = page.props.feedbacks;
+      console.log(this.feedbacks); // Cek data feedbacks di console
+    },
   }
 }
 </script>
