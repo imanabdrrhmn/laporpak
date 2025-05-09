@@ -16,17 +16,7 @@ use Inertia\Response;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
-    public function create(): Response
-    {
-        return Inertia::render('Home', [
-            'canResetPassword' => Route::has('password.request'),
-            'status' => session('status'),
-        ]);
-    }
-
+    
     /**
      * Handle login via email or no_hp.
      */
@@ -56,12 +46,10 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
         
-        
         Auth::login($user);
         $request->session()->regenerate();
 
-        
-        return redirect()->intended()->header('Location', url()->previous());
+        return redirect(url()->previous());
     }
 
     /**
@@ -105,7 +93,7 @@ class AuthenticatedSessionController extends Controller
 
             return redirect()->intended()->header('Location', url()->previous());
                 } catch (\Exception $e) {
-            return redirect('/')->withErrors('Google login failed.');
-        }
+                    return redirect(url()->previous());
+                }
     }
 }
