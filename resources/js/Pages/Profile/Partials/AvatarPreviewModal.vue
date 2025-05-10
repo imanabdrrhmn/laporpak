@@ -40,41 +40,60 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { usePage, useForm, router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
-  show: Boolean,
-  onClose: Function
-});
-
-const user = usePage().props.auth.user;
-const avatarPreview = ref(user?.avatar ? `/storage/${user.avatar}` : 'https://placehold.co/120x120?text=Avatar');
-
-const form = useForm({
-  avatar: null
-});
-
-const handleAvatarChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    form.avatar = file;
-    avatarPreview.value = URL.createObjectURL(file);
+  show: {
+    type: Boolean,
+    required: true
+  },
+  currentAvatar: {
+    type: String,
+    default: ''
+  },
+  onClose: {
+    type: Function,
+    required: true
   }
+});
+
+const defaultAvatar = 'https://placehold.co/150x150?text=Avatar';
+const avatarPreview = ref(props.currentAvatar || '');
+const hasChanges = ref(false);
+
+watch(() => props.show, (newVal) => {
+  if (newVal) {
+    avatarPreview.value = props.currentAvatar || '';
+    hasChanges.value = false;
+  }
+});
+
+watch(avatarPreview, () => {
+  hasChanges.value = true;
+});
+
+const handleFileUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  if (file.size > 5 * 1024 * 1024) {
+    alert('File terlalu besar. Maksimal ukuran file adalah 5MB.');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    avatarPreview.value = e.target.result;
+    hasChanges.value = true;
+  };
+  reader.readAsDataURL(file);
 };
 
-const submit = () => {
-  form.post(route('profile.avatar.update'), {
-    forceFormData: true,
-    preserveScroll: true,
-    onSuccess: () => {
-      form.reset('avatar');
-      props.onClose();
-      router.reload({ only: ['auth'] });
-    },
-  });
+const saveChanges = () => {
+  props.onClose();
 };
 </script>
+
 
 <style scoped>
 .modal-content {

@@ -48,6 +48,10 @@ class HandleInertiaRequests extends Middleware
     
                 'needsEmailVerification' => $user?->email && !$user?->hasVerifiedEmail(),
                 'needsPhoneVerification' => $user?->no_hp && !$user?->hasVerifiedPhone(),
+
+                'avatar_url' => $user && $user->avatar
+                ? asset('storage/' . $user->avatar)
+                : asset('images/default-avatar.png'),
             ],
         ]);
     }

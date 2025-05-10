@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
@@ -19,7 +20,6 @@ Route::middleware('guest')->group(function () {
 
     Route::post('register/email', [RegisteredUserController::class, 'storeWithEmail'])->name('register.email');
     Route::post('register/phone', [RegisteredUserController::class, 'storeWithNoHp'])->name('register.no_hp');
-
 
     Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.submit');
 
@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/phone/send-verification', [PhoneVerificationController::class, 'send'])->name('phone.send');
     Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');
 
+    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

@@ -1,19 +1,12 @@
 <template>
-  <section class="py-5">
-    <div class="container px-4">
-      <header class="mb-4">
-        <h2 class="h4 fw-bold">Hapus Akun</h2>
-        <p class="text-muted small">
-          Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Silakan unduh data atau informasi yang ingin Anda simpan sebelum menghapus akun.
-        </p>
-      </header>
-
-      <button
-        @click="confirmUserDeletion"
-        class="btn btn-danger"
-      >
-        Hapus Akun
-      </button>
+  <div class="p-4">
+    <button
+      @click="confirmUserDeletion"
+      class="btn btn-outline-danger w-100"
+    >
+      <i class="bi bi-trash me-2"></i>
+      Hapus Profil
+    </button>
 
       <!-- Modal -->
       <div v-if="confirmingUserDeletion" class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);" tabindex="-1">
