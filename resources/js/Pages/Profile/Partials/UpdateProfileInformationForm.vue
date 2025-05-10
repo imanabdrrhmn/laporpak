@@ -10,7 +10,7 @@
       <form @submit.prevent="form.patch(route('profile.update'))" class="space-y-6">
         <div class="row g-3">
           <div class="col-md-6">
-            <label for="firstName" class="form-label small fw-medium">Nama Depan</label>
+            <label for="name" class="form-label small fw-medium">Nama Lengkap</label>
             <div class="input-group">
               <span class="input-group-text bg-light">
                 <i class="bi bi-person"></i>
@@ -18,32 +18,14 @@
               <input
                 type="text"
                 class="form-control"
-                id="firstName"
-                v-model="form.firstName"
+                id="name"
+                v-model="form.name"
                 required
                 autocomplete="given-name"
               />
             </div>
-            <div v-if="form.errors.firstName" class="mt-2 text-sm text-red-600">
-              {{ form.errors.firstName }}
-            </div>
-          </div>
-          <div class="col-md-6">
-            <label for="lastName" class="form-label small fw-medium">Nama Belakang</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light">
-                <i class="bi bi-person"></i>
-              </span>
-              <input
-                type="text"
-                class="form-control"
-                id="lastName"
-                v-model="form.lastName"
-                autocomplete="family-name"
-              />
-            </div>
-            <div v-if="form.errors.lastName" class="mt-2 text-sm text-red-600">
-              {{ form.errors.lastName }}
+            <div v-if="form.errors.name" class="mt-2 text-sm text-red-600">
+              {{ form.errors.name }}
             </div>
           </div>
           <div class="col-md-6">
@@ -208,8 +190,7 @@ defineProps({
 const user = usePage().props.auth.user;
 
 const form = useForm({
-  firstName: user.firstName || '',
-  lastName: user.lastName || '',
+  name: user.name || '',
   email: user.email,
   phone: user.phone || '',
   gender: user.gender || 'male',

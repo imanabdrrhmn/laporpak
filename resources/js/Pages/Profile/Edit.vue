@@ -43,38 +43,36 @@
                       </button>
                     </div>
                   </div>
-                  
-                  <div class="mt-3 px-4 pb-3">
-                    <h4 class="fw-bold mb-1">{{ user.firstName }} {{ user.lastName }}</h4>
-                    <p class="text-muted mb-3">{{ user.email }}</p>
-                    
-                    <div class="d-flex justify-content-center gap-2 mb-3">
-                      <div class="badge bg-success-subtle text-success px-3 py-2 rounded-pill d-flex align-items-center">
-                        <i class="bi bi-check-circle-fill me-1"></i>
-                        Pelapor Aktif
-                      </div>
-                      <div class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill d-flex align-items-center">
-                        <i class="bi bi-shield-check me-1"></i>
-                        Terverifikasi
-                      </div>
+                  <div class="d-flex justify-content-center gap-2 m-3">
+                    <div
+                      v-if="stats.is_active_reporter"
+                      class="badge bg-success-subtle text-success px-3 py-2 rounded-pill d-flex align-items-center"
+                    >
+                      <i class="bi bi-check-circle-fill me-1"></i>
+                      Pelapor Aktif
+                    </div>
+                    <div
+                      v-if="stats.is_verified"
+                      class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill d-flex align-items-center"
+                    >
+                      <i class="bi bi-shield-check me-1"></i>
+                      Terverifikasi
                     </div>
                   </div>
                 </div>
-
                 <hr class="my-0">
-
                 <!-- Statistics -->
                 <div class="row text-center py-3 g-0">
                   <div class="col-4 border-end">
-                    <div class="fs-4 fw-bold text-primary">12</div>
+                    <div class="fs-4 fw-bold text-primary">{{ stats.reports }}</div>
                     <div class="small text-secondary">Laporan</div>
                   </div>
                   <div class="col-4 border-end">
-                    <div class="fs-4 fw-bold text-primary">5</div>
+                    <div class="fs-4 fw-bold text-primary">{{ stats.selected }}</div>
                     <div class="small text-secondary">Seleksi</div>
                   </div>
                   <div class="col-4">
-                    <div class="fs-4 fw-bold text-primary">7</div>
+                    <div class="fs-4 fw-bold text-primary">{{ stats.in_process }}</div>
                     <div class="small text-secondary">Proses</div>
                   </div>
                 </div>
@@ -99,7 +97,7 @@
                     </div>
                     <div>
                       <div class="small text-secondary">Bergabung sejak</div>
-                      <div class="fw-medium">23 Maret 2023</div>
+                      <div class="fw-medium">{{ stats.joined_at }}</div>
                     </div>
                   </div>
                 </div>
@@ -127,8 +125,11 @@
       </div>
     </div>
 
-    <!-- Avatar Preview Modal -->
-    <AvatarPreviewModal :show="showModal" :onClose="() => showModal = false" />
+    <AvatarPreviewModal
+      :show="showModal"
+      :onClose="() => showModal = false"
+      :currentAvatar="user.avatar"
+    />
   </AppLayout>
 </template>
 
@@ -143,9 +144,12 @@ import { ref, computed } from 'vue';
 
 const page = usePage();
 const user = page.props.auth.user;
+const stats = page.props.stats;
 const showModal = ref(false);
 const showCoverModal = ref(false);
-const avatarPreview = ref(user?.avatar ? `/storage/${user.avatar}` : 'https://placehold.co/150x150?text=Avatar');
+const avatarPreview = computed(() =>
+  page.props.auth.avatar_url
+);
 page.layout = AppLayout;
 
 defineProps({

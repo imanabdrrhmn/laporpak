@@ -52,47 +52,46 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
+import { router, usePage} from '@inertiajs/vue3';
+
+const page = usePage();
+const user = page.props.auth.user;
 
 const props = defineProps({
-  show: {
-    type: Boolean,
-    required: true
-  },
-  currentAvatar: {
-    type: String,
-    default: ''
-  },
-  onClose: {
-    type: Function,
-    required: true
-  }
+  show: Boolean,
+  currentAvatar: String,
+  onClose: Function,
 });
 
-const defaultAvatar = 'https://placehold.co/150x150?text=Avatar';
-const avatarPreview = ref(props.currentAvatar || '');
+const defaultAvatar = computed(() =>
+  props.currentAvatar ? `/storage/${props.currentAvatar}` : 'https://placehold.co/150x150?text=Avatar',
+);
+
+const avatarPreview = ref('');
 const hasChanges = ref(false);
+const selectedFile = ref(null); 
 
 watch(() => props.show, (newVal) => {
   if (newVal) {
-    avatarPreview.value = props.currentAvatar || '';
+    avatarPreview.value = defaultAvatar.value; 
+    selectedFile.value = null;
     hasChanges.value = false;
   }
 });
 
-watch(avatarPreview, () => {
-  hasChanges.value = true;
-});
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
   if (!file) return;
-  
+
   if (file.size > 5 * 1024 * 1024) {
     alert('File terlalu besar. Maksimal ukuran file adalah 5MB.');
     return;
   }
-  
+
+  selectedFile.value = file; 
+
   const reader = new FileReader();
   reader.onload = (e) => {
     avatarPreview.value = e.target.result;
@@ -102,9 +101,28 @@ const handleFileUpload = (event) => {
 };
 
 const saveChanges = () => {
-  props.onClose();
+  if (!selectedFile.value) {
+    alert('Silakan pilih file terlebih dahulu.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('avatar', selectedFile.value);
+
+  router.post(route('profile.avatar.update'), formData, {
+    preserveScroll: true,
+    forceFormData: true, 
+    onSuccess: () => {
+      props.onClose(); 
+      router.reload({ only: ['auth'] });
+    },
+    onError: () => {
+      alert('Gagal memperbarui avatar.');
+    }
+  });
 };
 </script>
+
 
 <style scoped>
 .modal-fade-enter-active,

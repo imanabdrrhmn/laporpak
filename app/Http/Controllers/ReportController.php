@@ -85,7 +85,6 @@ class ReportController extends Controller
     // Menyunting laporan
     public function edit(Request $request, Report $report)
     {
-        // Pastikan hanya yang berhak (admin/pemilik laporan) yang bisa mengedit laporan
         $this->authorize('update', $report);
 
         return Inertia::render('Pelaporan/Edit', [
@@ -96,7 +95,6 @@ class ReportController extends Controller
     // Memperbarui laporan
     public function update(Request $request, Report $report)
     {
-        // Pastikan hanya yang berhak (admin/pemilik laporan) yang bisa mengedit laporan
         $this->authorize('update', $report);
 
         // Validasi data laporan

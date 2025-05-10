@@ -98,7 +98,7 @@
                     </span>
                     <small class="text-muted">
                       {{ feedback.created_at }}
-                      <template v-if="feedback.is_updated"> (diperbarui {{ feedback.updated_at }})</template>
+                      <template v-if="feedback.is_updated"> (diperbarui)</template>
                     </small>
                   </div>
 

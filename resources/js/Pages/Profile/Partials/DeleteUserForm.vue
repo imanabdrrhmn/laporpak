@@ -5,7 +5,7 @@
       class="btn btn-outline-danger w-100"
     >
       <i class="bi bi-trash me-2"></i>
-      Hapus Profil
+      Hapus Akun
     </button>
 
     <div v-if="confirmingUserDeletion" class="modal-backdrop fixed inset-0 z-50 bg-gray-500 bg-opacity-75 flex justify-center items-center">
