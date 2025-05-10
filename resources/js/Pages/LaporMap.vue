@@ -258,11 +258,16 @@
         </div>
       </div>
     </AppLayout>
+
+
+    
   </div>
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+
+import Feedback from '@/Components/Feedback.vue';
 import { Head } from '@inertiajs/vue3';
 import L from 'leaflet';
 import 'leaflet.markercluster/dist/leaflet.markercluster.js';

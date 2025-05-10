@@ -75,7 +75,7 @@
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="/laporan-saya">
+                  <a class="dropdown-item" href="/kelola-laporan">
                     <i class="bi bi-file-earmark-text-fill me-2"></i>
                     Laporan Saya
                   </a>
@@ -402,7 +402,7 @@
 
 <script>
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 
 export default {
   name: 'NavbarLaporPak',
@@ -437,13 +437,6 @@ export default {
     const closeMobileNav = () => {
       mobileNavOpen.value = false;
     };
-
-    function avatarUrl(user) {
-      return user.avatar
-        ? `/storage/${user.avatar}`
-        : '/images/default-avatar.png';
-    };
-
 
     return {
       avatarUrl,
@@ -572,7 +565,8 @@ export default {
   right: 0; /* Align to right of button */
   left: auto;
   z-index: 1050; /* Ensure above other elements */
-  margin-top: 0.5rem; /* Space from button */
+  margin-top: 0 !important; /* Hilangkan gap */
+  transform: translateY(0); /* Pastikan menempel ke tombol */
 }
 
 .user-dropdown .dropdown-item {
@@ -818,7 +812,7 @@ export default {
   }
 
   .dropdown-item:hover {
-    color:#0d6efd;
+    color: #0d6efd;
     transform: translateX(3px);
   }
 
