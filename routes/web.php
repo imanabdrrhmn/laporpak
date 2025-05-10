@@ -68,18 +68,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    // Rute untuk admin/verifier
     Route::middleware('role:admin')->group(function () {
-        // Menerima laporan
         Route::get('/pelaporan/index', [ReportController::class, 'index'])->name('laporan.index');
-        Route::patch('pelaporan/{report}/terima', [ReportController::class, 'accept'])->name('laporan.terima');
-        // Menolak laporan
+        Route::patch('/pelaporan/{report}/terima', [ReportController::class, 'accept'])->name('laporan.terima');
         Route::patch('/pelaporan/{report}/tolak', [ReportController::class, 'reject'])->name('laporan.tolak');
-        // Mempublikasikan laporan
         Route::patch('/pelaporan/{report}/publikasikan', [ReportController::class, 'publish'])->name('laporan.publikasikan');
-        Route::delete('/pelaporan/{report}/delete', [ReportController::class, 'destroy'])->name('laporan.hapus');
+        Route::delete('/pelaporan/{report}/hapus', [ReportController::class, 'destroy'])->name('laporan.hapus');
     });
-    // Rute untuk menampilkan laporan yang dipublikasikan (Cari Laporan)
+
     Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
     Route::get('/Cari-laporan', [ReportController::class, 'search'])->name('laporan.cari');
 

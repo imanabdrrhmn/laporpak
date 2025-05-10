@@ -3,225 +3,295 @@
     <div class="container">
       <!-- Filter Section -->
       <div class="filter-section">
-        <h1>Laporan</h1>
+        <h1>Laporan Masuk</h1>
         <div class="filters">
-          <!-- Search Input -->
           <input
             v-model="searchQuery"
             type="text"
             class="filter-input"
-            placeholder="Search by title..."
+            placeholder="🔍 Cari deskripsi atau kategori..."
           />
-  
-          <!-- Filter by Category -->
           <select v-model="selectedCategory" class="filter-select">
-            <option value="">All Categories</option>
+            <option value="">🗂 Semua Kategori</option>
             <option v-for="category in categories" :key="category" :value="category">
               {{ category }}
             </option>
           </select>
-  
-          <!-- Filter by Service -->
           <select v-model="selectedService" class="filter-select">
-            <option value="">All Services</option>
+            <option value="">⚙ Semua Layanan</option>
             <option v-for="service in services" :key="service" :value="service">
               {{ service }}
             </option>
           </select>
-  
-          <!-- Filter by Status -->
           <select v-model="selectedStatus" class="filter-select">
-            <option value="">All Status</option>
+            <option value="">📌 Semua Status</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
             <option value="published">Published</option>
           </select>
+          <select v-model="sortDirection" class="filter-select">
+            <option value="desc">⬇️ Terbaru</option>
+            <option value="asc">⬆️ Terlama</option>
+          </select>
         </div>
       </div>
-  
-      <!-- Reports Section -->
+
+      <!-- Report Cards -->
       <div v-if="filteredReports.length" class="reports-list">
         <div v-for="report in filteredReports" :key="report.id" class="report-item">
-          <!-- User Information (Name and Avatar) -->
+          <!-- User Info -->
           <div class="user-info">
             <img :src="report.user.avatar_url" alt="User Avatar" class="user-avatar" />
             <span class="user-name">{{ report.user.name }}</span>
           </div>
 
-          <!-- Report Information -->
-          <p><strong>Service:</strong> {{ report.service }}</p>
-          <p><strong>Kategori:</strong> {{ report.category }}</p>
-          <p><strong>Status:</strong> {{ report.status }}</p>
-          <p>{{ report.description }}</p>
-          <button @click="viewReport(report)">View</button>
+          <!-- Report Details -->
+          <p>
+            <strong>📁 Kategori:</strong> {{ report.category }}
+          </p>
+          <p>
+            <strong>🧰 Layanan:</strong> {{ report.service }}
+          </p>
+          <p>
+            <strong>📌 Status:</strong>
+            <span :class="['status-badge', report.status]">
+              {{ capitalize(report.status) }}
+            </span>
+          </p>
+          <p class="description">{{ truncate(report.description, 100) }}</p>
+          <p class="timestamp">📅 {{ formatDate(report.created_at) }}</p>
+          <button @click="viewReport(report)" class="view-button">Lihat Detail</button>
         </div>
       </div>
-  
+
       <div v-else>
-        <p>No reports found.</p>
+        <p class="no-results">🚫 Tidak ada laporan ditemukan.</p>
       </div>
     </div>
-  </AppLayout>
 
-  <Modal :report="currentReport" :isVisible="showModal" @close="closeModal" />
+    <Modal :report="currentReport" :isVisible="showModal" @close="closeModal" />
+  </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { usePage } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3'
 import Modal from '@/Pages/Pelaporan/LaporanDetailModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
-// Receiving the 'reports' prop from Inertia
 const props = defineProps({
   reports: {
     type: Array,
-    default: () => [] // Default to empty array if no reports
+    default: () => []
   }
 })
 
-const page = usePage();
-const user = page.props.auth.user;
-
+const page = usePage()
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const selectedService = ref('')
 const selectedStatus = ref('')
+const sortDirection = ref('desc') // default terbaru → terlama
 
-// Define state for modal visibility and the selected report
 const showModal = ref(false)
-const currentReport = ref({})  
+const currentReport = ref({})
 
-// Extracting unique categories and services
 const categories = computed(() => {
-  const uniqueCategories = [...new Set(props.reports.map((report) => report.category))]
-  return uniqueCategories
+  return [...new Set(props.reports.map(report => report.category))].filter(Boolean)
 })
 
 const services = computed(() => {
-  const uniqueServices = [...new Set(props.reports.map((report) => report.service))]
-  return uniqueServices
+  return [...new Set(props.reports.map(report => report.service))].filter(Boolean)
 })
 
-// Filtered reports based on selected filters
 const filteredReports = computed(() => {
-  return props.reports.filter((report) => {
-    const matchesCategory = selectedCategory.value ? report.category === selectedCategory.value : true
-    const matchesService = selectedService.value ? report.service === selectedService.value : true
-    const matchesStatus = selectedStatus.value ? report.status === selectedStatus.value : true
-    const matchesSearchQuery = searchQuery.value ? report.description.toLowerCase().includes(searchQuery.value.toLowerCase()) : true
-
-    return matchesCategory && matchesService && matchesStatus && matchesSearchQuery
-  })
+  return props.reports
+    .filter(report => {
+      const matchesCategory = selectedCategory.value ? report.category === selectedCategory.value : true
+      const matchesService = selectedService.value ? report.service === selectedService.value : true
+      const matchesStatus = selectedStatus.value ? report.status === selectedStatus.value : true
+      const matchesSearch = searchQuery.value
+        ? (
+          report.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          report.category.toLowerCase().includes(searchQuery.value.toLowerCase())
+        )
+        : true
+      return matchesCategory && matchesService && matchesStatus && matchesSearch
+    })
+    .sort((a, b) => {
+      return sortDirection.value === 'desc'
+        ? new Date(b.created_at) - new Date(a.created_at)
+        : new Date(a.created_at) - new Date(b.created_at)
+    })
 })
 
-// Function to open the modal with specific report details
 const viewReport = (report) => {
   currentReport.value = report
   showModal.value = true
 }
 
-// Function to close the modal
 const closeModal = () => {
   showModal.value = false
   currentReport.value = {}
 }
 
+const formatDate = (iso) => {
+  const d = new Date(iso)
+  return d.toLocaleString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
+
+const truncate = (text, max) => {
+  return text.length > max ? text.substring(0, max) + '…' : text
+}
+
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1)
 </script>
 
 <style scoped>
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 32px 20px;
 }
 
-/* Filter Section */
 .filter-section {
   margin-bottom: 30px;
 }
 
 h1 {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: bold;
   margin-bottom: 20px;
 }
 
 .filters {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   flex-wrap: wrap;
-  justify-content: flex-start;
 }
 
 .filter-input,
 .filter-select {
   padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 220px;
+  font-size: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-width: 180px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  color: #333;
+  transition: box-shadow 0.2s;
 }
 
-.filter-input::placeholder,
-.filter-select {
-  color: #666;
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
 }
 
-.filter-input {
-  width: 250px;
+
+.reports-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
 }
 
-/* User Info Styling */
+.report-item {
+  background-color: #fdfdfd;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.report-item:hover {
+  transform: translateY(-3px);
+}
+
 .user-info {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   margin-right: 10px;
+  object-fit: cover;
 }
 
 .user-name {
   font-weight: 600;
 }
 
-/* Reports List */
-.reports-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: capitalize;
+  margin-left: 6px;
 }
 
-.report-item {
-  background-color: #fff;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-  height: 100%;
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.status-badge.approved {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+.status-badge.rejected {
+  background: #f8d7da;
+  color: #842029;
+}
+.status-badge.published {
+  background: #cfe2ff;
+  color: #084298;
 }
 
-.report-item:hover {
-  transform: translateY(-5px);
+.description {
+  font-size: 14px;
+  color: #444;
+  margin: 10px 0;
+  line-height: 1.5;
 }
 
-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
+.timestamp {
+  font-size: 13px;
+  color: #777;
+  margin-top: auto;
+}
+
+.view-button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #0d6efd;
+  color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s;
 }
 
-button:hover {
-  background-color: #0056b3;
+.view-button:hover {
+  background-color: #0b5ed7;
+}
+
+.no-results {
+  font-size: 16px;
+  color: #999;
+  margin-top: 20px;
 }
 </style>
