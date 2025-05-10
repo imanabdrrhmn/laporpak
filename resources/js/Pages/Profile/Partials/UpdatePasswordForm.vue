@@ -1,5 +1,4 @@
 <template>
-<<<<<<< HEAD
   <div class="card border-0 shadow-sm">
     <div class="card-header bg-white py-3 border-0">
       <h5 class="card-title mb-0 d-flex align-items-center">
@@ -16,7 +15,7 @@
               <span class="input-group-text bg-light">
                 <i class="bi bi-key"></i>
               </span>
-             <input
+            <input
                 id="currentPassword"
                 ref="currentPasswordInput"
                 v-model="form.current_password"
@@ -28,38 +27,6 @@
               <span class="input-group-text bg-light cursor-pointer" @click="showCurrentPassword = !showCurrentPassword">
                 <i :class="showCurrentPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
               </span>
-=======
-  <section>
-    <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white py-3 border-0">
-        <h5 class="card-title mb-0 d-flex align-items-center">
-          <i class="bi bi-shield-lock me-2 text-primary"></i>
-          Keamanan Akun
-        </h5>
-      </div>
-      <div class="card-body">
-        <form @submit.prevent="updatePassword" class="space-y-6">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label for="currentPassword" class="form-label small fw-medium">Password Saat Ini</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light">
-                  <i class="bi bi-key"></i>
-                </span>
-                <input
-                  id="currentPassword"
-                  ref="currentPasswordInput"
-                  v-model="form.current_password"
-                  type="password"
-                  class="form-control"
-                  placeholder="Masukkan password saat ini"
-                  autocomplete="current-password"
-                />
-              </div>
-              <div v-if="form.errors.current_password" class="mt-2 text-sm text-red-600">
-                {{ form.errors.current_password }}
-              </div>
->>>>>>> 1ddfb1bba59374174a974f84064ec31ea076b760
             </div>
             <div class="col-md-6">
               <label for="newPassword" class="form-label small fw-medium">Password Baru</label>
