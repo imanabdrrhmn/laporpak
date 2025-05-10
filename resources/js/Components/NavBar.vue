@@ -437,6 +437,9 @@ export default {
     const closeMobileNav = () => {
       mobileNavOpen.value = false;
     };
+    const avatarUrl = (user) => {
+    return user?.avatar ? `/storage/${user.avatar}` : 'https://placehold.co/150x150?text=Avatar';
+    };
 
     return {
       avatarUrl,

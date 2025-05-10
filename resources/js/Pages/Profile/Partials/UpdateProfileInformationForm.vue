@@ -150,7 +150,6 @@
             </div>
           </div>
         </div>
-
         <!-- Email Verification Link -->
         <div v-if="mustVerifyEmail && user.email_verified_at === null" class="mb-3">
           <p class="text-muted small">
@@ -191,7 +190,7 @@
         </div>
       </form>
     </div>
-  </section>
+  </div>
 </template>
 
 <script setup>
