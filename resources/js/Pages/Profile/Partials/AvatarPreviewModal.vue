@@ -1,228 +1,95 @@
 <template>
-  <Transition name="modal-fade">
-    <div v-if="show" class="modal-backdrop">
-      <div class="modal-wrapper" @click.self="onClose">
-        <div class="modal-container">
-          <div class="modal-header">
-            <h5 class="modal-title">Ubah Foto Profil</h5>
+  <div v-if="show">
+    <!-- Backdrop -->
+    <div class="modal fade show" :class="{ 'd-block': show }" style="background-color: rgba(0, 0, 0, 0.5);" @click.self="onClose"></div>
+
+    <!-- Modal -->
+    <div class="modal fade show d-block" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+          <!-- Header -->
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold">Ubah Foto Profil</h5>
             <button type="button" class="btn-close" @click="onClose"></button>
           </div>
-          
+
+          <!-- Body -->
           <div class="modal-body">
-            <!-- Avatar Preview -->
-            <div class="avatar-preview mb-3">
-              <img 
-                :src="avatarPreview || defaultAvatar" 
-                alt="Avatar Preview" 
-                class="preview-image"
-              />
-            </div>
-            
-            <!-- Upload Options -->
-            <div class="upload-options">
-              <label for="avatarUpload" class="upload-btn">
-                <i class="bi bi-upload me-2"></i>
-                Pilih Foto
-              </label>
-              <input 
-                type="file" 
-                id="avatarUpload" 
-                class="d-none" 
-                accept="image/*"
-                @change="handleFileUpload"
-              />
-              <div class="small text-muted mt-1">
-                Maksimal 5MB (JPG, PNG)
+            <p class="text-muted mb-4">Unggah avatar terbaru Anda</p>
+            <form @submit.prevent="submit">
+              <div class="text-center mb-4">
+                <img :src="avatarPreview" class="rounded-circle object-fit-cover" style="width: 120px; height: 120px;" alt="Avatar Preview" />
               </div>
-            </div>
+
+              <div class="mb-3">
+                <input type="file" accept="image/*" @change="handleAvatarChange" class="form-control" />
+                <small v-if="form?.errors?.avatar" class="text-danger">{{ form.errors.avatar }}</small>
+              </div>
+            </form>
           </div>
-          
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" @click="onClose">
-              Batal
-            </button>
-            <button type="button" class="btn btn-primary" @click="saveChanges" :disabled="!hasChanges">
-              Simpan
-            </button>
+
+          <!-- Footer -->
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" @click="onClose">Batal</button>
+            <button type="submit" class="btn btn-primary" :disabled="form.processing" @click="submit">Simpan</button>
           </div>
         </div>
       </div>
     </div>
-  </Transition>
+  </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
+import { usePage, useForm, router } from '@inertiajs/vue3';
 
 const props = defineProps({
-  show: {
-    type: Boolean,
-    required: true
-  },
-  currentAvatar: {
-    type: String,
-    default: ''
-  },
-  onClose: {
-    type: Function,
-    required: true
-  }
+  show: Boolean,
+  onClose: Function
 });
 
-const defaultAvatar = 'https://placehold.co/150x150?text=Avatar';
-const avatarPreview = ref(props.currentAvatar || '');
-const hasChanges = ref(false);
+const user = usePage().props.auth.user;
+const avatarPreview = ref(user?.avatar ? `/storage/${user.avatar}` : 'https://placehold.co/120x120?text=Avatar');
 
-watch(() => props.show, (newVal) => {
-  if (newVal) {
-    avatarPreview.value = props.currentAvatar || '';
-    hasChanges.value = false;
-  }
+const form = useForm({
+  avatar: null
 });
 
-watch(avatarPreview, () => {
-  hasChanges.value = true;
-});
-
-const handleFileUpload = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  if (file.size > 5 * 1024 * 1024) {
-    alert('File terlalu besar. Maksimal ukuran file adalah 5MB.');
-    return;
+const handleAvatarChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    form.avatar = file;
+    avatarPreview.value = URL.createObjectURL(file);
   }
-  
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    avatarPreview.value = e.target.result;
-    hasChanges.value = true;
-  };
-  reader.readAsDataURL(file);
 };
 
-const saveChanges = () => {
-  props.onClose();
+const submit = () => {
+  form.post(route('profile.avatar.update'), {
+    forceFormData: true,
+    preserveScroll: true,
+    onSuccess: () => {
+      form.reset('avatar');
+      props.onClose();
+      router.reload({ only: ['auth'] });
+    },
+  });
 };
 </script>
 
 <style scoped>
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.3s ease;
+.modal-content {
+  padding: 1.5rem;
 }
 
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
-
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1050;
-}
-
-.modal-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  padding: 15px;
-}
-
-.modal-container {
-  background-color: white;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
-  overflow-y: auto;
-}
-
-.modal-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-title {
-  font-weight: 600;
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.modal-body {
-  padding: 16px;
-  text-align: center;
-}
-
-.modal-footer {
-  padding: 12px 16px;
-  border-top: 1px solid #e9ecef;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.avatar-preview {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin: 0 auto;
-  border: 2px solid #4361ee;
-}
-
-.preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.upload-btn {
-  display: inline-flex;
-  align-items: center;
-  background-color: #4361ee;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.upload-btn:hover {
-  background-color: #3a56d4;
-}
-
-.btn-outline-secondary {
-  padding: 6px 12px;
-  font-size: 0.9rem;
-}
-
-.btn-primary {
-  background-color: #4361ee;
-  border-color: #4361ee;
-  padding: 6px 12px;
-  font-size: 0.9rem;
-}
-
-@media (max-width: 575.98px) {
-  .modal-container {
-    max-width: 90%;
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem;
   }
-  
-  .avatar-preview {
-    width: 120px;
-    height: 120px;
+  .modal-content {
+    padding: 1rem;
+  }
+  .modal-title {
+    font-size: 1.25rem;
   }
 }
 </style>

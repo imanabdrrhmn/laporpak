@@ -189,7 +189,7 @@
                       </div>
                     </div>
                     <div class="ms-auto mt-2 mt-sm-0">
-                        <div class="rating">
+                      <div class="rating">
                         <span v-for="star in 5" :key="star" class="star-icon" :style="{ color: star <= testimonial.rating ? '#ff9800' : '#ccc' }">
                         ★
                         </span>
@@ -210,10 +210,10 @@
     
     <div class="text-center mt-4 mt-md-5">
       <Link href="/feedback">
-      <button class="btn btn-primary px-4 py-2 mt-2">
-        Lihat semua <i class="bi bi-arrow-right ms-1"></i>
-      </button>
-    </Link>
+        <button class="btn btn-primary px-4 py-2 mt-2">
+          Lihat semua <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+      </Link>
     </div>
   </div>
 </template>
@@ -247,14 +247,14 @@ export default {
   computed: {
     testimonials() {
       if (!Array.isArray(this.feedbacks)) {
-    return [];
-    }
+        return [];
+      }
       return this.feedbacks.map(f => ({
         id: f.id,
-        name: f.user?.name || 'Anonim', 
+        name: f.user?.name || 'Anonim',
         avatar: this.resolveAvatar(f.user?.avatar),
-        rating: f.rating || 5, 
-        kategori: f.kategori || 'Umum', 
+        rating: f.rating || 5,
+        kategori: f.kategori || 'Umum',
         content: f.message || null,
       }));
     },
@@ -281,13 +281,11 @@ export default {
   methods: {
     resolveAvatar(avatarPath) {
       if (!avatarPath) {
-        return 'https://placehold.co/50x50?text=?'
+        return 'https://placehold.co/50x50?text=?';
       }
-
       if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
         return avatarPath;
       }
-
       return `/storage/${avatarPath}`;
     },
     checkMobile() {
@@ -296,15 +294,17 @@ export default {
       this.scrollSpeed2 = this.isMobile ? 0.2 : 0.3;
     },
     getCategoryClassMethod(kategori) {
-    switch (kategori) {
-      case 'Pelaporan':
-        return 'category-pelaporan';
-      case 'Verifikasi':
-        return 'category-verifikasi';
-      default:
-        return 'category-umum';
-    }
-  },
+      switch (kategori) {
+        case 'Pelaporan':
+          return 'category-pelaporan';
+        case 'Verifikasi':
+          return 'category-verifikasi';
+        case 'Umum':
+          return 'category-umum';
+        default:
+          return 'category-umum';
+      }
+    },
     initCarousel() {
       const card = document.querySelector('.testimonial-card');
       if (card) {
@@ -354,7 +354,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .testimonial-carousel {
   overflow: hidden;
@@ -371,7 +370,7 @@ export default {
 
 .testimonial-card {
   flex: 0 0 auto;
-  width: 280px; /* Base size for mobile */
+  width: 280px;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
@@ -380,7 +379,6 @@ export default {
   position: relative;
 }
 
-/* Shadow effect like in the image */
 .testimonial-card::after {
   content: '';
   position: absolute;
@@ -437,24 +435,23 @@ export default {
   border-radius: 10px;
   display: inline-block;
   text-align: center;
-  width: 80px; /* Smaller width for mobile */
+  width: 80px;
 }
 
 .category-pelaporan {
-  color: #fff;
-  background-color: #0d6efd;
+  background-color: #D4EDFF;
+  color: #004085;
 }
 
 .category-verifikasi {
-  color: #fff;
-  background-color: #198754;
+  background-color: #FFF3CD;
+  color: #856404;
 }
 
 .category-umum {
-  color: #fff;
-  background-color: #000;
+  background-color: #D1FAE5;
+  color: #065F46;
 }
-
 
 .rating {
   display: flex;
@@ -464,9 +461,6 @@ export default {
   color: #ccc;
   font-size: 18px;
   margin-left: 1px;
-}
-.star-icon.active {
-  color: #ff9800;
 }
 
 .divider {
@@ -479,9 +473,8 @@ export default {
   line-height: 1.4;
   color: #333;
   margin-bottom: 0;
-  /* Handle overflow text */
   display: -webkit-box;
-  -line-clamp: 4;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -494,7 +487,6 @@ export default {
   font-size: 14px;
 }
 
-/* Tablet breakpoint */
 @media (min-width: 576px) {
   .testimonial-card {
     width: 320px;
@@ -530,7 +522,6 @@ export default {
   }
 }
 
-/* Desktop breakpoint */
 @media (min-width: 768px) {
   .testimonial-card {
     width: 350px;
@@ -557,9 +548,8 @@ export default {
   .testimonial-text {
     font-size: 16px;
     line-height: 1.5;
-    -line-clamp: 5;
+    -webkit-line-clamp: 5;
   }
-  
   
   .star-icon {
     font-size: 22px;
@@ -572,21 +562,18 @@ export default {
   }
 }
 
-/* Large screens */
 @media (min-width: 992px) {
   .testimonial-card {
     width: 380px;
   }
 }
 
-/* Extra large screens */
 @media (min-width: 1200px) {
   .testimonial-card {
     width: 400px;
   }
 }
 
-/* Hover effect - only on non-touch devices */
 @media (hover: hover) {
   .testimonial-card:hover {
     transform: translateY(-5px);
@@ -595,7 +582,6 @@ export default {
   }
 }
 
-/* Ensure proper display on very small screens */
 @media (max-width: 320px) {
   .testimonial-card {
     width: 240px;
@@ -624,7 +610,8 @@ export default {
   .testimonial-text {
     font-size: 12px;
     line-height: 1.3;
-    -line-clamp: 3;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 }
 </style>
