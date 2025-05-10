@@ -8,50 +8,49 @@
       Hapus Profil
     </button>
 
-      <!-- Modal -->
-      <div v-if="confirmingUserDeletion" class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content border-0 shadow-lg rounded-3">
-            <div class="modal-header border-0">
-              <h5 class="modal-title fw-bold">Konfirmasi Penghapusan Akun</h5>
-              <button type="button" class="btn-close" @click="closeModal"></button>
-            </div>
-            <div class="modal-body">
-              <p class="text-muted mb-4">
-                Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Masukkan kata sandi Anda untuk konfirmasi.
-              </p>
-              <form @submit.prevent="deleteUser">
-                <div class="mb-3">
-                  <label for="password" class="form-label fw-bold">Kata Sandi</label>
-                  <input
-                    id="password"
-                    ref="passwordInput"
-                    v-model="form.password"
-                    type="password"
-                    class="form-control"
-                    placeholder="Masukkan kata sandi"
-                    @keyup.enter="deleteUser"
-                  />
-                  <small v-if="form.errors.password" class="text-danger d-block mt-2">{{ form.errors.password }}</small>
-                </div>
-              </form>
-            </div>
-            <div class="modal-footer border-0">
-              <button type="button" class="btn btn-secondary" @click="closeModal">Batal</button>
-              <button
-                type="submit"
-                class="btn btn-danger"
-                :disabled="form.processing"
-                @click="deleteUser"
-              >
-                Hapus Akun
-              </button>
-            </div>
+    <!-- Modal -->
+    <div v-if="confirmingUserDeletion" class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold">Konfirmasi Penghapusan Akun</h5>
+            <button type="button" class="btn-close" @click="closeModal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted mb-4">
+              Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Masukkan kata sandi Anda untuk konfirmasi.
+            </p>
+            <form @submit.prevent="deleteUser">
+              <div class="mb-3">
+                <label for="password" class="form-label fw-bold">Kata Sandi</label>
+                <input
+                  id="password"
+                  ref="passwordInput"
+                  v-model="form.password"
+                  type="password"
+                  class="form-control"
+                  placeholder="Masukkan kata sandi"
+                  @keyup.enter="deleteUser"
+                />
+                <small v-if="form.errors.password" class="text-danger d-block mt-2">{{ form.errors.password }}</small>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" @click="closeModal">Batal</button>
+            <button
+              type="submit"
+              class="btn btn-danger"
+              :disabled="form.processing"
+              @click="deleteUser"
+            >
+              Hapus Akun
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script setup>
