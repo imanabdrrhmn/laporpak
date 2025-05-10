@@ -10,7 +10,7 @@
       <form @submit.prevent="form.patch(route('profile.update'))" class="space-y-6">
         <div class="row g-3">
           <div class="col-md-6">
-            <label for="firstName" class="form-label small fw-medium">Nama Depan</label>
+            <label for="name" class="form-label small fw-medium">Nama Lengkap</label>
             <div class="input-group">
               <span class="input-group-text bg-light">
                 <i class="bi bi-person"></i>
@@ -18,32 +18,14 @@
               <input
                 type="text"
                 class="form-control"
-                id="firstName"
-                v-model="form.firstName"
+                id="name"
+                v-model="form.name"
                 required
                 autocomplete="given-name"
               />
             </div>
-            <div v-if="form.errors.firstName" class="mt-2 text-sm text-red-600">
-              {{ form.errors.firstName }}
-            </div>
-          </div>
-          <div class="col-md-6">
-            <label for="lastName" class="form-label small fw-medium">Nama Belakang</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light">
-                <i class="bi bi-person"></i>
-              </span>
-              <input
-                type="text"
-                class="form-control"
-                id="lastName"
-                v-model="form.lastName"
-                autocomplete="family-name"
-              />
-            </div>
-            <div v-if="form.errors.lastName" class="mt-2 text-sm text-red-600">
-              {{ form.errors.lastName }}
+            <div v-if="form.errors.name" class="mt-2 text-sm text-red-600">
+              {{ form.errors.name }}
             </div>
           </div>
           <div class="col-md-6">
@@ -150,32 +132,32 @@
             </div>
           </div>
         </div>
-        <!-- Email Verification Link -->
-        <div v-if="mustVerifyEmail && user.email_verified_at === null" class="mb-3">
-          <p class="text-muted small">
-            Alamat email Anda belum diverifikasi.
+
+        <div v-if="mustVerifyEmail && user.email_verified_at === null">
+          <p class="mt-2 text-sm text-gray-800">
+            Your email address is unverified.
             <Link
               :href="route('verification.send')"
               method="post"
               as="button"
-              class="text-primary text-decoration-underline"
+              class="text-indigo-600 underline hover:text-indigo-800"
             >
-              Klik di sini untuk mengirim ulang email verifikasi.
+              Click here to re-send the verification email.
             </Link>
           </p>
-          <div v-show="status === 'verification-link-sent'" class="text-success small mt-2">
-            Tautan verifikasi baru telah dikirim ke alamat email Anda.
+          <div v-show="status === 'verification-link-sent'" class="mt-2 text-sm font-medium text-green-600">
+            A new verification link has been sent to your email address.
           </div>
         </div>
 
-        <!-- Save Button -->
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex justify-content-end mt-4">
           <button
             type="submit"
+            class="btn btn-primary px-4"
             :disabled="form.processing"
-            class="btn btn-primary"
           >
-            Simpan
+            <i class="bi bi-save me-2"></i>
+            Simpan Perubahan
           </button>
           <transition
             enter-active-class="transition ease-in-out"
@@ -183,8 +165,8 @@
             leave-active-class="transition ease-in-out"
             leave-to-class="opacity-0"
           >
-            <p v-if="form.recentlySuccessful" class="text-muted small">
-              Tersimpan.
+            <p v-if="form.recentlySuccessful" class="text-sm text-gray-600 ms-2">
+              Saved.
             </p>
           </transition>
         </div>
@@ -197,21 +179,64 @@
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 
 defineProps({
-  mustVerifyEmail: Boolean,
-  status: String,
+  mustVerifyEmail: {
+    type: Boolean,
+  },
+  status: {
+    type: String,
+  },
 });
 
 const user = usePage().props.auth.user;
 
 const form = useForm({
-  firstName: user.firstName || '',
-  lastName: user.lastName || '',
+  name: user.name || '',
   email: user.email,
+  phone: user.phone || '',
+  gender: user.gender || 'male',
+  location: user.location || '',
+  biography: user.biography || ''
 });
 </script>
 
 <style scoped>
-.card {
-  border-radius: 0.75rem;
+.btn-primary {
+  background-color: #4361ee;
+  border-color: #4361ee;
+}
+.btn-primary:hover {
+  background-color: #3a56d4;
+  border-color: #3a56d4;
+}
+.text-primary {
+  color: #4361ee !important;
+}
+.form-control {
+  background-color: #ffffff;
+  color: #333333;
+  border: 1px solid #ccc;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.375rem;
+}
+.form-control:focus {
+  background-color: #f7fafc;
+  border-color: #5a67d8;
+  outline: none;
+}
+.text-red-600 {
+  color: #e53e3e;
+}
+.text-gray-600 {
+  color: #718096;
+}
+.text-gray-800 {
+  color: #2d3748;
+}
+.text-indigo-600 {
+  color: #5a67d8;
+}
+.text-green-600 {
+  color: #059669;
 }
 </style>
