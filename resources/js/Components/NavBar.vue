@@ -75,7 +75,7 @@
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="/kelola-laporan">
+                  <a class="dropdown-item" href="/laporan-saya">
                     <i class="bi bi-file-earmark-text-fill me-2"></i>
                     Laporan Saya
                   </a>

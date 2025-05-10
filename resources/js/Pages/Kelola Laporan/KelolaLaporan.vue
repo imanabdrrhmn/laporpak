@@ -74,7 +74,7 @@
 import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import DetailModal from './DetailModal.vue';
+import DetailModal from './Partials/Modals.vue';
 
 // Sample data to match the screenshot
 const laporanData = ref([
