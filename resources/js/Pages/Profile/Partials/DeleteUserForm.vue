@@ -8,14 +8,44 @@
       Hapus Akun
     </button>
 
-    <div v-if="confirmingUserDeletion" class="modal-backdrop fixed inset-0 z-50 bg-gray-500 bg-opacity-75 flex justify-center items-center">
+    <!-- Modal -->
+    <div v-if="confirmingUserDeletion" class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content custom-modal-content mx-auto">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h4 class="fw-bold text-gray-900">Are you sure you want to delete your account?</h4>
-              <p class="text-muted mb-4">Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm.</p>
-            </div>
+        <div class="modal-content border-0 shadow-lg rounded-3">
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold">Konfirmasi Penghapusan Akun</h5>
+            <button type="button" class="btn-close" @click="closeModal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted mb-4">
+              Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Masukkan kata sandi Anda untuk konfirmasi.
+            </p>
+            <form @submit.prevent="deleteUser">
+              <div class="mb-3">
+                <label for="password" class="form-label fw-bold">Kata Sandi</label>
+                <input
+                  id="password"
+                  ref="passwordInput"
+                  v-model="form.password"
+                  type="password"
+                  class="form-control"
+                  placeholder="Masukkan kata sandi"
+                  @keyup.enter="deleteUser"
+                />
+                <small v-if="form.errors.password" class="text-danger d-block mt-2">{{ form.errors.password }}</small>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" @click="closeModal">Batal</button>
+            <button
+              type="submit"
+              class="btn btn-danger"
+              :disabled="form.processing"
+              @click="deleteUser"
+            >
+              Hapus Akun
+            </button>
           </div>
 
           <form @submit.prevent="deleteUser">

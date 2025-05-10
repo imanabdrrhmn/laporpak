@@ -84,7 +84,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.create');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/laporan-saya', [UserHistoryController::class, 'reportHistory'])->name('history.reports');
+    Route::get('/laporan-saya', [UserHistoryReportController::class, 'reportHistory'])->name('history.reports');
     // Route::get('/laporan-saya', [UserHistoryController::class, 'verificationHistory'])->name('history.verifications');
 });
 
