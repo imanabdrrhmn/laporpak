@@ -79,7 +79,7 @@ class ReportController extends Controller
             'address' => $request->address,
         ]);
 
-        return redirect()->route('laporan.history')->with('success', 'Laporan berhasil diajukan');
+        return redirect()->route('history.reports')->with('success', 'Laporan berhasil diajukan');
     }
 
     // Menyunting laporan
@@ -102,7 +102,7 @@ class ReportController extends Controller
             'category' => 'required|string',
             'description' => 'required|string|max:1500',
             'service' => 'required|string',
-            'source' => 'required|string',
+            'source' => 'nullable|string',
             'address' => 'nullable|string', 
         ]);
 
