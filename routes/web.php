@@ -4,10 +4,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserHistoryReportController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Feedback;
+
+
 
 
 
@@ -78,12 +81,16 @@ Route::middleware('auth')->group(function () {
     });
     // Rute untuk menampilkan laporan yang dipublikasikan (Cari Laporan)
     Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
-    Route::get('/pelaporan/history', [ReportController::class, 'history'])->name('laporan.history');
     Route::get('/Cari-laporan', [ReportController::class, 'search'])->name('laporan.cari');
 
 });
 
     Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.create');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/laporan-saya', [UserHistoryController::class, 'reportHistory'])->name('history.reports');
+    // Route::get('/laporan-saya', [UserHistoryController::class, 'verificationHistory'])->name('history.verifications');
+});
 
 
 require __DIR__.'/auth.php';

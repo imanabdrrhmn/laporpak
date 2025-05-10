@@ -160,17 +160,6 @@ class ReportController extends Controller
         return redirect()->route('laporan.index')->with('success', 'Laporan dipublikasikan');
     }
 
-    public function history(Request $request)
-    {
-        $user = $request->user();
-
-        $reports = Report::where('user_id', $user->id)->latest()->get();
-
-        return Inertia::render('Pelaporan/History', [
-            'reports' => $reports
-        ]);
-    }
-
     public function search()
     {
         $reports = Report::where('status', 'published')->get();
