@@ -42,6 +42,9 @@ class HandleInertiaRequests extends Middleware
                     'no_hp' => $user->no_hp,
                     'email_verified_at' => $user->email_verified_at,
                     'no_hp_verified_at' => $user->no_hp_verified_at,
+                    'avatar_url' => $user && $user->avatar
+                        ? asset('storage/' . $user->avatar)
+                        : asset('/Default-Profile.png'),
                 ] : null,
     
                 'isAdmin' => $user?->hasAnyRole(['admin', 'verifier']),
@@ -49,9 +52,7 @@ class HandleInertiaRequests extends Middleware
                 'needsEmailVerification' => $user?->email && !$user?->hasVerifiedEmail(),
                 'needsPhoneVerification' => $user?->no_hp && !$user?->hasVerifiedPhone(),
 
-                'avatar_url' => $user && $user->avatar
-                ? asset('storage/' . $user->avatar)
-                : asset('images/default-avatar.png'),
+               
             ],
         ]);
     }

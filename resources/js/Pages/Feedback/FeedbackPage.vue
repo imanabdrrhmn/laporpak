@@ -114,12 +114,22 @@
 
                   <!-- User Info -->
                   <div class="d-flex align-items-center">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                    <img
+                      v-if="feedback.user.avatar_url"
+                      :src="feedback.user.avatar_url"
+                      alt="Avatar"
+                      class="rounded-circle me-3"
+                      style="width: 50px; height: 50px; object-fit: cover;"
+                    />
+                    <div
+                      v-else
+                      class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                      style="width: 50px; height: 50px;"
+                    >
                       {{ feedback.user.name.charAt(0) }}{{ feedback.user.name.split(' ').length > 1 ? feedback.user.name.split(' ')[1].charAt(0) : '' }}
                     </div>
                     <h5 class="card-title mb-0">{{ feedback.user.name }}</h5>
                   </div>
-
                   <!-- Edit/Delete Buttons for Owner or Admin -->
                   <div v-if="page.props.auth?.user?.id === feedback.user_id || isAdmin" class="mt-3">
                     <button class="btn btn-sm btn-outline-primary me-2" @click="openFeedbackModal('edit', feedback)">

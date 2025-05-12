@@ -76,7 +76,11 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import DetailModal from './Partials/Modals.vue';
 
-// Sample data to match the screenshot
+defineProps({
+    reports: Array,
+    verifications: Array
+});
+
 const laporanData = ref([
     { 
         no: 1, 

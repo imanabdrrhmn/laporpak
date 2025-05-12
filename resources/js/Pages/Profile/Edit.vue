@@ -5,7 +5,7 @@
       <div class="bg-primary bg-gradient py-5 rounded-bottom position-relative overflow-hidden">
         <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25">
           <div class="position-absolute top-0 start-0 w-100 h-100" 
-               style="background-image: url('https://placehold.co/1200x300?text=Cover'); background-size: cover;"></div>
+              style="background-image: url('https://placehold.co/1200x300?text=Cover'); background-size: cover;"></div>
         </div>
         <div class="container position-relative">
           <div class="d-flex justify-content-end">
@@ -29,7 +29,7 @@
                   <div class="d-inline-block mt-n5 position-relative">
                     <div class="bg-white rounded-circle p-2 shadow">
                       <img
-                        :src="avatarPreview"
+                        :src="user.avatar_url"
                         class="rounded-circle"
                         alt="Avatar"
                         style="width: 150px; height: 150px; object-fit: cover;"
@@ -128,7 +128,7 @@
     <AvatarPreviewModal
       :show="showModal"
       :onClose="() => showModal = false"
-      :currentAvatar="user.avatar"
+      :currentAvatar="user.avatar_url"
     />
   </AppLayout>
 </template>
@@ -143,13 +143,12 @@ import { Head, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
 const page = usePage();
-const user = page.props.auth.user;
+const user = computed(() => page.props.auth?.user || {});
+
 const stats = page.props.stats;
 const showModal = ref(false);
 const showCoverModal = ref(false);
-const avatarPreview = computed(() =>
-  page.props.auth.avatar_url
-);
+
 page.layout = AppLayout;
 
 defineProps({

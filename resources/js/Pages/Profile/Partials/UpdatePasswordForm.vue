@@ -28,26 +28,6 @@
                 <i :class="showCurrentPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
               </span>
             </div>
-            <div class="col-md-6">
-              <label for="newPassword" class="form-label small fw-medium">Password Baru</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light">
-                  <i class="bi bi-lock"></i>
-                </span>
-                <input
-                  id="newPassword"
-                  ref="passwordInput"
-                  v-model="form.password"
-                  type="password"
-                  class="form-control"
-                  placeholder="Masukkan password baru"
-                  autocomplete="new-password"
-                />
-              </div>
-              <div v-if="form.errors.password" class="mt-2 text-sm text-red-600">
-                {{ form.errors.password }}
-              </div>
-            </div>
           </div>
           <div class="col-md-6">
             <label for="newPassword" class="form-label small fw-medium">Password Baru</label>

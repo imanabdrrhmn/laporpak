@@ -42,12 +42,6 @@ class ProfileController extends Controller
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
             'stats' => $stats,
-            'auth' => [
-            'user' => $user, 
-            'avatar_url' => $user->avatar
-                ? asset('storage/' . $user->avatar)
-                : 'https://placehold.co/150x150?text=Avatar',
-            ],
         ]);
     }
 

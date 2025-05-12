@@ -281,7 +281,7 @@ export default {
   methods: {
     resolveAvatar(avatarPath) {
       if (!avatarPath) {
-        return 'https://placehold.co/50x50?text=?';
+        return ('/Default-Profile.png')
       }
       if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
         return avatarPath;

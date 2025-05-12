@@ -544,7 +544,8 @@ export default {
 </script>
 
 <style scoped>
-/* Hero Section */
+@import 'leaflet/dist/leaflet.css';
+
 .hero-section {
   background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
   color: white;
@@ -803,6 +804,3 @@ export default {
 }
 </style>
 
-<style>
-@import 'leaflet/dist/leaflet.css';
-</style>

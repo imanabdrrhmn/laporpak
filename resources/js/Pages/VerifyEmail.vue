@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+  <Head title="Verifikasi Email" />
   <div class="page-wrapper p-0">
     <!-- Card content -->
     <div class="card">
@@ -31,7 +32,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { usePage, router } from '@inertiajs/vue3'
+import { usePage, router, Head } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const processing = ref(false)
