@@ -5,12 +5,13 @@
       <div class="container-fluid px-0">
         <div class="row g-0">
           <!-- Title + Description on Left Side - DYNAMIC CONTENT -->
-          <div class="col-lg-6 d-flex flex-column justify-content-center text-white hero-content p-4 p-sm-5">
+          <div class="col-lg-6 d-flex flex-column justify-content text-white hero-content p-4 p-sm-5 ms-auto">
             <div class="text-section"> 
-              <h1 class="display-4 fw-bold mb-3">
-                <i :class="serviceInfo[selectedService].titleIcon + ' me-2'"></i>
-                {{ serviceInfo[selectedService].title }}
-              </h1>
+              <h1 class="display-4 fw-bold mb-3 d-flex align-items-center">
+  <i :class="serviceInfo[selectedService].titleIcon + ' me-2'"></i>
+  <span class="text-nowrap">{{ serviceInfo[selectedService].title }}</span>
+</h1>
+
               <div class="highlight-bar mb-4"></div>
               <p class="lead mb-4">
                 {{ serviceInfo[selectedService].description }}
@@ -70,7 +71,7 @@
           </div>
 
           <!-- Form on Right Side -->
-          <div class="col-lg-6 d-flex align-items-center justify-content-center p-3 p-md-4 bg-light">
+          <div class="col-lg-6 d-flex align-items-center justify-content-end p-3 p-md-2 bg-light">
             <div class="form-container p-3 p-sm-4 p-lg-5 w-100">
               <h5 class="text-start fw-bold mb-3">
                 <i class="bi bi-exclamation-triangle text-warning me-2"></i>
@@ -133,7 +134,7 @@
                       type="text"
                       class="form-control"
                       :class="{'is-invalid': validationErrors.source}"
-                      placeholder="Contoh: Website palsu, telepon, WhatsApp, dll"
+                      placeholder="Contoh: telepon, WhatsApp, dll"
                       maxlength="255"
                       @input="validationErrors.source = false"
                       aria-label="Sumber Penipuan"
@@ -314,7 +315,7 @@ const serviceInfo = {
   },
   infrastructure: {
     badge: 'Lapor Infrastruktur',
-    title: 'Pelaporan Kerusakan',
+    title: 'Pelaporan Infrastruktur',
     titleIcon: 'bi bi-wrench',
     description: 'Laporkan fasilitas umum dan infrastruktur yang rusak untuk perbaikan yang lebih cepat.',
     icon: 'bi bi-building-gear',
@@ -616,6 +617,10 @@ function getCurrentLocation() {
 
 <style scoped>
 /* Mobile-first base styles */
+.text-nowrap {
+  white-space: nowrap;
+}
+
 .hero-section {
   background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
   overflow: hidden;
@@ -968,7 +973,7 @@ function getCurrentLocation() {
   }
 
   .display-4 {
-    font-size: 4rem !important;
+    font-size: 2.5rem !important;
   }
 
   .map-container {
