@@ -552,8 +552,8 @@ export default {
 .hero-section {
   background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
   color: white;
-  padding: 100px 0;
-  min-height: 100vh;
+  padding: 60px 0;
+  min-height: 60vh; /* Reduced height for smaller screens */
   position: relative;
   overflow: hidden;
 }
@@ -571,26 +571,29 @@ export default {
 
 .line-separator {
   height: 5px;
-  width: 80px;
+  width: 60px; /* Slightly smaller for mobile */
   background: linear-gradient(to right, #ffb74d, #f57c00);
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   border-radius: 3px;
 }
 
 .hero-content {
-  padding-right: 30px;
+  padding-right: 15px;
+  text-align: center; /* Center text on all devices for consistency */
 }
 
 .map-container {
   position: relative;
-  border-radius: 20px;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
   overflow: hidden;
 }
 
 .map-container img {
-  border-radius: 20px;
+  border-radius: 15px;
   transition: all 0.5s ease;
+  width: 100%;
+  height: auto;
 }
 
 .map-container:hover img {
@@ -600,7 +603,7 @@ export default {
 .map-pin {
   position: absolute;
   color: #f44336;
-  font-size: 24px;
+  font-size: 20px; /* Slightly smaller for mobile */
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
 }
 
@@ -614,27 +617,28 @@ export default {
 
 .floating-card {
   position: absolute;
-  bottom: 30px;
-  right: 30px;
+  bottom: 20px;
+  right: 20px;
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
   color: #333;
-  max-width: 250px;
+  max-width: 200px; /* Reduced for smaller screens */
   transform: translateY(0);
   transition: transform 0.3s ease;
 }
 
 .map-container:hover .floating-card {
-  transform: translateY(-10px);
+  transform: translateY(-8px);
 }
 
 .stat-item {
   text-align: center;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 15px; /* Added spacing */
   transition: all 0.3s ease;
 }
 
@@ -644,14 +648,14 @@ export default {
 }
 
 .stat-number {
-  font-size: 2.5rem;
+  font-size: 2rem; /* Smaller base font size */
   font-weight: bold;
   margin-bottom: 0;
 }
 
 .stat-label {
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: 0.75rem; /* Smaller for mobile */
   letter-spacing: 1px;
   margin-bottom: 0;
 }
@@ -662,7 +666,7 @@ export default {
 }
 
 .map {
-  height: 600px;
+  height: 500px; /* Default height */
   width: 100%;
   z-index: 1;
 }
@@ -685,7 +689,7 @@ export default {
   justify-content: center;
   align-items: center;
   color: white;
-  font-size: 20px;
+  font-size: 18px; /* Slightly smaller for mobile */
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -700,26 +704,26 @@ export default {
 }
 
 .legend-marker {
-  width: 30px;
-  height: 30px;
+  width: 24px; /* Smaller for mobile */
+  height: 24px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .location-list {
-  max-height: 300px;
+  max-height: 250px; /* Slightly smaller for mobile */
   overflow-y: auto;
 }
 
 .location-marker {
   display: inline-block;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  margin-right: 8px;
+  margin-right: 6px;
 }
 
 .marker-high { background-color: #dc3545; }
@@ -735,34 +739,49 @@ export default {
   100% { opacity: 1; transform: translateY(0); }
 }
 
-.location-list::-webkit-scrollbar { width: 8px; }
+.location-list::-webkit-scrollbar { width: 6px; }
 .location-list::-webkit-scrollbar-track { background: #f1f1f1; }
 .location-list::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
 .location-list::-webkit-scrollbar-thumb:hover { background: #555; }
 
+/* Modal */
+.modal-dialog {
+  max-width: 90%; /* Flexible width for all screens */
+  margin: 1rem auto;
+}
+
+.modal-content {
+  border-radius: 10px;
+}
+
+.modal-body {
+  max-height: 60vh; /* Prevent overflow on small screens */
+  overflow-y: auto;
+}
+
 /* Animations */
-.animate__animated { animation-duration: 1s; animation-fill-mode: both; }
-.animate__delay-1s { animation-delay: 0.2s; }
-.animate__delay-2s { animation-delay: 0.4s; }
-.animate__delay-3s { animation-delay: 0.6s; }
-.animate__delay-4s { animation-delay: 0.8s; }
+.animate__animated { animation-duration: 0.8s; animation-fill-mode: both; }
+.animate__delay-1s { animation-delay: 0.1s; }
+.animate__delay-2s { animation-delay: 0.2s; }
+.animate__delay-3s { animation-delay: 0.3s; }
+.animate__delay-4s { animation-delay: 0.4s; }
 
 @keyframes fadeInLeft {
-  from { opacity: 0; transform: translate3d(-50px, 0, 0); }
+  from { opacity: 0; transform: translate3d(-30px, 0, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 .animate__fadeInLeft { animation-name: fadeInLeft; }
 
 @keyframes fadeInRight {
-  from { opacity: 0; transform: translate3d(50px, 0, 0); }
+  from { opacity: 0; transform: translate3d(30px, 0, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 .animate__fadeInRight { animation-name: fadeInRight; }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translate3d(0, 30px, 0); }
+  from { opacity: 0; transform: translate3d(0, 20px, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
@@ -775,14 +794,6 @@ export default {
 
 .animate__fadeIn { animation-name: fadeIn; }
 
-/* Responsive adjustments */
-@media (max-width: 992px) {
-  .hero-content { padding-right: 0; padding-bottom: 50px; text-align: center; }
-  .line-separator { margin: 0 auto 20px; }
-  .stats { margin-bottom: 50px; }
-  .map { height: 400px; }
-}
-
 /* Deep selector untuk Leaflet */
 :deep(.leaflet-popup-content-wrapper) {
   border-radius: 8px;
@@ -790,12 +801,12 @@ export default {
 }
 
 :deep(.leaflet-popup-content) {
-  margin: 15px;
+  margin: 10px;
 }
 
 :deep(.leaflet-container a.leaflet-popup-close-button) {
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   padding: 4px;
   color: #333;
 }
@@ -804,6 +815,172 @@ export default {
   color: #000;
   background-color: #f8f9fa;
   border-radius: 50%;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .hero-section {
+    padding: 50px 0;
+    min-height: 50vh;
+  }
+  .stat-number {
+    font-size: 1.8rem;
+  }
+  .map {
+    height: 450px;
+  }
+}
+
+@media (max-width: 992px) {
+  .hero-content {
+    padding-bottom: 30px;
+  }
+  .line-separator {
+    margin: 0 auto 15px;
+  }
+  .stats {
+    margin-bottom: 30px;
+  }
+  .map-container {
+    margin-bottom: 20px;
+  }
+  .map {
+    height: 400px;
+  }
+  .col-lg-9, .col-lg-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .col-lg-3 {
+    margin-top: 20px; /* Stack sidebar below map */
+  }
+  .floating-card {
+    max-width: 180px;
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 40px 0;
+    min-height: 40vh;
+  }
+  .hero-content h1 {
+    font-size: 1.8rem; /* Smaller heading */
+  }
+  .hero-content p.lead {
+    font-size: 1rem;
+  }
+  .stat-item {
+    padding: 8px;
+  }
+  .stat-number {
+    font-size: 1.5rem;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+  }
+  .map {
+    height: 350px;
+  }
+  .legend-marker {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+  .location-list {
+    max-height: 200px;
+  }
+  .map-pin {
+    font-size: 18px;
+  }
+  .card-header h5 {
+    font-size: 1rem;
+  }
+  .modal-dialog {
+    max-width: 95%;
+  }
+  .modal-body {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-section {
+    padding: 30px 0;
+    min-height: 35vh;
+  }
+  .hero-content h1 {
+    font-size: 1.5rem;
+  }
+  .hero-content p.lead {
+    font-size: 0.9rem;
+  }
+  .line-separator {
+    width: 50px;
+  }
+  .stat-item {
+    margin-bottom: 10px;
+  }
+  .stat-number {
+    font-size: 1.2rem;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+  }
+  .map {
+    height: 300px; /* Smaller map for small screens */
+  }
+  .floating-card {
+    max-width: 150px;
+    padding: 6px;
+    font-size: 0.8rem;
+    bottom: 10px;
+    right: 10px;
+  }
+  .map-pin {
+    font-size: 16px;
+  }
+  .card-header h5 {
+    font-size: 0.9rem;
+  }
+  .location-list {
+    max-height: 180px;
+  }
+  .btn-sm {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+  .modal-body {
+    max-height: 50vh;
+    font-size: 0.85rem;
+  }
+  .table {
+    font-size: 0.8rem;
+  }
+}
+
+/* Extra small devices (below 320px) */
+@media (max-width: 320px) {
+  .hero-content h1 {
+    font-size: 1.3rem;
+  }
+  .hero-content p.lead {
+    font-size: 0.8rem;
+  }
+  .map {
+    height: 250px;
+  }
+  .floating-card {
+    max-width: 120px;
+    font-size: 0.7rem;
+  }
+  .legend-marker {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
 }
 </style>
 

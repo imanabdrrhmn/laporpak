@@ -10,42 +10,6 @@
     </div>
 
     <div class="container py-3 py-md-5">
-      <!-- Filter Section -->
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <div class="d-flex align-items-center w-100 w-md-auto">
-          <span class="me-2 me-md-3 fw-medium text-muted">FILTER:</span>
-          <select v-model="selectedCategory" class="form-select" style="max-width: 200px;" @change="handleCategoryChange">
-            <option value="">Semua Kategori</option>
-            <option value="Pelaporan">Pelaporan</option>
-            <option value="Verifikasi">Verifikasi</option>
-            <option value="Lapor Map">Lapor Map</option>
-            <option value="Umum">Umum</option>
-            <option value="Cari Laporan">Cari Laporan</option>
-          </select>
-          
-          <!-- Tombol Feedback Saya (terpisah) -->
-          <button 
-            v-if="isLoggedIn" 
-            class="btn ms-2 ms-md-3" 
-            :class="isMyFeedbackActive ? 'btn-primary' : 'btn-outline-primary'"
-            @click="toggleMyFeedback"
-          >
-            <i class="bi bi-person-lines-fill me-1"></i> Feedback Saya
-          </button>
-        </div>
-        
-        <div class="d-flex w-100 w-md-auto justify-content-end">
-          <div class="d-flex">
-            <button class="btn btn-primary me-2" @click="sortBy = 'latest'">
-              Terbaru
-            </button>
-            <button class="btn btn-white text-primary border-primary hover-bg-primary hover-text-white" @click="sortBy = 'highestRating'">
-              Rating Tertinggi
-            </button>
-          </div>
-        </div>
-      </div>
-
       <!-- Flash Messages -->
       <div v-if="$page.props.flash?.success" class="alert alert-success alert-dismissible fade show" role="alert">
         {{ $page.props.flash.success }}
@@ -56,27 +20,79 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
 
-      <!-- Button to Open Modal -->
-      <div v-if="isLoggedIn && contactVerified" class="mb-4">
-        <button class="btn btn-primary" @click="openFeedbackModal('create')">
-          <i class="bi bi-chat-square-text me-2"></i> Beri Feedback
-        </button>
-      </div>
-      <div v-else-if="isLoggedIn && !contactVerified" class="mb-4">
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-          <i class="bi bi-exclamation-triangle me-2"></i>
-          Anda perlu verifikasi email atau nomor HP terlebih dahulu untuk memberi feedback.
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <!-- Navigation and Filter Card -->
+      <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-3 p-md-4">
+          <div class="row g-3">
+            <!-- Beri Feedback Button - Always First -->
+            <div class="col-12 col-md-6 col-xl-3 order-1">
+              <div v-if="isLoggedIn && contactVerified">
+                <button class="btn btn-primary w-100" @click="openFeedbackModal('create')">
+                  <i class="bi bi-chat-square-text me-2"></i> Beri Feedback
+                </button>
+              </div>
+              <div v-else-if="isLoggedIn && !contactVerified">
+                <button class="btn btn-warning w-100" disabled title="Verifikasi diperlukan">
+                  <i class="bi bi-exclamation-triangle me-2"></i> Verifikasi Diperlukan
+                </button>
+              </div>
+            </div>
+
+            <!-- My Feedback Button - Second Position -->
+            <div class="col-12 col-md-6 col-xl-3 order-2" v-if="isLoggedIn">
+              <button 
+                class="btn w-100" 
+                :class="isMyFeedbackActive ? 'btn-primary' : 'btn-outline-primary'"
+                @click="toggleMyFeedback"
+              >
+                <i class="bi bi-person-lines-fill me-1"></i> Feedback Saya
+              </button>
+            </div>
+
+            <!-- Category Filter - Third Position -->
+            <div class="col-12 col-md-6 col-xl-3 order-3">
+              <div class="input-group">
+                <span class="input-group-text bg-light">Kategori</span>
+                <select v-model="selectedCategory" class="form-select" @change="handleCategoryChange">
+                  <option value="">Semua Kategori</option>
+                  <option value="Pelaporan">Pelaporan</option>
+                  <option value="Verifikasi">Verifikasi</option>
+                  <option value="Lapor Map">Lapor Map</option>
+                  <option value="Umum">Umum</option>
+                  <option value="Cari Laporan">Cari Laporan</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Sort Options - Fourth Position -->
+            <div class="col-12 col-md-6 col-xl-3 order-4">
+              <div class="btn-group w-100">
+                <button class="btn flex-grow-1" :class="sortBy === 'latest' ? 'btn-primary' : 'btn-outline-primary'" @click="sortBy = 'latest'">
+                  <i class="bi bi-clock-history me-1 d-none d-sm-inline"></i> Terbaru
+                </button>
+                <button class="btn flex-grow-1" :class="sortBy === 'highestRating' ? 'btn-primary' : 'btn-outline-primary'" @click="sortBy = 'highestRating'">
+                  <i class="bi bi-star-fill me-1 d-none d-sm-inline"></i> Rating Tertinggi
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Warning message for unverified users -->
+          <div v-if="isLoggedIn && !contactVerified" class="mt-3">
+            <div class="alert alert-warning mb-0 py-2" role="alert">
+              <small><i class="bi bi-exclamation-triangle me-1"></i> Anda perlu verifikasi email atau nomor HP terlebih dahulu untuk memberi feedback.</small>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Feedback List with Fixed Layout -->
       <div class="feedback-container">
         <!-- Skeleton View -->
-        <div v-if="isLoading" class="row">
-          <div v-for="n in 3" :key="n" class="col-12 col-sm-6 col-md-4 mb-4">
+        <div v-if="isLoading" class="row g-3">
+          <div v-for="n in 3" :key="n" class="col-12 col-sm-6 col-lg-4 mb-3">
             <div class="card border-0 shadow-lg h-100">
-              <div class="card-body">
+              <div class="card-body p-3">
                 <!-- User info skeleton at top -->
                 <div class="d-flex align-items-center mb-3">
                   <div class="skeleton skeleton-circle me-3"></div>
@@ -95,10 +111,10 @@
 
         <!-- Feedback List or Empty State -->
         <div v-else>
-          <div v-if="filteredFeedbacks.length > 0" class="row">
-            <div v-for="feedback in filteredFeedbacks" :key="feedback.id" class="col-12 col-sm-6 col-md-4 mb-4">
-              <div class="card border-0 shadow-lg rounded-lg h-100">
-                <div class="card-body p-3 p-md-4">
+          <div v-if="filteredFeedbacks.length > 0" class="row g-3">
+            <div v-for="feedback in filteredFeedbacks" :key="feedback.id" class="col-12 col-sm-6 col-lg-4 mb-3">
+              <div class="card border-0 shadow-lg rounded-lg h-100 feedback-card">
+                <div class="card-body p-3">
                   <!-- User Info moved to top -->
                   <div class="d-flex align-items-center mb-3">
                     <img
@@ -115,7 +131,7 @@
                     >
                       {{ feedback.user.name.charAt(0) }}{{ feedback.user.name.split(' ').length > 1 ? feedback.user.name.split(' ')[1].charAt(0) : '' }}
                     </div>
-                    <h5 class="card-title mb-0 fs-6">{{ feedback.user.name }}</h5>
+                    <h5 class="card-title mb-0 fs-6 text-truncate" style="max-width: 150px;">{{ feedback.user.name }}</h5>
                     
                     <!-- Burger Menu Dropdown -->
                     <div class="ms-auto">
@@ -145,10 +161,12 @@
                   </div>
                   
                   <!-- Category and Timestamp -->
-                  <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
                     <span :class="[
                       'badge',
                       'rounded-pill',
+                      'mb-1',
+                      'me-1',
                       feedback.kategori === 'Verifikasi' ? 'bg-verifikasi text-verifikasi' :
                       feedback.kategori === 'Pelaporan' ? 'bg-pelaporan text-pelaporan' :
                       feedback.kategori === 'Umum' ? 'bg-umum text-umum' :
@@ -177,7 +195,8 @@
           </div>
 
           <!-- Empty State -->
-          <div v-else class="empty-state text-center">
+          <div v-else class="empty-state text-center py-5">
+            <i class="bi bi-emoji-frown display-4 text-muted mb-3"></i>
             <p class="text-muted">Tidak ditemukan feedback untuk kategori ini.</p>
           </div>
         </div>
@@ -193,7 +212,7 @@
 
       <!-- Detail Feedback Modal -->
       <div class="modal fade" ref="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="detailModalLabel">Detail Feedback</h5>
@@ -216,7 +235,7 @@
                   {{ selectedFeedback.user?.name?.charAt(0) }}{{ selectedFeedback.user?.name?.split(' ').length > 1 ? selectedFeedback.user.name.split(' ')[1].charAt(0) : '' }}
                 </div>
                 <div>
-                  <h5 class="mb-0">{{ selectedFeedback.user?.name }}</h5>
+                  <h5 class="mb-0 text-break">{{ selectedFeedback.user?.name }}</h5>
                   <div class="text-muted small">
                     {{ selectedFeedback.created_at }}
                     <template v-if="selectedFeedback.is_updated"> (diperbarui)</template>
@@ -255,7 +274,7 @@
                 <p class="mb-0">{{ selectedFeedback.admin_response }}</p>
               </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer flex-wrap gap-2">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
               <button 
                 v-if="page.props.auth?.user?.id === selectedFeedback?.user_id || isAdmin" 
@@ -366,7 +385,7 @@ const toggleMyFeedback = () => {
   isLoading.value = true;
   setTimeout(() => {
     isLoading.value = false;
-  }, 1000);
+  }, 700);
 };
 
 // Handle search with debounce
@@ -380,8 +399,8 @@ const handleSearch = () => {
 
 let searchTimeout;
 
-// Watch for changes in filters to simulate loading
-watch([selectedCategory, sortBy], () => {
+// Handle category change
+const handleCategoryChange = () => {
   // Reset "Feedback Saya" ketika filter kategori berubah
   if (selectedCategory.value !== '') {
     isMyFeedbackActive.value = false;
@@ -390,7 +409,15 @@ watch([selectedCategory, sortBy], () => {
   isLoading.value = true;
   setTimeout(() => {
     isLoading.value = false;
-  }, 1000); // Simulate 1-second loading
+  }, 700);
+};
+
+// Watch for changes in filters to simulate loading
+watch([sortBy], () => {
+  isLoading.value = true;
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 700); // Simulate loading
 });
 
 // Modal management for feedback
@@ -463,11 +490,6 @@ const truncateText = (text, maxLength) => {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + '...';
 };
-
-// Handle category change
-
-
-const searchInput = ref(null);
 </script>
 
 <style scoped>
@@ -518,26 +540,6 @@ const searchInput = ref(null);
   background-color: #6f42c1;
 }
 
-.btn-white {
-  background-color: white;
-}
-
-.border-primary {
-  border-color: #0d6efd !important;
-}
-
-.text-primary {
-  color: #0d6efd !important;
-}
-
-.hover-bg-primary:hover {
-  background-color: #0d6efd !important;
-}
-
-.hover-text-white:hover {
-  color: white !important;
-}
-
 /* Fixed Layout */
 .feedback-container {
   min-height: 400px;
@@ -549,9 +551,20 @@ const searchInput = ref(null);
 .empty-state {
   flex-grow: 1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 400px;
+  min-height: 200px;
+}
+
+/* Card Enhancements */
+.feedback-card {
+  transition: all 0.3s ease;
+}
+
+.feedback-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Skeleton Styles */
@@ -592,39 +605,22 @@ const searchInput = ref(null);
   height: 20px;
 }
 
-@media (max-width: 575.98px) {
-  .form-select {
-    width: 100%;
-    max-width: none;
-  }
-  
-  .input-group {
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    border-radius: 6px;
-  }
-  
-  .search-container {
-    margin-top: 10px;
-    margin-left: 0 !important;
-  }
-  
-  .search-container .input-group {
-    width: 100% !important;
-  }
-}
-
 /* Responsive adjustments */
 @media (max-width: 767.98px) {
-  .card-body {
-    padding: 15px;
-  }
-  
   .display-5 {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
   
   .lead {
     font-size: 1rem;
+  }
+
+  .modal-footer {
+    justify-content: center;
+  }
+  
+  .modal-footer .btn {
+    flex-grow: 1;
   }
 }
 
@@ -634,6 +630,56 @@ const searchInput = ref(null);
   }
   100% {
     background-color: #f5f5f5;
+  }
+}
+
+/* Media queries for better responsive design */
+@media (max-width: 575.98px) {
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  h1.display-5 {
+    font-size: 1.5rem;
+  }
+  
+  .lead {
+    font-size: 0.9rem;
+  }
+  
+  .header-gradient {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+}
+
+/* Make buttons more touch-friendly on mobile */
+@media (max-width: 767.98px) {
+  .btn {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .input-group-text {
+    font-size: 0.875rem;
+  }
+  
+  .input-group .form-select {
+    font-size: 0.875rem;
+  }
+  
+  .card {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Ensure cards have consistent height on all screens */
+@media (max-width: 991.98px) {
+  .row {
+    margin: 0 -0.5rem;
+  }
+  
+  .col-12, .col-sm-6, .col-md-4, .col-lg-4 {
+    padding: 0 0.5rem;
   }
 }
 </style>

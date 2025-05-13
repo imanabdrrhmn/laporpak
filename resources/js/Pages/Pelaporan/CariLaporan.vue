@@ -7,8 +7,7 @@
       <!-- Filter and search section -->
       <div class="filter-bar">
         <div class="row g-3 align-items-center">
-          <!-- Search input - full width on mobile, 6 cols on lg -->
-          <div class="col-12 col-lg-6">
+          <div class="col-lg-6">
             <div class="input-group">
               <span class="input-group-text bg-white border-end-0" aria-hidden="true">
                 <i class="fas fa-search text-muted"></i>
@@ -36,12 +35,9 @@
               {{ searchError }}
             </div>
           </div>
-          
-          <!-- Filters - stack on mobile, 6 cols on lg -->
-          <div class="col-12 col-lg-6">
+          <div class="col-lg-6">
             <div class="row g-2">
-              <!-- Type filter - responsive widths -->
-              <div class="col-12 col-sm-4">
+              <div class="col-sm-4">
                 <select
                   class="form-select"
                   v-model="typeFilter"
@@ -50,12 +46,11 @@
                   <option value="all">Semua Jenis</option>
                   <option value="Telepon">Telepon</option>
                   <option value="Email">Email</option>
+                  <option value="Website">Website</option>
                   <option value="WhatsApp">WhatsApp</option>
                 </select>
               </div>
-              
-              <!-- Status filter - responsive widths -->
-              <div class="col-12 col-sm-4">
+              <div class="col-sm-4">
                 <select
                   class="form-select"
                   v-model="statusFilter"
@@ -67,9 +62,7 @@
                   <option value="rejected">Berbahaya</option>
                 </select>
               </div>
-              
-              <!-- Sort order - responsive widths -->
-              <div class="col-12 col-sm-4">
+              <div class="col-sm-4">
                 <select
                   class="form-select"
                   v-model="sortOrder"
@@ -85,33 +78,30 @@
           </div>
         </div>
         
-        <!-- Active filters section - improved for mobile -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
-          <div class="active-filters mb-2 mb-sm-0" v-if="hasActiveFilters">
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div class="active-filters" v-if="hasActiveFilters">
             <span class="me-2">Filter aktif:</span>
-            <div class="d-inline-flex flex-wrap gap-1">
-              <span 
-                v-if="searchQuery" 
-                class="badge bg-light text-dark me-1 mb-1 active-filter"
-              >
-                "{{ searchQuery }}"
-                <button @click="clearSearch" class="btn-close btn-close-sm ms-1" aria-label="Hapus filter pencarian"></button>
-              </span>
-              <span 
-                v-if="typeFilter !== 'all'" 
-                class="badge bg-light text-dark me-1 mb-1 active-filter"
-              >
-                {{ typeFilter }}
-                <button @click="typeFilter = 'all'" class="btn-close btn-close-sm ms-1" aria-label="Hapus filter jenis"></button>
-              </span>
-              <span 
-                v-if="statusFilter !== 'all'" 
-                class="badge bg-light text-dark me-1 mb-1 active-filter"
-              >
-                {{ getFilterStatusLabel(statusFilter) }}
-                <button @click="statusFilter = 'all'" class="btn-close btn-close-sm ms-1" aria-label="Hapus filter status"></button>
-              </span>
-            </div>
+            <span 
+              v-if="searchQuery" 
+              class="badge bg-light text-dark me-1 active-filter"
+            >
+              "{{ searchQuery }}"
+              <button @click="clearSearch" class="btn-close btn-close-sm ms-1" aria-label="Hapus filter pencarian"></button>
+            </span>
+            <span 
+              v-if="typeFilter !== 'all'" 
+              class="badge bg-light text-dark me-1 active-filter"
+            >
+              {{ typeFilter }}
+              <button @click="typeFilter = 'all'" class="btn-close btn-close-sm ms-1" aria-label="Hapus filter jenis"></button>
+            </span>
+            <span 
+              v-if="statusFilter !== 'all'" 
+              class="badge bg-light text-dark me-1 active-filter"
+            >
+              {{ getFilterStatusLabel(statusFilter) }}
+              <button @click="statusFilter = 'all'" class="btn-close btn-close-sm ms-1" aria-label="Hapus filter status"></button>
+            </span>
           </div>
           <div>
             <button
@@ -127,10 +117,10 @@
         </div>
       </div>
 
-      <!-- Results stats - more responsive -->
+      <!-- Results stats -->
       <div v-if="!loading && filteredReports.length > 0" class="results-stats mb-3">
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
-          <p class="mb-2 mb-sm-0">
+        <div class="d-flex justify-content-between align-items-center">
+          <p class="mb-0">
             Menampilkan {{ paginatedReports.length }} dari {{ filteredReports.length }} hasil
           </p>
           <div class="d-flex align-items-center">
@@ -152,8 +142,8 @@
       </div>
 
       <!-- Loading skeleton -->
-      <div v-if="loading" class="row g-3">
-        <div v-for="n in 6" :key="n" class="col-12 col-md-6 col-lg-4">
+      <div v-if="loading" class="row">
+        <div v-for="n in 6" :key="n" class="col-md-6 col-lg-4">
           <div class="card skeleton-card">
             <div class="skeleton-type-indicator"></div>
             <div class="card-header skeleton-header"></div>
@@ -186,15 +176,15 @@
         </div>
       </div>
 
-      <!-- Results grid - improved responsive layout -->
-      <transition-group name="reports-fade" tag="div" class="row g-3">
+      <!-- Results grid -->
+      <transition-group name="reports-fade" tag="div" class="row">
         <div
           v-for="(report, index) in paginatedReports"
           :key="report.id || (report.contact + index)"
-          class="col-12 col-sm-6 col-lg-4"
+          class="col-md-6 col-lg-4"
         >
           <div 
-            class="card report-card h-100"
+            class="card report-card"
             :class="{ 'report-card--danger': report.status === 'danger' }"
           >
             <div :class="getTypeClass(report.type)" class="report-card__type-indicator"></div>
@@ -210,9 +200,9 @@
                 {{ getStatusLabel(report.status) }}
               </span>
             </div>
-            <div class="card-body report-card__body d-flex flex-column">
+            <div class="card-body report-card__body">
               <h5 class="card-title report-card__title">{{ report.contact }}</h5>
-              <p class="card-text report-card__description flex-grow-1">{{ truncateText(report.description, 100) }}</p>
+              <p class="card-text report-card__description">{{ truncateText(report.description, 100) }}</p>
 
               <div class="report-card__rating mb-3">
                 <div class="report-card__rating-stars" aria-label="Rating: {{ report.rating }} dari 5">
@@ -240,9 +230,9 @@
         </div>
       </transition-group>
 
-      <!-- Pagination - more responsive -->
-      <nav v-if="totalPages > 1" aria-label="Navigasi halaman laporan" class="mt-4">
-        <ul class="pagination pagination-sm flex-wrap justify-content-center">
+      <!-- Pagination -->
+      <nav v-if="totalPages > 1" aria-label="Navigasi halaman laporan">
+        <ul class="pagination justify-content-center">
           <li class="page-item" :class="{ disabled: currentPage === 1 }">
             <button 
               class="page-link" 
@@ -328,6 +318,8 @@ import Feedback from '@/Components/Feedback.vue';
 import { usePage, Head } from '@inertiajs/vue3';
 import Section from '@/Components/Section.vue';
 
+
+
 const STATUS_LABELS = {
   danger: 'Sangat Berbahaya',
   warning: 'Berbahaya',
@@ -349,12 +341,14 @@ const FILTER_STATUS_LABELS = {
 const TYPE_CLASSES = {
   Telepon: 'report-card__type-indicator--phone',
   Email: 'report-card__type-indicator--email',
+  Website: 'report-card__type-indicator--web',
   WhatsApp: 'report-card__type-indicator--whatsapp',
 };
 
 const TYPE_ICONS = {
   Telepon: 'fas fa-phone text-danger',
   Email: 'fas fa-envelope text-primary',
+  Website: 'fas fa-globe text-warning',
   WhatsApp: 'fab fa-whatsapp text-success',
 };
 
@@ -399,7 +393,7 @@ export default {
       itemsPerPage: 6,
       currentPage: 1,
       sampleReports: [
-        // Sample reports data would go here
+        // ... (data sampleReports tetap sama, tidak dipotong di sini)
       ],
     };
   },
@@ -551,17 +545,12 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .search-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 15px;
-}
-
-@media (min-width: 768px) {
-  .search-container {
-    padding: 20px;
-  }
+  padding: 20px;
 }
 
 .filter-bar {
@@ -569,11 +558,6 @@ export default {
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
-}
-
-.active-filter {
-  display: inline-flex;
-  align-items: center;
 }
 
 .active-filter .btn-close-sm {
@@ -648,7 +632,7 @@ export default {
 
 .report-card {
   position: relative;
-  margin-bottom: 0;
+  margin-bottom: 20px;
   transition: transform 0.2s;
 }
 
@@ -676,6 +660,10 @@ export default {
   background: #007bff;
 }
 
+.report-card__type-indicator--web {
+  background: #ffc107;
+}
+
 .report-card__type-indicator--whatsapp {
   background: #28a745;
 }
@@ -684,15 +672,12 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 5px;
 }
 
 .report-card__status-badge {
   padding: 5px 10px;
   border-radius: 12px;
   font-size: 0.8rem;
-  white-space: nowrap;
 }
 
 .report-card__status-badge--danger {
@@ -708,14 +693,6 @@ export default {
 .report-card__status-badge--safe {
   background: #28a745;
   color: white;
-}
-
-.report-card__rating {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 5px;
 }
 
 .report-card__rating-stars { 
@@ -746,13 +723,5 @@ export default {
 
 .pagination .page-link {
   cursor: pointer;
-}
-
-/* Responsive styles for active filters */
-@media (max-width: 576px) {
-  .active-filters {
-    width: 100%;
-    margin-bottom: 10px;
-  }
 }
 </style>
