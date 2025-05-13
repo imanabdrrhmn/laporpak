@@ -88,5 +88,9 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/laporan-saya', [UserHistoryController::class, 'verificationHistory'])->name('history.verifications');
 });
 
+Route::get('/Credit', function (){
+    return Inertia::render('Credit/CreditPage');
+})->middleware(['auth', 'contact.verified'])->name('credit');
+
 
 require __DIR__.'/auth.php';
