@@ -4,28 +4,56 @@
       <button class="close-btn" @click="closeModal">×</button>
 
       <div v-if="report && report.id">
-        <h2 class="modal-title">{{ report.service }} Report</h2>
+        <!-- Gambar Bukti -->
+        <p>
+      <div>
+        <strong>Bukti:</strong><br />
+        <a :href="report.evidence" target="_blank">
+          <div class="evidence-image-container">
+            <img
+              :src="report.evidence"
+              alt="Bukti Laporan"
+              class="evidence-image"
+              :class="{ portrait: isPortrait, landscape: !isPortrait }"
+              @load="onImageLoad"
+            />
+          </div>
+        </a>
+      </div>
+    </p>
 
+
+        <!-- Judul & Status -->
+        <div class="modal-header">
+          <h2 class="modal-title">{{ report.service }} Report</h2>
+          <span :class="['status-badge', report.status]">
+            {{ capitalize(report.status) }}
+          </span>
+        </div>
+
+        <!-- Grid Info -->
+        <div class="info-grid">
+          <div v-if="report.service === 'fraud'" style="margin-top: 12px">
+          <strong>Sumber Penipuan:</strong><br />
+          <a>
+            {{ report.source }}
+          </a>
+        </div>
+          <div>
+            <strong>Kategori:</strong><br />
+            {{ report.category }}
+          </div>
+          <div>
+            <strong>Lokasi:</strong><br />
+            Latitude: {{ report.latitude }}<br />
+            Longitude: {{ report.longitude }}
+          </div>
+        </div>
+
+        <!-- Deskripsi -->
         <div class="modal-section">
-          <p><strong>Kategori:</strong> {{ report.category }}</p>
-          <p>
-            <strong>Status:</strong>
-            <span :class="['status-badge', report.status]">
-              {{ capitalize(report.status) }}
-            </span>
-          </p>
-          <p><strong>Deskripsi:</strong></p>
+          <strong>Deskripsi:</strong>
           <p class="description">{{ report.description }}</p>
-          <p>
-            <strong>Bukti:</strong>
-            <a :href="`/storage/${report.evidence}`" class="evidence-link" target="_blank">
-              📎 Lihat Lampiran
-            </a>
-          </p>
-          <p>
-            <strong>Lokasi:</strong>
-            Latitude: {{ report.latitude }}, Longitude: {{ report.longitude }}
-          </p>
         </div>
 
         <!-- Action Buttons -->
@@ -35,21 +63,21 @@
             @click="handleApprove"
             class="btn btn-success"
           >
-            ✅ Approve
+            Approve
           </button>
           <button
             v-if="report.status === 'pending'"
             @click="handleReject"
             class="btn btn-danger"
           >
-            ❌ Reject
+            Reject
           </button>
           <button
             v-if="report.status === 'approved'"
             @click="handlePublish"
             class="btn btn-primary"
           >
-            🚀 Publish
+            Publish
           </button>
         </div>
       </div>
@@ -129,6 +157,14 @@ const handlePublish = () => {
     })
   }, 'Publikasikan Laporan', 'Laporan akan dipublikasikan ke publik.')
 }
+
+const isPortrait = ref(false)
+
+const onImageLoad = (event) => {
+  const { naturalWidth, naturalHeight } = event.target
+  isPortrait.value = naturalHeight > naturalWidth
+}
+
 </script>
 
 <style scoped>
@@ -136,21 +172,27 @@ const handlePublish = () => {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
+  z-index: 1050;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1050;
+  overflow-y: auto;
+  padding: 40px 16px;
 }
+
 
 .modal-content {
   background: white;
   padding: 24px;
   border-radius: 12px;
-  width: 90%;
+  width: 100%;
   max-width: 600px;
+  max-height: 90vh; 
+  overflow-y: auto;  
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
+
 
 .close-btn {
   position: absolute;
@@ -164,10 +206,25 @@ const handlePublish = () => {
   font-weight: bold;
 }
 
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0;
+}
+
 .modal-title {
-  margin-bottom: 20px;
   font-size: 20px;
   font-weight: 600;
+  text-transform: capitalize;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
 }
 
 .modal-section {
@@ -183,10 +240,41 @@ const handlePublish = () => {
   border-radius: 6px;
 }
 
-.evidence-link {
-  color: #0d6efd;
-  text-decoration: underline;
-  font-weight: 500;
+
+.evidence-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
+  height: 200px; 
+  overflow: hidden;
+}
+
+
+.evidence-image {
+  margin-top: 8px;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  object-fit: contain;
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+
+.evidence-image:hover {
+  transform: scale(1.02);
+}
+
+/* Portrait image */
+.evidence-image.portrait {
+  max-height: 100%;
+  width: auto;
+}
+
+/* Landscape image */
+.evidence-image.landscape {
+  width: 100%;
+  max-height: 300px;
 }
 
 .modal-actions {
@@ -252,4 +340,18 @@ const handlePublish = () => {
   background: #cfe2ff;
   color: #084298;
 }
+
+.modal-content::-webkit-scrollbar {
+  width: 8px; /* Lebar scrollbar */
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2); /* Warna thumb */
+  border-radius: 4px; /* Sudut bulat */
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background-color: transparent; /* Warna track */
+}
+
 </style>

@@ -101,9 +101,8 @@
 import { ref, onMounted } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { Router } from '@inertiajs/inertia';
 
-const router = useRouter();
 const depositAmount = ref(100000);
 const paymentMethod = ref('BCA');
 const isLoading = ref(false);
@@ -123,7 +122,7 @@ const checkUserSession = async () => {
   try {
     const response = await axios.get('/api/user/check-session');
     if (!response.data.authenticated) {
-      router.push('/login');
+      Router.push('/login');
     }
   } catch (error) {
     errorMessage.value = 'Failed to verify user session';

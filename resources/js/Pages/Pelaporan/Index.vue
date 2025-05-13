@@ -9,30 +9,30 @@
             v-model="searchQuery"
             type="text"
             class="filter-input"
-            placeholder="🔍 Cari deskripsi atau kategori..."
+            placeholder="Cari deskripsi atau kategori..."
           />
           <select v-model="selectedCategory" class="filter-select">
-            <option value="">🗂 Semua Kategori</option>
+            <option value="">Semua Kategori</option>
             <option v-for="category in categories" :key="category" :value="category">
               {{ category }}
             </option>
           </select>
           <select v-model="selectedService" class="filter-select">
-            <option value="">⚙ Semua Layanan</option>
+            <option value="">Semua Layanan</option>
             <option v-for="service in services" :key="service" :value="service">
               {{ service }}
             </option>
           </select>
           <select v-model="selectedStatus" class="filter-select">
-            <option value="">📌 Semua Status</option>
+            <option value="">Semua Status</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
             <option value="published">Published</option>
           </select>
           <select v-model="sortDirection" class="filter-select">
-            <option value="desc">⬇️ Terbaru</option>
-            <option value="asc">⬆️ Terlama</option>
+            <option value="desc">Terbaru</option>
+            <option value="asc">Terlama</option>
           </select>
         </div>
       </div>
@@ -47,26 +47,29 @@
           </div>
 
           <!-- Report Details -->
-          <p>
-            <strong>📁 Kategori:</strong> {{ report.category }}
+           <p v-if="report.service == 'fraud'">
+            <strong>Sumber Penipuan:</strong> {{ report.source || '-' }}
           </p>
           <p>
-            <strong>🧰 Layanan:</strong> {{ report.service }}
+            <strong>Kategori:</strong> {{ report.category }}
           </p>
           <p>
-            <strong>📌 Status:</strong>
+            <strong>Layanan:</strong> {{ report.service }}
+          </p>
+          <p>
+            <strong>Status:</strong>
             <span :class="['status-badge', report.status]">
               {{ capitalize(report.status) }}
             </span>
           </p>
           <p class="description">{{ truncate(report.description, 100) }}</p>
-          <p class="timestamp">📅 {{ formatDate(report.created_at) }}</p>
+          <p class="timestamp">{{ formatDate(report.created_at) }}</p>
           <button @click="viewReport(report)" class="view-button">Lihat Detail</button>
         </div>
       </div>
 
       <div v-else>
-        <p class="no-results">🚫 Tidak ada laporan ditemukan.</p>
+        <p class="no-results">Tidak ada laporan ditemukan.</p>
       </div>
     </div>
 
@@ -88,11 +91,12 @@ const props = defineProps({
 })
 
 const page = usePage()
+const user = computed(() => page.props.auth?.user || {});
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const selectedService = ref('')
 const selectedStatus = ref('')
-const sortDirection = ref('desc') // default terbaru → terlama
+const sortDirection = ref('desc') 
 
 const showModal = ref(false)
 const currentReport = ref({})

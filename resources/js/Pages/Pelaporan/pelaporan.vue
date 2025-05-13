@@ -124,7 +124,25 @@
                       Kategori harus dipilih
                     </div>
                   </div>
-
+                  <!-- Fraud Source -->
+                  <div class="col-12 " v-if="selectedService === 'fraud'">
+                    <label for="source" class="form-label mb-2">Sumber Penipuan</label>
+                    <input
+                      id="source"
+                      v-model="formData.source"
+                      type="text"
+                      class="form-control"
+                      :class="{'is-invalid': validationErrors.source}"
+                      placeholder="Contoh: Website palsu, telepon, WhatsApp, dll"
+                      maxlength="255"
+                      @input="validationErrors.source = false"
+                      aria-label="Sumber Penipuan"
+                      required
+                    />
+                    <div v-if="validationErrors.source" class="invalid-feedback">
+                      Sumber penipuan harus diisi
+                    </div>
+                  </div>
                   <!-- Evidence -->
                   <div class="col-12">
                     <label for="evidence" class="form-label mb-2">Bukti</label>
@@ -261,7 +279,7 @@ const services = [
 
 // Categories for each service type
 const fraudCategories = [
-  { label: 'Nomor Telepon', value: 'NomerHp' },
+  { label: 'Nomor Telepon', value: 'Nomer Hp' },
   { label: 'Email', value: 'Email' } 
 ];
 
@@ -322,7 +340,8 @@ const formData = ref({
   description: '',
   evidence: null,
   location: null,
-  address: '' 
+  address: '' ,
+  source : '' ,
 });
 const formRef = ref(null);
 const mapRef = ref(null);
@@ -340,6 +359,7 @@ watch(selectedService, () => {
 const validationErrors = reactive({
   category: false,
   description: false,
+  source: false,
   location: false
 });
 
@@ -443,6 +463,7 @@ const handleSubmit = () => {
   if (formData.value.evidence) {
     dataToSubmit.append('evidence', formData.value.evidence);
   }
+  dataToSubmit.append('source', formData.value.source);
   dataToSubmit.append('location[lat]', formData.value.location.lat);
   dataToSubmit.append('location[lng]', formData.value.location.lng);
   dataToSubmit.append('address', formData.value.address);
@@ -455,7 +476,8 @@ const handleSubmit = () => {
         description: '',
         evidence: null,
         location: null,
-        address: ''
+        address: '',
+        source: ''
       };
       alert('Laporan berhasil dikirim!');
     },
