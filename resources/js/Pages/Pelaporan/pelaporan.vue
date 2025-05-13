@@ -3,7 +3,7 @@
     <Head title="Pelaporan"/>
     <section class="hero-section py-4">
       <div class="container-fluid px-0">
-        <div class="row g-0 min-vh-100">
+        <div class="row g-0">
           <!-- Title + Description on Left Side - DYNAMIC CONTENT -->
           <div class="col-lg-6 d-flex flex-column justify-content-center text-white hero-content p-4 p-sm-5">
             <div class="text-section"> 
@@ -79,7 +79,7 @@
 
               <!-- Service Selection with Tab-like Buttons -->
               <div class="service-tabs mb-4">
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap">
                   <button
                     v-for="service in services"
                     :key="service.value"
@@ -172,40 +172,39 @@
                     </div>
                   </div>
 
-               <!-- Location & OpenStreetMap -->
-<div class="col-12">
-  <div class="mb-2">
-    <span class="form-label fw-semibold mb-0">
-      <i class="bi bi-geo-alt me-2"></i>Lokasi
-    </span>
-  </div>
-  <div 
-    id="map" 
-    ref="mapRef" 
-    style="width: 100%; height: 250px;" 
-    class="mb-2 rounded-2 border map-container"
-    :class="{'border-danger': validationErrors.location}"
-  ></div>
-  <div class="mb-3">
-    <label for="address" class="form-label mb-2">Alamat</label>
-    <input
-      id="address"
-      v-model="formData.address"
-      class="form-control"
-      placeholder="Lokasi Anda"
-      readonly
-      aria-label="Alamat"
-    />
-  </div>
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div v-if="validationErrors.location" class="text-danger">
-      Lokasi harus dipilih pada peta
-    </div>
-    <button type="button" class="btn btn-outline-primary w-100 py-2 px-3" @click="getCurrentLocation">
-      <i class="bi bi-geo-fill me-1"></i> Lokasi Saya
-    </button>
-  </div>
-</div>
+                  <!-- Location & OpenStreetMap -->
+                  <div class="col-12">
+                    <div class="mb-2">
+                      <span class="form-label fw-semibold mb-0">
+                        <i class="bi bi-geo-alt me-2"></i>Lokasi
+                      </span>
+                    </div>
+                    <div 
+                      id="map" 
+                      ref="mapRef" 
+                      class="mb-2 rounded-2 border map-container"
+                      :class="{'border-danger': validationErrors.location}"
+                    ></div>
+                    <div class="mb-3">
+                      <label for="address" class="form-label mb-2">Alamat</label>
+                      <input
+                        id="address"
+                        v-model="formData.address"
+                        class="form-control"
+                        placeholder="Lokasi Anda"
+                        readonly
+                        aria-label="Alamat"
+                      />
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <div v-if="validationErrors.location" class="text-danger">
+                        Lokasi harus dipilih pada peta
+                      </div>
+                      <button type="button" class="btn btn-outline-primary w-100 py-2 px-3" @click="getCurrentLocation">
+                        <i class="bi bi-geo-fill me-1"></i> Lokasi Saya
+                      </button>
+                    </div>
+                  </div>
 
                   <!-- Submit Button -->
                   <div class="col-12">
@@ -242,8 +241,9 @@ import { ref, computed, onMounted, reactive, watch } from 'vue';
 import { Head, usePage, router as Inertia } from '@inertiajs/vue3';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import debounce from 'lodash/debounce';
 
-// Import komponen-komponen
+// Import components
 import Section from '@/Components/Section.vue';
 import Feedback from '@/Components/Feedback.vue';
 import Alur from '@/Components/alurpelaporan.vue';
@@ -251,7 +251,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 
 const page = usePage();
 page.layout = AppLayout;
-const feedbacks = page.props.feedbacks
+const feedbacks = page.props.feedbacks;
 
 // Service options with icons
 const services = [
@@ -325,12 +325,12 @@ const formData = ref({
   address: '' 
 });
 const formRef = ref(null);
+const mapRef = ref(null);
 
 // Watch for service changes to reset form values
 watch(selectedService, () => {
   formData.value.category = '';
   formData.value.description = '';
-  // Reset validation errors
   Object.keys(validationErrors).forEach(key => {
     validationErrors[key] = false;
   });
@@ -353,7 +353,7 @@ const isFormValid = computed(() => {
          formData.value.location !== null;
 });
 
-// Fungsi untuk validasi deskripsi
+// Function to validate description
 const validateDescription = () => {
   if (formData.value.description.length > 1500) {
     formData.value.description = formData.value.description.substring(0, 1500);
@@ -381,7 +381,6 @@ const selectService = (value) => {
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
-    // Check file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       alert('Ukuran file terlalu besar. Maksimal 5MB.');
       event.target.value = '';
@@ -391,7 +390,7 @@ const handleFileUpload = (event) => {
   }
 };
 
-// Fungsi untuk reverse geocoding menggunakan Nominatim API
+// Function for reverse geocoding using Nominatim API
 async function reverseGeocode(lat, lng) {
   try {
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
@@ -410,12 +409,10 @@ async function reverseGeocode(lat, lng) {
 
 // Form submission handler with improved validation
 const handleSubmit = () => {
-  // Reset validation errors
   Object.keys(validationErrors).forEach(key => {
     validationErrors[key] = false;
   });
 
-  // Validate all required fields
   let hasErrors = false;
   if (!formData.value.category || formData.value.category.trim() === '') {
     validationErrors.category = true;
@@ -432,7 +429,6 @@ const handleSubmit = () => {
     hasErrors = true;
   }
 
-  // If there are errors, highlight them and prevent form submission
   if (hasErrors) {
     const firstError = document.querySelector('.is-invalid, .border-danger');
     if (firstError) {
@@ -441,7 +437,6 @@ const handleSubmit = () => {
     return;
   }
 
-  // Prepare the data to be sent
   const dataToSubmit = new FormData();
   dataToSubmit.append('category', formData.value.category);
   dataToSubmit.append('description', formData.value.description);
@@ -450,13 +445,11 @@ const handleSubmit = () => {
   }
   dataToSubmit.append('location[lat]', formData.value.location.lat);
   dataToSubmit.append('location[lng]', formData.value.location.lng);
-  dataToSubmit.append('address', formData.value.address); // Mengirim alamat ke backend
+  dataToSubmit.append('address', formData.value.address);
   dataToSubmit.append('service', selectedService.value);
 
-  // Send data to the backend using Inertia POST
   Inertia.post('/pelaporan/create', dataToSubmit, {
     onSuccess: () => {
-      // Handle success (e.g., clear form, show success message)
       formData.value = {
         category: '',
         description: '',
@@ -467,46 +460,42 @@ const handleSubmit = () => {
       alert('Laporan berhasil dikirim!');
     },
     onError: (error) => {
-      // Handle error (e.g., show error messages)
       console.error('Error:', error);
     }
   });
 };
 
 // OPENSTREETMAP IMPLEMENTATION
-const mapRef = ref(null);
 let map, marker;
 
 onMounted(() => {
-  // Use a short timeout to ensure the DOM is fully rendered
   setTimeout(() => {
     initMap();
-  }, 300); // Increased timeout for better reliability
+    window.addEventListener('resize', debounce(handleMapResize, 200));
+  }, 300);
 });
 
 function initMap() {
-  // Default coordinates (Jakarta, Indonesia)
   const defaultPosition = [-6.2, 106.8];
   
   if (!mapRef.value) return;
   
   try {
-    // Initialize the map
-    map = L.map(mapRef.value).setView(defaultPosition, 12);
+    map = L.map(mapRef.value, {
+      zoomControl: true,
+      attributionControl: true
+    }).setView(defaultPosition, 12);
     
-    // Add OpenStreetMap tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19
     }).addTo(map);
     
-    // Add click event listener to the map
     map.on('click', (e) => {
       placeMarker(e.latlng);
       validationErrors.location = false;
     });
     
-    // Fix map display issue by triggering a resize event
     setTimeout(() => {
       map.invalidateSize();
     }, 500);
@@ -515,14 +504,18 @@ function initMap() {
   }
 }
 
+function handleMapResize() {
+  if (map) {
+    map.invalidateSize();
+  }
+}
+
 function placeMarker(latlng) {
-  // Remove existing marker if any
   if (marker) {
     map.removeLayer(marker);
   }
   
   try {
-    // Create custom marker icon with proper path handling
     const customIcon = L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
       iconSize: [25, 41],
@@ -532,23 +525,19 @@ function placeMarker(latlng) {
       shadowSize: [41, 41]
     });
     
-    // Create new marker
     marker = L.marker(latlng, { icon: customIcon }).addTo(map);
     
-    // Add popup with content based on selected service
     const popupContent = selectedService.value === 'fraud' 
       ? "<b>Lokasi Pelaporan</b>" 
       : "<b>Lokasi Kerusakan Infrastruktur</b>";
       
     marker.bindPopup(popupContent).openPopup();
     
-    // Store the location in form data
     formData.value.location = {
       lat: latlng.lat,
       lng: latlng.lng
     };
     
-    // Lakukan reverse geocoding untuk mendapatkan alamat
     reverseGeocode(latlng.lat, latlng.lng).then(address => {
       formData.value.address = address;
     });
@@ -559,7 +548,6 @@ function placeMarker(latlng) {
 
 function getCurrentLocation() {
   if (navigator.geolocation) {
-    // Menampilkan indikator loading untuk alamat
     formData.value.address = 'Mendapatkan alamat...';
     
     navigator.geolocation.getCurrentPosition(
@@ -569,17 +557,13 @@ function getCurrentLocation() {
           lng: position.coords.longitude
         };
         
-        // Center map on user location
         map.setView([userLocation.lat, userLocation.lng], 16);
         
-        // Place marker at user location
         placeMarker(userLocation);
         
-        // Dapatkan alamat berdasarkan koordinat
         const address = await reverseGeocode(userLocation.lat, userLocation.lng);
         formData.value.address = address;
         
-        // Clear location validation error
         validationErrors.location = false;
       },
       (error) => {
@@ -609,23 +593,27 @@ function getCurrentLocation() {
 </script>
 
 <style scoped>
+/* Mobile-first base styles */
 .hero-section {
   background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
-  min-height: 100vh;
   overflow: hidden;
   position: relative;
+  min-height: auto; /* Prevent excessive height on small screens */
+  padding-bottom: 2rem;
 }
 
 .hero-content {
   position: relative;
   z-index: 1;
+  text-align: center; /* Center text for mobile */
 }
 
 .text-section {
   color: #fff;
   position: relative;
   z-index: 1;
-  margin-top: -30rem; /* Added to shift text section slightly upwards */
+  margin-top: 0; /* Remove negative margin */
+  padding: 1.5rem;
 }
 
 /* Feature boxes styling */
@@ -635,7 +623,7 @@ function getCurrentLocation() {
   backdrop-filter: blur(10px);
   transition: transform 0.3s ease;
   text-align: left;
-
+  padding: 1.5rem;
 }
 
 .feature-box:hover {
@@ -664,8 +652,8 @@ function getCurrentLocation() {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   backdrop-filter: blur(5px);
-  padding: 0.75rem !important;
-  min-height: 60px;
+  padding: 0.75rem;
+  min-height: 80px; /* Increased for touch targets */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -685,11 +673,19 @@ function getCurrentLocation() {
 .form-container {
   background: white;
   border-radius: 15px;
-  max-width: 580px;
+  max-width: 100%;
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
 }
 
 /* Form controls styling */
+.form-control, 
+.form-select {
+  font-size: 1rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
 .form-control:focus, 
 .form-select:focus {
   border-color: #0d6efd;
@@ -698,7 +694,6 @@ function getCurrentLocation() {
 
 /* Custom select styling */
 .custom-select {
-  border-radius: 4px;
   border: 1px solid #ced4da;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -707,9 +702,11 @@ function getCurrentLocation() {
 /* Custom textarea styling */
 .custom-textarea {
   border: 1px solid #ced4da;
-  border-radius: 4px;
-  padding: 12px;
-  min-height: 120px;
+  border-radius: 6px;
+  padding: 0.75rem;
+  min-height: 100px;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .custom-textarea.border-danger {
@@ -719,7 +716,7 @@ function getCurrentLocation() {
 
 /* Custom file input styling */
 .custom-file-input {
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
@@ -733,6 +730,8 @@ function getCurrentLocation() {
   border-radius: 6px;
   font-weight: 500;
   transition: all 0.3s ease;
+  padding: 0.75rem 1rem;
+  min-height: 48px; /* Accessible tap target */
 }
 
 .service-btn:hover:not(.btn-primary) {
@@ -745,8 +744,10 @@ function getCurrentLocation() {
 }
 
 .btn-outline-primary {
-  border-radius: 4px;
+  border-radius: 6px;
   transition: all 0.3s ease;
+  padding: 0.75rem 1rem;
+  min-height: 48px;
 }
 
 .submit-btn {
@@ -756,6 +757,8 @@ function getCurrentLocation() {
   border: none;
   box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
   transition: all 0.3s ease;
+  padding: 1rem;
+  min-height: 52px;
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -765,9 +768,11 @@ function getCurrentLocation() {
 
 /* Map container styling */
 .map-container {
-  border-radius: 6px !important;
+  border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: 250px;
 }
 
 /* Button disabled styling */
@@ -802,7 +807,6 @@ function getCurrentLocation() {
   100% { transform: translateX(0); }
 }
 
-/* Button animation */
 @keyframes btn-wave {
   0% { transform: translateX(-100%) rotate(45deg); }
   100% { transform: translateX(100%) rotate(45deg); }
@@ -824,92 +828,174 @@ function getCurrentLocation() {
   background-image: url("https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png");
 }
 
-/* Responsive layout adjustments */
-@media (max-width: 576px) {
+/* Responsive adjustments */
+@media (max-width: 320px) {
   .hero-content {
-    padding: 2rem 1rem !important;
-    text-align: center;
+    padding: 1rem !important;
   }
-  
+
   .form-container {
-    width: 100%;
-    margin: 0;
-    border-radius: 10px;
+    padding: 1rem !important;
   }
-  
+
   .display-4 {
-    font-size: 2.5rem !important;
+    font-size: 1.8rem !important;
   }
-  
+
   .lead {
-    font-size: 1rem;
-  }
-  
-  .form-select {
     font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
   }
-  
-  .text-section {
-    margin-top: -1.5rem; /* Adjusted for smaller screens */
+
+  .map-container {
+    height: 200px;
   }
 }
 
-@media (max-width: 360px) {
-  .lead,
+@media (min-width: 321px) and (max-width: 576px) {
+  .hero-content {
+    padding: 2rem 1.5rem !important;
+  }
+
+  .form-container {
+    padding: 1.5rem !important;
+  }
+
   .display-4 {
-    word-break: break-word;
-    hyphens: auto;
+    font-size: 2.2rem !important;
   }
-  
-  .form-select {
-    font-size: 0.85rem;
-    padding: 0.4rem 0.6rem;
+
+  .lead {
+    font-size: 1rem;
   }
-  
-  .text-section {
-    margin-top: -1rem; /* Further adjusted for very small screens */
+
+  .map-container {
+    height: 220px;
   }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
   .hero-content {
-    padding: 2.5rem 1.5rem !important;
-    text-align: center;
+    padding: 2.5rem 2rem !important;
   }
-  
+
   .form-container {
     max-width: 90%;
     padding: 2rem !important;
   }
-  
-  .text-section {
-    margin-top: -1.5rem; /* Adjusted for medium screens */
+
+  .display-4 {
+    font-size: 2.5rem !important;
+  }
+
+  .map-container {
+    height: 250px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .hero-content {
+    padding: 3rem 2.5rem !important;
+  }
+
+  .form-container {
+    max-width: 85%;
+    padding: 2.5rem !important;
+  }
+
+  .display-4 {
+    font-size: 3rem !important;
+  }
+
+  .map-container {
+    height: 280px;
   }
 }
 
 @media (min-width: 992px) {
-  .hero-content {
-    padding-left: 4rem !important;
+  .hero-section {
+    min-height: 100vh;
   }
-  
+
+  .hero-content {
+    padding: 4rem !important;
+    text-align: left;
+  }
+
   .bg-light {
     background: transparent !important;
   }
-  
+
   .form-container {
+    max-width: 580px;
     z-index: 2;
+    padding: 3rem !important;
+  }
+
+  .display-4 {
+    font-size: 3.5rem !important;
+  }
+
+  .map-container {
+    height: 300px;
   }
 }
 
-@media (min-height: 600px) and (orientation: landscape) {
-  .min-vh-100 {
-    min-height: auto !important;
+@media (min-width: 1200px) {
+  .form-container {
+    max-width: 620px;
   }
-  
+
+  .display-4 {
+    font-size: 4rem !important;
+  }
+
+  .map-container {
+    height: 320px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container-fluid {
+    max-width: 1400px;
+  }
+
+  .form-container {
+    max-width: 680px;
+  }
+
+  .map-container {
+    height: 350px;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
   .hero-section {
     min-height: auto;
     overflow-y: auto;
+  }
+
+  .hero-content {
+    padding: 2rem !important;
+  }
+
+  .form-container {
+    padding: 2rem !important;
+  }
+
+  .map-container {
+    height: 200px;
+  }
+}
+
+/* High-resolution displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .feature-box, .mobile-feature {
+    backdrop-filter: blur(12px);
+  }
+
+  .form-container {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   }
 }
 </style>
