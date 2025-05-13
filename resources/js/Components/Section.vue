@@ -26,7 +26,7 @@
             </div>
             
             <!-- Report Check Form -->
-            <div class="row justify-content-center mt-5 pt-4">
+            <div v-if="showSearch" class="row justify-content-center mt-5 pt-4">
                 <div class="col-lg-8 col-md-10 text-center">
                     <h2 class="fw-bold fs-2 mb-4">Sudah Ada yang Melaporkan? Cek di Sini!</h2>
                     <div class="search-container mt-3 mb-4">
@@ -120,6 +120,12 @@
 <script>
 export default {
     name: 'aboutSection',
+    props: {
+        showSearch: {
+            type: Boolean,
+            default: true
+        }
+    },
     data() {
         return {
             searchQuery: '',

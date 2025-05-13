@@ -8,37 +8,6 @@
         <div class="col-12">
           <div class="carousel-container overflow-hidden">
             <div class="carousel-track d-flex" :style="{ transform: `translateX(-${scrollPosition1}px)` }">
-              <!-- Clone awal kartu untuk infinite scroll -->
-              <div v-for="testimonial in testimonials" :key="`clone-top-start-${testimonial.id}`" 
-                   class="testimonial-card mx-2 mx-md-3">
-                <div class="card-body">
-                  <div class="d-flex flex-wrap flex-sm-nowrap">
-                    <div class="avatar-section">
-                      <div class="avatar-container">
-                        <img :src="testimonial.avatar" class="avatar" alt="user avatar">
-                      </div>
-                      <div class="user-info">
-                        <h4 class="user-name">{{ testimonial.name }}</h4>
-                        <p class="user-category" :class="getCategoryClassMethod(testimonial.kategori)">
-                          {{ testimonial.kategori }}
-                        </p>
-                      </div>
-                    </div>
-                    <div class="ms-auto mt-2 mt-sm-0">
-                      <div class="rating">
-                        <span v-for="star in 5" :key="star" class="star-icon" :style="{ color: star <= testimonial.rating ? '#ff9800' : '#ccc' }">
-                        ★
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <hr class="divider">
-                  
-                  <p class="testimonial-text">{{ testimonial.content }}</p>
-                </div>
-              </div>
-              
               <!-- Kartu asli -->
               <div v-for="testimonial in testimonials" :key="`top-${testimonial.id}`" 
                    class="testimonial-card mx-2 mx-md-3">
@@ -70,8 +39,8 @@
                 </div>
               </div>
               
-              <!-- Clone akhir kartu untuk infinite scroll -->
-              <div v-for="testimonial in testimonials" :key="`clone-top-end-${testimonial.id}`" 
+              <!-- Clone kartu untuk infinite scroll -->
+              <div v-for="testimonial in testimonials" :key="`clone-top-${testimonial.id}`" 
                    class="testimonial-card mx-2 mx-md-3">
                 <div class="card-body">
                   <div class="d-flex flex-wrap flex-sm-nowrap">
@@ -110,37 +79,6 @@
         <div class="col-12">
           <div class="carousel-container overflow-hidden">
             <div class="carousel-track d-flex" :style="{ transform: `translateX(-${scrollPosition2}px)` }">
-              <!-- Clone awal kartu untuk baris kedua -->
-              <div v-for="testimonial in shuffledTestimonials" :key="`clone-bottom-start-${testimonial.id}`" 
-                   class="testimonial-card mx-2 mx-md-3">
-                <div class="card-body">
-                  <div class="d-flex flex-wrap flex-sm-nowrap">
-                    <div class="avatar-section">
-                      <div class="avatar-container">
-                        <img :src="testimonial.avatar" class="avatar" alt="user avatar">
-                      </div>
-                      <div class="user-info">
-                        <h4 class="user-name">{{ testimonial.name }}</h4>
-                        <p class="user-category" :class="getCategoryClassMethod(testimonial.kategori)">
-                          {{ testimonial.kategori }}
-                        </p>
-                      </div>
-                    </div>
-                    <div class="ms-auto mt-2 mt-sm-0">
-                      <div class="rating">
-                        <span v-for="star in 5" :key="star" class="star-icon" :style="{ color: star <= testimonial.rating ? '#ff9800' : '#ccc' }">
-                        ★
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <hr class="divider">
-                  
-                  <p class="testimonial-text">{{ testimonial.content }}</p>
-                </div>
-              </div>
-              
               <!-- Kartu asli baris kedua -->
               <div v-for="testimonial in shuffledTestimonials" :key="`bottom-${testimonial.id}`" 
                    class="testimonial-card mx-2 mx-md-3">
@@ -172,8 +110,8 @@
                 </div>
               </div>
               
-              <!-- Clone akhir kartu untuk baris kedua -->
-              <div v-for="testimonial in shuffledTestimonials" :key="`clone-bottom-end-${testimonial.id}`" 
+              <!-- Clone kartu untuk infinite scroll baris kedua -->
+              <div v-for="testimonial in shuffledTestimonials" :key="`clone-bottom-${testimonial.id}`" 
                    class="testimonial-card mx-2 mx-md-3">
                 <div class="card-body">
                   <div class="d-flex flex-wrap flex-sm-nowrap">
@@ -241,6 +179,7 @@ export default {
       cardWidth: 0,
       cardMargin: 0,
       totalWidth: 0,
+      originalSetWidth: 0,
       isMobile: false
     };
   },
@@ -317,9 +256,14 @@ export default {
         const marginRight = parseInt(style.marginRight.replace('px', ''));
         this.cardWidth = card.offsetWidth;
         this.cardMargin = marginLeft + marginRight;
-        this.totalWidth = (this.cardWidth + this.cardMargin) * this.testimonials.length;
-        this.scrollPosition1 = this.totalWidth;
-        this.scrollPosition2 = this.totalWidth;
+        
+        // Menghitung lebar satu set kartu asli (setiap baris)
+        this.originalSetWidth = (this.cardWidth + this.cardMargin) * this.testimonials.length;
+        
+        // Inisialisasi posisi scroll untuk memulai dari set kartu asli
+        this.scrollPosition1 = 0;
+        this.scrollPosition2 = 0;
+        
         this.startScrolling();
       }
     },
@@ -327,11 +271,18 @@ export default {
       if (window.innerWidth < 320) return;
 
       const animate = () => {
+        // Tambahkan kecepatan scroll ke posisi
         this.scrollPosition1 += this.scrollSpeed1;
-        if (this.scrollPosition1 >= this.totalWidth * 2) this.scrollPosition1 = this.totalWidth;
-
         this.scrollPosition2 += this.scrollSpeed2;
-        if (this.scrollPosition2 >= this.totalWidth * 2) this.scrollPosition2 = this.totalWidth;
+        
+        // Reset posisi ketika sudah mencapai akhir set pertama (looping mulus)
+        if (this.scrollPosition1 >= this.originalSetWidth) {
+          this.scrollPosition1 = 0;
+        }
+        
+        if (this.scrollPosition2 >= this.originalSetWidth) {
+          this.scrollPosition2 = 0;
+        }
 
         this.animationFrameId = requestAnimationFrame(animate);
       };
@@ -565,6 +516,7 @@ export default {
     font-size: 16px;
     line-height: 1.5;
     -webkit-line-clamp: 5;
+    line-clamp: 5;
   }
   
   .star-icon {

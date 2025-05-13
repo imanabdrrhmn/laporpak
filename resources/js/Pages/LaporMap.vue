@@ -257,6 +257,8 @@
           </div>
         </div>
       </div>
+
+      <Feedback :feedbacks="feedbacks" />
     </AppLayout>
 
 
@@ -278,6 +280,7 @@ export default {
   components: {
     AppLayout,
     Head,
+    Feedback
   },
   data() {
     return {
