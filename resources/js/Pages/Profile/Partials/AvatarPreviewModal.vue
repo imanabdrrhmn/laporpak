@@ -53,33 +53,31 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { router, usePage} from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 
 const page = usePage();
-const user = page.props.auth.user;
+const user = computed(() => page.props.auth?.user || {});
 
 const props = defineProps({
   show: Boolean,
-  currentAvatar: String,
   onClose: Function,
 });
 
 const defaultAvatar = computed(() =>
-  props.currentAvatar ? `/storage/${props.currentAvatar}` : 'https://placehold.co/150x150?text=Avatar',
+  user.value?.avatar_url || 'https://placehold.co/150x150?text=Avatar'
 );
 
 const avatarPreview = ref('');
 const hasChanges = ref(false);
-const selectedFile = ref(null); 
+const selectedFile = ref(null);
 
 watch(() => props.show, (newVal) => {
   if (newVal) {
-    avatarPreview.value = defaultAvatar.value; 
+    avatarPreview.value = defaultAvatar.value;
     selectedFile.value = null;
     hasChanges.value = false;
   }
 });
-
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
@@ -90,7 +88,7 @@ const handleFileUpload = (event) => {
     return;
   }
 
-  selectedFile.value = file; 
+  selectedFile.value = file;
 
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -111,10 +109,10 @@ const saveChanges = () => {
 
   router.post(route('profile.avatar.update'), formData, {
     preserveScroll: true,
-    forceFormData: true, 
+    forceFormData: true,
     onSuccess: () => {
-      props.onClose(); 
-      router.reload({ only: ['auth'] });
+      props.onClose();
+      router.reload({ only: ['auth'] }); // reload auth data untuk refresh avatar
     },
     onError: () => {
       alert('Gagal memperbarui avatar.');
@@ -122,6 +120,7 @@ const saveChanges = () => {
   });
 };
 </script>
+
 
 
 <style scoped>

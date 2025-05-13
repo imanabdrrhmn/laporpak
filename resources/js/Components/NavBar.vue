@@ -39,7 +39,7 @@
                 aria-expanded="false"
               >
                 <div class="avatar-wrapper me-2">
-                  <img v-if="user.avatar" :src="avatarUrl(user)" alt="User Avatar" class="user-avatar" />
+                  <img v-if="user.avatar_url" :src="user.avatar_url" alt="User Avatar" class="user-avatar" />
                   <div v-else class="user-avatar-placeholder">
                     {{ getUserInitials() }}
                   </div>
@@ -50,7 +50,7 @@
                 <li class="dropdown-user-info px-3 py-2">
                   <div class="d-flex align-items-center">
                     <div class="avatar-wrapper me-2">
-                      <img v-if="user.avatar" :src="avatarUrl(user)" alt="User Avatar" class="user-avatar" />
+                      <img v-if="user.avatar_url" :src="user.avatar_url" alt="User Avatar" class="user-avatar" />
                       <div v-else class="user-avatar-placeholder">
                         {{ getUserInitials() }}
                       </div>
@@ -241,8 +241,8 @@
           <div class="d-flex align-items-center">
             <div class="avatar-wrapper me-3">
               <img
-                v-if="user.avatar"
-                :src="avatarUrl(user)"
+                v-if="user.avatar_url"
+                :src="user.avatar_url"
                 alt="User Avatar"
                 class="user-avatar"
               />
@@ -437,12 +437,8 @@ export default {
     const closeMobileNav = () => {
       mobileNavOpen.value = false;
     };
-    const avatarUrl = (user) => {
-    return user?.avatar ? `/storage/${user.avatar}` : 'https://placehold.co/150x150?text=Avatar';
-    };
 
     return {
-      avatarUrl,
       mobileNavOpen,
       toggleLayananMobile,
       isLoggedIn,

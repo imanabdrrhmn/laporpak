@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+  <Head title="Verifikasi Nomor" />
   <div class="container m-5">
     <div class="row justify-content-center">
       <div class="col-md-6">
@@ -60,7 +61,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useForm, router, usePage } from '@inertiajs/vue3'
+import { useForm, router, usePage, Head } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const form = useForm({ code: '' })

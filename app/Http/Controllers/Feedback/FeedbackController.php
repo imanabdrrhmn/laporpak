@@ -27,7 +27,10 @@ class FeedbackController extends Controller
                 'user' => [
                     'id' => $feedback->user->id,
                     'name' => $feedback->user->name,
-                ],
+                    'avatar_url' => $feedback->user->avatar 
+                        ? asset('storage/' . $feedback->user->avatar) 
+                        : asset('/Default-Profile.png'),
+                    ],
                 'message' => $feedback->message,
                 'rating' => $feedback->rating,
                 'kategori' => $feedback->kategori,
