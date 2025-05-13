@@ -113,6 +113,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import axios from 'axios';
 import { Router } from '@inertiajs/inertia';
 
+// State
 const router = useRouter();
 const depositAmount = ref(100000);
 const paymentMethod = ref('BCA');
