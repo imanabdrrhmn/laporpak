@@ -39,12 +39,7 @@ Route::get('/verifikasi', function () {
      return Inertia::render('LaporMap');
  })->name('LaporMap');
 
-  Route::get('/CariLaporan', function (){
-    $feedbacks = Feedback::where('kategori', 'Cari Laporan')->latest()->take(10)->get();
-     return Inertia::render('Pelaporan/CariLaporan', [
-        'feedbacks' => $feedbacks
-     ]);
- })->name('CariLaporan');
+Route::get('/CariLaporan', [ReportController::class, 'search'])->name('CariLaporan');
 
 Route::get('/tentang-kami', function () {
     return Inertia::render('TentangKami');
@@ -77,7 +72,6 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
-    Route::get('/Cari-laporan', [ReportController::class, 'search'])->name('laporan.cari');
 
 });
 
