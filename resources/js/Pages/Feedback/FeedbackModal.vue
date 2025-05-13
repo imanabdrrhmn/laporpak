@@ -46,32 +46,54 @@
             <div class="animated-underline"></div>
           </div>
 
-          <!-- Modern Tab Select -->
-          <div class="tab-select mb-3">
-            <button
-              type="button"
-              class="tab-btn"
-              :class="{ active: form.kategori === 'Pelaporan' }"
-              @click="form.kategori = 'Pelaporan'"
-            >
-              <i class="bi bi-megaphone me-2"></i>Pelaporan
-            </button>
-            <button
-              type="button"
-              class="tab-btn"
-              :class="{ active: form.kategori === 'Verifikasi' }"
-              @click="form.kategori = 'Verifikasi'"
-            >
-              <i class="bi bi-check-circle me-2"></i>Verifikasi
-            </button>
-            <button
-              type="button"
-              class="tab-btn"
-              :class="{ active: form.kategori === 'Umum' }"
-              @click="form.kategori = 'Umum'"
-            >
-              <i class="bi bi-globe me-2"></i>Umum
-            </button>
+          <!-- Modern Tab Select - Updated with additional options -->
+          <div class="tab-select-container mb-3">
+            <div class="tab-select">
+              <button
+                type="button"
+                class="tab-btn"
+                :class="{ active: form.kategori === 'Pelaporan' }"
+                @click="form.kategori = 'Pelaporan'"
+              >
+                <i class="bi bi-megaphone me-2"></i>Pelaporan
+              </button>
+              <button
+                type="button"
+                class="tab-btn"
+                :class="{ active: form.kategori === 'Verifikasi' }"
+                @click="form.kategori = 'Verifikasi'"
+              >
+                <i class="bi bi-check-circle me-2"></i>Verifikasi
+              </button>
+            </div>
+            <div class="tab-select mt-2">
+              <button
+                type="button"
+                class="tab-btn"
+                :class="{ active: form.kategori === 'Cari Laporan' }"
+                @click="form.kategori = 'Cari Laporan'"
+              >
+                <i class="bi bi-search me-2"></i>Cari Laporan
+              </button>
+              <button
+                type="button"
+                class="tab-btn"
+                :class="{ active: form.kategori === 'Lapor Map' }"
+                @click="form.kategori = 'Lapor Map'"
+              >
+                <i class="bi bi-geo-alt me-2"></i>Lapor Map
+              </button>
+            </div>
+            <div class="tab-select mt-2">
+              <button
+                type="button"
+                class="tab-btn"
+                :class="{ active: form.kategori === 'Umum' }"
+                @click="form.kategori = 'Umum'"
+              >
+                <i class="bi bi-globe me-2"></i>Umum
+              </button>
+            </div>
           </div>
           <div v-if="form.errors.kategori" class="error-message mb-2">{{ form.errors.kategori }}</div>
 
@@ -225,25 +247,14 @@ defineExpose({
 </script>
 
 <style scoped>
-/* Custom scrollbar styling for textarea only */
+/* Hide vertical scrollbar for textarea */
+.custom-scrollbar {
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #0d6efd, #0dcaf0);
-  border-radius: 10px;
-  transition: all 0.3s ease;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #0b5ed7, #0babcc);
+  display: none; /* For Chrome, Safari, and other WebKit browsers */
 }
 
 /* Modal styling */
@@ -253,11 +264,11 @@ defineExpose({
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   background: #fff;
   width: 100%;
-  max-width: 500px; /* Reduced form width */
+  max-width: 450px; /* Reduced from 500px to make modal smaller */
 }
 
 .modal-body {
-  padding: 1.5rem !important; /* Reduced padding */
+  padding: 1.25rem !important; /* Reduced from 1.5rem to complement smaller modal */
 }
 
 /* Feedback icon styling */
@@ -364,6 +375,11 @@ defineExpose({
 }
 
 /* Tab buttons styling */
+.tab-select-container {
+  display: flex;
+  flex-direction: column;
+}
+
 .tab-select {
   display: flex;
   justify-content: space-between;

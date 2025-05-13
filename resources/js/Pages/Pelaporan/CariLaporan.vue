@@ -1,8 +1,7 @@
 <template>
   <AppLayout>
-    <Head title="Cari Laporan "/>
+    <Head title="Cari Laporan" />
     <div class="search-container">
-      
       <h2 class="mb-4">Pencarian Laporan Penipuan</h2>
 
       <!-- Filter and search section -->
@@ -225,14 +224,6 @@
                   <i class="far fa-calendar-alt me-1" aria-hidden="true"></i>
                   {{ report.date }}
                 </small>
-                <button
-                  class="btn btn-sm btn-outline-primary report-card__detail-btn"
-                  @click="handleShowDetails(report)"
-                  aria-label="Lihat detail laporan"
-                >
-                  <i class="fas fa-info-circle me-1" aria-hidden="true"></i>
-                  Detail
-                </button>
               </div>
             </div>
           </div>
@@ -291,223 +282,6 @@
         </ul>
       </nav>
 
-      <!-- Report detail modal -->
-      <div
-        class="modal fade"
-        id="reportDetailModal"
-        tabindex="-1"
-        aria-labelledby="reportDetailModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content" v-if="selectedReport">
-            <div 
-              class="modal-header"
-              :class="{'bg-danger text-white': selectedReport.status === 'danger'}"
-            >
-              <h5 class="modal-title" id="reportDetailModalLabel">
-                <i :class="getTypeIcon(selectedReport.type)" class="me-2" aria-hidden="true"></i>
-                {{ selectedReport.contact }}
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                :class="{'btn-close-white': selectedReport.status === 'danger'}"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <div class="mb-3 p-2 rounded" :class="getStatusBackgroundClass(selectedReport.status)">
-                <div class="d-flex align-items-center">
-                  <i class="fas fa-exclamation-triangle me-2" v-if="selectedReport.status === 'danger'" aria-hidden="true"></i>
-                  <i class="fas fa-exclamation-circle me-2" v-if="selectedReport.status === 'warning'" aria-hidden="true"></i>
-                  <i class="fas fa-check-circle me-2" v-if="selectedReport.status === 'safe'" aria-hidden="true"></i>
-                  <strong>{{ getStatusLabel(selectedReport.status) }}</strong>
-                </div>
-              </div>
-              
-              <div class="report-detail__item">
-                <strong>Jenis:</strong> {{ selectedReport.type }}
-              </div>
-              <div class="report-detail__item">
-                <strong>Kontak:</strong> {{ selectedReport.contact }}
-              </div>
-              <div class="report-detail__item">
-                <strong>Deskripsi:</strong> {{ selectedReport.description }}
-              </div>
-              <div class="report-detail__item">
-                <strong>Rating Bahaya:</strong>
-                <div class="d-inline-block">
-                  <i
-                    v-for="i in 5"
-                    :key="'modal-star-' + i"
-                    :class="getStarClass(selectedReport.rating, i)"
-                    aria-hidden="true"
-                  ></i>
-                  <span class="ms-2">({{ selectedReport.rating }} / 5)</span>
-                </div>
-              </div>
-              <div class="report-detail__item">
-                <strong>Jumlah Laporan:</strong> {{ selectedReport.reportCount }}
-              </div>
-              <div class="report-detail__item">
-                <strong>Dilaporkan pada:</strong> {{ selectedReport.date }}
-              </div>
-              
-              <div class="alert alert-warning mt-4" v-if="selectedReport.status === 'danger' || selectedReport.status === 'warning'">
-                <i class="fas fa-shield-alt me-2" aria-hidden="true"></i>
-                <strong>Tindakan yang disarankan:</strong>
-                <ul class="mb-0 mt-2">
-                  <li v-if="selectedReport.type === 'Telepon' || selectedReport.type === 'WhatsApp'">Jangan menerima panggilan dari nomor ini</li>
-                  <li v-if="selectedReport.type === 'Email'">Jangan membalas atau mengklik tautan pada email ini</li>
-                  <li v-if="selectedReport.type === 'Website'">Jangan mengunjungi atau memasukkan data pada website ini</li>
-                  <li>Laporkan ke pihak berwenang jika Anda telah menjadi korban</li>
-                </ul>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Tutup
-              </button>
-              <button
-                type="button" 
-                class="btn btn-primary"
-                @click="handleReportContactClick"
-              >
-                <i class="fas fa-flag me-1" aria-hidden="true"></i>
-                Laporkan Kontak Ini
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Report form modal -->
-      <div
-        class="modal fade"
-        id="reportFormModal"
-        tabindex="-1"
-        aria-labelledby="reportFormModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="reportFormModalLabel">
-                <i class="fas fa-flag me-2" aria-hidden="true"></i>
-                Laporkan Kontak
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <form @submit.prevent="submitReport">
-                <div class="mb-3">
-                  <label Sty for="reportContact" class="form-label">Kontak yang Dilaporkan</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="reportContact"
-                    v-model="reportForm.contact"
-                    readonly
-                  />
-                </div>
-                
-                <div class="mb-3">
-                  <label for="reportType" class="form-label">Jenis Kontak</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="reportType"
-                    v-model="reportForm.type"
-                    readonly
-                  />
-                </div>
-                
-                <div class="mb-3">
-                  <label for="reportDescription" class="form-label">Deskripsi Kejadian</label>
-                  <textarea
-                    class="form-control"
-                    id="reportDescription"
-                    rows="4"
-                    v-model="reportForm.description"
-                    placeholder="Jelaskan bagaimana Anda mengalami penipuan dari kontak ini..."
-                    required
-                  ></textarea>
-                </div>
-                
-                <div class="mb-3">
-                  <label class="form-label d-block">Tingkat Bahaya</label>
-                  <div class="rating-input">
-                    <i
-                      v-for="i in 5"
-                      :key="'rating-' + i"
-                      :class="['fas', i <= reportForm.rating ? 'fa-star' : 'fa-star-o']"
-                      @click="reportForm.rating = i"
-                      style="cursor: pointer;"
-                      aria-hidden="true"
-                    ></i>
-                    <span class="ms-2">{{ reportForm.rating || 0 }} / 5</span>
-                  </div>
-                </div>
-                
-                <div class="mb-3">
-                  <label for="reporterName" class="form-label">Nama Anda (opsional)</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="reporterName"
-                    v-model="reportForm.reporterName"
-                    placeholder="Nama Anda"
-                  />
-                </div>
-                
-                <div class="mb-3">
-                  <label for="reporterEmail" class="form-label">Email Anda (opsional)</label>
-                  <input
-                    type="email"
-                    class="form-control"
-                    id="reporterEmail"
-                    v-model="reportForm.reporterEmail"
-                    placeholder="email@contoh.com"
-                  />
-                  <div class="form-text">Kami tidak akan membagikan email Anda kepada pihak lain.</div>
-                </div>
-                
-                <div class="form-check mb-3">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    id="confirmCheck"
-                    v-model="reportForm.confirmed"
-                    required
-                  />
-                  <label class="form-check-label" for="confirmCheck">
-                    Saya mengonfirmasi bahwa laporan ini akurat dan benar
-                  </label>
-                </div>
-                
-                <div class="d-grid gap-2">
-                  <button type="submit" class="btn btn-primary" :disabled="!reportForm.confirmed">
-                    <i class="fas fa-paper-plane me-1" aria-hidden="true"></i>
-                    Kirim Laporan
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Success toast -->
       <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
         <div 
@@ -528,6 +302,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Feedback component -->
+      <Feedback :feedbacks="feedbacks" />
     </div>
   </AppLayout>
 </template>
@@ -535,7 +312,7 @@
 <script>
 import { debounce } from 'lodash';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Modal, Toast } from 'bootstrap';
+import Feedback from '@/Components/Feedback.vue';
 import { usePage } from '@inertiajs/vue3'
 
 // Constants
@@ -597,7 +374,8 @@ function parseReportDate(dateStr) {
 export default {
   name: 'FraudReportSearch',
   components: {
-    AppLayout
+    AppLayout,
+    Feedback
   },
   data() {
     return {
@@ -609,18 +387,8 @@ export default {
       reports: [],
       loading: false,
       searchError: '',
-      selectedReport: null,
       itemsPerPage: 6,
       currentPage: 1,
-      reportForm: {
-        contact: '',
-        type: '',
-        description: '',
-        rating: 0,
-        reporterName: '',
-        reporterEmail: '',
-        confirmed: false
-      },
       sampleReports: [
         {
           id: 1,
@@ -704,7 +472,7 @@ export default {
           type: 'WhatsApp',
           contact: '+62 855-6789-1234',
           description:
-            'Penipuan berkedok undian berhadiah dari perusahaan e-commerce terkenal. Pelaku mengirimkan pesan WhatsApp bahwa penerima telah memenangkan hadiah dan diminta untuk mentransfer biaya administrasi.',
+'Penipuan berkedok undian berhadiah dari perusahaan e-commerce terkenal. Pelaku mengirimkan pesan WhatsApp bahwa penerima telah memenangkan hadiah dan diminta untuk mentransfer biaya administrasi.',
           rating: 4.5,
           reportCount: 41,
           date: '9 Apr 2025',
@@ -879,39 +647,6 @@ export default {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
       }
-    },
-    handleShowDetails(report) {
-      this.selectedReport = report;
-      const modal = new Modal(document.getElementById('reportDetailModal'));
-      modal.show();
-    },
-    handleReportContactClick() {
-      const detailModal = Modal.getInstance(document.getElementById('reportDetailModal'));
-      detailModal.hide();
-
-      this.reportForm.contact = this.selectedReport.contact;
-      this.reportForm.type = this.selectedReport.type;
-      const reportModal = new Modal(document.getElementById('reportFormModal'));
-      reportModal.show();
-    },
-    submitReport() {
-      if (!this.reportForm.confirmed) return;
-
-      const reportModal = Modal.getInstance(document.getElementById('reportFormModal'));
-      reportModal.hide();
-
-      const toast = new Toast(document.getElementById('successToast'));
-      toast.show();
-
-      this.reportForm = {
-        contact: '',
-        type: '',
-        description: '',
-        rating: 0,
-        reporterName: '',
-        reporterEmail: '',
-        confirmed: false
-      };
     },
     getTypeClass(type) {
       return TYPE_CLASSES[type] || '';
@@ -1104,7 +839,7 @@ export default {
   color: white;
 }
 
-.report-card__rating-stars i {
+.report-card__rating-stars { 
   font-size: 0.9rem;
 }
 
@@ -1132,9 +867,5 @@ export default {
 
 .pagination .page-link {
   cursor: pointer;
-}
-
-.report-detail__item {
-  margin-bottom: 10px;
 }
 </style>
