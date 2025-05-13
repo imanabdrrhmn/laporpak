@@ -378,7 +378,7 @@
               </Link>
             </li>
             <li class="nav-item mt-3">
-              <a class="nav-link text-danger" href="#" @click.prevent="logout">
+              <a class="nav-link text-danger" href="/" @click.prevent="logout">
                 <i class="bi bi-box-arrow-right me-2"></i>
                 <span>Keluar</span>
               </a>
@@ -430,8 +430,8 @@ export default {
 
     const logout = () => {
       window.axios.post('/logout').then(() => {
-        window.location.reload();
-      });
+      window.location.href = '/';      
+});
     };
 
     const closeMobileNav = () => {

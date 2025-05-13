@@ -301,6 +301,10 @@ export default {
           return 'category-verifikasi';
         case 'Umum':
           return 'category-umum';
+        case 'Cari Laporan':
+          return 'category-cari-laporan';
+        case 'Lapor Map':
+          return 'category-lapor-map';
         default:
           return 'category-umum';
       }
@@ -449,6 +453,17 @@ export default {
 }
 
 .category-umum {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.category-cari-laporan {
+  background-color: #D1FAE5;
+  color: #065F46;
+
+}
+
+.category-lapor-map {
   background-color: #D1FAE5;
   color: #065F46;
 }
