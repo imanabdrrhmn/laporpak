@@ -111,9 +111,8 @@
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { Router } from '@inertiajs/inertia';
 
-// State
 const router = useRouter();
 const depositAmount = ref(100000);
 const paymentMethod = ref('BCA');
@@ -153,7 +152,7 @@ const checkUserSession = async () => {
   try {
     const response = await axios.get('/api/user/check-session');
     if (!response.data.authenticated) {
-      router.push('/login');
+      Router.push('/login');
     }
   } catch (error) {
     errorMessage.value = 'Gagal memverifikasi sesi pengguna';

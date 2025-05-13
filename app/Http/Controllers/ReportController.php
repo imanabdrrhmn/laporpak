@@ -16,19 +16,43 @@ class ReportController extends Controller
 
     // Menampilkan semua laporan
     public function index(Request $request)
-    {
-        $user = $request->user();
+{
+    $user = $request->user();
 
-        if (!$user || !($user->hasRole('admin') || $user->hasRole('verifier'))) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $reports = Report::with('user')->latest()->get();
-
-        return Inertia::render('Pelaporan/Index', [
-            'reports' => $reports,
-        ]);
+    if (!$user || !($user->hasRole('admin') || $user->hasRole('verifier'))) {
+        abort(403, 'Unauthorized action.');
     }
+
+    $reports = Report::with('user')->latest()->get()->map(function ($report) {
+    return [
+        'id' => $report->id,
+        'user_id' => $report->user_id,
+        'user' => [
+            'id' => $report->user->id,
+            'name' => $report->user->name,
+            'avatar_url' => $report->user->avatar 
+                ? asset('storage/' . $report->user->avatar) 
+                : asset('/Default-Profile.png'),
+        ],
+        'category' => $report->category,
+        'description' => $report->description,
+        'status' => $report->status,
+        'latitude' => $report->latitude,
+        'longitude' => $report->longitude,
+        'service' => $report->service,
+        'source' => $report->source,
+        'created_at' => $report->created_at->toDateTimeString(),
+        'evidence' => $report->evidence 
+            ? asset('storage/' . $report->evidence) 
+            : null,
+    ];
+});
+
+
+    return Inertia::render('Pelaporan/Index', [
+        'reports' => $reports,
+    ]);
+}
 
     // Menampilkan form untuk membuat laporan
     public function create(Request $request)
@@ -60,7 +84,7 @@ class ReportController extends Controller
             'location.lat' => 'required|numeric',
             'location.lng' => 'required|numeric',
             'service' => 'required|string',
-            'source' => 'require|string',  
+            'source' => 'nullable|string',  
             'address' => 'nullable|string', 
         ]);
 
