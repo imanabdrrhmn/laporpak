@@ -113,7 +113,7 @@
               <Link
                 href="/"
                 class="nav-link py-3"
-                :class="{ active: $page.url === '/Beranda' }"
+                :class="{ active: $page.url === '/' }"
               >
                 <i class="bi bi-house-fill me-2"></i>
                 <span>Beranda</span>
@@ -793,6 +793,7 @@ export default {
   }
 
   .nav-link.active,
+  .nav-link.active-Beranda,
   .nav-link.active-CariLaporan,
   .nav-link.active-verifikasi,
   .nav-link.active-pelaporan,
