@@ -8,15 +8,13 @@
           <div class="col-lg-6 d-flex flex-column justify-content text-white hero-content p-4 p-sm-5 ms-auto">
             <div class="text-section"> 
               <h1 class="display-4 fw-bold mb-3 d-flex align-items-center">
-  <i :class="serviceInfo[selectedService].titleIcon + ' me-2'"></i>
-  <span class="text-nowrap">{{ serviceInfo[selectedService].title }}</span>
-</h1>
-
+                <i :class="serviceInfo[selectedService].titleIcon + ' me-2'"></i>
+                <span class="text-nowrap">{{ serviceInfo[selectedService].title }}</span>
+              </h1>
               <div class="highlight-bar mb-4"></div>
               <p class="lead mb-4">
                 {{ serviceInfo[selectedService].description }}
               </p>
-            
               <!-- Service Info Cards -->
               <div class="d-none d-lg-block">
                 <div class="row mt-4 g-3">
@@ -24,7 +22,7 @@
                     <div class="feature-box p-3">
                       <i class="bi bi-shield-check fs-2 mb-2"></i>
                       <h5>Keamanan</h5>
-                      <p class="small">Data terenkripsi dan terlindungi dengan standar tinggi</p>
+                      <p class="small">Data terenkripsi dan terlindungi dengan baik</p>
                     </div>
                   </div>
                   <div class="col-md-4">
@@ -43,7 +41,6 @@
                   </div>
                 </div>
               </div>
-            
               <!-- Features for mobile/tablet -->
               <div class="d-block d-lg-none mt-4">
                 <div class="row g-2">
@@ -69,7 +66,6 @@
               </div>
             </div>
           </div>
-
           <!-- Form on Right Side -->
           <div class="col-lg-6 d-flex align-items-center justify-content-end p-3 p-md-2 bg-light">
             <div class="form-container p-3 p-sm-4 p-lg-5 w-100">
@@ -77,7 +73,6 @@
                 <i class="bi bi-exclamation-triangle text-warning me-2"></i>
                 {{ serviceInfo[selectedService].formTitle }}
               </h5>
-
               <!-- Service Selection with Tab-like Buttons -->
               <div class="service-tabs mb-4">
                 <div class="d-flex gap-2 flex-wrap">
@@ -97,7 +92,6 @@
                   </button>
                 </div>
               </div>
-
               <form @submit.prevent="handleSubmit" ref="formRef">
                 <div class="row g-3">
                   <!-- Category -->
@@ -126,7 +120,7 @@
                     </div>
                   </div>
                   <!-- Fraud Source -->
-                  <div class="col-12 " v-if="selectedService === 'Penipuan'">
+                  <div class="col-12" v-if="selectedService === 'Penipuan'">
                     <label for="source" class="form-label mb-2">Sumber Penipuan</label>
                     <input
                       id="source"
@@ -164,7 +158,6 @@
                       Format: JPEG, PNG, PDF (Max: 5MB)
                     </div>
                   </div>
-
                   <!-- Incident Description -->
                   <div class="col-12">
                     <label for="description" class="form-label mb-2">Deskripsi Kejadian</label>
@@ -190,7 +183,6 @@
                       </span>
                     </div>
                   </div>
-
                   <!-- Location & OpenStreetMap -->
                   <div class="col-12">
                     <div class="mb-2">
@@ -224,7 +216,6 @@
                       </button>
                     </div>
                   </div>
-
                   <!-- Submit Button -->
                   <div class="col-12">
                     <div class="d-grid">
@@ -245,16 +236,14 @@
         </div>
       </div>
     </section>
-
     <Alur/>
     <!-- SECTION COMPONENT -->
     <Section />
-  
     <!-- FEEDBACK COMPONENT -->
     <Feedback :feedbacks="feedbacks" /> 
     <SuccessModal
-    :show="showSuccessModal"
-    @close="showSuccessModal = false"
+      :show="showSuccessModal"
+      @close="showSuccessModal = false"
     />
   </AppLayout>
 </template>
@@ -276,7 +265,7 @@ import SuccessModal from '@/Pages/Pelaporan/SuccessModal.vue';
 const page = usePage();
 page.layout = AppLayout;
 const feedbacks = page.props.feedbacks;
-const showSuccessModal   = ref(false);
+const showSuccessModal = ref(false);
 
 // Service options with icons
 const services = [
@@ -347,8 +336,8 @@ const formData = ref({
   description: '',
   evidence: null,
   location: null,
-  address: '' ,
-  source : '' ,
+  address: '',
+  source: '',
 });
 const formRef = ref(null);
 const mapRef = ref(null);
@@ -421,11 +410,9 @@ const handleFileUpload = (event) => {
 async function reverseGeocode(lat, lng) {
   try {
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
-    
     if (!response.ok) {
       throw new Error('Gagal mendapatkan alamat');
     }
-    
     const data = await response.json();
     return data.display_name || 'Alamat tidak ditemukan';
   } catch (error) {
@@ -476,7 +463,6 @@ const handleSubmit = () => {
   dataToSubmit.append('address', formData.value.address);
   dataToSubmit.append('service', selectedService.value);
 
-
   Inertia.post('/pelaporan/create', dataToSubmit, {
     onSuccess: () => {
       formData.value = {
@@ -487,8 +473,8 @@ const handleSubmit = () => {
         address: '',
         source: ''
       };
-        showSuccessModal.value = true;    
-      },
+      showSuccessModal.value = true;    
+    },
     onError: (error) => {
       console.error('Error:', error);
     }
@@ -557,9 +543,10 @@ function placeMarker(latlng) {
     
     marker = L.marker(latlng, { icon: customIcon }).addTo(map);
     
-    const popupContent = selectedService.value === 'fraud' 
-      ? "<b>Lokasi Pelaporan</b>" 
-      : "<b>Lokasi Kerusakan Infrastruktur</b>";
+    // Set popup content based on selected service
+    const popupContent = selectedService.value === 'Penipuan' 
+      ? '<b>Lokasi Pelaporan</b>' 
+      : '<b>Lokasi Kerusakan Infrastruktur</b>';
       
     marker.bindPopup(popupContent).openPopup();
     
@@ -632,25 +619,24 @@ function getCurrentLocation() {
   background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
   overflow: hidden;
   position: relative;
-  min-height: auto; /* Prevent excessive height on small screens */
+  min-height: auto;
   padding-bottom: 2rem;
 }
 
 .hero-content {
   position: relative;
   z-index: 1;
-  text-align: center; /* Center text for mobile */
+  text-align: center;
 }
 
 .text-section {
   color: #fff;
   position: relative;
   z-index: 1;
-  margin-top: 0; /* Remove negative margin */
+  margin-top: 0;
   padding: 1.5rem;
 }
 
-/* Feature boxes styling */
 .feature-box {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
@@ -687,7 +673,7 @@ function getCurrentLocation() {
   border-radius: 8px;
   backdrop-filter: blur(5px);
   padding: 0.75rem;
-  min-height: 80px; /* Increased for touch targets */
+  min-height: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -712,7 +698,6 @@ function getCurrentLocation() {
   padding: 1.5rem;
 }
 
-/* Form controls styling */
 .form-control, 
 .form-select {
   font-size: 1rem;
@@ -726,14 +711,12 @@ function getCurrentLocation() {
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
-/* Custom select styling */
 .custom-select {
   border: 1px solid #ced4da;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-/* Custom textarea styling */
 .custom-textarea {
   border: 1px solid #ced4da;
   border-radius: 6px;
@@ -748,7 +731,6 @@ function getCurrentLocation() {
   animation: shake 0.5s linear;
 }
 
-/* Custom file input styling */
 .custom-file-input {
   border-radius: 6px;
   overflow: hidden;
@@ -759,13 +741,12 @@ function getCurrentLocation() {
   border-bottom-right-radius: 0;
 }
 
-/* Button styling */
 .service-btn {
   border-radius: 6px;
   font-weight: 500;
   transition: all 0.3s ease;
   padding: 0.75rem 1rem;
-  min-height: 48px; /* Accessible tap target */
+  min-height: 48px;
 }
 
 .service-btn:hover:not(.btn-primary) {
@@ -800,7 +781,6 @@ function getCurrentLocation() {
   box-shadow: 0 6px 12px rgba(13, 110, 253, 0.4);
 }
 
-/* Map container styling */
 .map-container {
   border-radius: 6px;
   overflow: hidden;
@@ -809,7 +789,6 @@ function getCurrentLocation() {
   height: 250px;
 }
 
-/* Button disabled styling */
 .btn-primary:disabled {
   background: #6c757d;
   border-color: #6c757d;
@@ -817,13 +796,11 @@ function getCurrentLocation() {
   cursor: not-allowed;
 }
 
-/* Service tabs styling */
 .service-tabs {
   border-bottom: 1px solid #dee2e6;
   padding-bottom: 1rem;
 }
 
-/* Highlight bar styling */
 .highlight-bar {
   width: 60px;
   height: 4px;
@@ -831,7 +808,6 @@ function getCurrentLocation() {
   border-radius: 2px;
 }
 
-/* Animations */
 @keyframes shake {
   0% { transform: translateX(0); }
   20% { transform: translateX(-5px); }
@@ -857,29 +833,23 @@ function getCurrentLocation() {
   animation: btn-wave 2s infinite;
 }
 
-/* Fix for Leaflet marker icon */
 .leaflet-default-icon-path {
   background-image: url("https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png");
 }
 
-/* Responsive adjustments */
 @media (max-width: 320px) {
   .hero-content {
     padding: 1rem !important;
   }
-
   .form-container {
     padding: 1rem !important;
   }
-
   .display-4 {
     font-size: 1.8rem !important;
   }
-
   .lead {
     font-size: 0.9rem;
   }
-
   .map-container {
     height: 200px;
   }
@@ -889,19 +859,15 @@ function getCurrentLocation() {
   .hero-content {
     padding: 2rem 1.5rem !important;
   }
-
   .form-container {
     padding: 1.5rem !important;
   }
-
   .display-4 {
     font-size: 2.2rem !important;
   }
-
   .lead {
     font-size: 1rem;
   }
-
   .map-container {
     height: 220px;
   }
@@ -911,16 +877,13 @@ function getCurrentLocation() {
   .hero-content {
     padding: 2.5rem 2rem !important;
   }
-
   .form-container {
     max-width: 90%;
     padding: 2rem !important;
   }
-
   .display-4 {
     font-size: 2.5rem !important;
   }
-
   .map-container {
     height: 250px;
   }
@@ -930,16 +893,13 @@ function getCurrentLocation() {
   .hero-content {
     padding: 3rem 2.5rem !important;
   }
-
   .form-container {
     max-width: 85%;
     padding: 2.5rem !important;
   }
-
   .display-4 {
     font-size: 3rem !important;
   }
-
   .map-container {
     height: 280px;
   }
@@ -949,26 +909,21 @@ function getCurrentLocation() {
   .hero-section {
     min-height: 100vh;
   }
-
   .hero-content {
     padding: 4rem !important;
     text-align: left;
   }
-
   .bg-light {
     background: transparent !important;
   }
-
   .form-container {
     max-width: 580px;
     z-index: 2;
     padding: 3rem !important;
   }
-
   .display-4 {
     font-size: 3.5rem !important;
   }
-
   .map-container {
     height: 300px;
   }
@@ -978,11 +933,9 @@ function getCurrentLocation() {
   .form-container {
     max-width: 620px;
   }
-
   .display-4 {
     font-size: 2.5rem !important;
   }
-
   .map-container {
     height: 320px;
   }
@@ -992,42 +945,34 @@ function getCurrentLocation() {
   .container-fluid {
     max-width: 1400px;
   }
-
   .form-container {
     max-width: 680px;
   }
-
   .map-container {
     height: 350px;
   }
 }
 
-/* Landscape orientation adjustments */
 @media (max-height: 600px) and (orientation: landscape) {
   .hero-section {
     min-height: auto;
     overflow-y: auto;
   }
-
   .hero-content {
     padding: 2rem !important;
   }
-
   .form-container {
     padding: 2rem !important;
   }
-
   .map-container {
     height: 200px;
   }
 }
 
-/* High-resolution displays */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .feature-box, .mobile-feature {
     backdrop-filter: blur(12px);
   }
-
   .form-container {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   }
