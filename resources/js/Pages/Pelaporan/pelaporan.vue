@@ -126,7 +126,7 @@
                     </div>
                   </div>
                   <!-- Fraud Source -->
-                  <div class="col-12 " v-if="selectedService === 'fraud'">
+                  <div class="col-12 " v-if="selectedService === 'Penipuan'">
                     <label for="source" class="form-label mb-2">Sumber Penipuan</label>
                     <input
                       id="source"
@@ -280,27 +280,27 @@ const showSuccessModal   = ref(false);
 
 // Service options with icons
 const services = [
-  { label: 'Pelaporan', value: 'fraud', icon: 'bi bi-shield-exclamation' },
-  { label: 'Infrastruktur', value: 'infrastructure', icon: 'bi bi-building-gear' }
+  { label: 'Pelaporan', value: 'Penipuan', icon: 'bi bi-shield-exclamation' },
+  { label: 'Infrastruktur', value: 'Infrastruktur', icon: 'bi bi-building-gear' }
 ];
 
 // Categories for each service type
 const fraudCategories = [
-  { label: 'Nomor Telepon', value: 'Nomer Hp' },
+  { label: 'Nomor Telepon', value: 'Nomor Hp' },
   { label: 'Email', value: 'Email' } 
 ];
 
 const infrastructureCategories = [
-  { label: 'Jalan Rusak', value: 'jalan' },
-  { label: 'Lampu Penerangan', value: 'lampu' },
-  { label: 'Saluran Air', value: 'saluran' },
-  { label: 'Fasilitas Umum', value: 'fasum' },
-  { label: 'Lainnya', value: 'other' }
+  { label: 'Jalan Rusak', value: 'Jalan' },
+  { label: 'Lampu Penerangan', value: 'Lampu' },
+  { label: 'Saluran Air', value: 'Saluran Air' },
+  { label: 'Fasilitas Umum', value: 'Fasilitas Umum' },
+  { label: 'Lainnya', value: 'Lainnya' }
 ];
 
 // Service information
 const serviceInfo = {
-  fraud: {
+  Penipuan: {
     badge: 'Platform Pelaporan',
     title: 'Pelaporan Akun',
     titleIcon: 'bi bi-exclamation-triangle-fill',
@@ -319,7 +319,7 @@ const serviceInfo = {
       icon: 'bi bi-graph-up-arrow'
     }
   },
-  infrastructure: {
+  Infrastruktur: {
     badge: 'Lapor Infrastruktur',
     title: 'Pelaporan Infrastruktur',
     titleIcon: 'bi bi-wrench',
@@ -341,7 +341,7 @@ const serviceInfo = {
 };
 
 // Reactive data
-const selectedService = ref('fraud');
+const selectedService = ref('Penipuan');
 const formData = ref({
   category: '',
   description: '',
@@ -395,7 +395,7 @@ const validateDescription = () => {
 };
 
 const currentCategories = computed(() =>
-  selectedService.value === 'fraud' ? fraudCategories : infrastructureCategories
+  selectedService.value === 'Penipuan' ? fraudCategories : infrastructureCategories
 );
 
 // Service selection handler

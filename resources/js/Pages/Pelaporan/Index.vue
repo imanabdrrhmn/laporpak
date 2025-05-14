@@ -47,7 +47,7 @@
           </div>
 
           <!-- Report Details -->
-          <p v-if="report.service == 'fraud'">
+          <p v-if="report.service == 'Penipuan'">
             <strong>Sumber Penipuan:</strong> {{ report.source || '-' }}
           </p>
           <p>
