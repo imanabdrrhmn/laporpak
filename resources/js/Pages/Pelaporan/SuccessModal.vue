@@ -3,58 +3,61 @@
     <!-- Backdrop overlay for the modal -->
     <div 
       v-if="show" 
-      class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center"
+      class="modal fade show d-block" 
+      style="background-color: rgba(0, 0, 0, 0.5);"
       @click.self="closeOnBackdrop ? close() : null"
+      tabindex="-1"
+      role="dialog"
     >
       <!-- Modal container -->
       <div 
-        class="modal-container bg-white rounded-lg shadow-xl w-11/12 max-w-md mx-auto overflow-hidden"
-        :class="{'animate-scale-in': show}"
+        class="modal-dialog modal-dialog-centered"
+        role="document"
       >
-        <!-- Modal header -->
-        <div class="modal-header p-4 bg-primary text-white text-center relative">
-          <h4 class="text-xl font-bold mb-0">
-            <i class="bi bi-check-circle-fill me-2"></i>{{ title }}
-          </h4>
-          <button 
-            @click="close"
-            class="absolute top-3 right-3 text-white hover:text-gray-200 transition-colors"
-            aria-label="Close modal"
-          >
-            <i class="bi bi-x-lg"></i>
-          </button>
-        </div>
+        <div class="modal-content animate-scale-in">
+          <!-- Modal body -->
+          <div class="modal-body text-center position-relative p-4">
+            <!-- Tombol close di pojok kanan atas -->
+            <button 
+              type="button" 
+              class="btn-close position-absolute top-0 end-0 m-2" 
+              @click="close" 
+              aria-label="Close"
+            ></button>
 
-        <!-- Modal body -->
-        <div class="modal-body p-5 text-center">
-          <!-- Success icon animation -->
-          <div class="success-animation mb-4">
-            <div class="checkmark-circle">
-              <div class="checkmark-check"></div>
+            <!-- Ikon sukses -->
+            <div class="success-animation mb-3">
+              <div class="blue-circle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="text-primary" viewBox="0 0 16 16">
+                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Judul -->
+            <h5 class="modal-title fw-bold mb-2">Laporan Anda Berhasil!!</h5>
+
+            <!-- Deskripsi -->
+            <p class="text-muted mb-4 small">
+              Lihat detail laporan dan status tindak lanjutnya di halaman berikut
+            </p>
+
+            <!-- Tombol -->
+            <div class="d-flex flex-column gap-2">
+              <button 
+                @click="navigate"
+                class="btn btn-primary btn-sm"
+              >
+                Lihat Riwayat Laporan
+              </button>
+              <button 
+                @click="close"
+                class="btn btn-outline-primary btn-sm"
+              >
+                Berikan Ulasan
+              </button>
             </div>
           </div>
-          
-          <!-- Success message -->
-          <p class="text-lg mb-4">{{ message }}</p>
-          
-          <!-- Optional details -->
-          <p v-if="details" class="text-sm text-gray-600 mb-4">{{ details }}</p>
-        </div>
-
-        <!-- Modal footer -->
-        <div class="modal-footer p-4 bg-gray-50 flex flex-col sm:flex-row justify-center gap-3">
-          <button 
-            @click="close"
-            class="btn btn-outline-secondary w-full sm:w-auto"
-          >
-            <i class="bi bi-x me-1"></i>Tutup
-          </button>
-          <button 
-            @click="navigate"
-            class="btn btn-primary w-full sm:w-auto"
-          >
-            <i class="bi bi-file-earmark-text me-1"></i>{{ actionButtonText }}
-          </button>
         </div>
       </div>
     </div>
@@ -70,25 +73,9 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  title: {
-    type: String,
-    default: 'Berhasil!'
-  },
-  message: {
-    type: String,
-    default: 'Laporan Anda telah berhasil dikirim.'
-  },
-  details: {
-    type: String,
-    default: 'Kami akan memproses laporan Anda sesegera mungkin. Terima kasih atas partisipasi Anda.'
-  },
-  actionButtonText: {
-    type: String,
-    default: 'Kelola Laporan'
-  },
   redirectPath: {
     type: String,
-    default: '/laporan-saya'
+    default: '/kelola-laporan'
   },
   closeOnBackdrop: {
     type: Boolean,
@@ -111,11 +98,11 @@ const navigate = () => {
 // Watch for show property changes to handle escape key
 watch(() => props.show, (value) => {
   if (value) {
-    // Add event listener when modal is shown
     document.addEventListener('keydown', handleEscKey);
+    document.body.classList.add('modal-open'); // Tambahkan kelas untuk Bootstrap
   } else {
-    // Remove event listener when modal is hidden
     document.removeEventListener('keydown', handleEscKey);
+    document.body.classList.remove('modal-open'); // Hapus kelas saat modal ditutup
   }
 });
 
@@ -144,102 +131,42 @@ const handleEscKey = (event) => {
   animation: scale-in 0.3s ease-out forwards;
 }
 
-/* Success animation */
-.checkmark-circle {
+/* Blue circle styles */
+.blue-circle {
   width: 80px;
   height: 80px;
-  position: relative;
-  display: inline-block;
-  vertical-align: top;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.checkmark-circle .background {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: #0d6efd;
-  position: absolute;
-}
-
-.success-animation {
   margin: 0 auto;
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 1.5s ease-in-out;
 }
 
-.checkmark-check {
-  width: 80px;
-  height: 80px;
-  background-color: #0d6efd;
-  border-radius: 50%;
-  display: block;
-  stroke-width: 2;
-  stroke: #fff;
-  stroke-miterlimit: 10;
-  box-shadow: inset 0px 0px 0px #0d6efd;
-  animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
-  position: relative;
-  top: 0;
-  right: 0;
-}
-
-.checkmark-check:before {
-  content: "";
-  width: 30px;
-  height: 60px;
-  border-right: 6px solid white;
-  border-top: 6px solid white;
-  position: absolute;
-  top: 10px;
-  left: 28px;
-  transform: scaleX(-1) rotate(135deg);
-  transform-origin: left top;
-  animation: check-animation 0.8s ease-in forwards;
-}
-
-@keyframes check-animation {
+@keyframes pulse {
   0% {
-    height: 0;
-    width: 0;
-    opacity: 1;
-  }
-  20% {
-    height: 0;
-    width: 30px;
-    opacity: 1;
-  }
-  40% {
-    height: 60px;
-    width: 30px;
-    opacity: 1;
-  }
-  100% {
-    height: 60px;
-    width: 30px;
-    opacity: 1;
-  }
-}
-
-@keyframes fill {
-  100% {
-    box-shadow: inset 0px 0px 0px 40px #0d6efd;
-  }
-}
-
-@keyframes scale {
-  0%, 100% {
-    transform: none;
+    transform: scale(0.8);
+    opacity: 0;
   }
   50% {
-    transform: scale3d(1.1, 1.1, 1);
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .modal-footer {
-    flex-direction: column-reverse;
+/* Mengatur lebar modal menjadi lebih kecil */
+.modal-dialog {
+  max-width: 350px; /* Lebar modal lebih kecil */
+}
+
+/* Responsivitas untuk layar kecil */
+@media (max-width: 576px) {
+  .modal-dialog {
+    max-width: 300px;
+    margin: 1.75rem auto;
   }
 }
 </style>
