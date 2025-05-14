@@ -65,35 +65,39 @@ class AuthenticatedSessionController extends Controller
         return redirect('/');
     }   
 
-    public function redirectToGoogle()
+        public function redirectToGoogle()
     {
+        session(['url.intended' => url()->previous()]); // Simpan halaman asal
         return Socialite::driver('google')->redirect();
     }
 
-    /**
-     * Handle Google callback.
-     */
+
     public function handleGoogleCallback()
-    {
-        try {
-            $googleUser = Socialite::driver('google')->user();
-            
-            $user = User::firstOrCreate([
-                'email' => $googleUser->getEmail(),
-            ], [
-                'name' => $googleUser->getName(),
-                'google_id' => $googleUser->getId(),
-                'avatar' => $googleUser->getAvatar(),
-                'password' => null
-            ]);
+{
+    try {
+        $googleUser = Socialite::driver('google')->user();
+        
+        $user = User::firstOrCreate([
+            'email' => $googleUser->getEmail(),
+        ], [
+            'name' => $googleUser->getName(),
+            'google_id' => $googleUser->getId(),
+            'avatar' => $googleUser->getAvatar(),
+            'password' => bcrypt(uniqid()) 
+        ]);
 
+        if (!$user->hasRole('user')) {
             $user->assignRole('user');
+        }
 
-            Auth::login($user);
+        Auth::login($user);
+        session()->regenerate();
 
-            return redirect()->intended()->header('Location', url()->previous());
-                } catch (\Exception $e) {
-                    return redirect(url()->previous());
-                }
+        return redirect()->to(session()->pull('url.intended', '/'));
+
+        } catch (\Exception $e) {
+            return redirect('/login')->with('error', 'Login dengan Google gagal.');
+        }
     }
+
 }

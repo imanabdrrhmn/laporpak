@@ -103,7 +103,7 @@ class ReportController extends Controller
             'address' => $request->address,
         ]);
 
-        return redirect()->route('history.reports')->with('success', 'Laporan berhasil diajukan');
+        return redirect()->route('history')->with('success', 'Laporan berhasil diajukan');
     }
 
     // Menyunting laporan
