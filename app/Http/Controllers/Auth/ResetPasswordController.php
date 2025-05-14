@@ -69,6 +69,5 @@ class ResetPasswordController extends Controller
         // Login pengguna otomatis setelah reset password
         Auth::login($user);
 
-        return redirect(url()->previous());
-    }
+        return redirect()->intended('/dashboard')->with('success', 'Password berhasil direset dan Anda telah login.');    }
 }

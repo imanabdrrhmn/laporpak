@@ -43,7 +43,7 @@ class HandleInertiaRequests extends Middleware
                     'email_verified_at' => $user->email_verified_at,
                     'no_hp_verified_at' => $user->no_hp_verified_at,
                     'avatar_url' => $user && $user->avatar
-                        ? asset('storage/' . $user->avatar)
+                        ? (str_starts_with($user->avatar, 'http') ? $user->avatar : asset('storage/' . $user->avatar))
                         : asset('/Default-Profile.png'),
                 ] : null,
     
