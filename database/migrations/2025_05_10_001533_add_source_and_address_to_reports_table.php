@@ -14,7 +14,7 @@ class AddSourceAndAddressToReportsTable extends Migration
     public function up()
     {
         Schema::table('reports', function (Blueprint $table) {
-            $table->string('source');  
+            $table->string('source')->nullable();  
             $table->string('address')->nullable(); 
         });
     }
