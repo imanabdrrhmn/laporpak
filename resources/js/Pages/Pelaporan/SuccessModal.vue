@@ -88,7 +88,7 @@ const props = defineProps({
   },
   redirectPath: {
     type: String,
-    default: '/kelola-laporan'
+    default: '/laporan-saya'
   },
   closeOnBackdrop: {
     type: Boolean,

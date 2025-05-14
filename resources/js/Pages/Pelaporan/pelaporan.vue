@@ -252,6 +252,10 @@
   
     <!-- FEEDBACK COMPONENT -->
     <Feedback :feedbacks="feedbacks" /> 
+    <SuccessModal
+    :show="showSuccessModal"
+    @close="showSuccessModal = false"
+    />
   </AppLayout>
 </template>
 
@@ -267,10 +271,12 @@ import Section from '@/Components/Section.vue';
 import Feedback from '@/Components/Feedback.vue';
 import Alur from '@/Components/alurpelaporan.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SuccessModal from '@/Pages/Pelaporan/SuccessModal.vue';
 
 const page = usePage();
 page.layout = AppLayout;
 const feedbacks = page.props.feedbacks;
+const showSuccessModal   = ref(false);
 
 // Service options with icons
 const services = [
@@ -470,6 +476,7 @@ const handleSubmit = () => {
   dataToSubmit.append('address', formData.value.address);
   dataToSubmit.append('service', selectedService.value);
 
+
   Inertia.post('/pelaporan/create', dataToSubmit, {
     onSuccess: () => {
       formData.value = {
@@ -480,8 +487,8 @@ const handleSubmit = () => {
         address: '',
         source: ''
       };
-      alert('Laporan berhasil dikirim!');
-    },
+        showSuccessModal.value = true;    
+      },
     onError: (error) => {
       console.error('Error:', error);
     }
