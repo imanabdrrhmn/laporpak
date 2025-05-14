@@ -13,6 +13,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600&display=swap" rel="stylesheet">
         <!-- Bootstrap Icons CDN -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="https://unpkg.com/vue-tel-input@6/dist/vue-tel-input.css">
 
         <!-- Scripts -->
         @routes
