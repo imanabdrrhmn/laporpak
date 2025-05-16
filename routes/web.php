@@ -22,7 +22,11 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function (){
-    return Inertia::render('Dashboard');
+    $user = Auth::user();
+    return Inertia::render('Dashboard',[
+        'creditBalance' => $user->balance,
+    ]);
+    
 })->middleware(['auth', 'contact.verified'])->name('dashboard');
 
 Route::get('/verifikasi', function () {

@@ -6,10 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Policies\TopUpPolicy;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+
 
 
 class TopUpController extends Controller
 {
+    use AuthorizesRequests;
     public function index()
     {
         $topUps = TopUp::where('user_id', Auth::id())
@@ -47,13 +52,40 @@ class TopUpController extends Controller
     }
 
 
+        public function adminIndex(Request $request)
+    {
+        $query = TopUp::with('user')->orderBy('created_at', 'desc');
+
+        // Optional filter by status
+        if ($request->has('status') && in_array($request->status, ['pending','verified','rejected'])) {
+            $query->where('status', $request->status);
+        }
+
+        // Optional search by user email or name
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                ->orWhere('email', 'like', "%$search%");
+            });
+        }
+
+        $topUps = $query->paginate(10)->withQueryString();
+
+        return Inertia::render('Admin/TopUps/Index', [
+            'topUps' => $topUps,
+            'filters' => $request->only('status', 'search'),
+        ]);
+    }
+
+
     public function verify($id)
     {
         $topUp = TopUp::findOrFail($id);
         $this->authorize('verify', $topUp);
 
         if ($topUp->status !== 'pending') {
-            return response()->json(['message' => 'Top up already processed'], 400);
+            return redirect()->back()->with('error', 'Top up sudah diproses sebelumnya.');
         }
 
         $user = $topUp->user;
@@ -63,7 +95,7 @@ class TopUpController extends Controller
         $topUp->status = 'verified';
         $topUp->save();
 
-        return response()->json(['message' => 'Top up verified']);
+        return redirect()->back()->with('success', 'Top up berhasil diverifikasi.');
     }
 
     public function reject($id)
@@ -72,12 +104,12 @@ class TopUpController extends Controller
         $this->authorize('reject', $topUp);
 
         if ($topUp->status !== 'pending') {
-            return response()->json(['message' => 'Top up already processed'], 400);
+            return redirect()->back()->with('error', 'Top up sudah diproses sebelumnya.');
         }
 
         $topUp->status = 'rejected';
         $topUp->save();
 
-        return response()->json(['message' => 'Top up rejected']);
+        return redirect()->back()->with('success', 'Top up berhasil ditolak.');
     }
 }

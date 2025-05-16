@@ -7,7 +7,8 @@ const page = usePage();
 page.layout = AppLayout;
 
 // Sample data
-const creditBalance = ref(125000);
+const creditBalance = ref(page.props.creditBalance ?? 0);
+
 const verificationStatus = ref({
   npwp: true,
   identity: true,
