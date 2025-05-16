@@ -246,33 +246,35 @@
       @close="showSuccessModal = false"
     />
   <loginModal v-model:visible="showLoginModal" :is-from-report="true"></loginModal>
+   <RegisterModal v-model:visible="showRegisterModal" :is-from-report="true" />
   </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive, watch } from 'vue';
+import { ref, computed, reactive, watch, onMounted } from 'vue';
 import { Head, usePage, router as Inertia } from '@inertiajs/vue3';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import debounce from 'lodash/debounce';
-
-// Import components
+import AppLayout from '@/Layouts/AppLayout.vue';
+import Alur from '@/Components/alurpelaporan.vue';
 import Section from '@/Components/Section.vue';
 import Feedback from '@/Components/Feedback.vue';
-import Alur from '@/Components/alurpelaporan.vue';
-import AppLayout from '@/Layouts/AppLayout.vue';
 import SuccessModal from '@/Pages/Pelaporan/SuccessModal.vue';
 import loginModal from '@/Components/modals/LoginModal.vue';
+import RegisterModal from '@/Components/modals/RegisterModal.vue';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
 const page = usePage();
-page.layout = AppLayout;
 const feedbacks = page.props.feedbacks;
 const showSuccessModal = ref(false);
 const showLoginModal = ref(false);
-const isFromReport = ref(false);
+const showRegisterModal = ref(false);
 
-// Check if user is logged in
 const userIsLoggedIn = computed(() => !!page.props.auth.user);
+
+function openRegisterFromLogin() {
+  showLoginModal.value = false;
+  showRegisterModal.value = true;
+}
 
 // Service options with icons
 const services = [

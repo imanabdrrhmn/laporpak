@@ -4,178 +4,182 @@
     <div class="modal fade show d-block" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content custom-login-modal mx-auto">
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <div>
-              <h5 class="fw-bold">Daftar Akun</h5>
-              <p class="text-muted small mb-2">Silakan isi data Anda</p>
-            </div>
-            <button type="button" class="btn-close" @click="closeModal" aria-label="Tutup"></button>
-          </div>
-
-          <!-- TOGGLE HORIZONTAL -->
-          <div class="mb-3 registration-toggle d-flex">
-            <button
-              class="btn btn-outline-primary flex-grow-1 me-2 py-1"
-              :class="{ active: mode === 'email' }"
-              @click="switchMode('email')"
-              type="button"
-            >
-              <i class="bi bi-envelope me-1"></i> Email
-            </button>
-            <button
-              class="btn btn-outline-primary flex-grow-1 py-1"
-              :class="{ active: mode === 'no_hp' }"
-              @click="switchMode('no_hp')"
-              type="button"
-            >
-              <i class="bi bi-phone me-1"></i> No HP
-            </button>
-          </div>
-
-          <form @submit.prevent="handleRegister" novalidate>
-            <!-- Nama -->
-            <div class="mb-2">
-              <label for="fullname" class="form-label fw-bold small">Nama Lengkap <span class="text-danger">*</span></label>
-              <input
-                type="text"
-                id="fullname"
-                class="form-control form-control-sm"
-                :class="errors.name ? 'border-danger' : 'border-primary'"
-                v-model="form.name"
-                placeholder="Masukkan nama lengkap Anda"
-                required
-                @focus="clearError('name')"
-                @blur="validateField('name')"
-              />
-              <div v-if="errors.name" class="error-message">{{ errors.name }}</div>
-            </div>
-
-            <!-- Email -->
-            <div class="mb-2" v-if="mode === 'email'">
-              <label for="email" class="form-label fw-bold small">Email <span class="text-danger">*</span></label>
-              <input
-                type="email"
-                id="email"
-                class="form-control form-control-sm"
-                :class="errors.email ? 'border-danger' : 'border-primary'"
-                v-model="form.email"
-                placeholder="Masukkan email Anda"
-                required
-                @focus="clearError('email')"
-                @blur="validateField('email')"
-              />
-              <div v-if="errors.email" class="error-message">{{ errors.email }}</div>
-            </div>
-
-            <!-- No HP -->
-            <div class="mb-2" v-if="mode === 'no_hp'">
-              <label for="phone" class="form-label fw-bold small">Nomor HP <span class="text-danger">*</span></label>
-              <div class="input-group input-group-sm">
-                <span class="input-group-text border-primary">+62</span>
-                <input
-                  type="tel"
-                  id="phone"
-                  class="form-control form-control-sm"
-                  :class="errors.no_hp ? 'border-danger' : 'border-primary'"
-                  v-model="phoneNumber"
-                  placeholder="8123456789"
-                  required
-                  @focus="clearError('no_hp')"
-                  @input="validatePhoneNumber"
-                  @blur="validateField('no_hp')"
-                />
+          <!-- Header with Decorative Element -->
+          <div class="modal-header-decoration"></div>
+          
+          <div class="modal-body px-4 py-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h4 class="fw-bold mb-1">Daftar Akun</h4>
+                <p class="text-muted small">Silakan isi data Anda untuk mulai</p>
               </div>
-              <div v-if="errors.no_hp" class="error-message">{{ errors.no_hp }}</div>
-              <small class="text-muted small" v-if="mode === 'no_hp'">Contoh: 81234567890 (tanpa awalan 0)</small>
+              <button type="button" class="btn-close custom-close" @click="closeModal" aria-label="Tutup"></button>
             </div>
 
-            <!-- Password -->
-            <div class="mb-2">
-              <label for="password" class="form-label fw-bold small">Kata Sandi <span class="text-danger">*</span></label>
-              <div class="position-relative">
+            <!-- TOGGLE HORIZONTAL with Icon Background -->
+            <div class="mb-4 registration-toggle d-flex p-1 bg-light rounded-pill">
+              <button
+                class="btn btn-toggle flex-grow-1 me-1 py-2 rounded-pill"
+                :class="{ active: mode === 'email' }"
+                @click="switchMode('email')"
+                type="button"
+              >
+                <i class="bi bi-envelope me-2"></i> Email
+              </button>
+              <button
+                class="btn btn-toggle flex-grow-1 py-2 rounded-pill"
+                :class="{ active: mode === 'no_hp' }"
+                @click="switchMode('no_hp')"
+                type="button"
+              >
+                <i class="bi bi-phone me-2"></i> No HP
+              </button>
+            </div>
+
+            <form @submit.prevent="handleRegister" novalidate>
+              <!-- Nama -->
+              <div class="form-floating mb-3">
+                <input
+                  type="text"
+                  id="fullname"
+                  class="form-control"
+                  :class="errors.name ? 'is-invalid' : ''"
+                  v-model="form.name"
+                  placeholder="Nama Lengkap"
+                  required
+                  @focus="clearError('name')"
+                  @blur="validateField('name')"
+                />
+                <label for="fullname">Nama Lengkap <span class="text-danger">*</span></label>
+                <div v-if="errors.name" class="error-message text-danger">{{ errors.name }}</div>
+              </div>
+
+              <!-- Email -->
+              <div class="form-floating mb-3" v-if="mode === 'email'">
+                <input
+                  type="email"
+                  id="email"
+                  class="form-control"
+                  :class="errors.email ? 'is-invalid' : ''"
+                  v-model="form.email"
+                  placeholder="Email"
+                  required
+                  @focus="clearError('email')"
+                  @blur="validateField('email')"
+                />
+                <label for="email">Email <span class="text-danger">*</span></label>
+                <div v-if="errors.email" class="error-message text-danger">{{ errors.email }}</div>
+              </div>
+
+              <!-- No HP -->
+              <div class="mb-3" v-if="mode === 'no_hp'">
+                <label for="phone" class="form-label">Nomor HP <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0">+62</span>
+                  <input
+                    type="tel"
+                    id="phone"
+                    class="form-control border-start-0"
+                    :class="errors.no_hp ? 'is-invalid' : ''"
+                    v-model="phoneNumber"
+                    placeholder="8123456789"
+                    required
+                    @focus="clearError('no_hp')"
+                    @input="validatePhoneNumber"
+                    @blur="validateField('no_hp')"
+                  />
+                </div>
+                <div v-if="errors.no_hp" class="error-message text-danger">{{ errors.no_hp }}</div>
+                <small class="text-muted d-block mt-1" v-if="mode === 'no_hp'">Contoh: 81234567890 (tanpa awalan 0)</small>
+              </div>
+
+              <!-- Password -->
+              <div class="form-floating mb-3">
                 <input
                   :type="passwordVisible ? 'text' : 'password'"
                   id="password"
-                  class="form-control form-control-sm"
-                  :class="errors.password ? 'border-danger' : 'border-primary'"
+                  class="form-control"
+                  :class="errors.password ? 'is-invalid' : ''"
                   v-model="form.password"
-                  placeholder="Minimal 8 karakter"
+                  placeholder="Kata Sandi"
                   required
                   @focus="clearError('password')"
                   @blur="validateField('password')"
                 />
+                <label for="password">Kata Sandi <span class="text-danger">*</span></label>
                 <i
                   :class="passwordVisible ? 'bi bi-eye-fill' : 'bi bi-eye-slash-fill'"
                   class="toggle-password-icon"
                   @click="passwordVisible = !passwordVisible"
                 ></i>
+                <div v-if="errors.password" class="error-message text-danger">{{ errors.password }}</div>
               </div>
-              <div v-if="errors.password" class="error-message">{{ errors.password }}</div>
-              <div class="password-strength mt-1" v-if="form.password">
-                <div class="d-flex align-items-center mb-1">
-                  <div class="progress flex-grow-1" style="height: 4px;">
+
+              <!-- Password Strength Meter -->
+              <div class="strength-meter mb-3" v-if="form.password">
+                <div class="d-flex align-items-center mb-2">
+                  <div class="progress flex-grow-1" style="height: 6px;">
                     <div class="progress-bar" :class="passwordStrengthClass" :style="{ width: passwordStrength + '%' }"></div>
                   </div>
-                  <span class="ms-2 small" :class="passwordStrengthTextClass">{{ passwordStrengthText }}</span>
+                  <span class="ms-2 small fw-bold" :class="passwordStrengthTextClass">{{ passwordStrengthText }}</span>
                 </div>
                 <div class="password-requirements small">
-                  <div :class="form.password.length >= 8 ? 'text-success' : 'text-muted'">
-                    <i :class="form.password.length >= 8 ? 'bi bi-check-circle-fill' : 'bi bi-circle'"></i> Minimal 8 karakter
+                  <div :class="form.password.length >= 8 ? 'requirement-met' : 'requirement'">
+                    <i :class="form.password.length >= 8 ? 'bi bi-check-circle-fill' : 'bi bi-circle'"></i> 
+                    Minimal 8 karakter
                   </div>
-                  <div :class="hasUpperCase ? 'text-success' : 'text-muted'">
-                    <i :class="hasUpperCase ? 'bi bi-check-circle-fill' : 'bi bi-circle'"></i> Minimal 1 huruf besar
+                  <div :class="hasUpperCase ? 'requirement-met' : 'requirement'">
+                    <i :class="hasUpperCase ? 'bi bi-check-circle-fill' : 'bi bi-circle'"></i> 
+                    Minimal 1 huruf besar
                   </div>
-                  <div :class="hasNumber ? 'text-success' : 'text-muted'">
-                    <i :class="hasNumber ? 'bi bi-check-circle-fill' : 'bi bi-circle'"></i> Minimal 1 angka
+                  <div :class="hasNumber ? 'requirement-met' : 'requirement'">
+                    <i :class="hasNumber ? 'bi bi-check-circle-fill' : 'bi bi-circle'"></i> 
+                    Minimal 1 angka
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Konfirmasi Password -->
-            <div class="mb-3">
-              <label for="password_confirmation" class="form-label fw-bold small">Konfirmasi Kata Sandi <span class="text-danger">*</span></label>
-              <div class="position-relative">
+              <!-- Konfirmasi Password -->
+              <div class="form-floating mb-4">
                 <input
                   :type="passwordVisible ? 'text' : 'password'"
                   id="password_confirmation"
-                  class="form-control form-control-sm"
-                  :class="(errors.password_confirmation || passwordMismatch) ? 'border-danger' : 'border-primary'"
+                  class="form-control"
+                  :class="(errors.password_confirmation || passwordMismatch) ? 'is-invalid' : ''"
                   v-model="form.password_confirmation"
-                  placeholder="Ulangi kata sandi"
+                  placeholder="Konfirmasi Kata Sandi"
                   required
                   @focus="clearError('password_confirmation')"
                   @blur="validateField('password_confirmation')"
                 />
+                <label for="password_confirmation">Konfirmasi Kata Sandi <span class="text-danger">*</span></label>
+                <div v-if="passwordMismatch || errors.password_confirmation" class="error-message text-danger">
+                  {{ passwordMismatch ? 'Kata sandi tidak cocok' : errors.password_confirmation }}
+                </div>
               </div>
-              <div v-if="passwordMismatch || errors.password_confirmation" class="error-message">
-                {{ passwordMismatch ? 'Kata sandi tidak cocok' : errors.password_confirmation }}
+
+              <!-- Pesan Error tanpa Alert box -->
+              <div v-if="showErrorAlert" class="error-message-summary mb-3 p-2 bg-danger-subtle border border-danger rounded">
+                <p class="text-danger mb-0 fw-medium"><i class="bi bi-exclamation-circle me-2"></i>Mohon lengkapi semua data yang diperlukan.</p>
               </div>
-            </div>
 
-            <!-- Pesan Alert untuk Error -->
-            <div v-if="showErrorAlert" class="alert alert-danger alert-dismissible fade show py-2 px-3 small" role="alert">
-              <i class="bi bi-exclamation-triangle-fill me-1"></i>
-              <strong>Perhatian!</strong> Mohon lengkapi semua data yang diperlukan.
-              <button type="button" class="btn-close btn-close-sm" @click="showErrorAlert = false" aria-label="Close"></button>
-            </div>
+              <button 
+                type="submit" 
+                class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3"
+                :disabled="isSubmitting"
+              >
+                <span v-if="isSubmitting">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Mendaftar...
+                </span>
+                <span v-else>Daftar Sekarang</span>
+              </button>
 
-            <button 
-              type="submit" 
-              class="btn btn-primary w-100 py-1 fw-bold"
-              :disabled="isSubmitting"
-            >
-              <span v-if="isSubmitting">
-                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                Mendaftar...
-              </span>
-              <span v-else>Daftar</span>
-            </button>
-
-            <div class="text-center mt-2">
-              <p class="mb-0 small">Sudah punya akun? <a href="#" @click.prevent="goToLogin" class="text-primary fw-bold">Masuk</a></p>
-            </div>
-          </form>
+              <div class="text-center">
+                <p class="mb-0">Sudah punya akun? <a href="#" @click.prevent="goToLogin" class="text-primary fw-bold">Masuk</a></p>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -272,9 +276,25 @@ function resetForm() {
 }
 
 function switchMode(newMode) {
+  // Jangan lakukan apa-apa jika mode yang sama dipilih
+  if (mode.value === newMode) return
+  
   mode.value = newMode
-  clearError('email')
-  clearError('no_hp')
+  
+  // Clear all errors and reset alert when switching modes
+  Object.keys(errors.value).forEach(key => {
+    errors.value[key] = ''
+  })
+  showErrorAlert.value = false
+  passwordMismatch.value = false
+  
+  // Reset fields that might cause validation errors
+  if (newMode === 'email') {
+    form.no_hp = ''
+    phoneNumber.value = ''
+  } else {
+    form.email = ''
+  }
 }
 
 function validatePhoneNumber() {
@@ -431,12 +451,21 @@ function handleRegister() {
 <style scoped>
 .custom-login-modal {
   width: 100%;
-  max-width: 450px;
+  max-width: 480px;
   min-height: auto;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+  padding: 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   background-color: #fff;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Decorative header */
+.modal-header-decoration {
+  height: 8px;
+  width: 100%;
+  background: linear-gradient(90deg, #2563EB, #4F46E5);
 }
 
 .modal-backdrop {
@@ -446,7 +475,8 @@ function handleRegister() {
   z-index: 1040;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
 }
 
 .modal {
@@ -471,120 +501,177 @@ function handleRegister() {
   padding: 0 15px;
 }
 
+/* ✅ Hilangkan icon (!) dari input saat error */
+.form-control.is-invalid {
+  background-image: none !important;
+  padding-right: 1rem !important;
+}
+
+/* ✅ Hilangkan icon alert dari feedback */
+.invalid-feedback i {
+  display: none !important;
+}
+
+.invalid-feedback::before {
+  display: none !important;
+}
+
+/* Error message styling */
 .error-message {
-  font-size: 0.75rem;
-  color: #dc3545;
-  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
   margin-top: 0.25rem;
 }
 
+.error-message-summary {
+  border-radius: 8px;
+}
+
+/* ✅ Jaga ukuran modal tetap saat error muncul */
+.invalid-feedback.position-static {
+  display: block;
+  min-height: 1rem;
+  line-height: 1rem;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+}
+
+/* Password toggle icon */
 .toggle-password-icon {
   position: absolute;
   top: 50%;
-  right: 10px;
+  right: 12px;
   transform: translateY(-50%);
   cursor: pointer;
   color: #6c757d;
   font-size: 16px;
+  z-index: 10;
 }
 
-button.active {
+/* Toggle button styling */
+.btn-toggle {
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-toggle.active {
   background-color: #2563EB !important;
   color: white !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+/* Password strength items */
+.strength-meter {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 12px;
 }
 
 .password-requirements {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.25rem;
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
-.registration-toggle .btn {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
+.requirement {
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.requirement-met {
+  color: #198754;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 500;
-  font-size: 0.875rem;
 }
 
-.input-group-text {
-  background-color: #f8f9fa;
-  font-size: 0.875rem;
-}
-
-/* Hilangkan background icon alert */
-.form-control.is-invalid,
-.was-validated .form-control:invalid {
-  background-image: none;
-  padding-right: 0.75rem;
-}
-
-/* Alert error */
-.alert {
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid transparent;
-}
-
-.alert-danger {
-  color: #721c24;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-}
-
-.alert-dismissible .btn-close {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
-}
-
-/* Animasi untuk tombol dan elemen interaktif */
-.btn, .toggle-password-icon {
+/* Form controls */
+.form-control {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
   transition: all 0.2s ease;
 }
 
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+.form-control:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-floating > label {
+  padding: 0.75rem 1rem;
+}
+
+.form-floating > .form-control {
+  height: 56px;
+}
+
+/* Submit button */
+.btn-primary {
+  background-color: #2563EB;
+  border: none;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #1e40af;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background-color: #93c5fd;
+  box-shadow: none;
+}
+
+/* Animasi dan efek */
+.toggle-password-icon {
+  transition: all 0.2s ease;
 }
 
 .toggle-password-icon:hover {
   color: #2563EB;
 }
 
-/* Ukuran font pada form */
-.form-label {
-  margin-bottom: 0.25rem;
+/* Custom close button */
+.custom-close {
+  border-radius: 50%;
+  padding: 6px;
+  background-color: #f3f4f6;
+  opacity: 1;
+  transition: all 0.2s ease;
 }
 
-.form-control-sm {
-  font-size: 0.875rem;
-  padding: 0.25rem 0.5rem;
-}
-
-.small {
-  font-size: 0.75rem;
+.custom-close:hover {
+  background-color: #e5e7eb;
+  transform: rotate(90deg);
 }
 
 /* Media queries */
 @media (max-width: 576px) {
   .custom-login-modal {
     max-width: 100%;
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 16px;
   }
-  
+
   .modal-dialog-centered {
     padding: 0 10px;
   }
-  
+
   .password-requirements {
     grid-template-columns: 1fr;
-  }
-  
-  .form-label {
-    font-size: 0.8rem;
   }
 }
 
@@ -597,7 +684,39 @@ button.active {
 
 @media (min-width: 992px) {
   .custom-login-modal {
-    max-width: 450px;
+    max-width: 480px;
   }
+}
+
+/* Animation effects */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-content {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+.modal-backdrop {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Input group styling for phone number */
+.input-group .input-group-text {
+  border-radius: 10px 0 0 10px;
+  border: 1.5px solid #e2e8f0;
+  border-right: none;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.input-group .form-control {
+  border-radius: 0 10px 10px 0;
 }
 </style>
