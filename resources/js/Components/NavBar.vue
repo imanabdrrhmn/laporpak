@@ -81,7 +81,7 @@
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="/Credit">
+                  <a class="dropdown-item" href="/top-ups">
                     <i class="bi bi-wallet-fill me-2"></i>
                     Credit
                   </a>
@@ -366,7 +366,7 @@
               </Link>
             </li>
             <li class="nav-item">
-              <Link href="/credit" class="nav-link" @click="closeMobileNav">
+              <Link href="/top-ups" class="nav-link" @click="closeMobileNav">
                 <i class="bi bi-wallet-fill me-2"></i>
                 <span>Credit</span>
               </Link>

@@ -74,6 +74,7 @@ const props = defineProps({
     default: false
   },
   redirectPath: {
+
     type: String,
     default: '/laporan-saya'
   },
