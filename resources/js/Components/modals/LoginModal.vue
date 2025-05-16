@@ -6,8 +6,8 @@
         <div class="modal-content custom-login-modal mx-auto">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h4 class="fw-bold modal-title">Selamat Datang</h4>
-              <p class="text-muted mb-4">Silahkan masukkan akun anda</p>
+              <h4 class="fw-bold modal-title">{{ isFromReport ? 'Silahkan Login' : 'Selamat Datang' }}</h4>
+              <p class="text-muted mb-4">{{ isFromReport ? 'Login terlebih dahulu untuk melanjutkan aktivitas pelaporan Anda' : 'Silahkan masukkan akun anda' }}</p>
             </div>
             <button type="button" class="btn-close" @click="closeModal"></button>
           </div>
@@ -83,6 +83,10 @@ import { useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
   visible: Boolean,
+  isFromReport: {
+    type: Boolean,
+    default: false
+  }
 })
 
 const emit = defineEmits(['update:visible', 'open-register', 'open-reset-password'])

@@ -92,7 +92,7 @@
                   </button>
                 </div>
               </div>
-              <form @submit.prevent="handleSubmit" ref="formRef">
+              <form @submit.prevent="handleSubmitReport" ref="formRef">
                 <div class="row g-3">
                   <!-- Category -->
                   <div class="col-12">
@@ -245,6 +245,7 @@
       :show="showSuccessModal"
       @close="showSuccessModal = false"
     />
+  <loginModal v-model:visible="showLoginModal" :is-from-report="true"></loginModal>
   </AppLayout>
 </template>
 
@@ -261,11 +262,17 @@ import Feedback from '@/Components/Feedback.vue';
 import Alur from '@/Components/alurpelaporan.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SuccessModal from '@/Pages/Pelaporan/SuccessModal.vue';
+import loginModal from '@/Components/modals/LoginModal.vue';
 
 const page = usePage();
 page.layout = AppLayout;
 const feedbacks = page.props.feedbacks;
 const showSuccessModal = ref(false);
+const showLoginModal = ref(false);
+const isFromReport = ref(false);
+
+// Check if user is logged in
+const userIsLoggedIn = computed(() => !!page.props.auth.user);
 
 // Service options with icons
 const services = [
@@ -421,8 +428,20 @@ async function reverseGeocode(lat, lng) {
   }
 }
 
+// Handle form submission with login check
+function handleSubmitReport() {
+  if (!userIsLoggedIn.value) {
+    // Tampilkan modal login dengan indikasi dari halaman pelaporan
+    showLoginModal.value = true;
+    isFromReport.value = true;
+  } else {
+    // Proses pengiriman laporan
+    submitReport();
+  }
+}
+
 // Form submission handler with improved validation
-const handleSubmit = () => {
+const submitReport = () => {
   Object.keys(validationErrors).forEach(key => {
     validationErrors[key] = false;
   });
@@ -544,7 +563,7 @@ function placeMarker(latlng) {
     marker = L.marker(latlng, { icon: customIcon }).addTo(map);
     
     // Set popup content based on selected service
-    const popupContent = selectedService.value === 'Penipuan' 
+    const popupContent  = selectedService.value === 'Penipuan' 
       ? '<b>Lokasi Pelaporan</b>' 
       : '<b>Lokasi Kerusakan Infrastruktur</b>';
       
