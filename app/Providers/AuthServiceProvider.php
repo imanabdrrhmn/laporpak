@@ -6,16 +6,18 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Gate;
 
 use App\Models\Feedback;
-use App\Policies\FeedbackPolicy;
-
+use App\Models\TopUp;
 use App\Models\Report;
 use App\Policies\ReportPolicy;
+use App\Policies\TopUpPolicy;
+use App\Policies\FeedbackPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
         Feedback::class => FeedbackPolicy::class,
         Report::class => ReportPolicy::class,
+        TopUp::class => TopUpPolicy::class,
     ];
 
     public function boot(): void

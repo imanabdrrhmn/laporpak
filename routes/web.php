@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserHistoryReportController;
+use App\Http\Controllers\TopUpController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -78,9 +79,19 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::get('/Credit', function (){
-    return Inertia::render('Credit/CreditPage');
-})->middleware(['auth', 'contact.verified'])->name('credit');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/top-ups/history', [TopUpController::class, 'index'])->name('top-ups.index');     
+    Route::get('/top-ups', [TopUpController::class, 'create'])->name('top-ups.create');; 
+    Route::post('/top-ups/create', [TopUpController::class, 'store'])->name('top-ups.store');       
+
+    // Admin routes
+    Route::middleware('can:viewAny,App\Models\TopUp')->group(function () {
+        Route::get('/admin/top-ups', [TopUpController::class, 'adminIndex']);
+        Route::post('/admin/top-ups/{id}/verify', [TopUpController::class, 'verify']);
+        Route::post('/admin/top-ups/{id}/reject', [TopUpController::class, 'reject']);
+    });
+});
+
 
 
 require __DIR__.'/auth.php';
