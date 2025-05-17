@@ -86,12 +86,7 @@
                     Credit
                   </a>
                 </li>
-                <li>
-                  <a class="dropdown-item" href="/pengaturan">
-                    <i class="bi bi-gear-fill me-2"></i>
-                    Pengaturan
-                  </a>
-                </li>
+            
                 <li><hr class="dropdown-divider" /></li>
                 <li>
                   <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
@@ -369,12 +364,6 @@
               <Link href="/top-ups" class="nav-link" @click="closeMobileNav">
                 <i class="bi bi-wallet-fill me-2"></i>
                 <span>Credit</span>
-              </Link>
-            </li>
-            <li class="nav-item">
-              <Link href="/pengaturan" class="nav-link" @click="closeMobileNav">
-                <i class="bi bi-gear-fill me-2"></i>
-                <span>Pengaturan</span>
               </Link>
             </li>
             <li class="nav-item mt-3">

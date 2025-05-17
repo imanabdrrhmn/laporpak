@@ -7,16 +7,16 @@
           <!-- Title + Description on Left Side - DYNAMIC CONTENT -->
           <div class="col-lg-6 d-flex flex-column justify-content text-white hero-content p-4 p-sm-5 ms-auto">
             <div class="text-section"> 
-              <h1 class="display-4 fw-bold mb-3 d-flex align-items-center">
+              <h1 class="display-4 fw-bold mb-3 d-flex align-items-center responsive-title">
                 <i :class="serviceInfo[selectedService].titleIcon + ' me-2'"></i>
-                <span class="text-nowrap">{{ serviceInfo[selectedService].title }}</span>
+                <span>{{ serviceInfo[selectedService].title }}</span>
               </h1>
               <div class="highlight-bar mb-4"></div>
               <p class="lead mb-4">
                 {{ serviceInfo[selectedService].description }}
               </p>
               <!-- Service Info Cards -->
-              <div class="d-none d-lg-block">
+              <div class="d-none d-md-block">
                 <div class="row mt-4 g-3">
                   <div class="col-md-4">
                     <div class="feature-box p-3">
@@ -41,8 +41,8 @@
                   </div>
                 </div>
               </div>
-              <!-- Features for mobile/tablet -->
-              <div class="d-block d-lg-none mt-4">
+              <!-- Features for mobile -->
+              <div class="d-block d-md-none">
                 <div class="row g-2">
                   <div class="col-4 text-center">
                     <div class="mobile-feature p-2">
@@ -245,8 +245,8 @@
       :show="showSuccessModal"
       @close="showSuccessModal = false"
     />
-  <loginModal v-model:visible="showLoginModal" :is-from-report="true"></loginModal>
-   <RegisterModal v-model:visible="showRegisterModal" :is-from-report="true" />
+    <loginModal v-model:visible="showLoginModal" :is-from-report="true"></loginModal>
+    <RegisterModal v-model:visible="showRegisterModal" :is-from-report="true" />
   </AppLayout>
 </template>
 
@@ -306,16 +306,7 @@ const serviceInfo = {
     icon: 'bi bi-shield-check',
     formTitle: 'Form Pelaporan',
     descriptionPlaceholder: 'Ceritakan bagaimana kejadian yang mencurigakan terjadi dan modus yang digunakan...',
-    feature1: {
-      title: 'Verifikasi Data',
-      subtitle: 'Pemeriksaan menyeluruh',
-      icon: 'bi bi-shield-check'
-    },
-    feature2: {
-      title: 'Perlindungan Pengguna',
-      subtitle: 'Keamanan terjamin',
-      icon: 'bi bi-graph-up-arrow'
-    }
+
   },
   Infrastruktur: {
     badge: 'Lapor Infrastruktur',
@@ -325,16 +316,7 @@ const serviceInfo = {
     icon: 'bi bi-building-gear',
     formTitle: 'Form Infrastruktur',
     descriptionPlaceholder: 'Jelaskan detail kerusakan dan dampaknya terhadap lingkungan...',
-    feature1: {
-      title: 'Perbaikan Lebih Cepat',
-      subtitle: 'Prioritas berdasarkan laporan',
-      icon: 'bi bi-tools'
-    },
-    feature2: {
-      title: 'Lingkungan Lebih Baik',
-      subtitle: 'Infrastruktur terpelihara',
-      icon: 'bi bi-tree'
-    }
+ 
   }
 };
 
@@ -628,10 +610,22 @@ function getCurrentLocation() {
     alert("Browser Anda tidak mendukung Geolocation.");
   }
 }
+
+// Debounce function to limit resize event frequency
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 </script>
 
 <style scoped>
-/* Mobile-first base styles */
 .text-nowrap {
   white-space: nowrap;
 }
@@ -665,6 +659,11 @@ function getCurrentLocation() {
   transition: transform 0.3s ease;
   text-align: left;
   padding: 1.5rem;
+  min-height: 200px; /* Ensure uniform height */
+  height: 100%; /* Fill the parent container */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .feature-box:hover {
@@ -687,6 +686,7 @@ function getCurrentLocation() {
   font-size: 0.875rem;
   line-height: 1.4;
   margin-bottom: 0;
+  flex-grow: 1; /* Ensure text takes available space */
 }
 
 .mobile-feature {
@@ -717,16 +717,17 @@ function getCurrentLocation() {
   max-width: 100%;
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
+  overflow: hidden;
 }
 
-.form-control, 
+.form-control,
 .form-select {
   font-size: 1rem;
   padding: 0.75rem;
   border-radius: 6px;
 }
 
-.form-control:focus, 
+.form-control:focus,
 .form-select:focus {
   border-color: #0d6efd;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
@@ -736,6 +737,9 @@ function getCurrentLocation() {
   border: 1px solid #ced4da;
   cursor: pointer;
   transition: all 0.2s ease;
+  max-width: 100%;
+  overflow-x: hidden;
+  word-wrap: break-word;
 }
 
 .custom-textarea {
@@ -858,7 +862,133 @@ function getCurrentLocation() {
   background-image: url("https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png");
 }
 
+.responsive-title {
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  line-height: 1.2;
+}
+
+.responsive-title span {
+  display: inline;
+}
+
+/* Ensure uniform card sizes on tablet */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .feature-box {
+    min-height: 180px; /* Slightly smaller for tablets */
+    padding: 1rem;
+  }
+  .feature-box h5 {
+    font-size: 0.95rem;
+  }
+  .feature-box p {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  .row.g-3 {
+    margin-right: -0.5rem;
+    margin-left: -0.5rem;
+  }
+  .col-md-4 {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .form-container {
+    margin: 0 auto !important;
+    max-width: 90% !important;
+  }
+  
+  .hero-section {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .hero-section .row .col-lg-6 {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+  
+  .text-section {
+    padding: 2rem 3rem !important;
+    margin-bottom: 1rem;
+  }
+  
+  .hero-section .col-lg-6:last-child {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 2rem 3rem !important;
+  }
+
+  .bg-light {
+    padding: 0 !important;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 834px) {
+  .form-container {
+    max-width: 85% !important;
+    margin: 0 auto !important;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 920px) {
+  .form-container {
+    max-width: 80% !important;
+  }
+}
+
+@media (min-width: 650px) and (max-width: 767px) {
+  .form-container {
+    max-width: 92% !important;
+  }
+  
+  .hero-section .col-lg-6:last-child {
+    padding: 1rem 1.5rem 2rem !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1100px) {
+  .hero-section .row {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-container {
+    max-width: 75% !important;
+    margin: 0 auto 2rem !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .map-container {
+    height: 280px !important;
+    width: 100% !important;
+  }
+  
+  .service-btn, .submit-btn {
+    min-height: 50px;
+  }
+  
+  .form-container {
+    padding: 2rem !important;
+  }
+}
+
 @media (max-width: 320px) {
+  .responsive-title {
+    font-size: 1.5rem !important;
+    line-height: 1.3;
+  }
+  .responsive-title i {
+    font-size: 1.3rem;
+  }
   .hero-content {
     padding: 1rem !important;
   }
@@ -874,9 +1004,21 @@ function getCurrentLocation() {
   .map-container {
     height: 200px;
   }
+  .custom-select {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    height: auto;
+  }
 }
 
-@media (min-width: 321px) and (max-width: 576px) {
+@media (min-width: 321px) and (max-width: 375px) {
+  .responsive-title {
+    font-size: 1.7rem !important;
+    line-height: 1.3;
+  }
+  .responsive-title i {
+    font-size: 1.5rem;
+  }
   .hero-content {
     padding: 2rem 1.5rem !important;
   }
@@ -891,6 +1033,37 @@ function getCurrentLocation() {
   }
   .map-container {
     height: 220px;
+  }
+  .custom-select {
+    font-size: 0.95rem;
+    padding: 0.6rem;
+    height: auto;
+  }
+}
+
+@media (min-width: 376px) and (max-width: 576px) {
+  .responsive-title {
+    font-size: 1.9rem !important;
+  }
+  .hero-content {
+    padding: 2rem 1.5rem !important;
+  }
+  .form-container {
+    padding: 1.5rem !important;
+  }
+  .display-4 {
+    font-size: 2.2rem !important;
+  }
+  .lead {
+    font-size: 1rem;
+  }
+  .map-container {
+    height: 220px;
+  }
+  .custom-select {
+    font-size: 0.95rem;
+    padding: 0.6rem;
+    height: auto;
   }
 }
 
@@ -908,6 +1081,11 @@ function getCurrentLocation() {
   .map-container {
     height: 250px;
   }
+  .custom-select {
+    font-size: 1rem;
+    padding: 0.75rem;
+    height: auto;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
@@ -923,6 +1101,11 @@ function getCurrentLocation() {
   }
   .map-container {
     height: 280px;
+  }
+  .custom-select {
+    font-size: 1.05rem;
+    padding: 0.8rem;
+    height: auto;
   }
 }
 
@@ -948,6 +1131,11 @@ function getCurrentLocation() {
   .map-container {
     height: 300px;
   }
+  .custom-select {
+    font-size: 1.1rem;
+    padding: 0.85rem;
+    height: auto;
+  }
 }
 
 @media (min-width: 1200px) {
@@ -960,6 +1148,11 @@ function getCurrentLocation() {
   .map-container {
     height: 320px;
   }
+  .custom-select {
+    font-size: 1.15rem;
+    padding: 0.9rem;
+    height: auto;
+  }
 }
 
 @media (min-width: 1400px) {
@@ -971,6 +1164,11 @@ function getCurrentLocation() {
   }
   .map-container {
     height: 350px;
+  }
+  .custom-select {
+    font-size: 1.2rem;
+    padding: 1rem;
+    height: auto;
   }
 }
 
@@ -988,6 +1186,11 @@ function getCurrentLocation() {
   .map-container {
     height: 200px;
   }
+  .custom-select {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    height: auto;
+  }
 }
 
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
@@ -996,6 +1199,11 @@ function getCurrentLocation() {
   }
   .form-container {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  }
+  .custom-select {
+    font-size: 1.05rem;
+    padding: 0.8rem;
+    height: auto;
   }
 }
 </style>

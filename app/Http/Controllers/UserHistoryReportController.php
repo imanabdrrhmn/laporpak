@@ -16,7 +16,7 @@ class UserHistoryReportController extends Controller
         $reports = Report::where('user_id', $user->id)->latest()->get();
         // $verifications = Verification::where('user_id', $user->id)->latest()->get();
 
-        return Inertia::render('Kelola Laporan/KelolaLaporan', [
+        return Inertia::render('Kelola Laporan/RiwayatPelaporan', [
             'reports' => $reports,
             // 'verifications' => $verifications,
         ]);
