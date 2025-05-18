@@ -234,10 +234,11 @@
 
         <!-- New Mobile Navigation Structure -->
         <ul class="nav flex-column mobile-nav">
+          <!-- Beranda -->
           <li class="nav-item">
             <Link href="/" class="nav-link" @click="closeMobileNav">
               <i class="bi bi-house-fill me-2"></i>
-              <span>BERANDA</span>
+              <span>Beranda</span>
             </Link>
           </li>
 
@@ -247,31 +248,30 @@
                @click.prevent="toggleLayananMobile = !toggleLayananMobile">
               <div>
                 <i class="bi bi-collection-fill me-2"></i>
-                <span>LAYANAN</span>
+                <span>Layanan</span>
               </div>
               <i class="bi" :class="toggleLayananMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
             </a>
             <div class="collapse" :class="{ show: toggleLayananMobile }">
               <div class="nav flex-column submenu">
-                <Link href="/pelaporan" class="nav-link" @click="closeMobileNav">Pelaporan</Link>
-                <Link href="/verifikasi" class="nav-link" @click="closeMobileNav">Verifikasi</Link>
-                <Link href="/LaporMap" class="nav-link" @click="closeMobileNav">Lapor Map</Link>
-                <Link href="/CariLaporan" class="nav-link" @click="closeMobileNav">Cari Laporan</Link>
+                <Link href="/pelaporan" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                  Pelaporan
+                </Link>
+                <Link href="/verifikasi" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-check-square-fill me-2"></i>
+                  Verifikasi
+                </Link>
+                <Link href="/LaporMap" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-geo-alt-fill me-2"></i>
+                  Lapor Map
+                </Link>
+                <Link href="/CariLaporan" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-search me-2"></i>
+                  Cari Laporan
+                </Link>
               </div>
             </div>
-          </li>
-
-          <li class="nav-item">
-            <Link href="/feedback" class="nav-link" @click="closeMobileNav">
-              <i class="bi bi-chat-dots-fill me-2"></i>
-              <span>FEEDBACK</span>
-            </Link>
-          </li>
-          <li class="nav-item">
-            <Link href="/tentang-kami" class="nav-link" @click="closeMobileNav">
-              <i class="bi bi-people-fill me-2"></i>
-              <span>TENTANG KAMI</span>
-            </Link>
           </li>
 
           <!-- Profile Dropdown -->
@@ -280,7 +280,7 @@
                @click.prevent="toggleProfileMobile = !toggleProfileMobile">
               <div>
                 <i class="bi bi-person-fill me-2"></i>
-                <span>PROFIL</span>
+                <span>Profil</span>
               </div>
               <i class="bi" :class="toggleProfileMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
             </a>
@@ -312,29 +312,56 @@
                @click.prevent="toggleAdminMobile = !toggleAdminMobile">
               <div>
                 <i class="bi bi-shield-fill me-2"></i>
-                <span>ADMIN</span>
+                <span>Admin</span>
               </div>
               <i class="bi" :class="toggleAdminMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
             </a>
             <div class="collapse" :class="{ show: toggleAdminMobile }">
               <div class="nav flex-column submenu">
-                <Link href="/admin/dashboard" class="nav-link" @click="closeMobileNav">Dashboard Admin</Link>
-                <Link href="/admin/pelaporan" class="nav-link" @click="closeMobileNav">Manajemen Pelaporan</Link>
-                <Link href="/admin/top-ups" class="nav-link" @click="closeMobileNav">Manajemen Top-up</Link>
-                <Link href="/admin/users" class="nav-link" @click="closeMobileNav">Manajemen Pengguna</Link>
+                <Link href="/admin/dashboard" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-grid-fill me-2"></i>
+                  Dashboard Admin
+                </Link>
+                <Link href="/admin/pelaporan" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-file-earmark-excel-fill me-2"></i>
+                  Manajemen Pelaporan
+                </Link>
+                <Link href="/admin/top-ups" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-wallet-fill me-2"></i>
+                  Manajemen Top-up
+                </Link>
+                <Link href="/admin/users" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-people-fill me-2"></i>
+                  Manajemen Pengguna
+                </Link>
               </div>
             </div>
           </li>
 
-          <!-- Logout Button -->
+          <!-- Feedback -->
+          <li class="nav-item">
+            <Link href="/feedback" class="nav-link" @click="closeMobileNav">
+              <i class="bi bi-chat-dots-fill me-2"></i>
+              <span>Feedback</span>
+            </Link>
+          </li>
+
+          <!-- Tentang Kami -->
+          <li class="nav-item">
+            <Link href="/tentang-kami" class="nav-link" @click="closeMobileNav">
+              <i class="bi bi-people-fill me-2"></i>
+              <span>Tentang Kami</span>
+            </Link>
+          </li>
+
+          <!-- Logout and Login Buttons -->
           <li v-if="isLoggedIn" class="nav-item mt-3">
             <a class="nav-link text-danger" href="#" @click.prevent="logout">
               <i class="bi bi-box-arrow-right me-2"></i>
-              <span>KELUAR</span>
+              <span>Keluar</span>
             </a>
           </li>
 
-          <!-- Login Button (when not logged in) -->
           <li v-else class="nav-item mt-4 mb-2 d-flex justify-content-center">
             <button class="btn btn-primary rounded-pill px-5" 
                     @click="$emit('trigger-login'); closeMobileNav()">
