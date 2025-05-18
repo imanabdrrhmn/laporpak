@@ -5,10 +5,7 @@
       <p class="text-muted">Mau ngapain hari ini?</p>
     </div>
     <div class="user-info-container animate__animated animate__fadeIn">
-      <div class="level-badge">
-        <i class="bi bi-award"></i>
-        <span>{{ levelUser }}</span>
-      </div>
+    
       <div class="date-badge">
         <span class="day">{{ new Date().toLocaleDateString('id-ID', { weekday: 'long' }) }}</span>
         <span class="date">{{ new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) }}</span>

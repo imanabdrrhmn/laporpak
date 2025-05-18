@@ -94,7 +94,7 @@ import { Head, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import WelcomeHeader from '@/Components/Dashboard/WelcomeHeader.vue';
 import SummaryCard from '@/Components/Dashboard/SummaryCard.vue';
-import LevelProgress from '@/Components/Dashboard/LevelProgress.vue';
+
 import QuickActions from '@/Components/Dashboard/QuickActions.vue';
 import RecentActivity from '@/Components/Dashboard/RecentActivity.vue';
 import FeedbackCard from '@/Components/Dashboard/FeedbackCard.vue';
@@ -108,8 +108,6 @@ page.layout = AppLayout;
 
 // Model data
 const saldoKredit = ref(page.props.saldoKredit ?? 0);
-const levelUser = ref(page.props.levelUser ?? 'Silver');
-const progresLevel = ref(65);
 const namaUser = computed(() => page.props.auth?.user?.name || 'User');
 
 // Status verifikasi
