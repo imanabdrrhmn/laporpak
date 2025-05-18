@@ -232,155 +232,112 @@
           ></button>
         </div>
 
-        <!-- Mobile User Profile Section (when logged in) -->
-        <div v-if="isLoggedIn" class="px-4 py-3 mb-3 border-bottom">
-          <div class="d-flex align-items-center">
-            <div class="avatar-wrapper me-3">
-              <img
-                v-if="user.avatar_url"
-                :src="user.avatar_url"
-                alt="User Avatar"
-                class="user-avatar"
-              />
-              <div v-else class="user-avatar-placeholder">
-                {{ getUserInitials() }}
-              </div>
-            </div>
-            <div>
-              <div class="fw-bold">{{ user.name }}</div>
-              <div class="small text-muted">{{ user.email }}</div>
-            </div>
-          </div>
-        </div>
-
-        <ul class="nav flex-column">
+        <!-- New Mobile Navigation Structure -->
+        <ul class="nav flex-column mobile-nav">
           <li class="nav-item">
             <Link href="/" class="nav-link" @click="closeMobileNav">
               <i class="bi bi-house-fill me-2"></i>
-              <span>Beranda</span>
+              <span>BERANDA</span>
             </Link>
           </li>
 
-          <!-- Mobile Layanan Collapsible -->
+          <!-- Layanan Dropdown -->
           <li class="nav-item">
-            <a
-              class="nav-link d-flex justify-content-between align-items-center"
-              @click.stop="toggleLayananMobile = !toggleLayananMobile"
-            >
+            <a class="nav-link d-flex justify-content-between align-items-center"
+               @click.prevent="toggleLayananMobile = !toggleLayananMobile">
               <div>
                 <i class="bi bi-collection-fill me-2"></i>
-                <span>Layanan</span>
+                <span>LAYANAN</span>
               </div>
-              <i
-                class="bi"
-                :class="toggleLayananMobile ? 'bi-chevron-up' : 'bi-chevron-down'"
-              ></i>
+              <i class="bi" :class="toggleLayananMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
             </a>
             <div class="collapse" :class="{ show: toggleLayananMobile }">
-              <div class="nav flex-column ms-4">
-                <Link
-                  href="/pelaporan"
-                  class="nav-link"
-                  @click="closeMobileNav"
-                  :class="{ 'active-pelaporan': $page.url === '/pelaporan' }"
-                >
-                  <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                  <span>Pelaporan</span>
-                </Link>
-                <Link
-                  href="/verifikasi"
-                  class="nav-link"
-                  @click="closeMobileNav"
-                  :class="{ 'active-verifikasi': $page.url === '/verifikasi' }"
-                >
-                  <i class="bi bi-check-square-fill me-2"></i>
-                  <span>Verifikasi</span>
-                </Link>
-                <Link
-                  href="/LaporMap"
-                  class="nav-link"
-                  @click="closeMobileNav"
-                  :class="{ 'active-LaporMap': $page.url === '/LaporMap' }"
-                >
-                  <i class="bi bi-geo-alt-fill me-2"></i>
-                  <span>Lapor Map</span>
-                </Link>
-                <Link
-                  href="/CariLaporan"
-                  class="nav-link"
-                  @click="closeMobileNav"
-                  :class="{ 'active-CariLaporan': $page.url === '/CariLaporan' }"
-                >
-                  <i class="bi bi-search me-2"></i>
-                  <span>Cari Laporan</span>
-                </Link>
+              <div class="nav flex-column submenu">
+                <Link href="/pelaporan" class="nav-link" @click="closeMobileNav">Pelaporan</Link>
+                <Link href="/verifikasi" class="nav-link" @click="closeMobileNav">Verifikasi</Link>
+                <Link href="/LaporMap" class="nav-link" @click="closeMobileNav">Lapor Map</Link>
+                <Link href="/CariLaporan" class="nav-link" @click="closeMobileNav">Cari Laporan</Link>
               </div>
             </div>
           </li>
 
           <li class="nav-item">
-            <Link
-              href="/feedback"
-              class="nav-link"
-              @click="closeMobileNav"
-              :class="{ 'active-feedback': $page.url === '/feedback' }"
-            >
+            <Link href="/feedback" class="nav-link" @click="closeMobileNav">
               <i class="bi bi-chat-dots-fill me-2"></i>
-              <span>Feedback</span>
+              <span>FEEDBACK</span>
             </Link>
           </li>
           <li class="nav-item">
-            <Link
-              href="/tentang-kami"
-              class="nav-link"
-              @click="closeMobileNav"
-              :class="{ 'active-tentang-kami': $page.url === '/tentang-kami' }"
-            >
+            <Link href="/tentang-kami" class="nav-link" @click="closeMobileNav">
               <i class="bi bi-people-fill me-2"></i>
-              <span>Tentang Kami</span>
+              <span>TENTANG KAMI</span>
             </Link>
           </li>
 
-          <!-- User-specific links (when logged in) -->
-          <template v-if="isLoggedIn">
-            <li class="nav-item border-top mt-3 pt-2">
-              <Link href="/dashboard" class="nav-link" @click="closeMobileNav">
-                <i class="bi bi-file-bar-graph-fill me-2"></i>
-                <span>Dashboard</span>
-              </Link>
-            </li>
-            <li class="nav-item">
-              <Link href="/profile" class="nav-link" @click="closeMobileNav">
+          <!-- Profile Dropdown -->
+          <li v-if="isLoggedIn" class="nav-item">
+            <a class="nav-link d-flex justify-content-between align-items-center"
+               @click.prevent="toggleProfileMobile = !toggleProfileMobile">
+              <div>
                 <i class="bi bi-person-fill me-2"></i>
-                <span>Profil Saya</span>
-              </Link>
-            </li>
-            <li class="nav-item">
-              <Link href="/laporan-saya" class="nav-link" @click="closeMobileNav">
-                <i class="bi bi-file-earmark-text-fill me-2"></i>
-                <span>Laporan Saya</span>
-              </Link>
-            </li>
-            <li class="nav-item">
-              <Link href="/top-ups" class="nav-link" @click="closeMobileNav">
-                <i class="bi bi-wallet-fill me-2"></i>
-                <span>Credit</span>
-              </Link>
-            </li>
-            <li class="nav-item mt-3">
-              <a class="nav-link text-danger" href="/" @click.prevent="logout">
-                <i class="bi bi-box-arrow-right me-2"></i>
-                <span>Keluar</span>
-              </a>
-            </li>
-          </template>
+                <span>PROFIL</span>
+              </div>
+              <i class="bi" :class="toggleProfileMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            </a>
+            <div class="collapse" :class="{ show: toggleProfileMobile }">
+              <div class="nav flex-column submenu">
+                <Link href="/dashboard" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-speedometer2 me-2"></i>
+                  Dashboard
+                </Link>
+                <Link href="/profile" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-person-fill me-2"></i>
+                  Profil Saya
+                </Link>
+                <Link href="/laporan-saya" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-file-earmark-text-fill me-2"></i>
+                  Laporan Saya
+                </Link>
+                <Link href="/top-ups" class="nav-link" @click="closeMobileNav">
+                  <i class="bi bi-wallet-fill me-2"></i>
+                  Credit
+                </Link>
+              </div>
+            </div>
+          </li>
+
+          <!-- Admin Dropdown -->
+          <li v-if="isLoggedIn" class="nav-item">
+            <a class="nav-link d-flex justify-content-between align-items-center"
+               @click.prevent="toggleAdminMobile = !toggleAdminMobile">
+              <div>
+                <i class="bi bi-shield-fill me-2"></i>
+                <span>ADMIN</span>
+              </div>
+              <i class="bi" :class="toggleAdminMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            </a>
+            <div class="collapse" :class="{ show: toggleAdminMobile }">
+              <div class="nav flex-column submenu">
+                <Link href="/admin/dashboard" class="nav-link" @click="closeMobileNav">Dashboard Admin</Link>
+                <Link href="/admin/pelaporan" class="nav-link" @click="closeMobileNav">Manajemen Pelaporan</Link>
+                <Link href="/admin/top-ups" class="nav-link" @click="closeMobileNav">Manajemen Top-up</Link>
+                <Link href="/admin/users" class="nav-link" @click="closeMobileNav">Manajemen Pengguna</Link>
+              </div>
+            </div>
+          </li>
+
+          <!-- Logout Button -->
+          <li v-if="isLoggedIn" class="nav-item mt-3">
+            <a class="nav-link text-danger" href="#" @click.prevent="logout">
+              <i class="bi bi-box-arrow-right me-2"></i>
+              <span>KELUAR</span>
+            </a>
+          </li>
 
           <!-- Login Button (when not logged in) -->
           <li v-else class="nav-item mt-4 mb-2 d-flex justify-content-center">
-            <button
-              class="btn btn-primary rounded-pill px-5"
-              @click="$emit('trigger-login'); closeMobileNav()"
-            >
+            <button class="btn btn-primary rounded-pill px-5" 
+                    @click="$emit('trigger-login'); closeMobileNav()">
               Masuk
             </button>
           </li>
@@ -404,6 +361,8 @@ export default {
     const page = usePage();
     const mobileNavOpen = ref(false);
     const toggleLayananMobile = ref(false);
+    const toggleProfileMobile = ref(false);
+    const toggleAdminMobile = ref(false);
 
     const isLoggedIn = computed(() => !!page.props.auth?.user);
     const user = computed(() => page.props.auth?.user || {});
@@ -431,6 +390,8 @@ export default {
     return {
       mobileNavOpen,
       toggleLayananMobile,
+      toggleProfileMobile,
+      toggleAdminMobile,
       isLoggedIn,
       user,
       getUserInitials,
@@ -846,5 +807,48 @@ export default {
 .sidebar-nav .btn-primary:active {
   transform: translateY(1px);
   box-shadow: 0 1px 3px rgba(13, 110, 253, 0.2);
+}
+
+/* Add these new styles for mobile navigation */
+.mobile-nav .nav-link {
+  padding: 15px 20px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav .submenu {
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 5px 0;
+}
+
+.mobile-nav .submenu .nav-link {
+  padding: 12px 20px 12px 48px;
+  font-weight: normal;
+  font-size: 13px;
+  color: #666;
+}
+
+.mobile-nav .collapse {
+  transition: all 0.2s ease-out;
+}
+
+.mobile-nav .collapse:not(.show) {
+  display: none;
+}
+
+.mobile-nav .nav-link i.bi-chevron-down,
+.mobile-nav .nav-link i.bi-chevron-up {
+  transition: transform 0.3s ease;
+}
+
+.mobile-nav .nav-item {
+  border-bottom: 1px solid #eee;
+}
+
+.mobile-nav .nav-item:last-child {
+  border-bottom: none;
 }
 </style>
