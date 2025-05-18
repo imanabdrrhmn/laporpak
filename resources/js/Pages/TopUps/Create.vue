@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+    <Head title="Top Up" />
     <div class="container py-4">
       <div class="card shadow-sm mx-auto" style="max-width: 700px;">
         <div class="card-body p-4">
@@ -168,6 +169,7 @@
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import axios from 'axios';
+import { Head } from '@inertiajs/vue3';
 import { useRouter } from 'vue-router';
 import { Modal, Toast } from 'bootstrap';
 

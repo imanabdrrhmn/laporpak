@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+    <Head title="Manajemen Top Up" />
     <div class="container py-4">
       <h1 class="mb-4 text-center fw-bold">Admin Panel - Top Up Management</h1>
 
@@ -169,7 +170,7 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { Inertia } from "@inertiajs/inertia";
-import { usePage } from "@inertiajs/vue3";
+import { usePage, Head } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Modal } from "bootstrap";
 

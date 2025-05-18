@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+    <Head title="User Management" />
     <div class="container mt-4">
       <h2 class="mb-4">User Management</h2>
 
@@ -133,7 +134,7 @@
 <script setup>
 import Swal from 'sweetalert2'
 import { ref } from 'vue'
-import { usePage } from '@inertiajs/vue3'
+import { usePage, Head } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const { props } = usePage()

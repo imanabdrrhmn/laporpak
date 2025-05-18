@@ -27,7 +27,6 @@ Route::get('/dashboard', function (){
         'user' => auth()->user(),
         'creditBalance' => $user->balance,
     ]);
-    
 })->middleware(['auth', 'contact.verified'])->name('dashboard');
 
 Route::get('/verifikasi', function () {
@@ -47,7 +46,7 @@ Route::get('/tentang-kami', function () {
     return Inertia::render('TentangKami');
 })->name('tentang-kami');
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth','contact.verified')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -64,7 +63,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth','contact.verified')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::get('/pelaporan/index', [ReportController::class, 'index'])->name('laporan.index');
         Route::patch('/pelaporan/{report}/terima', [ReportController::class, 'accept'])->name('laporan.terima');
@@ -79,12 +78,12 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.create');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','contact.verified'])->group(function () {
     Route::get('/laporan-saya', [UserHistoryReportController::class, 'allHistory'])->name('history');
 });
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','contact.verified'])->group(function () {
     Route::get('/top-ups/history', [TopUpController::class, 'index'])->name('top-ups.index');     
     Route::get('/top-ups', [TopUpController::class, 'create'])->name('top-ups.create');; 
     Route::post('/top-ups/create', [TopUpController::class, 'store'])->name('top-ups.store');       
