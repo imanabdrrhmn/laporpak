@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+    <Head title="Manajemen Laporan" />
     <div class="container">
       <!-- Filter Section -->
       <div class="filter-section">
@@ -79,7 +80,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { usePage } from '@inertiajs/vue3'
+import { usePage, Head } from '@inertiajs/vue3'
 import Modal from '@/Pages/Pelaporan/LaporanDetailModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
