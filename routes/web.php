@@ -63,13 +63,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
 });
 
-Route::middleware('auth','contact.verified')->group(function () {
-    Route::middleware('role:admin')->group(function () {
-        Route::get('/pelaporan/index', [ReportController::class, 'index'])->name('laporan.index');
-        Route::patch('/pelaporan/{report}/terima', [ReportController::class, 'accept'])->name('laporan.terima');
-        Route::patch('/pelaporan/{report}/tolak', [ReportController::class, 'reject'])->name('laporan.tolak');
-        Route::patch('/pelaporan/{report}/publikasikan', [ReportController::class, 'publish'])->name('laporan.publikasikan');
-        Route::delete('/pelaporan/{report}/hapus', [ReportController::class, 'destroy'])->name('laporan.hapus');
+Route::middleware('auth','contact.verified', 'role:admin||verifier')->group(function () {
+    Route::middleware('role:admin||verifier')->group(function () {
+        Route::get('/admin/pelaporan', [ReportController::class, 'index'])->name('laporan.index');
+        Route::patch('/admin//pelaporan/{report}/terima', [ReportController::class, 'accept'])->name('laporan.terima');
+        Route::patch('/admin//pelaporan/{report}/tolak', [ReportController::class, 'reject'])->name('laporan.tolak');
+        Route::patch('/admin//pelaporan/{report}/publikasikan', [ReportController::class, 'publish'])->name('laporan.publikasikan');
+        Route::delete('/admin//pelaporan/{report}/hapus', [ReportController::class, 'destroy'])->name('laporan.hapus');
     });
 
     Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
@@ -82,21 +82,20 @@ Route::middleware(['auth','contact.verified'])->group(function () {
     Route::get('/laporan-saya', [UserHistoryReportController::class, 'allHistory'])->name('history');
 });
 
-
 Route::middleware(['auth','contact.verified'])->group(function () {
     Route::get('/top-ups/history', [TopUpController::class, 'index'])->name('top-ups.index');     
     Route::get('/top-ups', [TopUpController::class, 'create'])->name('top-ups.create');; 
     Route::post('/top-ups/create', [TopUpController::class, 'store'])->name('top-ups.store');       
 
     // Admin routes
-    Route::middleware('can:viewAny,App\Models\TopUp')->group(function () {
+    Route::middleware('can:viewAny,App\Models\TopUp', 'role:admin||verifier')->group(function () {
         Route::get('/admin/top-ups', [TopUpController::class, 'adminIndex']);
         Route::post('/admin/top-ups/{id}/verify', [TopUpController::class, 'verify']);
         Route::post('/admin/top-ups/{id}/reject', [TopUpController::class, 'reject']);
     });
 });
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin||verifier'])->group(function () {
     Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
     Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.delete');
     Route::post('/users/{user}/assign-role', [UserManagementController::class, 'assignRole'])->name('users.assignRole');
@@ -104,7 +103,5 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/roles/{role}', [UserManagementController::class, 'destroyRole'])->name('roles.destroy');
 
 });
-
-
 
 require __DIR__.'/auth.php';
