@@ -24,6 +24,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function (){
     $user = Auth::user();
     return Inertia::render('Dashboard',[
+        'user' => auth()->user(),
         'creditBalance' => $user->balance,
     ]);
     
@@ -36,9 +37,9 @@ Route::get('/verifikasi', function () {
     ]);
 });
 
- Route::get('/LaporMap', function (){
-     return Inertia::render('LaporMap');
- })->name('LaporMap');
+Route::get('/LaporMap', function (){
+    return Inertia::render('LaporMap');
+})->name('LaporMap');
 
 Route::get('/CariLaporan', [ReportController::class, 'search'])->name('CariLaporan');
 
@@ -94,6 +95,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/top-ups/{id}/verify', [TopUpController::class, 'verify']);
         Route::post('/admin/top-ups/{id}/reject', [TopUpController::class, 'reject']);
     });
+});
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.delete');
+    Route::post('/users/{user}/assign-role', [UserManagementController::class, 'assignRole'])->name('users.assignRole');
+    Route::post('/roles', [UserManagementController::class, 'storeRole'])->name('roles.store');
+    Route::delete('/roles/{role}', [UserManagementController::class, 'destroyRole'])->name('roles.destroy');
+
 });
 
 
