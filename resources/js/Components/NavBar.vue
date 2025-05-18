@@ -86,27 +86,6 @@
                     Credit
                   </a>
                 </li>
-                <!-- Admin Dropdown -->
-                <li v-if="user.is_admin">
-                  <hr class="dropdown-divider" />
-                  <h6 class="dropdown-header">Admin Menu</h6>
-                  <a class="dropdown-item" href="/admin/dashboard">
-                    <i class="bi bi-speedometer2 me-2"></i>
-                    Dashboard Admin
-                  </a>
-                  <a class="dropdown-item" href="/admin/pelaporan">
-                    <i class="bi bi-file-earmark-text me-2"></i>
-                    Manajemen Pelaporan
-                  </a>
-                  <a class="dropdown-item" href="/admin/top-up">
-                    <i class="bi bi-wallet2 me-2"></i>
-                    Manajemen Top-Up
-                  </a>
-                  <a class="dropdown-item" href="/admin/pengguna">
-                    <i class="bi bi-people me-2"></i>
-                    Manajemen Pengguna
-                  </a>
-                </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
                   <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
@@ -386,58 +365,6 @@
                 <span>Credit</span>
               </Link>
             </li>
-            <!-- Admin Menu for Mobile -->
-            <li v-if="user.is_admin" class="nav-item border-top mt-3 pt-2">
-              <a
-                class="nav-link d-flex justify-content-between align-items-center"
-                @click.stop="toggleAdminMobile = !toggleAdminMobile"
-              >
-                <div>
-                  <i class="bi bi-shield-lock-fill me-2"></i>
-                  <span>Menu Admin</span>
-                </div>
-                <i
-                  class="bi"
-                  :class="toggleAdminMobile ? 'bi-chevron-up' : 'bi-chevron-down'"
-                ></i>
-              </a>
-              <div class="collapse" :class="{ show: toggleAdminMobile }">
-                <div class="nav flex-column ms-4">
-                  <Link
-                    href="/admin/dashboard"
-                    class="nav-link"
-                    @click="closeMobileNav"
-                  >
-                    <i class="bi bi-speedometer2 me-2"></i>
-                    <span>Dashboard Admin</span>
-                  </Link>
-                  <Link
-                    href="/admin/pelaporan"
-                    class="nav-link"
-                    @click="closeMobileNav"
-                  >
-                    <i class="bi bi-file-earmark-text me-2"></i>
-                    <span>Manajemen Pelaporan</span>
-                  </Link>
-                  <Link
-                    href="/admin/top-up"
-                    class="nav-link"
-                    @click="closeMobileNav"
-                  >
-                    <i class="bi bi-wallet2 me-2"></i>
-                    <span>Manajemen Top-Up</span>
-                  </Link>
-                  <Link
-                    href="/admin/pengguna"
-                    class="nav-link"
-                    @click="closeMobileNav"
-                  >
-                    <i class="bi bi-people me-2"></i>
-                    <span>Manajemen Pengguna</span>
-                  </Link>
-                </div>
-              </div>
-            </li>
             <li class="nav-item mt-3">
               <a class="nav-link text-danger" href="/" @click.prevent="logout">
                 <i class="bi bi-box-arrow-right me-2"></i>
@@ -463,7 +390,7 @@
 
 <script>
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 
 export default {
   name: 'NavbarLaporPak',
@@ -475,7 +402,6 @@ export default {
     const page = usePage();
     const mobileNavOpen = ref(false);
     const toggleLayananMobile = ref(false);
-    const toggleAdminMobile = ref(false);
 
     const isLoggedIn = computed(() => !!page.props.auth?.user);
     const user = computed(() => page.props.auth?.user || {});
@@ -498,14 +424,11 @@ export default {
 
     const closeMobileNav = () => {
       mobileNavOpen.value = false;
-      toggleLayananMobile.value = false;
-      toggleAdminMobile.value = false;
     };
 
     return {
       mobileNavOpen,
       toggleLayananMobile,
-      toggleAdminMobile,
       isLoggedIn,
       user,
       getUserInitials,
@@ -534,11 +457,11 @@ export default {
   margin-left: 0;
   position: relative;
   background-color: white;
-  overflow: visible !important;
+  overflow: visible !important; /* Prevent dropdown clipping */
 }
 
 .container-fluid {
-  overflow: visible !important;
+  overflow: visible !important; /* Ensure dropdown is not clipped */
 }
 
 .logo-img {
@@ -555,12 +478,13 @@ export default {
   cursor: pointer;
 }
 
+/* User Profile Styles */
 .user-dropdown {
   position: relative;
 }
 
 .login-btn {
-  min-width: 150px;
+  min-width: 150px; /* Match user dropdown button width */
 }
 
 .user-dropdown-btn {
@@ -571,7 +495,7 @@ export default {
   border-radius: 50px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  min-width: 150px;
+  min-width: 150px; /* Ensure consistent width */
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -610,7 +534,7 @@ export default {
 
 .user-name {
   font-weight: 500;
-  max-width: 100px;
+  max-width: 100px; /* Prevent overflow */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -621,21 +545,23 @@ export default {
   border-bottom: 1px solid #e9ecef;
 }
 
+/* Fix for long email in dropdown */
 .small.text-muted {
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: 200px; /* Adjust as needed */
+  white-space: nowrap; /* Prevent wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for overflow */
 }
 
+/* User dropdown menu styles */
 .user-dropdown .dropdown-menu {
   padding: 0.5rem 0;
   width: 260px;
-  right: 0;
+  right: 0; /* Align to right of button */
   left: auto;
-  z-index: 1050;
-  margin-top: 0 !important;
-  transform: translateY(0);
+  z-index: 1050; /* Ensure above other elements */
+  margin-top: 0 !important; /* Hilangkan gap */
+  transform: translateY(0); /* Pastikan menempel ke tombol */
 }
 
 .user-dropdown .dropdown-item {
@@ -649,6 +575,7 @@ export default {
   margin-right: 10px;
 }
 
+/* Desktop Navigation */
 @media (min-width: 992px) {
   .nav-item {
     border-right: 1px solid #dee2e6;
@@ -718,6 +645,7 @@ export default {
     background-color: rgba(13, 110, 253, 0.03);
   }
 
+  /* Dropdown arrow styling */
   .dropdown-toggle::after {
     margin-left: 8px;
     vertical-align: 0.15em;
@@ -729,6 +657,7 @@ export default {
   }
 }
 
+/* Mobile Navigation */
 .sidebar-overlay {
   position: fixed;
   top: 0;
@@ -782,6 +711,7 @@ export default {
   font-size: 14px;
 }
 
+/* Mobile Navigation Color */
 @media (max-width: 991px) {
   .sidebar-nav .nav-link {
     color: #666;
@@ -803,6 +733,7 @@ export default {
   }
 }
 
+/* Active State Mobile */
 @media (max-width: 991px) {
   .nav-link {
     transition: all 0.25s ease-in-out;
@@ -830,6 +761,7 @@ export default {
     transform: translateX(3px);
   }
 
+  /* Animation for dropdown */
   .collapse {
     transition: all 0.3s ease-out;
   }
@@ -844,6 +776,7 @@ export default {
   }
 }
 
+/* Active State Desktop */
 @media (min-width: 992px) {
   .nav-link {
     transition: all 0.2s ease-in-out;
@@ -869,6 +802,7 @@ export default {
     border-bottom: 3px solid #0d6efd;
   }
 
+  /* Dropdown items */
   .dropdown-item {
     transition: all 0.2s ease-in-out;
   }
@@ -885,6 +819,7 @@ export default {
   }
 }
 
+/* Submenu Mobile */
 .nav-flex-column.ms-4 .nav-link {
   padding-left: 2.5rem;
   font-size: 14px;
@@ -898,6 +833,7 @@ export default {
   background-color: rgba(13, 110, 253, 0.08);
 }
 
+/* Mobile menu button styling */
 .sidebar-nav .btn-primary {
   padding: 10px 24px;
   font-weight: 500;
