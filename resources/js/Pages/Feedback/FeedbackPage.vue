@@ -134,29 +134,34 @@
                     <h5 class="card-title mb-0 fs-6 text-truncate" style="max-width: 150px;">{{ feedback.user.name }}</h5>
                     
                     <!-- Burger Menu Dropdown -->
-                    <div class="ms-auto">
-                      <div class="dropdown">
-                        <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          <i class="bi bi-three-dots-vertical"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                          <li>
-                            <a class="dropdown-item" href="#" @click.prevent="openDetailModal(feedback)">
-                              <i class="bi bi-eye me-2"></i> Detail
-                            </a>
-                          </li>
-                          <li v-if="page.props.auth?.user?.id === feedback.user_id || isAdmin">
-                            <a class="dropdown-item" href="#" @click.prevent="openFeedbackModal('edit', feedback)">
-                              <i class="bi bi-pencil-square me-2"></i> Edit
-                            </a>
-                          </li>
-                          <li v-if="page.props.auth?.user?.id === feedback.user_id || isAdmin">
-                            <a class="dropdown-item text-danger" href="#" @click.prevent="openDeleteModal(feedback.id)">
-                              <i class="bi bi-trash me-2"></i> Hapus
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
+                    <div class="ms-auto position-relative">
+                      <button
+                        class="btn btn-sm btn-light rounded-circle"
+                        @click.stop="toggleDropdown(feedback.id)"
+                      >
+                        <i class="bi bi-three-dots-vertical"></i>
+                      </button>
+                      <ul
+                        v-if="activeDropdownId === feedback.id"
+                        class="dropdown-menu show position-absolute end-0 mt-2"
+                        style="display: block; z-index: 1000;"
+                      >
+                        <li>
+                          <a class="dropdown-item" href="#" @click.prevent="openDetailModal(feedback)">
+                            <i class="bi bi-eye me-2"></i> Detail
+                          </a>
+                        </li>
+                        <li v-if="page.props.auth?.user?.id === feedback.user_id || isAdmin">
+                          <a class="dropdown-item" href="#" @click.prevent="openFeedbackModal('edit', feedback)">
+                            <i class="bi bi-pencil-square me-2"></i> Edit
+                          </a>
+                        </li>
+                        <li v-if="page.props.auth?.user?.id === feedback.user_id || isAdmin">
+                          <a class="dropdown-item text-danger" href="#" @click.prevent="openDeleteModal(feedback.id)">
+                            <i class="bi bi-trash me-2"></i> Hapus
+                          </a>
+                        </li>
+                      </ul>
                     </div>
                   </div>
                   
@@ -273,17 +278,6 @@
                 <h6 class="fw-bold">Respon Admin:</h6>
                 <p class="mb-0">{{ selectedFeedback.admin_response }}</p>
               </div>
-            </div>
-            <div class="modal-footer flex-wrap gap-2">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-              <button 
-                v-if="page.props.auth?.user?.id === selectedFeedback?.user_id || isAdmin" 
-                type="button" 
-                class="btn btn-primary"
-                @click="openFeedbackModal('edit', selectedFeedback)"
-              >
-                Edit
-              </button>
             </div>
           </div>
         </div>
@@ -490,6 +484,20 @@ const truncateText = (text, maxLength) => {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + '...';
 };
+
+const activeDropdownId = ref(null);
+
+const toggleDropdown = (id) => {
+  activeDropdownId.value = activeDropdownId.value === id ? null : id;
+};
+
+document.addEventListener('click', (e) => {
+  const clickedInside = e.target.closest('.dropdown-menu') || e.target.closest('.btn');
+  if (!clickedInside) {
+    activeDropdownId.value = null;
+  }
+});
+
 </script>
 
 <style scoped>
