@@ -28,7 +28,10 @@
         "leaflet": "^1.9.4",
         "leaflet-geosearch": "^4.2.0",
         "leaflet.markercluster": "^1.5.3",
+        "sweetalert2": "^11.21.1",
         "vue-router": "^4.5.1",
+        "vue-tel-input": "^9.3.0",
+        "yup": "^1.6.1",
         "ziggy": "^2.4.0"
     }
 }

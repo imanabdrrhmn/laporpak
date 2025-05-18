@@ -14,7 +14,7 @@
         <div class="modal-content border-0 shadow-lg rounded-3">
           <div class="modal-header border-0">
             <h5 class="modal-title fw-bold">Konfirmasi Penghapusan Akun</h5>
-            <button type="button" class="btn-close" @click="closeModal"></button>
+            <button type="button" class="btn-close close-animated" @click="closeModal"></button>
           </div>
           <div class="modal-body">
             <p class="text-muted mb-4">
@@ -47,40 +47,6 @@
               Hapus Akun
             </button>
           </div>
-
-          <form @submit.prevent="deleteUser">
-            <div class="mb-3">
-              <label for="password" class="form-label fw-bold text-gray-700">Password</label>
-              <input
-                id="password"
-                ref="passwordInput"
-                v-model="form.password"
-                type="password"
-                class="form-control border-primary"
-                placeholder="Enter your password"
-                @keyup.enter="deleteUser"
-              />
-              <small class="text-red-600 d-block mt-2">{{ form.errors.password }}</small>
-            </div>
-
-            <div class="d-flex justify-content-between space-x-3 mt-5">
-              <button
-                type="button"
-                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                @click="closeModal"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                :disabled="form.processing"
-              >
-                Delete Account
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </div>
@@ -124,6 +90,30 @@ const closeModal = () => {
   background-color: #ef476f;
   border-color: #ef476f;
 }
+
+.note {
+  background-color: #f3f4f6;
+  border-left: 4px solid #5a67d8;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 0.25rem;
+}
+  .note p {
+    margin: 0;
+    color: #2d3748;
+  }
+
+
+/* Animation for close button */
+.close-animated {
+  transition: all 0.3s ease;
+}
+
+.close-animated:hover {
+  transform: rotate(90deg) scale(1.2);
+  opacity: 0.8;
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;

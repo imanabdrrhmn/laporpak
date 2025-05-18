@@ -1,8 +1,8 @@
 <template>
   <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true" ref="modal">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-sm mx-auto">
       <div class="modal-content">
-        <div class="modal-body p-4 position-relative">
+        <div class="modal-body p-3 p-md-4 position-relative">
           <!-- Close Button -->
           <button type="button" class="close-btn" @click="hideModal" aria-label="Close">
             <i class="bi bi-x-lg"></i>
@@ -16,7 +16,7 @@
             <h2 class="modal-title fs-4 fw-bold gradient-text" id="feedbackModalLabel">
               {{ mode === 'create' ? 'Berikan Masukkan Anda' : 'Edit Masukkan Anda' }}
             </h2>
-            <p class="text-secondary mb-2">Bantu kami meningkatkan layanan pelaporan</p>
+            <p class="text-secondary mb-2 fs-6">Bantu kami meningkatkan layanan pelaporan</p>
           </div>
 
           <!-- Star Rating with Animation and Labels -->
@@ -46,7 +46,7 @@
             <div class="animated-underline"></div>
           </div>
 
-          <!-- Modern Tab Select - Updated with additional options -->
+          <!-- Modern Tab Select - Responsive layout -->
           <div class="tab-select-container mb-3">
             <div class="tab-select">
               <button
@@ -55,7 +55,7 @@
                 :class="{ active: form.kategori === 'Pelaporan' }"
                 @click="form.kategori = 'Pelaporan'"
               >
-                <i class="bi bi-megaphone me-2"></i>Pelaporan
+                <i class="bi bi-megaphone me-1 me-md-2"></i><span>Pelaporan</span>
               </button>
               <button
                 type="button"
@@ -63,7 +63,7 @@
                 :class="{ active: form.kategori === 'Verifikasi' }"
                 @click="form.kategori = 'Verifikasi'"
               >
-                <i class="bi bi-check-circle me-2"></i>Verifikasi
+                <i class="bi bi-check-circle me-1 me-md-2"></i><span>Verifikasi</span>
               </button>
             </div>
             <div class="tab-select mt-2">
@@ -73,7 +73,7 @@
                 :class="{ active: form.kategori === 'Cari Laporan' }"
                 @click="form.kategori = 'Cari Laporan'"
               >
-                <i class="bi bi-search me-2"></i>Cari Laporan
+                <i class="bi bi-search me-1 me-md-2"></i><span>Cari Laporan</span>
               </button>
               <button
                 type="button"
@@ -81,17 +81,17 @@
                 :class="{ active: form.kategori === 'Lapor Map' }"
                 @click="form.kategori = 'Lapor Map'"
               >
-                <i class="bi bi-geo-alt me-2"></i>Lapor Map
+                <i class="bi bi-geo-alt me-1 me-md-2"></i><span>Lapor Map</span>
               </button>
             </div>
             <div class="tab-select mt-2">
               <button
                 type="button"
-                class="tab-btn"
+                class="tab-btn w-100"
                 :class="{ active: form.kategori === 'Umum' }"
                 @click="form.kategori = 'Umum'"
               >
-                <i class="bi bi-globe me-2"></i>Umum
+                <i class="bi bi-globe me-1 me-md-2"></i><span>Umum</span>
               </button>
             </div>
           </div>
@@ -101,7 +101,7 @@
           <div class="mb-3">
             <div class="position-relative textarea-container">
               <textarea
-                class="form-control p-3 custom-scrollbar"
+                class="form-control p-2 p-md-3 custom-scrollbar"
                 v-model="form.message"
                 placeholder="Bagikan pendapat Anda di sini..."
                 rows="4"
@@ -264,11 +264,33 @@ defineExpose({
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   background: #fff;
   width: 100%;
-  max-width: 450px; /* Reduced from 500px to make modal smaller */
+  margin: 0 auto;
+}
+
+.modal-dialog {
+  max-width: 90%;
+  margin: 1.75rem auto;
+}
+
+@media (min-width: 576px) {
+  .modal-content {
+    max-width: 450px;
+  }
+  
+  .modal-dialog {
+    max-width: 450px;
+    margin: 1.75rem auto;
+  }
 }
 
 .modal-body {
-  padding: 1.25rem !important; /* Reduced from 1.5rem to complement smaller modal */
+  padding: 1rem !important;
+}
+
+@media (min-width: 768px) {
+  .modal-body {
+    padding: 1.25rem !important;
+  }
 }
 
 /* Feedback icon styling */
@@ -276,14 +298,22 @@ defineExpose({
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background: linear-gradient(45deg, #0d6efd, #0dcaf0);
   color: white;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   margin-bottom: 0.8rem;
   animation: pulse-light 2s infinite;
+}
+
+@media (min-width: 576px) {
+  .feedback-icon-container {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8rem;
+  }
 }
 
 /* Title with gradient */
@@ -304,8 +334,14 @@ defineExpose({
 .star {
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 2rem; /* Reduced star size */
+  font-size: 1.8rem;
   position: relative;
+}
+
+@media (min-width: 576px) {
+  .star {
+    font-size: 2rem;
+  }
 }
 
 .star.active {
@@ -327,7 +363,7 @@ defineExpose({
 
 /* Rating label styling */
 .rating-label {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #0d6efd;
   background: -webkit-linear-gradient(45deg, #0d6efd, #0dcaf0);
@@ -342,6 +378,12 @@ defineExpose({
   box-shadow: 0 2px 8px rgba(13, 110, 253, 0.1);
 }
 
+@media (min-width: 576px) {
+  .rating-label {
+    font-size: 1rem;
+  }
+}
+
 @keyframes star-pulse {
   0% { transform: scale(1); }
   50% { transform: scale(1.3); }
@@ -350,12 +392,18 @@ defineExpose({
 
 /* Service label styling */
 .service-label {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   margin-bottom: 0.8rem;
   color: #495057;
   position: relative;
   display: inline-block;
+}
+
+@media (min-width: 576px) {
+  .service-label {
+    font-size: 1rem;
+  }
 }
 
 .animated-underline {
@@ -383,16 +431,22 @@ defineExpose({
 .tab-select {
   display: flex;
   justify-content: space-between;
-  gap: 0.6rem;
+  gap: 0.4rem;
+}
+
+@media (min-width: 576px) {
+  .tab-select {
+    gap: 0.6rem;
+  }
 }
 
 .tab-btn {
   flex: 1;
-  padding: 0.8rem;
+  padding: 0.6rem 0.4rem;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
   transition: all 0.3s;
   background-color: white;
@@ -401,6 +455,19 @@ defineExpose({
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+@media (min-width: 576px) {
+  .tab-btn {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+.tab-btn span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tab-btn:hover {
@@ -418,21 +485,31 @@ defineExpose({
 /* Close button styling */
 .close-btn {
   position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
+  top: 0.6rem;
+  right: 0.6rem;
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #6c757d;
   cursor: pointer;
   transition: all 0.3s;
   z-index: 10;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (min-width: 576px) {
+  .close-btn {
+    top: 0.8rem;
+    right: 0.8rem;
+    font-size: 1.2rem;
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .close-btn:hover {
@@ -458,7 +535,13 @@ defineExpose({
   border: 1px solid #e0e0e0;
   transition: all 0.3s;
   resize: none;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+}
+
+@media (min-width: 576px) {
+  .form-control {
+    font-size: 0.9rem;
+  }
 }
 
 .form-control:focus {
@@ -471,13 +554,20 @@ defineExpose({
   position: absolute;
   bottom: 8px;
   right: 8px;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #6c757d;
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 2px 8px;
+  padding: 1px 6px;
   border-radius: 20px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   transition: all 0.3s;
+}
+
+@media (min-width: 576px) {
+  .text-counter {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+  }
 }
 
 /* Submit button styling */
@@ -489,8 +579,14 @@ defineExpose({
   transition: all 0.3s;
   position: relative;
   overflow: hidden;
-  font-size: 1rem;
+  font-size: 0.95rem;
   box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+}
+
+@media (min-width: 576px) {
+  .submit-btn {
+    font-size: 1rem;
+  }
 }
 
 .submit-btn:hover {
@@ -520,9 +616,15 @@ defineExpose({
 /* Error messages */
 .error-message {
   color: #dc3545;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   margin-top: 0.2rem;
   animation: fadeIn 0.3s ease-in-out;
+}
+
+@media (min-width: 576px) {
+  .error-message {
+    font-size: 0.8rem;
+  }
 }
 
 @keyframes fadeIn {
@@ -536,23 +638,66 @@ defineExpose({
   100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
 }
 
-/* Responsive adjustments */
-@media (max-width: 576px) {
-  .tab-select {
-    flex-direction: column;
-    gap: 0.5rem;
+/* For extra small devices */
+@media (max-width: 320px) {
+  .star {
+    font-size: 1.5rem;
+    margin: 0 0.2rem !important;
+  }
+  
+  .tab-btn {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.75rem;
+  }
+  
+  .feedback-icon-container {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
+  
+  .modal-title {
+    font-size: 1.1rem !important;
+  }
+  
+  .text-secondary {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* For landscape orientation on smaller devices */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-body {
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  
+  .feedback-icon-container {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .star-rating {
+    margin-bottom: 0.2rem;
   }
   
   .star {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
   
-  .modal-body {
-    padding: 1rem !important;
+  .modal-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.2rem !important;
   }
   
-  .modal-content {
-    max-width: 90vw;
+  .text-secondary {
+    margin-bottom: 0.2rem !important;
+  }
+  
+  .form-control {
+    padding: 0.25rem 0.5rem !important;
   }
 }
 </style>
