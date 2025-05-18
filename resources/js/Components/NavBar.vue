@@ -86,6 +86,8 @@
                     Credit
                   </a>
                 </li>
+                <!-- Slot for additional dropdown items -->
+                <slot name="userDropdownItems"></slot>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
                   <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
