@@ -44,7 +44,7 @@
                     {{ getUserInitials() }}
                   </div>
                 </div>
-                <span class="user-name me-1">{{ user.name }}</span>
+                <span class="user-name me-1">Hi, {{ user.name }}</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li class="dropdown-user-info px-3 py-2">
@@ -232,7 +232,7 @@
           ></button>
         </div>
 
-        <!-- New Mobile Navigation Structure -->
+        <!-- Mobile Navigation Structure -->
         <ul class="nav flex-column mobile-nav">
           <!-- Beranda -->
           <li class="nav-item">
@@ -447,11 +447,11 @@ export default {
   margin-left: 0;
   position: relative;
   background-color: white;
-  overflow: visible !important; /* Prevent dropdown clipping */
+  overflow: visible !important;
 }
 
 .container-fluid {
-  overflow: visible !important; /* Ensure dropdown is not clipped */
+  overflow: visible !important;
 }
 
 .logo-img {
@@ -474,26 +474,28 @@ export default {
 }
 
 .login-btn {
-  min-width: 150px; /* Match user dropdown button width */
+  min-width: 150px;
 }
 
 .user-dropdown-btn {
-  background: transparent;
-  border: none;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef); /* Gradient background */
+  border: 1px solid #dee2e6;
   color: #333;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 50px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  min-width: 150px; /* Ensure consistent width */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  min-width: 160px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  transform: scale(1);
 }
 
 .user-dropdown-btn:hover {
-  background-color: #f8f9fa;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #e9ecef, #dee2e6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02); /* Slight scale on hover */
 }
 
 .avatar-wrapper {
@@ -503,66 +505,100 @@ export default {
 }
 
 .user-avatar {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #008cdb; /* Added border for definition */
 }
 
 .user-avatar-placeholder {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background-color: #0d6efd;
+  background-color: #008cdb;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   font-size: 14px;
+  border: 2px solid #006bb3; /* Matching border for placeholder */
 }
 
 .user-name {
   font-weight: 500;
-  max-width: 100px; /* Prevent overflow */
+  max-width: 90px; /* Adjusted for "Hi" */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #333;
 }
 
 .dropdown-user-info {
   background-color: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
+  padding: 1rem !important; /* Increased padding */
 }
 
 /* Fix for long email in dropdown */
 .small.text-muted {
-  max-width: 200px; /* Adjust as needed */
-  white-space: nowrap; /* Prevent wrapping */
-  overflow: hidden; /* Hide overflow */
-  text-overflow: ellipsis; /* Add ellipsis for overflow */
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #6c757d;
 }
 
 /* User dropdown menu styles */
 .user-dropdown .dropdown-menu {
-  padding: 0.5rem 0;
-  width: 260px;
-  right: 0; /* Align to right of button */
+  padding: 0.75rem 0;
+  width: 280px; /* Slightly wider */
+  right: 0;
   left: auto;
-  z-index: 1050; /* Ensure above other elements */
-  margin-top: 0 !important; /* Hilangkan gap */
-  transform: translateY(0); /* Pastikan menempel ke tombol */
+  z-index: 1050;
+  margin-top: 0 !important;
+  transform: translateY(0);
+  border: none;
+  border-radius: 12px; /* Softer corners */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* Pronounced shadow */
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.user-dropdown .dropdown-menu.show {
+  opacity: 1;
+  transform: translateY(4px); /* Slight slide-in effect */
 }
 
 .user-dropdown .dropdown-item {
-  padding: 0.6rem 1rem;
+  padding: 0.75rem 1.25rem;
   display: flex;
   align-items: center;
+  font-weight: 500;
+  color: #444;
+  transition: all 0.2s ease;
+}
+
+.user-dropdown .dropdown-item:hover {
+  background-color: #e9ecef;
+  color: #008cdb;
+  transform: translateX(4px); /* Slight slide on hover */
 }
 
 .user-dropdown .dropdown-item .bi {
-  font-size: 16px;
-  margin-right: 10px;
+  font-size: 18px;
+  margin-right: 12px;
+  transition: transform 0.2s ease;
+}
+
+.user-dropdown .dropdown-item:hover .bi {
+  transform: translateX(2px);
+}
+
+.dropdown-divider {
+  margin: 0.5rem 0;
+  border-color: #dee2e6;
 }
 
 /* Desktop Navigation */
@@ -635,7 +671,6 @@ export default {
     background-color: rgba(13, 110, 253, 0.03);
   }
 
-  /* Dropdown arrow styling */
   .dropdown-toggle::after {
     margin-left: 8px;
     vertical-align: 0.15em;
@@ -701,7 +736,6 @@ export default {
   font-size: 14px;
 }
 
-/* Mobile Navigation Color */
 @media (max-width: 991px) {
   .sidebar-nav .nav-link {
     color: #666;
@@ -723,7 +757,6 @@ export default {
   }
 }
 
-/* Active State Mobile */
 @media (max-width: 991px) {
   .nav-link {
     transition: all 0.25s ease-in-out;
@@ -751,7 +784,6 @@ export default {
     transform: translateX(3px);
   }
 
-  /* Animation for dropdown */
   .collapse {
     transition: all 0.3s ease-out;
   }
@@ -766,7 +798,6 @@ export default {
   }
 }
 
-/* Active State Desktop */
 @media (min-width: 992px) {
   .nav-link {
     transition: all 0.2s ease-in-out;
@@ -792,7 +823,6 @@ export default {
     border-bottom: 3px solid #0d6efd;
   }
 
-  /* Dropdown items */
   .dropdown-item {
     transition: all 0.2s ease-in-out;
   }
@@ -809,7 +839,6 @@ export default {
   }
 }
 
-/* Submenu Mobile */
 .nav-flex-column.ms-4 .nav-link {
   padding-left: 2.5rem;
   font-size: 14px;
@@ -823,7 +852,6 @@ export default {
   background-color: rgba(13, 110, 253, 0.08);
 }
 
-/* Mobile menu button styling */
 .sidebar-nav .btn-primary {
   padding: 10px 24px;
   font-weight: 500;
@@ -836,7 +864,6 @@ export default {
   box-shadow: 0 1px 3px rgba(13, 110, 253, 0.2);
 }
 
-/* Add these new styles for mobile navigation */
 .mobile-nav .nav-link {
   padding: 15px 20px;
   font-weight: 600;

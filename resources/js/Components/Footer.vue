@@ -35,11 +35,11 @@
           <h5 class="mb-3 mb-md-4">Contact</h5>
           <div class="contact-item mb-3">
             <i class="bi bi-telephone-fill me-2"></i>
-            <span>(406) 555-0120</span>
+            <span>+62 812 3456 7890</span>
           </div>
           <div class="contact-item mb-3">
             <i class="bi bi-envelope-fill me-2"></i>
-            <span class="contact-text">LaporPak@gmail.com</span>
+            <span class="contact-text">info@laporpak.com</span>
           </div>
           <div class="contact-item">
             <i class="bi bi-geo-alt-fill me-2"></i>

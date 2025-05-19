@@ -396,7 +396,7 @@ function submitNewRole() {
 </script>
 
 <style>
-/* Custom styling */
+
 .bg-soft-primary {
   background-color: rgba(13, 110, 253, 0.15);
 }
