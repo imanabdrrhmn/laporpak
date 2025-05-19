@@ -26,13 +26,13 @@ return new class extends Migration
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->id();
-            $table->string('email')->nullable()->index(); 
-            $table->string('no_hp')->nullable()->index(); 
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('expires_at')->nullable(); 
-        });
+                    $table->id();
+                    $table->string('identifier'); 
+                    $table->enum('via', ['email', 'phone']);
+                    $table->text('token'); 
+                    $table->timestamp('created_at')->nullable();
+                    $table->timestamp('expires_at')->nullable();
+                });
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
