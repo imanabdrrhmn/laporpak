@@ -95,25 +95,29 @@ onMounted(() => {
     isVerified.value = true
   } else {
     isVerified.value = false
-    startCountdown()
+    resendVerification(false) 
   }
 })
+
 
 const closeModal = () => {
   isModalVisible.value = false
 }
 
-const resendVerification = () => {
+const resendVerification = (showModalNow = true) => {
   processing.value = true
   router.post(route('verification.send'), {}, {
     onFinish: () => {
       processing.value = false
       status.value = 'verification-link-sent'
       startCountdown()
-      showModal('Link verifikasi telah dikirim! Silakan cek inbox Anda.')
+      if (showModalNow) {
+        showModal('Link verifikasi telah dikirim! Silakan cek inbox Anda.')
+      }
     }
   })
 }
+
 
 const startCountdown = () => {
   countdown.value = 60
@@ -152,6 +156,7 @@ const showModal = (message) => {
   border-radius: 24px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.2);
   padding: 2.5rem;
+  margin: 1rem;
   width: 100%;
   text-align: center;
   transform-style: preserve-3d;

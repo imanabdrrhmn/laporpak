@@ -48,7 +48,7 @@ class UserManagementController extends Controller
 
         return redirect()->back()->with('success', 'Role berhasil dibuat.');
     }
-    public function destroyRole(Role $role)
+    public function destroyRole( Role $role)
     {
         $role->delete();
 

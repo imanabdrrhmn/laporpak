@@ -100,7 +100,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin||verifie
     Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.delete');
     Route::post('/users/{user}/assign-role', [UserManagementController::class, 'assignRole'])->name('users.assignRole');
     Route::post('/roles', [UserManagementController::class, 'storeRole'])->name('roles.store');
-    Route::delete('/roles/{role}', [UserManagementController::class, 'destroyRole'])->name('roles.destroy');
+    Route::delete('/roles/{roles}', [UserManagementController::class, 'destroyRole'])->name('roles.destroy');
 
 });
 
