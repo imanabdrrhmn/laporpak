@@ -1,7 +1,7 @@
 <template>
   <div v-if="visible">
     <div class="modal-backdrop fade show" @click.self="closeModal"></div>
-    <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content custom-login-modal mx-auto">
           <div class="d-flex justify-content-between align-items-start mb-3">
@@ -9,7 +9,27 @@
               <h4 class="fw-bold modal-title">Reset Kata Sandi</h4>
               <p class="text-muted mb-4">Masukkan email atau nomor HP terdaftar</p>
             </div>
-            <button type="button" class="btn-close" @click="closeModal"></button>
+            <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
+          </div>
+
+          <!-- Toggle Button for Email / No HP -->
+          <div class="mb-4 login-toggle d-flex p-1 bg-light rounded-pill">
+            <button
+              type="button"
+              class="btn btn-toggle flex-grow-1 me-1 py-2 rounded-pill"
+              :class="{ active: isEmailMode }"
+              @click="setMode('email')"
+            >
+              <i class="bi bi-envelope me-2"></i> Email
+            </button>
+            <button
+              type="button"
+              class="btn btn-toggle flex-grow-1 py-2 rounded-pill"
+              :class="{ active: !isEmailMode }"
+              @click="setMode('no_hp')"
+            >
+              <i class="bi bi-phone me-2"></i> No HP
+            </button>
           </div>
 
           <!-- Success Message -->
@@ -22,23 +42,28 @@
             {{ form.errors.phoneEmail }}
           </div>
 
-          <!-- Form to Input Email or Phone Number -->
-          <form v-else @submit.prevent="handleReset">
+          <!-- Form -->
+          <form @submit.prevent="handleReset">
             <div class="mb-3">
-              <label class="form-label fw-bold">Nomor HP / Email</label>
+              <label class="form-label fw-bold" v-if="isEmailMode">Email</label>
+              <label class="form-label fw-bold" v-else>Nomor HP</label>
               <input
                 type="text"
                 class="form-control border-primary"
                 v-model="form.phoneEmail"
-                placeholder="Masukkan email atau nomor HP"
+                :placeholder="isEmailMode ? 'Masukkan email terdaftar' : 'Masukkan nomor HP terdaftar'"
                 :disabled="isLoading"
               />
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" :disabled="isLoading">
-              <span v-if="isLoading">Mengirim...</span>
-              <span v-else>Kirim Link Reset Password</span>
-            </button>
+            <button
+            type="submit"
+            class="btn btn-primary w-100 py-2 fw-bold"
+            :disabled="isLoading || cooldown">
+            <span v-if="isLoading">Mengirim...</span>
+            <span v-else-if="cooldown">Tunggu {{ cooldownTimer }} detik...</span>
+            <span v-else>Kirim Link Reset Password</span>
+          </button>
           </form>
 
           <!-- Login Prompt -->
@@ -58,24 +83,34 @@
 import { ref } from 'vue'
 import { useForm, router as Inertia } from '@inertiajs/vue3'
 
-// Props and Emitters
+// Props & Emits
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
 })
 const emit = defineEmits(['update:visible', 'open-login'])
 
-// State management
+// Reactive state
+const isEmailMode = ref(true)
 const successMessage = ref('')
 const isLoading = ref(false)
+
 const form = useForm({
-  phoneEmail: ''
+  phoneEmail: '',
 })
 
-// Functions
+function setMode(mode) {
+  isEmailMode.value = mode === 'email'
+  form.phoneEmail = ''
+  form.clearErrors()
+  successMessage.value = ''
+}
+
 function closeModal() {
   form.reset()
   form.clearErrors()
   successMessage.value = ''
+  cooldown.value = false
+  clearInterval(cooldownInterval)
   emit('update:visible', false)
 }
 
@@ -86,15 +121,14 @@ function triggerLogin() {
 
 function handleReset() {
   form.clearErrors()
-  successMessage.value = '' 
+  successMessage.value = ''
 
   if (!form.phoneEmail) {
-    form.setError('phoneEmail', 'Email atau nomor HP wajib diisi')
+    form.setError('phoneEmail', isEmailMode.value ? 'Email wajib diisi' : 'Nomor HP wajib diisi')
     return
   }
 
-  const isEmail = form.phoneEmail.includes('@')
-  const payload = isEmail
+  const payload = isEmailMode.value
     ? { email: form.phoneEmail }
     : { no_hp: form.phoneEmail }
 
@@ -103,17 +137,41 @@ function handleReset() {
   Inertia.post('/forgot-password', payload, {
     preserveScroll: true,
     onSuccess: (response) => {
-      successMessage.value = response.props?.successMessage || 'Link reset password berhasil dikirim ke email Anda.'
-      form.reset()  
+      successMessage.value = response.props?.message || 'Link reset password berhasil dikirim.'
+      form.reset()
+      startCooldown()
     },
     onError: (errors) => {
-      form.setError('phoneEmail', 'Terjadi kesalahan. Pastikan email atau nomor HP terdaftar.')
+      // Tangani error dari backend
+      if (errors.email || errors.no_hp) {
+        form.setError('phoneEmail', errors.email || errors.no_hp)
+      } else {
+        form.setError('phoneEmail', 'Terjadi kesalahan. Pastikan input sudah benar.')
+      }
     },
-    finally: () => {
+    onFinish: () => {
       isLoading.value = false
-    }
+    },
   })
 }
+
+const cooldown = ref(false)
+const cooldownTimer = ref(60)
+let cooldownInterval = null
+
+function startCooldown() {
+  cooldown.value = true
+  cooldownTimer.value = 60
+
+  cooldownInterval = setInterval(() => {
+    cooldownTimer.value--
+    if (cooldownTimer.value <= 0) {
+      clearInterval(cooldownInterval)
+      cooldown.value = false
+    }
+  }, 1000)
+}
+
 </script>
 
 <style scoped>
@@ -157,6 +215,24 @@ function handleReset() {
   margin: auto;
   width: 100%;
   padding: 0 15px;
+}
+
+.btn-toggle {
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+  font-weight: 600;
+  color: #212529;
+}
+
+.btn-toggle.active {
+  background-color: #0d6efd; /* Bootstrap primary */
+  color: white;
+}
+
+.login-toggle {
+  user-select: none;
 }
 
 .error-message {

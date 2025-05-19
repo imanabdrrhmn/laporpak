@@ -21,13 +21,13 @@ Route::middleware('guest')->group(function () {
     Route::post('register/email', [RegisteredUserController::class, 'storeWithEmail'])->name('register.email');
     Route::post('register/phone', [RegisteredUserController::class, 'storeWithNoHp'])->name('register.no_hp');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.submit');
+    Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.submit')->middleware('throttle:5,1');
 
     Route::get('login/google', [AuthenticatedSessionController::class, 'redirectToGoogle'])->name('login.google');
     Route::get('login/google/callback', [AuthenticatedSessionController::class, 'handleGoogleCallback']);
 
     Route::inertia('/forgot-password', 'ForgotPassword')->name('password.request');
-    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:1,1');
 
     Route::get('/reset-password', function (Request $request) {
         return Inertia::render('ResetPassword', [
@@ -37,7 +37,6 @@ Route::middleware('guest')->group(function () {
         ]);
     })->name('password.reset');
 
-    // Proses reset password
     Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
     });

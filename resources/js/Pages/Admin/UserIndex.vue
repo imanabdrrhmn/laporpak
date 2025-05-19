@@ -366,7 +366,7 @@ function submitNewRole() {
     name: newRoleName.value.trim(),
   }
   
-  window.axios.post(route('roles.store'), data)
+  window.axios.post(route('admin.roles.store'), data)
     .then(() => {
       Swal.fire({
         title: 'Success',
