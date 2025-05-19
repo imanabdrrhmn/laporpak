@@ -12,7 +12,11 @@
             icon-bg="rgba(67, 97, 238, 0.1)"
             icon-color="var(--primary-color)"
           >
-            <button class="btn btn-sm btn-primary mt-2">Isi Saldo <i class="bi bi-plus-circle ms-1"></i></button>
+            <Link
+              href="/top-ups"
+              class="btn btn-sm btn-primary mt-2">
+              Isi Saldo <i class="bi bi-plus-circle ms-1"></i>
+            </Link>
             <div class="progress mt-3" style="height: 4px;">
               <div class="progress-bar bg-primary" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
@@ -47,21 +51,25 @@
           <SummaryCard
             title="Total Laporan"
             icon="bi-file-earmark-text"
-            :value="laporan.total"
+            :value="reports"
             icon-bg="rgba(220, 53, 69, 0.1)"
             icon-color="var(--danger-color)"
           >
             <div class="reports-stats">
               <div class="stat-item">
                 <i class="bi bi-hourglass-split text-warning"></i>
-                <span>{{ laporan.diproses }} lagi diproses</span>
+                <span>{{ in_process }} lagi diproses</span>
               </div>
               <div class="stat-item">
                 <i class="bi bi-check-circle-fill text-success"></i>
-                <span>{{ laporan.selesai }} udah selesai</span>
+                <span>{{ selected }} udah selesai</span>
               </div>
             </div>
-            <button class="btn btn-sm btn-outline-primary w-100 mt-3">Liat Semua Laporan</button>
+            <Link
+              href="/laporan-saya"
+              class="btn btn-sm btn-outline-primary w-100 mt-3">
+              Lihat Semua Laporan
+            </Link>
           </SummaryCard>
         </div>
       </div>
@@ -75,11 +83,8 @@
         </div>
         <div class="col-lg-4 animate__animated animate__fadeInRight" style="animation-delay: 0.4s">
           <FeedbackCard
-            :nama-user="namaUser"
-            :user-avatar="userAvatar"
-            :feedback-kategori="feedbackKategori"
-            :feedback-text="feedbackText"
-          />
+            :feedbacks="props.feedbacks" 
+            />
         </div>
       </div>
       <RecentReports :laporan-terbaru="laporanTerbaru" @show-modal="showModal" />
@@ -90,7 +95,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, usePage, Link} from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import WelcomeHeader from '@/Components/Dashboard/WelcomeHeader.vue';
 import SummaryCard from '@/Components/Dashboard/SummaryCard.vue';
@@ -102,12 +107,20 @@ import RecentReports from '@/Components/Dashboard/RecentReports.vue';
 import DashboardFooter from '@/Components/Dashboard/DashboardFooter.vue';
 import { Modal } from 'bootstrap';
 
+const props = defineProps({
+  feedbacks: Array,
+  auth: Object,
+  stats: Object,
+  reports: Array
+})
+
 // Setup layout halaman
 const page = usePage();
 page.layout = AppLayout;
+const { reports, selected, in_process } = props.stats
 
 // Model data
-const saldoKredit = ref(page.props.saldoKredit ?? 0);
+const saldoKredit = computed(() => page.props.user?.balance ?? 0);
 const namaUser = computed(() => page.props.auth?.user?.name || 'User');
 
 // Status verifikasi
@@ -120,7 +133,7 @@ const statusVerifikasi = ref(page.props.statusVerifikasi ?? {
 });
 
 // Data laporan dari backend
-const laporanTerbaru = ref(page.props.laporanTerbaru ?? []);
+const laporanTerbaru = ref(page.props.reports ?? []);
 
 // Ringkasan laporan
 const laporan = ref({
@@ -148,8 +161,7 @@ const aksiCepat = ref([
 
 // Feedback dinamis
 const userAvatar = ref(page.props.auth?.user?.avatar ?? '/Default-Profile.png');
-const feedbackKategori = ref(page.props.feedbacks?.kategori ?? 'Cari Laporan');
-const feedbackText = ref(page.props.feedbacks?.text ?? 'Belum ada ulasan');
+
 
 // Format rupiah
 const formatRupiah = (jumlah) => {

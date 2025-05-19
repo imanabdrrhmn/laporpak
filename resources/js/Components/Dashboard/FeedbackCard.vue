@@ -4,19 +4,24 @@
       <h5 class="fw-bold mb-0">Ulasan Saya</h5>
     </div>
     <div class="card-body">
-      <div class="testimonial">
+      <div
+        class="testimonial mb-3"
+        v-for="(fb, index) in feedbacks"
+        :key="index"
+      >
         <div class="d-flex align-items-center mb-3">
-          <img :src="userAvatar" alt="avatar" class="rounded-circle me-3" width="50" height="50">
+          <img :src="fb.user.avatar_url" alt="avatar" class="rounded-circle me-3" width="50" height="50">
           <div>
-            <strong>{{ namaUser }}</strong><br>
-            <small class="text-muted">Kategori: {{ feedbackKategori }}</small>
+            <strong>{{ fb.user.name }}</strong><br>
+            <small class="text-muted">Kategori: {{ fb.kategori }}</small>
           </div>
         </div>
         <div class="mb-2">
-          <span class="text-warning fs-5">★★★★★</span>
+          <span class="text-warning fs-5">{{ '★'.repeat(fb.rating) }}</span>
         </div>
-        <p class="mb-0">{{ feedbackText }}</p>
+        <p class="mb-0">{{ fb.message }}</p>
       </div>
+
       <a href="/feedback" class="btn btn-sm btn-outline-primary w-100 mt-3">
         Kasih Ulasan
       </a>
@@ -26,10 +31,7 @@
 
 <script setup>
 defineProps({
-  namaUser: String,
-  userAvatar: String,
-  feedbackKategori: String,
-  feedbackText: String
+  feedbacks: Array,
 });
 </script>
 
