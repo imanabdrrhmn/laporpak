@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="col-lg-6 d-flex align-items-center justify-content-center p-3 p-md-4 bg-light">
     <div class="form-container p-3 p-sm-4 p-lg-5 w-100">
@@ -62,6 +63,7 @@
                 aria-describedby="idNumberError"
                 required 
                 maxlength="16"
+                @input="restrictToNumbers"
               >
               <div id="idNumberError" class="invalid-feedback" v-if="validation.idNumber">{{ validation.idNumber }}</div>
             </div>
@@ -128,17 +130,36 @@
           </div>
         </div>
       </form>
+
+      <!-- Render Verification Modal -->
+      <VerificationModal
+        :is-visible="isModal1Visible"
+        :biaya-verifikasi="biayaVerifikasi"
+        :is-verifying="isVerifying"
+        @close="closeModal1"
+        @verify="handleVerification"
+      />
+
+      <!-- Render Success Modal -->
+      <SuccessModal
+        :is-visible="isModal2Visible"
+        @navigate="navigateToReports"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
+import VerificationModal from './Modals/VerificationModal.vue';
+import SuccessModal from './Modals/SuccessModal.vue';
 
 defineProps({
   services: Array
 });
 
+// Form state
 const selectedService = ref('');
 const formData = ref({
   fullName: '',
@@ -158,9 +179,23 @@ const validation = ref({
 const formError = ref('');
 const loading = ref(false);
 
+// Modal state
+const isModal1Visible = ref(false);
+const isModal2Visible = ref(false);
+const isVerifying = ref(false);
+const biayaVerifikasi = ref(3600); // Default verification cost
+
+// Router for navigation
+const router = useRouter();
+
 const showNpwpField = computed(() => {
   return selectedService.value && (selectedService.value.includes('npwp') || selectedService.value === 'income-tax');
 });
+
+// Restrict NIK input to numbers only
+const restrictToNumbers = (event) => {
+  formData.value.idNumber = event.target.value.replace(/[^0-9]/g, '');
+};
 
 const validateAndSubmit = () => {
   resetValidation();
@@ -215,7 +250,8 @@ const validateAndSubmit = () => {
     return;
   }
   
-  submitForm();
+  // Show verification modal
+  showVerificationModal();
 };
 
 const resetValidation = () => {
@@ -230,22 +266,41 @@ const resetValidation = () => {
   };
 };
 
-const submitForm = () => {
-  loading.value = true;
+// Modal functions
+const showVerificationModal = () => {
+  isModal1Visible.value = true;
+};
+
+const closeModal1 = () => {
+  isModal1Visible.value = false;
+};
+
+const handleVerification = () => {
+  isVerifying.value = true;
   
   setTimeout(() => {
-    loading.value = false;
+    isVerifying.value = false;
+    closeModal1();
     
-    const successMessage = `Verifikasi berhasil untuk layanan: ${getServiceName(selectedService.value)}`;
-    alert(successMessage);
-    
-    console.log('Form Data:', {
-      service: selectedService.value,
-      ...formData.value
-    });
-    
-    resetForm();
-  }, 1500);
+    setTimeout(() => {
+      isModal2Visible.value = true;
+      
+      // Log form data
+      console.log('Form Data:', {
+        service: selectedService.value,
+        ...formData.value
+      });
+      
+      resetForm();
+    }, 400);
+  }, 2000);
+};
+
+const navigateToReports = () => {
+  isModal2Visible.value = false;
+  setTimeout(() => {
+    router.push('/laporan-saya');
+  }, 300);
 };
 
 const resetForm = () => {
@@ -256,6 +311,7 @@ const resetForm = () => {
     npwpNumber: '',
     termsAgreed: false
   };
+  selectedService.value = '';
 };
 
 const getServiceName = (serviceId) => {
@@ -326,3 +382,4 @@ const getServiceName = (serviceId) => {
   }
 }
 </style>
+```

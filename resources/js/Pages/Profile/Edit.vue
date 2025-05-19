@@ -82,15 +82,6 @@
                 <!-- Activity -->
                 <div class="p-4">
                   <h6 class="mb-3 text-uppercase fw-bold text-secondary small">Aktivitas</h6>
-                  <div class="d-flex align-items-center mb-2">
-                    <div class="bg-light p-2 rounded-circle me-3">
-                      <i class="bi bi-clock-history text-secondary"></i>
-                    </div>
-                    <div>
-                      <div class="small text-secondary">Login terakhir</div>
-                      <div class="fw-medium">2 jam yang lalu</div>
-                    </div>
-                  </div>
                   <div class="d-flex align-items-center">
                     <div class="bg-light p-2 rounded-circle me-3">
                       <i class="bi bi-calendar-check text-secondary"></i>
@@ -105,11 +96,7 @@
                 <hr class="my-0">
 
                 <!-- Action Buttons -->
-                <div class="p-4">
-                  <button class="btn btn-primary w-100 mb-2">
-                    <i class="bi bi-cloud-arrow-up me-2"></i>
-                    Perbarui Profil
-                  </button>
+                <div>
                   <DeleteUserForm />
                 </div>
               </div>
