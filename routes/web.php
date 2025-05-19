@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserHistoryReportController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TopUpController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -21,13 +22,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function (){
-    $user = Auth::user();
-    return Inertia::render('Dashboard',[
-        'user' => auth()->user(),
-        'creditBalance' => $user->balance,
-    ]);
-})->middleware(['auth', 'contact.verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'contact.verified'])->name('dashboard');
 
 Route::get('/verifikasi', function () {
     $feedbacks = Feedback::with('user')->where('kategori', 'Verifikasi')->latest()->take(10)->get();
@@ -66,10 +61,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware('auth','contact.verified', 'role:admin||verifier')->group(function () {
     Route::middleware('role:admin||verifier')->group(function () {
         Route::get('/admin/pelaporan', [ReportController::class, 'index'])->name('laporan.index');
-        Route::patch('/admin//pelaporan/{report}/terima', [ReportController::class, 'accept'])->name('laporan.terima');
-        Route::patch('/admin//pelaporan/{report}/tolak', [ReportController::class, 'reject'])->name('laporan.tolak');
-        Route::patch('/admin//pelaporan/{report}/publikasikan', [ReportController::class, 'publish'])->name('laporan.publikasikan');
-        Route::delete('/admin//pelaporan/{report}/hapus', [ReportController::class, 'destroy'])->name('laporan.hapus');
+        Route::patch('/pelaporan/{report}/terima', [ReportController::class, 'accept'])->name('laporan.terima');
+        Route::patch('/pelaporan/{report}/tolak', [ReportController::class, 'reject'])->name('laporan.tolak');
+        Route::patch('/pelaporan/{report}/publikasikan', [ReportController::class, 'publish'])->name('laporan.publikasikan');
+        Route::delete('/pelaporan/{report}/hapus', [ReportController::class, 'destroy'])->name('laporan.hapus');
     });
 
     Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
