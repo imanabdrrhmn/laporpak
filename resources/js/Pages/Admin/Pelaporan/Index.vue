@@ -448,13 +448,13 @@ const quickAction = (report, action) => {
     let endpoint, newStatus;
 
     if (action === 'approved') {
-        endpoint = `/admin/pelaporan/${reportId}/terima`;
+        endpoint = `/pelaporan/${reportId}/terima`;
         newStatus = report.status === 'approved' ? 'pending' : 'approved';
     } else if (action === 'rejected') {
-        endpoint = `/admin/pelaporan/${reportId}/tolak`;
+        endpoint = `/pelaporan/${reportId}/tolak`;
         newStatus = report.status === 'rejected' ? 'pending' : 'rejected';
     } else if (action === 'published') {
-        endpoint = `/admin/pelaporan/${reportId}/publikasikan`;
+        endpoint = `/pelaporan/${reportId}/publikasikan`;
         newStatus = report.status === 'published' ? 'pending' : 'published';
     }
 

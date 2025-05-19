@@ -49,7 +49,7 @@ class ReportController extends Controller
 });
 
 
-    return Inertia::render('Pelaporan/Index', [
+    return Inertia::render('Admin/Pelaporan/Index', [
         'reports' => $reports,
     ]);
 }
