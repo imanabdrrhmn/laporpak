@@ -57,7 +57,7 @@ const userIsLoggedIn = computed(() => !!page.props.auth.user);
 
 // Service options with icons
 const services = [
-  { label: 'Pelaporan', value: 'Penipuan', icon: 'bi bi-shield-exclamation' },
+  { label: 'Penipuan', value: 'Penipuan', icon: 'bi bi-shield-exclamation' },
   { label: 'Infrastruktur', value: 'Infrastruktur', icon: 'bi bi-building-gear' }
 ];
 

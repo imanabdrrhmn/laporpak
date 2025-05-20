@@ -14,7 +14,11 @@ import NavBarAdmin from '@/Components/NavBarAdmin.vue';
 <style scoped>
 .admin-layout {
   display: flex;
+  overflow: flex;
+
+
 }
+
 
 .main-content {
   flex: 1;

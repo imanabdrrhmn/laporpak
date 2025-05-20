@@ -388,6 +388,9 @@ const exportLogs = () => {
 <style scoped>
 .container {
   max-width: 1000px;
+  margin-top: 20px; /* Tambahkan jika belum ada */
+  padding-top: 10px;
+  line-height: 1.2;
 }
 
 .filter-controls {

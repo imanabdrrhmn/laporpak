@@ -1,6 +1,6 @@
 <template>
   <AdminLayout>
-    <Head title="User Management" />
+    <Head title="Manajemen Pengguna" />
     <div class="container py-6">
       <!-- Page Header with Card styling -->
       <div class="card shadow-sm mb-6 border-0">
@@ -396,6 +396,14 @@ function submitNewRole() {
 </script>
 
 <style>
+
+
+
+body {
+  background-color: #f8f9fa;
+}
+
+
 
 .bg-soft-primary {
   background-color: rgba(13, 110, 253, 0.15);

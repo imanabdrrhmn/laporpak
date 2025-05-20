@@ -1,6 +1,6 @@
 <template>
   <AdminLayout>
-
+  <Head title="Manajemen Laporan" />
   <div class="container">
     <!-- Dashboard Header -->
     <div class="dashboard-header">
@@ -522,7 +522,7 @@ watch([searchQuery, selectedCategory, selectedService, selectedStatus], () => {
 <style scoped>
 /* Global Styles */
 .container {
-  max-width: 1200px;
+  max-width: 1160px;
   margin: 0 auto;
   padding: 24px 16px;
 }
