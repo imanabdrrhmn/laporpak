@@ -34,6 +34,10 @@
         <div class="col-lg-3 col-md-3 col-sm-6 col-6 mb-4 mb-md-0">
           <h5 class="mb-3 mb-md-4">Contact</h5>
           <div class="contact-item mb-3">
+            <i class="bi bi-building-fill me-2"></i>
+            <span>PT. Pelopor Ide Kreatif</span>
+          </div>
+          <div class="contact-item mb-3">
             <i class="bi bi-telephone-fill me-2"></i>
             <span>+62 812 3456 7890</span>
           </div>
@@ -50,9 +54,16 @@
     </div>
   </footer>
 
-  <div class="footer-bottom text-center">
+  <div class="footer-bottom">
     <div class="container">
-      <p class="mb-0">© 2025 All Rights Reserved</p>
+      <div class="footer-bottom-content">
+        <p class="mb-0">© 2025 Sistem Anti-Penipuan. Semua hak dilindungi.</p>
+        <div class="footer-links">
+          <a href="#">Kebijakan Privasi</a>
+          <a href="#">Syarat & Ketentuan</a>
+          <a href="#">Bantuan</a>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -66,7 +77,7 @@ const features = ref([
   { name: 'Verifikasi', route: '/verifikasi' },
   { name: 'Lapor Map', route: '/LaporMap' },
   { name: 'Cari Laporan', route: '/CariLaporan' }
-])
+]);
 </script>
 
 <style scoped>
@@ -90,6 +101,28 @@ const features = ref([
   border-top: 1px solid #2c3855;
   padding: 1rem 0;
   color: white;
+}
+
+.footer-bottom-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer-links a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #ccc;
 }
 
 .feature-item {
@@ -155,10 +188,19 @@ const features = ref([
   .feature-item, .contact-item {
     font-size: 0.9rem;
   }
+  
+  .footer-bottom-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .footer-links {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 575.98px) {
-  /* Extra small devices - phones like iPhone SE */
   .footer {
     padding: 1.25rem 0;
   }
@@ -190,9 +232,16 @@ const features = ref([
   .social-icons a {
     font-size: 16px;
   }
+  
+  .footer-bottom-content {
+    font-size: 0.85rem;
+  }
+  
+  .footer-links {
+    gap: 1rem;
+  }
 }
 
-/* Foldable devices like Galaxy Z Fold 5 and Surface Duo */
 @media (max-width: 320px) {
   .logo {
     font-size: 18px;
@@ -210,16 +259,18 @@ const features = ref([
   .feature-item, .contact-item {
     font-size: 0.8rem;
   }
+  
+  .footer-bottom-content {
+    font-size: 0.8rem;
+  }
 }
 
-/* For larger tablets in landscape mode */
 @media (min-width: 992px) and (max-width: 1199.98px) {
   .contact-text {
     font-size: 0.9rem;
   }
 }
 
-/* For very small height devices */
 @media (max-height: 600px) {
   .footer {
     padding: 1rem 0;

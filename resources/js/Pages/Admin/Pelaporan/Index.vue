@@ -1166,7 +1166,7 @@ watch([searchQuery, selectedCategory, selectedService, selectedStatus], () => {
 
 .table-action.publish.active {
   background-color: #0d6efd;
-  color: #0d6efd;
+  color: white;
 }
 
 .table-action.loading {

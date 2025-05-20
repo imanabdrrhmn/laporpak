@@ -3,7 +3,7 @@
   <AppLayout>
     <!-- Header Section -->
     <div class="header-gradient text-white py-4 py-md-5 text-center">
-      <h1 class="display-5 display-md-4 fw-bold">Feedback</h1>
+      <h1 class="display-5 display-md-4 fw-bold">Ulasan</h1>
       <p class="lead mt-2 px-3">
         Bagikan pengalaman Anda dan lihat ulasan yang dikaitkan pengguna lain tentang fitur-fitur LaporPak
       </p>
@@ -28,7 +28,7 @@
             <div class="col-12 col-md-6 col-xl-3 order-1">
               <div v-if="isLoggedIn && contactVerified">
                 <button class="btn btn-primary w-100" @click="openFeedbackModal('create')">
-                  <i class="bi bi-chat-square-text me-2"></i> Beri Feedback
+                  <i class="bi bi-chat-square-text me-2"></i> Beri Ulasan
                 </button>
               </div>
               <div v-else-if="isLoggedIn && !contactVerified">
@@ -45,7 +45,7 @@
                 :class="isMyFeedbackActive ? 'btn-primary' : 'btn-outline-primary'"
                 @click="toggleMyFeedback"
               >
-                <i class="bi bi-person-lines-fill me-1"></i> Feedback Saya
+                <i class="bi bi-person-lines-fill me-1"></i> Ulasan Saya
               </button>
             </div>
 
