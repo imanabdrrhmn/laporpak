@@ -135,12 +135,6 @@ const statusVerifikasi = ref(page.props.statusVerifikasi ?? {
 // Data laporan dari backend
 const laporanTerbaru = ref(page.props.reports ?? []);
 
-// Ringkasan laporan
-const laporan = ref({
-  total: page.props.laporan?.total ?? 5,
-  diproses: page.props.laporan?.diproses ?? 2,
-  selesai: page.props.laporan?.selesai ?? 3
-});
 
 // Aktivitas
 const aktivitas = ref(page.props.aktivitas ?? [

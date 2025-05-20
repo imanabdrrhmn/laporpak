@@ -56,8 +56,8 @@
               <input
                 type="tel"
                 class="form-control"
-                id="phone"
-                v-model="form.phone"
+                id="no_hp"
+                v-model="form.no_hp"
                 autocomplete="tel"
               />
             </div>
@@ -192,7 +192,7 @@ const user = usePage().props.auth.user;
 const form = useForm({
   name: user.name || '',
   email: user.email,
-  phone: user.phone || '',
+  no_hp: user.no_hp || '',
   gender: user.gender || 'male',
   location: user.location || '',
   biography: user.biography || ''
