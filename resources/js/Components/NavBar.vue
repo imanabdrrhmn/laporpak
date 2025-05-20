@@ -306,38 +306,6 @@
             </div>
           </li>
 
-          <!-- Admin Dropdown -->
-          <li v-if="isLoggedIn" class="nav-item">
-            <a class="nav-link d-flex justify-content-between align-items-center"
-               @click.prevent="toggleAdminMobile = !toggleAdminMobile">
-              <div>
-                <i class="bi bi-shield-fill me-2"></i>
-                <span>Admin</span>
-              </div>
-              <i class="bi" :class="toggleAdminMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-            </a>
-            <div class="collapse" :class="{ show: toggleAdminMobile }">
-              <div class="nav flex-column submenu">
-                <Link href="/admin/dashboard" class="nav-link" @click="closeMobileNav">
-                  <i class="bi bi-grid-fill me-2"></i>
-                  Dashboard Admin
-                </Link>
-                <Link href="/admin/pelaporan" class="nav-link" @click="closeMobileNav">
-                  <i class="bi bi-file-earmark-excel-fill me-2"></i>
-                  Manajemen Pelaporan
-                </Link>
-                <Link href="/admin/top-ups" class="nav-link" @click="closeMobileNav">
-                  <i class="bi bi-wallet-fill me-2"></i>
-                  Manajemen Top-up
-                </Link>
-                <Link href="/admin/users" class="nav-link" @click="closeMobileNav">
-                  <i class="bi bi-people-fill me-2"></i>
-                  Manajemen Pengguna
-                </Link>
-              </div>
-            </div>
-          </li>
-
           <!-- Feedback -->
           <li class="nav-item">
             <Link href="/feedback" class="nav-link" @click="closeMobileNav">
@@ -389,7 +357,6 @@ export default {
     const mobileNavOpen = ref(false);
     const toggleLayananMobile = ref(false);
     const toggleProfileMobile = ref(false);
-    const toggleAdminMobile = ref(false);
 
     const isLoggedIn = computed(() => !!page.props.auth?.user);
     const user = computed(() => page.props.auth?.user || {});
@@ -418,7 +385,6 @@ export default {
       mobileNavOpen,
       toggleLayananMobile,
       toggleProfileMobile,
-      toggleAdminMobile,
       isLoggedIn,
       user,
       getUserInitials,

@@ -1,5 +1,5 @@
 <template>
-  <AppLayout>
+  <AdminLayout>
     <Head title="User Management" />
     <div class="container py-6">
       <!-- Page Header with Card styling -->
@@ -238,14 +238,14 @@
         </div>
       </div>
     </div>
-  </AppLayout>
+  </AdminLayout>
 </template>
 
 <script setup>
 import Swal from 'sweetalert2'
 import { ref, computed } from 'vue'
 import { usePage, Head } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const { props } = usePage()
 const users = props.users
