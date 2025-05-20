@@ -49,6 +49,10 @@ class AuthenticatedSessionController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
+        if ($user->hasRole('admin') || $user->hasRole('verifier')) {
+            return redirect()->route('dashboard');
+        }
+
         return redirect(url()->previous());
     }
 
@@ -67,7 +71,7 @@ class AuthenticatedSessionController extends Controller
 
         public function redirectToGoogle()
     {
-        session(['url.intended' => url()->previous()]); // Simpan halaman asal
+        session(['url.intended' => url()->previous()]); 
         return Socialite::driver('google')->redirect();
     }
 
