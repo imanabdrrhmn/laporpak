@@ -44,7 +44,7 @@
               <span class="badge" :class="statusVerifikasi.email ? 'bg-success' : 'bg-secondary'">Email</span>
               <span class="badge" :class="statusVerifikasi.rekening ? 'bg-success' : 'bg-secondary'">Rekening</span>
             </div>
-            <button class="btn btn-sm btn-outline-success w-100 mt-3" v-if="!statusVerifikasi.noHp">Verifikasi No. HP</button>
+            <button class="btn btn-sm btn-outline-success w-100 mt-3" v-if="!statusVerifikasi.noHp">Verifikasi Data</button>
           </SummaryCard>
         </div>
         <div class="col-md-4 col-sm-12 animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
