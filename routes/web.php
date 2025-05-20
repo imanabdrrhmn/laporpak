@@ -87,6 +87,7 @@ Route::middleware(['auth','contact.verified'])->group(function () {
         Route::get('/admin/top-ups', [TopUpController::class, 'adminIndex']);
         Route::post('/admin/top-ups/{id}/verify', [TopUpController::class, 'verify']);
         Route::post('/admin/top-ups/{id}/reject', [TopUpController::class, 'reject']);
+        Route::get('/admin/top-ups/export-logs', [TopUpController::class, 'exportTopUpLogsToCsv']);
     });
 });
 
