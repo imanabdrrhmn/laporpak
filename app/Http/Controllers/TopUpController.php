@@ -2,19 +2,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\TopUp;
+use App\Models\TopUpStatusLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use App\Policies\TopUpPolicy;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-
-
-
 
 class TopUpController extends Controller
 {
     use AuthorizesRequests;
+
     public function index()
     {
         $topUps = TopUp::where('user_id', Auth::id())
@@ -51,17 +50,14 @@ class TopUpController extends Controller
         return redirect()->route('top-ups.index')->with('success', 'Top up request submitted');
     }
 
-
-        public function adminIndex(Request $request)
+    public function adminIndex(Request $request)
     {
         $query = TopUp::with('user')->orderBy('created_at', 'desc');
 
-        // Optional filter by status
         if ($request->has('status') && in_array($request->status, ['pending','verified','rejected'])) {
             $query->where('status', $request->status);
         }
 
-        // Optional search by user email or name
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
@@ -77,7 +73,6 @@ class TopUpController extends Controller
             'filters' => $request->only('status', 'search'),
         ]);
     }
-
 
     public function verify($id)
     {
@@ -111,5 +106,55 @@ class TopUpController extends Controller
         $topUp->save();
 
         return redirect()->back()->with('success', 'Top up berhasil ditolak.');
+    }
+
+    public function exportTopUpLogsToCsv(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $query = TopUpStatusLog::with(['topUp.user', 'changedBy'])
+            ->when($request->start_date, fn($q) => $q->whereDate('created_at', '>=', $request->start_date))
+            ->when($request->end_date, fn($q) => $q->whereDate('created_at', '<=', $request->end_date))
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $filename = 'top_up_status_logs_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            "Content-Type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=\"$filename\"",
+        ];
+
+        $columns = [
+            'Log ID', 'TopUp ID', 'User ID', 'User Name', 'Amount', 'Changed By ID', 'Changed By Name',
+            'Status', 'Notes', 'Created At'
+        ];
+
+        $callback = function() use ($query, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($query as $log) {
+                fputcsv($file, [
+                    $log->id,
+                    $log->topup_id,
+                    $log->topUp->user->id ?? '',
+                    $log->topUp->user->name ?? '',
+                    $log->topUp->amount ?? '',
+                    $log->changed_by,
+                    $log->changedBy->name ?? '',
+                    $log->status,
+                    $log->notes,
+                    $log->created_at->toDateTimeString(),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return Response::stream($callback, 200, $headers);
     }
 }

@@ -20,7 +20,16 @@
           placeholder="Cari user (nama/email)..."
           class="form-control"
         />
+
         <button @click="updateFilters" class="btn btn-primary flex-shrink-0">Cari</button>
+
+        <!-- Button untuk buka modal export -->
+        <button
+          @click="showExportModal"
+          class="btn btn-outline-success ms-3"
+        >
+          Export Logs
+        </button>
       </div>
 
       <!-- Table Top Ups -->
@@ -144,6 +153,55 @@
         </div>
       </div>
 
+      <!-- Modal Export Logs -->
+      <div
+        class="modal fade"
+        id="exportModal"
+        tabindex="-1"
+        aria-labelledby="exportModalLabel"
+        aria-hidden="true"
+        ref="exportModalRef"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exportModalLabel">Export Logs</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                @click="closeExportModal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="startDate" class="form-label">Tanggal Mulai</label>
+                <input
+                  type="date"
+                  id="startDate"
+                  v-model="exportFilters.start_date"
+                  class="form-control"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="endDate" class="form-label">Tanggal Akhir</label>
+                <input
+                  type="date"
+                  id="endDate"
+                  v-model="exportFilters.end_date"
+                  class="form-control"
+                />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" @click="closeExportModal">Batal</button>
+              <button type="button" class="btn btn-success" @click="exportLogs">Download CSV</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Toast Notification -->
       <div
         v-if="toast.show"
@@ -186,17 +244,31 @@ const filters = ref({
   search: props.filters.search || "",
 });
 
+const exportFilters = ref({
+  start_date: '',
+  end_date: '',
+});
+
 const loadingIds = ref([]);
 const proofModalRef = ref(null);
 const proofModalInstance = ref(null);
 const proofModalUrl = ref("");
 
+const exportModalRef = ref(null);
+const exportModalInstance = ref(null);
+
 const updateFilters = () => {
-  Inertia.get("/admin/top-ups", filters.value, { preserveState: true, replace: true });
+  Inertia.get("/admin/top-ups", filters.value, {
+    preserveState: true,
+    replace: true,
+  });
 };
 
 const formatCurrency = (value) =>
-  new Intl.NumberFormat("id-ID", { style: "decimal", minimumFractionDigits: 0 }).format(value);
+  new Intl.NumberFormat("id-ID", {
+    style: "decimal",
+    minimumFractionDigits: 0,
+  }).format(value);
 
 const formatDate = (date) =>
   new Intl.DateTimeFormat("id-ID", {
@@ -207,7 +279,8 @@ const formatDate = (date) =>
     minute: "2-digit",
   }).format(new Date(date));
 
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str) =>
+  str.charAt(0).toUpperCase() + str.slice(1);
 
 const statusBadgeClass = (status) => {
   switch (status.toLowerCase()) {
@@ -262,7 +335,9 @@ const rejectTopUp = async (id) => {
 
 const goToPage = (page) => {
   if (page < 1 || page > props.topUps.last_page) return;
-  Inertia.get("/admin/top-ups", { ...filters.value, page }, { preserveState: true, replace: true });
+  Inertia.get("/admin/top-ups", { ...filters.value, page }, {
+    preserveState: true,
+  });
 };
 
 const totalPages = computed(() => {
@@ -273,8 +348,9 @@ const totalPages = computed(() => {
   return pages;
 });
 
-const showProofModal = (path) => {
-  proofModalUrl.value = getProofUrl(path);
+// Modal Bukti Pembayaran
+const showProofModal = (imgPath) => {
+  proofModalUrl.value = getProofUrl(imgPath);
   if (!proofModalInstance.value && proofModalRef.value) {
     proofModalInstance.value = new Modal(proofModalRef.value);
   }
@@ -284,74 +360,55 @@ const showProofModal = (path) => {
 const closeProofModal = () => {
   proofModalInstance.value?.hide();
 };
+
+// Modal Export Logs
+const showExportModal = () => {
+  if (!exportModalInstance.value && exportModalRef.value) {
+    exportModalInstance.value = new Modal(exportModalRef.value);
+  }
+  exportModalInstance.value.show();
+};
+
+const closeExportModal = () => {
+  exportModalInstance.value?.hide();
+};
+
+const exportLogs = () => {
+  const params = new URLSearchParams();
+  if (exportFilters.value.start_date) params.append("start_date", exportFilters.value.start_date);
+  if (exportFilters.value.end_date) params.append("end_date", exportFilters.value.end_date);
+
+  const url = `/admin/top-ups/export-logs?${params.toString()}`;
+  window.open(url, "_blank");
+
+  closeExportModal();
+};
 </script>
 
 <style scoped>
+.container {
+  max-width: 1000px;
+}
+
 .filter-controls {
   display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  align-items: center;
 }
 
-.filter-controls > * {
-  min-width: 200px;
-  flex-grow: 1;
-  max-width: 300px;
-}
-
-.table-responsive {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
-}
-
-/* Tabel desktop */
 .table th,
 .table td {
   vertical-align: middle;
   white-space: nowrap;
 }
 
-/* Responsive: Ubah ke "card list" di mobile */
-@media (max-width: 576px) {
-  table thead {
-    display: none;
-  }
-  table tbody tr {
-    display: block;
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1rem;
-    background: #fff;
-  }
-  table tbody tr td {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.3rem 0;
-    white-space: normal;
-  }
-  table tbody tr td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    flex: 1;
-    color: #555;
-  }
-  /* Sembunyikan kolom bukti dan aksi di mobile supaya sederhana */
-  table tbody tr td.bukti,
-  table tbody tr td.aksi {
-    display: none;
-  }
-}
-
-.pagination {
-  flex-wrap: wrap;
-}
-
 .proof-thumb {
-  max-height: 50px;
   cursor: pointer;
+  width: 60px;
+  height: 40px;
+  object-fit: cover;
   border-radius: 4px;
   transition: transform 0.2s ease-in-out;
 }
@@ -359,11 +416,26 @@ const closeProofModal = () => {
   transform: scale(1.1);
 }
 
-/* Responsive button sizes on small screens */
+.badge {
+  font-weight: 500;
+  padding: 0.4em 0.6em;
+  font-size: 0.875rem;
+}
+
+.toast {
+  cursor: pointer;
+  user-select: none;
+}
+
 @media (max-width: 576px) {
-  .btn {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
+  .filter-controls {
+    flex-direction: column;
+  }
+
+  .table th,
+  .table td {
+    white-space: normal;
   }
 }
 </style>
+
