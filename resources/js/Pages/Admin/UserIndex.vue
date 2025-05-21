@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout>
+  <AppLayout>
     <Head title="Manajemen Pengguna" />
     <div class="container py-5 overflow-hidden-container">
       <!-- Modern Page Header with gradient background -->
@@ -96,16 +96,20 @@
                       <td>{{ index + 1 }}</td>
                       <td>
                         <div class="d-flex align-items-center">
-                          <div class="user-avatar me-3">
-                            {{ user.name.charAt(0).toUpperCase() }}
-                          </div>
+                          <img 
+                            :src="user.avatar_url" 
+                            alt="Avatar" 
+                            class="user-avatar rounded-circle me-2" 
+                            style="width: 40px; height: 40px; object-fit: cover;"
+                          >
+
                           <span class="fw-medium">{{ user.name }}</span>
                         </div>
                       </td>
                       <td>{{ user.email }}</td>
                       <td>
                         <span v-if="user.roles.length" class="badge role-badge text-primary">
-                          {{ user.roles[0].name }}
+                          {{ user.roles}}
                         </span>
                         <span v-else class="badge no-role-badge">
                           No Role
@@ -124,7 +128,7 @@
                               v-for="role in roles"
                               :key="role"
                               :value="role"
-                              :selected="user.roles[0]?.name === role"
+                              :selected="user.roles === role"
                             >
                               {{ role }}
                             </option>
@@ -263,18 +267,19 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
+  </AppLayout>
 </template>
 
 <script setup>
 import Swal from 'sweetalert2'
 import { ref, computed } from 'vue'
 import { usePage, Head } from '@inertiajs/vue3'
-import AdminLayout from '@/Layouts/AdminLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue';
 
 const { props } = usePage()
 const users = props.users
 const roles = props.roles
+
 
 const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 const newRoleName = ref('')

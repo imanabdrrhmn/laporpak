@@ -12,11 +12,24 @@ class UserManagementController extends Controller
 {
     public function index()
     {
+        $users = User::with('roles')->get()->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'roles' => $user->roles->pluck('name')->join(', '),
+                'avatar_url' => $user->avatar 
+                    ? asset('storage/' . $user->avatar) 
+                    : asset('/Default-Profile.png'),
+            ];
+        });
+
         return inertia('Admin/UserIndex', [
-            'users' => User::with('roles')->get(),
-            'roles' => Role::pluck('name')  
+            'users' => $users,
+            'roles' => Role::pluck('name'),
         ]);
     }
+
 
     public function destroy(User $user)
     {

@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout>
+  <AppLayout>
     <Head title="Manajemen Laporan" />
     <div class="wrapper">
       <div class="container">
@@ -322,14 +322,14 @@
         />
       </div>
     </div>
-  </AdminLayout>
+  </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { usePage, Head, router } from '@inertiajs/vue3';
 import Modal from '@/Pages/Pelaporan/LaporanDetailModal.vue';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
+import AppLayout from '@/Layouts/AppLayout.vue';
 
 const props = defineProps({
     reports: {

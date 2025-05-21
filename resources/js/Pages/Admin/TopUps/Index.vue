@@ -124,7 +124,12 @@
                 <td class="ps-4">
                   <div class="d-flex align-items-center">
                     <div class="user-avatar bg-primary-light text-primary me-2">
-                      {{ getUserInitials(topUp.user.name) }}
+                      <img 
+                        :src="topUp.user.avatar_url" 
+                        alt="Avatar" 
+                        class="user-avatar rounded-circle me-2" 
+                        style="width: 40px; height: 40px; object-fit: cover;"
+                      >
                     </div>
                     <div>
                       <div class="fw-semibold">{{ topUp.user.name }}</div>
@@ -450,10 +455,6 @@ const statusBadgeClass = (status) => {
 
 const getProofUrl = (path) => `/storage/${path}`;
 
-const getUserInitials = (name) => {
-  if (!name) return "?";
-  return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
-};
 
 const toast = ref({
   show: false,

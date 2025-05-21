@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout>
+  <AppLayout>
     <Head title="Dashboard Admin" />
     <div class="wrapper">
       <div class="container-fluid p-3">
@@ -157,14 +157,14 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
+  </AppLayout>
 </template>
 
 
 <script>
 import { ref, onMounted } from 'vue';
 import Chart from 'chart.js/auto';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
+import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
 

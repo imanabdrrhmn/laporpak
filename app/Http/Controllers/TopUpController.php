@@ -50,29 +50,45 @@ class TopUpController extends Controller
         return redirect()->route('top-ups.index')->with('success', 'Top up request submitted');
     }
 
-    public function adminIndex(Request $request)
-    {
-        $query = TopUp::with('user')->orderBy('created_at', 'desc');
+   public function adminIndex(Request $request)
+{
+    $query = TopUp::with('user')->orderBy('created_at', 'desc');
 
-        if ($request->has('status') && in_array($request->status, ['pending','verified','rejected'])) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                ->orWhere('email', 'like', "%$search%");
-            });
-        }
-
-        $topUps = $query->paginate(10)->withQueryString();
-
-        return Inertia::render('Admin/TopUps/Index', [
-            'topUps' => $topUps,
-            'filters' => $request->only('status', 'search'),
-        ]);
+    if ($request->has('status') && in_array($request->status, ['pending','verified','rejected'])) {
+        $query->where('status', $request->status);
     }
+
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+        $query->whereHas('user', function($q) use ($search) {
+            $q->where('name', 'like', "%$search%")
+              ->orWhere('email', 'like', "%$search%");
+        });
+    }
+
+    $topUps = $query->paginate(10)->withQueryString()->through(function ($topUp) {
+        return [
+            'id' => $topUp->id,
+            'amount' => $topUp->amount,
+            'status' => $topUp->status,
+            'created_at' => $topUp->created_at->toDateTimeString(),
+            'user' => [
+                'id' => $topUp->user->id,
+                'name' => $topUp->user->name,
+                'email' => $topUp->user->email,
+                'avatar_url' => $topUp->user->avatar 
+                    ? asset('storage/' . $topUp->user->avatar) 
+                    : asset('/Default-Profile.png'),
+            ],
+        ];
+    });
+
+    return Inertia::render('Admin/TopUps/Index', [
+        'topUps' => $topUps,
+        'filters' => $request->only('status', 'search'),
+    ]);
+}
+
 
     public function verify($id)
     {
