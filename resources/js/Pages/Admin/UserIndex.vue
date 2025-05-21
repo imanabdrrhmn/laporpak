@@ -79,88 +79,7 @@
                   </div>
                 </div>
 
-                <!-- Users Table with enhanced styling -->
-                <div class="table-responsive custom-table-container">
-                  <table class="table custom-table align-middle">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Change Role</th>
-                        <th class="text-center">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(user, index) in filteredUsers" :key="user.id" class="align-middle">
-                        <td>{{ index + 1 }}</td>
-                        <td>
-                          <div class="d-flex align-items-center">
-                            <div class="user-avatar me-3">
-                              {{ user.name.charAt(0).toUpperCase() }}
-                            </div>
-                            <span class="fw-medium">{{ user.name }}</span>
-                          </div>
-                        </td>
-                        <td>{{ user.email }}</td>
-                        <td>
-                          <span v-if="user.roles.length" class="badge role-badge text-primary">
-                            {{ user.roles[0].name }}
-                          </span>
-                          <span v-else class="badge no-role-badge">
-                            No Role
-                          </span>
-                        </td>
-                        <td>
-                          <form :action="route('admin.users.assignRole', user.id)" method="POST">
-                            <input type="hidden" name="_token" :value="csrf" />
-                            <select
-                              name="role"
-                              class="form-select form-select-sm custom-role-select"
-                              @change="(e) => submitForm(e, user.name)"
-                            >
-                              <option disabled selected>Select role</option>
-                              <option
-                                v-for="role in roles"
-                                :key="role"
-                                :value="role"
-                                :selected="user.roles[0]?.name === role"
-                              >
-                                {{ role }}
-                              </option>
-                            </select>
-                          </form>
-                        </td>
-                        <td class="text-center">
-                          <form :action="route('admin.users.delete', user.id)" method="POST">
-                            <input type="hidden" name="_method" value="DELETE" />
-                            <input type="hidden" name="_token" :value="csrf" />
-                            <button
-                              class="btn btn-delete"
-                              @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
-                            >
-                              <i class="bi bi-trash me-1"></i> Delete
-                            </button>
-                          </form>
-                        </td>
-                      </tr>
-                      <tr v-if="filteredUsers.length === 0">
-                        <td colspan="6" class="text-center py-5">
-                          <div class="empty-state">
-                            <div class="empty-icon mb-3">
-                              <i class="bi bi-search"></i>
-                            </div>
-                            <h5>No users found</h5>
-                            <p class="text-muted">Try adjusting your search or filter criteria</p>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
+            
               <!-- Users Table with enhanced styling -->
               <div class="table-responsive custom-table-container">
                 <table class="table custom-table align-middle">
@@ -222,11 +141,19 @@
                         <form :action="route('admin.users.delete', user.id)" method="POST">
                           <input type="hidden" name="_method" value="DELETE" />
                           <input type="hidden" name="_token" :value="csrf" />
-                          <button
-                            class="btn btn-delete"
-                            @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
-                          >
-                            <i class="bi bi-trash me-1"></i> Delete
+                                      <button
+                                        class="btn btn-delete"
+                                        @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
+                                      >
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                      </button>
+                                    </form>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
               
               <!-- Roles Tab -->
               <div class="tab-pane fade" id="roles" role="tabpanel" aria-labelledby="roles-tab">

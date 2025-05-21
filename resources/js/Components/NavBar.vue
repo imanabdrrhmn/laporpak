@@ -68,6 +68,7 @@
                     Dashboard
                   </a>
                 </li>
+    
                 <li>
                   <a class="dropdown-item" href="/profile">
                     <i class="bi bi-person-fill me-2"></i>
@@ -84,6 +85,12 @@
                   <a class="dropdown-item" href="/top-ups">
                     <i class="bi bi-wallet-fill me-2"></i>
                     Credit
+                  </a>
+                </li>
+                 <li v-if="user.role === 'admin' || user.role === 'verifier'">
+                  <a class="dropdown-item" href="/admin">
+                    <i class="bi bi-shield-fill me-2"></i>
+                    Admin Panel
                   </a>
                 </li>
                 <!-- Slot for additional dropdown items -->
