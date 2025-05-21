@@ -117,7 +117,6 @@ const props = defineProps({
 // Setup layout halaman
 const page = usePage();
 page.layout = AppLayout;
-const { reports, selected, in_process } = props.stats
 
 // Model data
 const saldoKredit = computed(() => page.props.user?.balance ?? 0);

@@ -23,6 +23,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'contact.verified'])->name('dashboard');
+Route::get('admin/dashboard', function () {
+    return Inertia::render('Admin/DashboardAdmin', [
+    ]);
+})->middleware(['auth', 'contact.verified', 'role:admin||verifier'])->name('dashboard.admin');
 
 Route::get('/verifikasi', function () {
     $feedbacks = Feedback::with('user')->where('kategori', 'Verifikasi')->latest()->take(10)->get();
@@ -58,7 +62,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
 });
 
-Route::middleware('auth','contact.verified', 'role:admin||verifier')->group(function () {
+Route::middleware('auth','contact.verified')->group(function () {
     Route::middleware('role:admin||verifier')->group(function () {
         Route::get('/admin/pelaporan', [ReportController::class, 'index'])->name('laporan.index');
         Route::patch('/pelaporan/{report}/terima', [ReportController::class, 'accept'])->name('laporan.terima');

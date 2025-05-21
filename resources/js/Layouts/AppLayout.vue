@@ -21,9 +21,11 @@ import AdminLayout from './AdminLayout.vue'
 import UserLayout from './UserLayout.vue'
 import Footer from '@/Components/Footer.vue'
 
-const page = usePage();
+const page = usePage()
 
-const isAdmin = computed(() => page.props.auth.isAdmin)
+const isAdminRoute = computed(() => page.url.startsWith('/admin'))
+const isAdmin = computed(() => page.props.auth?.isAdmin && isAdminRoute.value)
+
 const layoutComponent = computed(() =>
   isAdmin.value ? AdminLayout : UserLayout
 )
