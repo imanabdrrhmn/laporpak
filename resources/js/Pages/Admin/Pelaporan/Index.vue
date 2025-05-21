@@ -633,6 +633,7 @@ watch([searchQuery, selectedCategory, selectedService, selectedStatus], () => {
   font-size: 16px;
   background-color: #f9f9f9;
   transition: all 0.3s ease;
+  color: #000; /* Menambahkan warna teks hitam */
 }
 
 .search-input:focus {
