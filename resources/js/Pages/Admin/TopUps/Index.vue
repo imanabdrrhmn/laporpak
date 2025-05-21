@@ -1,129 +1,236 @@
 <template>
   <AppLayout>
     <Head title="Manajemen Top Up" />
-    <div class="container py-4">
-      <h1 class="mb-4 text-center fw-bold">Admin Panel - Top Up Management</h1>
+    <div class="container py-5">
+      <div class="dashboard-header mb-4">
+        <h1 class="fw-bold text-primary">Admin Panel</h1>
+        <h2 class="fw-light text-secondary">Top Up Management</h2>
+      </div>
 
       <!-- Filter dan Search -->
-      <div class="filter-controls">
-        <select v-model="filters.status" @change="updateFilters" class="form-select">
-          <option value="">Semua Status</option>
-          <option value="pending">Pending</option>
-          <option value="verified">Verified</option>
-          <option value="rejected">Rejected</option>
-        </select>
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div class="filter-controls">
+            <div class="filter-item">
+              <label class="form-label text-muted small mb-1">Status Filter</label>
+              <select v-model="filters.status" @change="updateFilters" class="form-select form-select-sm">
+                <option value="">Semua Status</option>
+                <option value="pending">Pending</option>
+                <option value="verified">Verified</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
 
-        <input
-          v-model="filters.search"
-          @keyup.enter="updateFilters"
-          type="search"
-          placeholder="Cari user (nama/email)..."
-          class="form-control"
-        />
+            <div class="filter-item flex-grow-1">
+              <label class="form-label text-muted small mb-1">Search User</label>
+              <div class="input-group">
+                <input
+                  v-model="filters.search"
+                  @keyup.enter="updateFilters"
+                  type="search"
+                  placeholder="Cari user (nama/email)..."
+                  class="form-control form-control-sm"
+                />
+                <button @click="updateFilters" class="btn btn-primary btn-sm">
+                  <i class="fas fa-search me-1"></i> Cari
+                </button>
+              </div>
+            </div>
 
-        <button @click="updateFilters" class="btn btn-primary flex-shrink-0">Cari</button>
+            <div class="filter-item">
+              <label class="form-label text-muted small mb-1">Export Data</label>
+              <button
+                @click="showExportModal"
+                class="btn btn-outline-success btn-sm w-100"
+              >
+                <i class="fas fa-file-export me-1"></i> Export Logs
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Button untuk buka modal export -->
-        <button
-          @click="showExportModal"
-          class="btn btn-outline-success ms-3"
-        >
-          Export Logs
-        </button>
+      <!-- Status Cards -->
+      <div class="status-cards mb-4">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card status-card shadow-sm border-warning">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-subtitle mb-1 text-muted">Pending</h6>
+                    <h3 class="card-title mb-0">{{ pendingCount }}</h3>
+                  </div>
+                  <div class="status-icon bg-warning-light text-warning">
+                    <i class="fas fa-clock"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card status-card shadow-sm border-success">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-subtitle mb-1 text-muted">Verified</h6>
+                    <h3 class="card-title mb-0">{{ verifiedCount }}</h3>
+                  </div>
+                  <div class="status-icon bg-success-light text-success">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card status-card shadow-sm border-danger">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-subtitle mb-1 text-muted">Rejected</h6>
+                    <h3 class="card-title mb-0">{{ rejectedCount }}</h3>
+                  </div>
+                  <div class="status-icon bg-danger-light text-danger">
+                    <i class="fas fa-times-circle"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Table Top Ups -->
-      <div class="table-responsive">
-        <table class="table table-striped table-hover shadow-sm">
-          <thead class="table-dark">
-            <tr>
-              <th>User</th>
-              <th>Jumlah</th>
-              <th>Metode Pembayaran</th>
-              <th>Status</th>
-              <th>Tanggal</th>
-              <th>Bukti</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="topUp in topUps.data" :key="topUp.id">
-              <td data-label="User">
-                {{ topUp.user.name }}<br />
-                <small class="text-muted">{{ topUp.user.email }}</small>
-              </td>
-              <td data-label="Jumlah">Rp {{ formatCurrency(topUp.amount) }}</td>
-              <td data-label="Metode Pembayaran">{{ topUp.payment_method || '-' }}</td>
-              <td data-label="Status">
-                <span :class="statusBadgeClass(topUp.status)" class="badge">
-                  {{ capitalize(topUp.status) }}
-                </span>
-              </td>
-              <td data-label="Tanggal">{{ formatDate(topUp.created_at) }}</td>
-              <td data-label="Bukti" class="bukti">
-                <img
-                  v-if="topUp.proof"
-                  :src="getProofUrl(topUp.proof)"
-                  alt="Bukti"
-                  class="proof-thumb"
-                  @click="showProofModal(topUp.proof)"
-                />
-                <span v-else class="text-muted">-</span>
-              </td>
-              <td data-label="Aksi" class="aksi">
-                <button
-                  v-if="topUp.status === 'pending'"
-                  @click="verifyTopUp(topUp.id)"
-                  class="btn btn-sm btn-success me-2"
-                  :disabled="loadingIds.includes(topUp.id)"
-                >
-                  <span v-if="loadingIds.includes(topUp.id)" class="spinner-border spinner-border-sm"></span>
-                  Verifikasi
-                </button>
-                <button
-                  v-if="topUp.status === 'pending'"
-                  @click="rejectTopUp(topUp.id)"
-                  class="btn btn-sm btn-danger"
-                  :disabled="loadingIds.includes(topUp.id)"
-                >
-                  <span v-if="loadingIds.includes(topUp.id)" class="spinner-border spinner-border-sm"></span>
-                  Tolak
-                </button>
-                <span v-if="topUp.status !== 'pending'" class="text-muted">-</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <div class="card shadow">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0">Transaction History</h5>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover m-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">User</th>
+                <th>Jumlah</th>
+                <th>Metode Pembayaran</th>
+                <th>Status</th>
+                <th>Tanggal</th>
+                <th>Bukti</th>
+                <th class="text-end pe-4">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="topUp in topUps.data" :key="topUp.id" class="align-middle">
+                <td class="ps-4">
+                  <div class="d-flex align-items-center">
+                    <div class="user-avatar bg-primary-light text-primary me-2">
+                      {{ getUserInitials(topUp.user.name) }}
+                    </div>
+                    <div>
+                      <div class="fw-semibold">{{ topUp.user.name }}</div>
+                      <small class="text-muted">{{ topUp.user.email }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="fw-semibold">Rp {{ formatCurrency(topUp.amount) }}</span>
+                </td>
+                <td>
+                  <span class="payment-method">{{ topUp.payment_method || '-' }}</span>
+                </td>
+                <td>
+                  <span :class="statusBadgeClass(topUp.status)" class="status-badge">
+                    {{ capitalize(topUp.status) }}
+                  </span>
+                </td>
+                <td>
+                  <div class="d-flex flex-column">
+                    <span>{{ formatDate(topUp.created_at).date }}</span>
+                    <small class="text-muted">{{ formatDate(topUp.created_at).time }}</small>
+                  </div>
+                </td>
+                <td>
+                  <div v-if="topUp.proof" class="proof-container">
+                    <img
+                      :src="getProofUrl(topUp.proof)"
+                      alt="Bukti"
+                      class="proof-thumb"
+                      @click="showProofModal(topUp.proof)"
+                    />
+                  </div>
+                  <span v-else class="text-muted">-</span>
+                </td>
+                <td class="text-end pe-4">
+                  <div class="d-flex justify-content-end gap-2">
+                    <button
+                      v-if="topUp.status === 'pending'"
+                      @click="verifyTopUp(topUp.id)"
+                      class="btn btn-sm btn-outline-success"
+                      :disabled="loadingIds.includes(topUp.id)"
+                    >
+                      <span v-if="loadingIds.includes(topUp.id)" class="spinner-border spinner-border-sm me-1"></span>
+                      <i v-else class="fas fa-check me-1"></i> Verifikasi
+                    </button>
+                    <button
+                      v-if="topUp.status === 'pending'"
+                      @click="rejectTopUp(topUp.id)"
+                      class="btn btn-sm btn-outline-danger"
+                      :disabled="loadingIds.includes(topUp.id)"
+                    >
+                      <span v-if="loadingIds.includes(topUp.id)" class="spinner-border spinner-border-sm me-1"></span>
+                      <i v-else class="fas fa-times me-1"></i> Tolak
+                    </button>
+                    <span v-if="topUp.status !== 'pending'" class="text-muted">-</span>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="topUps.data.length === 0">
+                <td colspan="7" class="text-center py-4">
+                  <div class="empty-state">
+                    <i class="fas fa-receipt text-muted mb-2"></i>
+                    <p>Tidak ada data transaksi yang ditemukan</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <!-- Pagination -->
-      <nav v-if="topUps.last_page > 1" aria-label="Page navigation" class="mt-3">
-        <ul class="pagination justify-content-center flex-wrap">
-          <li
-            class="page-item"
-            :class="{ disabled: !topUps.prev_page_url }"
-            @click.prevent="goToPage(topUps.current_page - 1)"
-          >
-            <a class="page-link" href="#">Previous</a>
-          </li>
-          <li
-            v-for="page in totalPages"
-            :key="page"
-            class="page-item"
-            :class="{ active: page === topUps.current_page }"
-            @click.prevent="goToPage(page)"
-          >
-            <a class="page-link" href="#">{{ page }}</a>
-          </li>
-          <li
-            class="page-item"
-            :class="{ disabled: !topUps.next_page_url }"
-            @click.prevent="goToPage(topUps.current_page + 1)"
-          >
-            <a class="page-link" href="#">Next</a>
-          </li>
-        </ul>
-      </nav>
+        <!-- Pagination -->
+        <div v-if="topUps.last_page > 1" class="card-footer bg-white">
+          <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm justify-content-center flex-wrap mb-0">
+              <li
+                class="page-item"
+                :class="{ disabled: !topUps.prev_page_url }"
+                @click.prevent="goToPage(topUps.current_page - 1)"
+              >
+                <a class="page-link" href="#">
+                  <i class="fas fa-chevron-left"></i>
+                </a>
+              </li>
+              <li
+                v-for="page in totalPages"
+                :key="page"
+                class="page-item"
+                :class="{ active: page === topUps.current_page }"
+                @click.prevent="goToPage(page)"
+              >
+                <a class="page-link" href="#">{{ page }}</a>
+              </li>
+              <li
+                class="page-item"
+                :class="{ disabled: !topUps.next_page_url }"
+                @click.prevent="goToPage(topUps.current_page + 1)"
+              >
+                <a class="page-link" href="#">
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
 
       <!-- Modal Bukti Pembayaran -->
       <div
@@ -146,8 +253,13 @@
                 @click="closeProofModal"
               ></button>
             </div>
-            <div class="modal-body text-center">
-              <img :src="proofModalUrl" alt="Bukti Pembayaran" class="img-fluid rounded" />
+            <div class="modal-body p-0">
+              <img :src="proofModalUrl" alt="Bukti Pembayaran" class="img-fluid w-100" />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" @click="closeProofModal">
+                Tutup
+              </button>
             </div>
           </div>
         </div>
@@ -165,7 +277,9 @@
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exportModalLabel">Export Logs</h5>
+              <h5 class="modal-title" id="exportModalLabel">
+                <i class="fas fa-file-export me-2"></i>Export Logs
+              </h5>
               <button
                 type="button"
                 class="btn-close"
@@ -196,7 +310,9 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" @click="closeExportModal">Batal</button>
-              <button type="button" class="btn btn-success" @click="exportLogs">Download CSV</button>
+              <button type="button" class="btn btn-success" @click="exportLogs">
+                <i class="fas fa-download me-1"></i> Download CSV
+              </button>
             </div>
           </div>
         </div>
@@ -205,21 +321,25 @@
       <!-- Toast Notification -->
       <div
         v-if="toast.show"
-        :class="['toast align-items-center text-bg-' + toast.type, 'position-fixed bottom-0 end-0 m-3']"
+        :class="['toast-notification', 'toast-' + toast.type]"
         role="alert"
         aria-live="assertive"
         aria-atomic="true"
-        style="z-index: 1200; min-width: 250px;"
       >
-        <div class="d-flex">
-          <div class="toast-body">{{ toast.message }}</div>
-          <button
-            type="button"
-            class="btn-close btn-close-white me-2 m-auto"
-            aria-label="Close"
-            @click="toast.show = false"
-          ></button>
+        <div class="toast-icon">
+          <i :class="toastIcon"></i>
         </div>
+        <div class="toast-content">
+          {{ toast.message }}
+        </div>
+        <button
+          type="button"
+          class="toast-close"
+          aria-label="Close"
+          @click="toast.show = false"
+        >
+          <i class="fas fa-times"></i>
+        </button>
       </div>
     </div>
   </AppLayout>
@@ -257,6 +377,19 @@ const proofModalUrl = ref("");
 const exportModalRef = ref(null);
 const exportModalInstance = ref(null);
 
+// Count by status
+const pendingCount = computed(() => 
+  props.topUps.data.filter(t => t.status === 'pending').length
+);
+
+const verifiedCount = computed(() => 
+  props.topUps.data.filter(t => t.status === 'verified').length
+);
+
+const rejectedCount = computed(() => 
+  props.topUps.data.filter(t => t.status === 'rejected').length
+);
+
 const updateFilters = () => {
   Inertia.get("/admin/top-ups", filters.value, {
     preserveState: true,
@@ -270,14 +403,20 @@ const formatCurrency = (value) =>
     minimumFractionDigits: 0,
   }).format(value);
 
-const formatDate = (date) =>
-  new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date));
+const formatDate = (date) => {
+  const dateObj = new Date(date);
+  return {
+    date: new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(dateObj),
+    time: new Intl.DateTimeFormat("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(dateObj)
+  };
+};
 
 const capitalize = (str) =>
   str.charAt(0).toUpperCase() + str.slice(1);
@@ -285,17 +424,22 @@ const capitalize = (str) =>
 const statusBadgeClass = (status) => {
   switch (status.toLowerCase()) {
     case "pending":
-      return "bg-warning text-dark";
+      return "status-badge-warning";
     case "verified":
-      return "bg-success";
+      return "status-badge-success";
     case "rejected":
-      return "bg-danger";
+      return "status-badge-danger";
     default:
-      return "bg-secondary";
+      return "status-badge-secondary";
   }
 };
 
 const getProofUrl = (path) => `/storage/${path}`;
+
+const getUserInitials = (name) => {
+  if (!name) return "?";
+  return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+};
 
 const toast = ref({
   show: false,
@@ -303,13 +447,32 @@ const toast = ref({
   type: "success",
 });
 
+const toastIcon = computed(() => {
+  switch (toast.value.type) {
+    case "success":
+      return "fas fa-check-circle";
+    case "danger":
+      return "fas fa-exclamation-circle";
+    case "warning":
+      return "fas fa-exclamation-triangle";
+    default:
+      return "fas fa-info-circle";
+  }
+});
+
 watch(
   () => page.props.flash,
   (flash) => {
     if (flash?.success) {
       toast.value = { show: true, message: flash.success, type: "success" };
+      setTimeout(() => {
+        toast.value.show = false;
+      }, 5000);
     } else if (flash?.error) {
       toast.value = { show: true, message: flash.error, type: "danger" };
+      setTimeout(() => {
+        toast.value.show = false;
+      }, 5000);
     }
   },
   { immediate: true }
@@ -387,58 +550,263 @@ const exportLogs = () => {
 
 <style scoped>
 .container {
-  max-width: 1000px;
-  margin-top: 20px; /* Tambahkan jika belum ada */
-  padding-top: 10px;
-  line-height: 1.2;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+.dashboard-header h1 {
+  margin-bottom: 0;
+  font-size: 1.75rem;
+}
+
+.dashboard-header h2 {
+  font-size: 1.4rem;
+  margin-top: 0;
+}
+
+/* Filter Controls */
 .filter-controls {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 1rem;
+  align-items: flex-end;
   flex-wrap: wrap;
-  align-items: center;
 }
 
-.table th,
-.table td {
-  vertical-align: middle;
+.filter-item {
+  min-width: 150px;
+}
+
+/* Status Cards */
+.status-cards .card {
+  border-left-width: 4px;
+  transition: transform 0.2s;
+}
+
+.status-cards .card:hover {
+  transform: translateY(-3px);
+}
+
+.status-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.bg-warning-light {
+  background-color: rgba(255, 193, 7, 0.15);
+}
+
+.bg-success-light {
+  background-color: rgba(40, 167, 69, 0.15);
+}
+
+.bg-danger-light {
+  background-color: rgba(220, 53, 69, 0.15);
+}
+
+.bg-primary-light {
+  background-color: rgba(13, 110, 253, 0.15);
+}
+
+/* User Avatar */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.35em 0.65em;
+  font-size: 0.75em;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
   white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 50rem;
+}
+
+.status-badge-warning {
+  color: #856404;
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+}
+
+.status-badge-success {
+  color: #155724;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.status-badge-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+.status-badge-secondary {
+  color: #383d41;
+  background-color: #e2e3e5;
+  border: 1px solid #d6d8db;
+}
+
+/* Proof Image */
+.proof-container {
+  width: 60px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .proof-thumb {
-  cursor: pointer;
-  width: 60px;
-  height: 40px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 4px;
+  cursor: pointer;
   transition: transform 0.2s ease-in-out;
 }
+
 .proof-thumb:hover {
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
-.badge {
-  font-weight: 500;
-  padding: 0.4em 0.6em;
-  font-size: 0.875rem;
+/* Empty State */
+.empty-state {
+  padding: 1rem;
+  text-align: center;
 }
 
-.toast {
-  cursor: pointer;
-  user-select: none;
+.empty-state i {
+  font-size: 2.5rem;
+  display: block;
 }
 
-@media (max-width: 576px) {
+.empty-state p {
+  margin-bottom: 0;
+  color: #6c757d;
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  min-width: 300px;
+  max-width: 400px;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  z-index: 1200;
+  animation: slideIn 0.3s ease-out;
+}
+
+.toast-success {
+  background-color: #d4edda;
+  border-left: 4px solid #28a745;
+}
+
+.toast-danger {
+  background-color: #f8d7da;
+  border-left: 4px solid #dc3545;
+}
+
+.toast-icon {
+  margin-right: 0.75rem;
+  font-size: 1.25rem;
+}
+
+.toast-success .toast-icon {
+  color: #28a745;
+}
+
+.toast-danger .toast-icon {
+  color: #dc3545;
+}
+
+.toast-content {
+  flex-grow: 1;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
   .filter-controls {
     flex-direction: column;
+    align-items: stretch;
   }
+  
+  .filter-item {
+    width: 100%;
+    min-width: auto;
+  }
+}
 
+@media (max-width: 768px) {
   .table th,
   .table td {
     white-space: normal;
   }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }
 </style>
-

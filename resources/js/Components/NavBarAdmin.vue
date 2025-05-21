@@ -241,13 +241,26 @@ export default {
 }
 
 .danger-item {
-  color: #ffffff !important; /* Changed to white */
-  background-color: rgba(220, 53, 69, 0.5) !important; /* Semi-transparent red */
+  color: #dc3545 !important;
+  background-color: transparent !important;
+}
+
+.danger-item i {
+  color: #dc3545 !important;
+}
+
+.danger-item span {
+  color: #dc3545 !important;
 }
 
 .danger-item:hover {
-  color: #ffffff !important; /* Keeping white text */
-  background-color: rgba(220, 53, 69, 0.7) !important; /* Slightly darker on hover */
+  color: #ffffff !important;
+  background-color: #dc3545 !important;
+}
+
+.danger-item:hover i,
+.danger-item:hover span {
+  color: #ffffff !important;
 }
 
 /* Main Content Area */
