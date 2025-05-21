@@ -97,19 +97,16 @@
                         <td>{{ index + 1 }}</td>
                         <td>
                           <div class="d-flex align-items-center">
-                            <img 
-                              :src="user.avatar_url" 
-                              alt="Avatar" 
-                              class="user-avatar rounded-circle me-2" 
-                              style="width: 40px; height: 40px; object-fit: cover;"
-                            >
+                            <div class="user-avatar me-3">
+                              {{ user.name.charAt(0).toUpperCase() }}
+                            </div>
                             <span class="fw-medium">{{ user.name }}</span>
                           </div>
                         </td>
                         <td>{{ user.email }}</td>
                         <td>
                           <span v-if="user.roles.length" class="badge role-badge text-primary">
-                            {{ user.roles}}
+                            {{ user.roles[0].name }}
                           </span>
                           <span v-else class="badge no-role-badge">
                             No Role
@@ -128,7 +125,7 @@
                                 v-for="role in roles"
                                 :key="role"
                                 :value="role"
-                                :selected="user.roles === role"
+                                :selected="user.roles[0]?.name === role"
                               >
                                 {{ role }}
                               </option>
@@ -164,6 +161,73 @@
                 </div>
               </div>
 
+              <!-- Users Table with enhanced styling -->
+              <div class="table-responsive custom-table-container">
+                <table class="table custom-table align-middle">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Change Role</th>
+                      <th class="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(user, index) in filteredUsers" :key="user.id" class="align-middle">
+                      <td>{{ index + 1 }}</td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img 
+                            :src="user.avatar_url" 
+                            alt="Avatar" 
+                            class="user-avatar rounded-circle me-2" 
+                            style="width: 40px; height: 40px; object-fit: cover;"
+                          >
+
+                          <span class="fw-medium">{{ user.name }}</span>
+                        </div>
+                      </td>
+                      <td>{{ user.email }}</td>
+                      <td>
+                        <span v-if="user.roles.length" class="badge role-badge text-primary">
+                          {{ user.roles}}
+                        </span>
+                        <span v-else class="badge no-role-badge">
+                          No Role
+                        </span>
+                      </td>
+                      <td>
+                        <form :action="route('admin.users.assignRole', user.id)" method="POST">
+                          <input type="hidden" name="_token" :value="csrf" />
+                          <select
+                            name="role"
+                            class="form-select form-select-sm custom-role-select"
+                            @change="(e) => submitForm(e, user.name)"
+                          >
+                            <option disabled selected>Select role</option>
+                            <option
+                              v-for="role in roles"
+                              :key="role"
+                              :value="role"
+                              :selected="user.roles === role"
+                            >
+                              {{ role }}
+                            </option>
+                          </select>
+                        </form>
+                      </td>
+                      <td class="text-center">
+                        <form :action="route('admin.users.delete', user.id)" method="POST">
+                          <input type="hidden" name="_method" value="DELETE" />
+                          <input type="hidden" name="_token" :value="csrf" />
+                          <button
+                            class="btn btn-delete"
+                            @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
+                          >
+                            <i class="bi bi-trash me-1"></i> Delete
+              
               <!-- Roles Tab -->
               <div class="tab-pane fade" id="roles" role="tabpanel" aria-labelledby="roles-tab">
                 <div class="row">
@@ -297,7 +361,7 @@ const filteredUsers = computed(() => {
     
     // Filter by role
     const matchesRole = filterRole.value === '' || 
-      (user.roles.length && user.roles[0].name === filterRole.value)
+      (user.roles.length && user.roles === filterRole.value)
     
     return matchesSearch && matchesRole
   })
@@ -306,7 +370,7 @@ const filteredUsers = computed(() => {
 // Count users with a specific role
 function getUserCountByRole(roleName) {
   return users.filter(user => 
-    user.roles.length && user.roles[0].name === roleName
+    user.roles.length && user.roles === roleName
   ).length
 }
 
