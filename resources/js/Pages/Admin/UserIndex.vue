@@ -298,7 +298,7 @@ const filteredUsers = computed(() => {
     
     // Filter by role
     const matchesRole = filterRole.value === '' || 
-      (user.roles.length && user.roles[0].name === filterRole.value)
+      (user.roles.length && user.roles === filterRole.value)
     
     return matchesSearch && matchesRole
   })
