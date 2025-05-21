@@ -8,7 +8,7 @@
       </div>
       <div class="navbar-actions">
         <div class="user-info">
-          <span class="user-greeting">Selamat datang, Admin</span>
+          <span class="user-greeting">Selamat datang, {{ namaUser }}</span>
         </div>
         <div class="navbar-icons">
           <i class="bi bi-bell"></i>
@@ -59,6 +59,12 @@
             </a>
           </li>
           <li class="nav-item">
+            <a class="nav-link admin-item" href="/dashboard" target="_blank">
+              <i class="bi bi-arrow-up-right-circle-fill"></i>
+              <span>Halaman User</span>
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link admin-item" href="/admin/about">
               <i class="bi bi-info-circle-fill"></i>
               <span>Tentang Aplikasi</span>
@@ -82,19 +88,16 @@
   </div>
 </template>
 
-<script>
-import { Link } from '@inertiajs/vue3'
+<script setup>
+import { Link } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 
-export default {
-  components: {
-    Link
-  },
-  methods: {
-    logout() {
-      // Submit a POST request to the logout endpoint
-      this.$inertia.post('/logout');
-    }
-  }
+const props = defineProps({
+  namaUser: String
+});
+
+const logout = () => {
+  useForm({}).post('/logout');
 };
 </script>
 
@@ -174,6 +177,13 @@ export default {
   flex-direction: column;
   border-right: 1px solid rgba(255, 255, 255, 0.1); /* Updated for better contrast */
   z-index: 900;
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .sidebar-section {
