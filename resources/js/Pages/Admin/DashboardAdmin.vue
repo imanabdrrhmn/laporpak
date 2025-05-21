@@ -4,7 +4,7 @@
     <div class="wrapper">
       <div class="container-fluid p-3">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="fw-bold mb-0">Dashboard Laporan</h2>
+          <h2 class="fw-bold mb-0">Dashboard Admin</h2>
         </div>
 
         <!-- Stat Cards -->

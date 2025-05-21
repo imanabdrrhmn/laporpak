@@ -566,7 +566,8 @@ const exportLogs = () => {
 <style scoped>
 .container {
   max-width: 1200px;
-  margin: 0 auto;
+  padding-top: 10px;
+  margin-top: -30px !important;
 }
 
 .dashboard-header h1 {
