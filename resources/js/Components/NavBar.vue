@@ -87,8 +87,8 @@
                     Credit
                   </a>
                 </li>
-                 <li v-if="user.role === 'admin' || user.role === 'verifier'">
-                  <a class="dropdown-item" href="/admin">
+                 <li v-if="isAdmin">
+                  <a class="dropdown-item" href="/admin/dashboard">
                     <i class="bi bi-shield-fill me-2"></i>
                     Admin Panel
                   </a>
@@ -367,7 +367,7 @@ export default {
 
     const isLoggedIn = computed(() => !!page.props.auth?.user);
     const user = computed(() => page.props.auth?.user || {});
-
+  const isAdmin = computed(() => page.props.auth?.isAdmin)
     const getUserInitials = () => {
       const name = user.value.name || '';
       return name
@@ -398,6 +398,7 @@ export default {
       logout,
       closeMobileNav,
       page,
+      isAdmin,
     };
   },
 };
