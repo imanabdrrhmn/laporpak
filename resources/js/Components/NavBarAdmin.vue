@@ -8,7 +8,7 @@
       </div>
       <div class="navbar-actions">
         <div class="user-info">
-          <span class="user-greeting">Selamat datang, {{ namaUser }}</span>
+          <span class="user-greeting">Selamat datang, {{ user.name }}</span>
         </div>
         <div class="navbar-icons">
           <i class="bi bi-bell"></i>
@@ -89,12 +89,12 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
-import { useForm } from '@inertiajs/vue3';
+import { Link, useForm, usePage} from '@inertiajs/vue3';
+import { computed} from 'vue';
 
-const props = defineProps({
-  namaUser: String
-});
+const page = usePage();
+const user = computed(() => page.props.auth?.user || {});
+
 
 const logout = () => {
   useForm({}).post('/logout');

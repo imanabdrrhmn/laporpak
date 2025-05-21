@@ -1,6 +1,6 @@
 <template>
   <div class="admin-layout">
-    <NavBarAdmin />
+    <NavBarAdmin/>
     <div class="main-content">
       <slot />
     </div>
