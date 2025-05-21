@@ -1,258 +1,260 @@
 <template>
   <AdminLayout>
     <Head title="Manajemen Pengguna" />
-    <div class="container py-5 overflow-hidden-container">
-      <!-- Modern Page Header with gradient background -->
-      <div class="card border-0 shadow-lg mb-5 overflow-hidden">
-        <div class="card-body position-relative p-0">
-          <div class="-mt-4 gradient-header p-4">
-            <div class="d-flex justify-content-between align-items-center position-relative z-10">
-              <div>
-                <h2 class="mb-1 fw-bold text-white">Manajemen Pengguna</h2>
-                <p class="text-white-50 mb-0">Kelola pengguna dan peran dalam aplikasi Anda</p>
-              </div>
-              <div class="badge bg-white text-primary fw-bold px-3 py-2 fs-6 shadow-sm">
-                Total Users: {{ users.length }}
+    <div class="wrapper">
+      <div class="container py-5">
+        <!-- Modern Page Header with gradient background -->
+        <div class="card border-0 shadow-lg mb-5 overflow-hidden">
+          <div class="card-body position-relative p-0">
+            <div class="-mt-4 gradient-header p-4">
+              <div class="d-flex justify-content-between align-items-center position-relative z-10">
+                <div>
+                  <h2 class="mb-1 fw-bold text-white">Manajemen Pengguna</h2>
+                  <p class="text-white-50 mb-0">Kelola pengguna dan peran dalam aplikasi Anda</p>
+                </div>
+                <div class="badge bg-white text-primary fw-bold px-3 py-2 fs-6 shadow-sm">
+                  Total Users: {{ users.length }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Success Alert with improved animation -->
-      <div v-if="$page.props.flash.success" class="alert custom-alert shadow-sm border-0 animate__animated animate__fadeInDown">
-        <div class="d-flex align-items-center">
-          <div class="alert-icon-container me-3">
-            <i class="bi bi-check-circle-fill"></i>
+        <!-- Success Alert with improved animation -->
+        <div v-if="$page.props.flash.success" class="alert custom-alert shadow-sm border-0 animate__animated animate__fadeInDown">
+          <div class="d-flex align-items-center">
+            <div class="alert-icon-container me-3">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div>{{ $page.props.flash.success }}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
-          <div>{{ $page.props.flash.success }}</div>
-          <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-      </div>
 
-      <!-- User and Role Management in Tabs -->
-      <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
-        <div class="card-header bg-white p-0 border-0">
-          <ul class="nav nav-pills nav-tabs-modern" id="managementTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active px-4 py-3" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true">
-                <i class="bi bi-people-fill me-2"></i>Users
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link px-4 py-3" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles" type="button" role="tab" aria-controls="roles" aria-selected="false">
-                <i class="bi bi-shield-lock-fill me-2"></i>Roles
-              </button>
-            </li>
-          </ul>
-        </div>
-        
-        <div class="card-body p-4">
-          <div class="tab-content" id="managementTabsContent">
-            <!-- Users Tab -->
-            <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
-              <!-- Search & Filter Row with improved styling -->
-              <div class="row mb-4 align-items-center">
-                <div class="col-md-6">
-                  <div class="search-container">
-                    <div class="input-group">
-                      <span class="input-group-text bg-transparent border-end-0">
-                        <i class="bi bi-search text-primary"></i>
-                      </span>
-                      <input 
-                        type="text" 
-                        v-model="searchQuery" 
-                        class="form-control form-control-lg border-start-0" 
-                        placeholder="Search users..."
-                      >
+        <!-- User and Role Management in Tabs -->
+        <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
+          <div class="card-header bg-white p-0 border-0">
+            <ul class="nav nav-pills nav-tabs-modern" id="managementTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active px-4 py-3" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true">
+                  <i class="bi bi-people-fill me-2"></i>Users
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link px-4 py-3" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles" type="button" role="tab" aria-controls="roles" aria-selected="false">
+                  <i class="bi bi-shield-lock-fill me-2"></i>Roles
+                </button>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="card-body p-4">
+            <div class="tab-content" id="managementTabsContent">
+              <!-- Users Tab -->
+              <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
+                <!-- Search & Filter Row with improved styling -->
+                <div class="row mb-4 align-items-center">
+                  <div class="col-md-6">
+                    <div class="search-container">
+                      <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                          <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input 
+                          type="text" 
+                          v-model="searchQuery" 
+                          class="form-control form-control-lg border-start-0" 
+                          placeholder="Search users..."
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <div class="custom-select-container">
+                      <select v-model="filterRole" class="form-select form-select-lg custom-select">
+                        <option value="">All Roles</option>
+                        <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
+                      </select>
                     </div>
                   </div>
                 </div>
-                <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                  <div class="custom-select-container">
-                    <select v-model="filterRole" class="form-select form-select-lg custom-select">
-                      <option value="">All Roles</option>
-                      <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
-                    </select>
-                  </div>
+
+                <!-- Users Table with enhanced styling -->
+                <div class="table-responsive custom-table-container">
+                  <table class="table custom-table align-middle">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Change Role</th>
+                        <th class="text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(user, index) in filteredUsers" :key="user.id" class="align-middle">
+                        <td>{{ index + 1 }}</td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <div class="user-avatar me-3">
+                              {{ user.name.charAt(0).toUpperCase() }}
+                            </div>
+                            <span class="fw-medium">{{ user.name }}</span>
+                          </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                          <span v-if="user.roles.length" class="badge role-badge text-primary">
+                            {{ user.roles[0].name }}
+                          </span>
+                          <span v-else class="badge no-role-badge">
+                            No Role
+                          </span>
+                        </td>
+                        <td>
+                          <form :action="route('admin.users.assignRole', user.id)" method="POST">
+                            <input type="hidden" name="_token" :value="csrf" />
+                            <select
+                              name="role"
+                              class="form-select form-select-sm custom-role-select"
+                              @change="(e) => submitForm(e, user.name)"
+                            >
+                              <option disabled selected>Select role</option>
+                              <option
+                                v-for="role in roles"
+                                :key="role"
+                                :value="role"
+                                :selected="user.roles[0]?.name === role"
+                              >
+                                {{ role }}
+                              </option>
+                            </select>
+                          </form>
+                        </td>
+                        <td class="text-center">
+                          <form :action="route('admin.users.delete', user.id)" method="POST">
+                            <input type="hidden" name="_method" value="DELETE" />
+                            <input type="hidden" name="_token" :value="csrf" />
+                            <button
+                              class="btn btn-delete"
+                              @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
+                            >
+                              <i class="bi bi-trash me-1"></i> Delete
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                      <tr v-if="filteredUsers.length === 0">
+                        <td colspan="6" class="text-center py-5">
+                          <div class="empty-state">
+                            <div class="empty-icon mb-3">
+                              <i class="bi bi-search"></i>
+                            </div>
+                            <h5>No users found</h5>
+                            <p class="text-muted">Try adjusting your search or filter criteria</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
-
-              <!-- Users Table with enhanced styling -->
-              <div class="table-responsive custom-table-container">
-                <table class="table custom-table align-middle">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Change Role</th>
-                      <th class="text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(user, index) in filteredUsers" :key="user.id" class="align-middle">
-                      <td>{{ index + 1 }}</td>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <div class="user-avatar me-3">
-                            {{ user.name.charAt(0).toUpperCase() }}
+              
+              <!-- Roles Tab -->
+              <div class="tab-pane fade" id="roles" role="tabpanel" aria-labelledby="roles-tab">
+                <div class="row">
+                  <!-- Form Add New Role with improved styling -->
+                  <div class="col-md-5 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                      <div class="card-header role-card-header">
+                        <h5 class="card-title mb-0">
+                          <i class="bi bi-plus-circle me-2"></i>Add New Role
+                        </h5>
+                      </div>
+                      <div class="card-body p-4">
+                        <form :action="route('admin.roles.store')" method="POST" @submit.prevent="submitNewRole">
+                          <input type="hidden" name="_token" :value="csrf" />
+                          <div class="mb-4">
+                            <label for="newRoleName" class="form-label fw-medium">Role Name</label>
+                            <input
+                              type="text"
+                              id="newRoleName"
+                              v-model="newRoleName"
+                              class="form-control form-control-lg"
+                              placeholder="Enter role name"
+                              required
+                            />
                           </div>
-                          <span class="fw-medium">{{ user.name }}</span>
-                        </div>
-                      </td>
-                      <td>{{ user.email }}</td>
-                      <td>
-                        <span v-if="user.roles.length" class="badge role-badge text-primary">
-                          {{ user.roles[0].name }}
-                        </span>
-                        <span v-else class="badge no-role-badge">
-                          No Role
-                        </span>
-                      </td>
-                      <td>
-                        <form :action="route('admin.users.assignRole', user.id)" method="POST">
-                          <input type="hidden" name="_token" :value="csrf" />
-                          <select
-                            name="role"
-                            class="form-select form-select-sm custom-role-select"
-                            @change="(e) => submitForm(e, user.name)"
-                          >
-                            <option disabled selected>Select role</option>
-                            <option
-                              v-for="role in roles"
-                              :key="role"
-                              :value="role"
-                              :selected="user.roles[0]?.name === role"
-                            >
-                              {{ role }}
-                            </option>
-                          </select>
-                        </form>
-                      </td>
-                      <td class="text-center">
-                        <form :action="route('admin.users.delete', user.id)" method="POST">
-                          <input type="hidden" name="_method" value="DELETE" />
-                          <input type="hidden" name="_token" :value="csrf" />
-                          <button
-                            class="btn btn-delete"
-                            @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
-                          >
-                            <i class="bi bi-trash me-1"></i> Delete
+                          <button class="btn btn-primary btn-lg w-100" type="submit">
+                            <i class="bi bi-plus-lg me-2"></i>Add Role
                           </button>
                         </form>
-                      </td>
-                    </tr>
-                    <tr v-if="filteredUsers.length === 0">
-                      <td colspan="6" class="text-center py-5">
-                        <div class="empty-state">
-                          <div class="empty-icon mb-3">
-                            <i class="bi bi-search"></i>
-                          </div>
-                          <h5>No users found</h5>
-                          <p class="text-muted">Try adjusting your search or filter criteria</p>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            
-            <!-- Roles Tab -->
-            <div class="tab-pane fade" id="roles" role="tabpanel" aria-labelledby="roles-tab">
-              <div class="row">
-                <!-- Form Add New Role with improved styling -->
-                <div class="col-md-5 mb-4">
-                  <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-header role-card-header">
-                      <h5 class="card-title mb-0">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Role
-                      </h5>
-                    </div>
-                    <div class="card-body p-4">
-                      <form :action="route('admin.roles.store')" method="POST" @submit.prevent="submitNewRole">
-                        <input type="hidden" name="_token" :value="csrf" />
-                        <div class="mb-4">
-                          <label for="newRoleName" class="form-label fw-medium">Role Name</label>
-                          <input
-                            type="text"
-                            id="newRoleName"
-                            v-model="newRoleName"
-                            class="form-control form-control-lg"
-                            placeholder="Enter role name"
-                            required
-                          />
-                        </div>
-                        <button class="btn btn-primary btn-lg w-100" type="submit">
-                          <i class="bi bi-plus-lg me-2"></i>Add Role
-                        </button>
-                      </form>
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                <!-- Role List with improved styling -->
-                <div class="col-md-7 mb-4">
-                  <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-header role-card-header">
-                      <h5 class="card-title mb-0">
-                        <i class="bi bi-list-check me-2"></i>Role List
-                      </h5>
-                    </div>
-                    <div class="card-body p-0">
-                      <div class="table-responsive">
-                        <table class="table custom-role-table mb-0">
-                          <thead>
-                            <tr>
-                              <th>Role Name</th>
-                              <th>Users</th>
-                              <th class="text-end">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr v-for="role in roles" :key="role">
-                              <td>
-                                <div class="d-flex align-items-center">
-                                  <div class="role-icon me-2">
-                                    <i class="bi bi-shield-fill"></i>
+                  
+                  <!-- Role List with improved styling -->
+                  <div class="col-md-7 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                      <div class="card-header role-card-header">
+                        <h5 class="card-title mb-0">
+                          <i class="bi bi-list-check me-2"></i>Role List
+                        </h5>
+                      </div>
+                      <div class="card-body p-0">
+                        <div class="table-responsive">
+                          <table class="table custom-role-table mb-0">
+                            <thead>
+                              <tr>
+                                <th>Role Name</th>
+                                <th>Users</th>
+                                <th class="text-end">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="role in roles" :key="role">
+                                <td>
+                                  <div class="d-flex align-items-center">
+                                    <div class="role-icon me-2">
+                                      <i class="bi bi-shield-fill"></i>
+                                    </div>
+                                    <span class="fw-medium">{{ role }}</span>
                                   </div>
-                                  <span class="fw-medium">{{ role }}</span>
-                                </div>
-                              </td>
-                              <td>
-                                <span class="badge users-count-badge">
-                                  {{ getUserCountByRole(role) }}
-                                </span>
-                              </td>
-                              <td class="text-end">
-                                <form
-                                  :action="route('admin.roles.destroy', role)"
-                                  method="POST"
-                                  @submit.prevent="confirmDeleteRole(role, $event.target)"
-                                >
-                                  <input type="hidden" name="_method" value="DELETE" />
-                                  <input type="hidden" name="_token" :value="csrf" />
-                                  <button class="btn btn-role-delete" type="submit">
-                                    <i class="bi bi-trash"></i>
-                                  </button>
-                                </form>
-                              </td>
-                            </tr>
-                            <tr v-if="roles.length === 0">
-                              <td colspan="3" class="text-center py-5">
-                                <div class="empty-state">
-                                  <div class="empty-icon mb-3">
-                                    <i class="bi bi-shield-slash"></i>
+                                </td>
+                                <td>
+                                  <span class="badge users-count-badge">
+                                    {{ getUserCountByRole(role) }}
+                                  </span>
+                                </td>
+                                <td class="text-end">
+                                  <form
+                                    :action="route('admin.roles.destroy', role)"
+                                    method="POST"
+                                    @submit.prevent="confirmDeleteRole(role, $event.target)"
+                                  >
+                                    <input type="hidden" name="_method" value="DELETE" />
+                                    <input type="hidden" name="_token" :value="csrf" />
+                                    <button class="btn btn-role-delete" type="submit">
+                                      <i class="bi bi-trash"></i>
+                                    </button>
+                                  </form>
+                                </td>
+                              </tr>
+                              <tr v-if="roles.length === 0">
+                                <td colspan="3" class="text-center py-5">
+                                  <div class="empty-state">
+                                    <div class="empty-icon mb-3">
+                                      <i class="bi bi-shield-slash"></i>
+                                    </div>
+                                    <h5>No roles available</h5>
+                                    <p class="text-muted">Create your first role to get started</p>
                                   </div>
-                                  <h5>No roles available</h5>
-                                  <p class="text-muted">Create your first role to get started</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -421,11 +423,10 @@ function submitNewRole() {
 </script>
 
 <style>
-.overflow-hidden-container {
-  height: 100vh;
-  top: 0;
-
-  bottom: 0;
+.wrapper {
+  min-height: 100vh;
+  background-color: #f8f9fc;
+  margin-top: -1rem;
 }
 
 .gradient-header {
