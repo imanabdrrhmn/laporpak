@@ -99,7 +99,7 @@ export default {
   display: flex;
   min-height: 100vh;
   position: fixed;
-   z-index: 50
+   z-index: 50;
 }
 
 /* Top Navbar Styles */
@@ -265,10 +265,7 @@ export default {
 
 /* Main Content Area */
 .main-content {
-  flex: 1;
-  margin-left: 260px;
-  padding: 75px 1.5rem 1.5rem;
-  background-color: #f5f7fa;
-  min-height: 100vh;
+  display: flex;
+
 }
 </style>

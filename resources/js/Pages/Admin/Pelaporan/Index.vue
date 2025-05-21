@@ -1,325 +1,327 @@
 <template>
   <AdminLayout>
-  <Head title="Manajemen Laporan" />
-  <div class="container">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
-      <div class="header-content">
-        <h1>Manajemen Laporan</h1>
-        <div class="stats-bar">
-          <div class="stat-item">
-            <span class="stat-value">{{ reportStats.total }}</span>
-            <span class="stat-label">Total</span>
-          </div>
-          <div class="stat-item pending">
-            <span class="stat-value">{{ reportStats.pending }}</span>
-            <span class="stat-label">Pending</span>
-          </div>
-          <div class="stat-item approved">
-            <span class="stat-value">{{ reportStats.approved }}</span>
-            <span class="stat-label">Approved</span>
-          </div>
-          <div class="stat-item rejected">
-            <span class="stat-value">{{ reportStats.rejected }}</span>
-            <span class="stat-label">Rejected</span>
-          </div>
-          <div class="stat-item published">
-            <span class="stat-value">{{ reportStats.published }}</span>
-            <span class="stat-label">Published</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Filter Section -->
-    <div class="filter-section">
-      <div class="section-header">
-        <h2>Laporan Masuk</h2>
-        <div class="view-toggle">
-          <button 
-            @click="viewMode = 'grid'" 
-            :class="['toggle-btn', viewMode === 'grid' ? 'active' : '']"
-            title="Grid View"
-          >
-            <i class="fas fa-th-large"></i>
-          </button>
-          <button 
-            @click="viewMode = 'list'" 
-            :class="['toggle-btn', viewMode === 'list' ? 'active' : '']"
-            title="List View"
-          >
-            <i class="fas fa-list"></i>
-          </button>
-        </div>
-      </div>
-      
-      <div class="search-bar">
-        <div class="search-wrapper">
-          <i class="fas fa-search search-icon"></i>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="search-input"
-            placeholder="Cari laporan..."
-          />
-          <button v-if="searchQuery" @click="searchQuery = ''" class="clear-btn">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-      </div>
-      
-      <div class="filters">
-        <div class="dropdown-filter">
-          <select v-model="selectedCategory" class="filter-select">
-            <option value="">Semua Kategori</option>
-            <option v-for="category in categories" :key="category" :value="category">
-              {{ category }}
-            </option>
-          </select>
-          <i class="fas fa-chevron-down dropdown-icon"></i>
-        </div>
-        
-        <div class="dropdown-filter">
-          <select v-model="selectedService" class="filter-select">
-            <option value="">Semua Layanan</option>
-            <option v-for="service in services" :key="service" :value="service">
-              {{ service }}
-            </option>
-          </select>
-          <i class="fas fa-chevron-down dropdown-icon"></i>
-        </div>
-        
-        <div class="dropdown-filter">
-          <select v-model="selectedStatus" class="filter-select">
-            <option value="">Semua Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="published">Published</option>
-          </select>
-          <i class="fas fa-chevron-down dropdown-icon"></i>
-        </div>
-        
-        <div class="dropdown-filter">
-          <select v-model="sortDirection" class="filter-select">
-            <option value="desc">Terbaru</option>
-            <option value="asc">Terlama</option>
-          </select>
-          <i class="fas fa-chevron-down dropdown-icon"></i>
-        </div>
-        
-        <button @click="resetFilters" class="reset-btn" :disabled="!hasActiveFilters">
-          <i class="fas fa-sync-alt"></i> Reset
-        </button>
-      </div>
-      
-      <div v-if="hasActiveFilters" class="active-filters">
-        <div class="filter-chips">
-          <div v-if="selectedCategory" class="filter-chip">
-            Kategori: {{ selectedCategory }}
-            <button @click="selectedCategory = ''" class="remove-filter">×</button>
-          </div>
-          <div v-if="selectedService" class="filter-chip">
-            Layanan: {{ selectedService }}
-            <button @click="selectedService = ''" class="remove-filter">×</button>
-          </div>
-          <div v-if="selectedStatus" class="filter-chip">
-            Status: {{ capitalize(selectedStatus) }}
-            <button @click="selectedStatus = ''" class="remove-filter">×</button>
-          </div>
-          <div v-if="searchQuery" class="filter-chip">
-            Pencarian: "{{ searchQuery }}"
-            <button @click="searchQuery = ''" class="remove-filter">×</button>
-          </div>
-        </div>
-        <p class="results-count">{{ filteredReports.length }} laporan ditemukan</p>
-      </div>
-    </div>
-
-    <!-- Reports Display -->
-    <div v-if="paginatedReports.length" :class="['reports-container', viewMode]">
-      <template v-if="viewMode === 'grid'">
-        <!-- Grid View -->
-        <div class="reports-grid">
-          <div v-for="report in paginatedReports" :key="report.id" class="report-card">
-            <!-- Report Badge -->
-            <div :class="['report-badge', report.status]"></div>
-            
-            <!-- Report Header -->
-            <div class="report-header">
-              <div class="user-info">
-                <img :src="report.user.avatar_url" alt="User Avatar" class="user-avatar" />
-                <div class="user-details">
-                  <span class="user-name">{{ report.user.name }}</span>
-                  <span class="timestamp">{{ formatDate(report.created_at) }}</span>
-                </div>
+    <Head title="Manajemen Laporan" />
+    <div class="wrapper">
+      <div class="container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+          <div class="header-content">
+            <h1 class="fw-bold">Manajemen Laporan</h1>
+            <div class="stats-bar">
+              <div class="stat-item">
+                <span class="stat-value">{{ reportStats.total }}</span>
+                <span class="stat-label">Total</span>
               </div>
-              <div class="report-labels">
-                <span :class="['status-badge', report.status]">
-                  {{ capitalize(report.status) }}
-                </span>
+              <div class="stat-item pending">
+                <span class="stat-value">{{ reportStats.pending }}</span>
+                <span class="stat-label">Pending</span>
+              </div>
+              <div class="stat-item approved">
+                <span class="stat-value">{{ reportStats.approved }}</span>
+                <span class="stat-label">Approved</span>
+              </div>
+              <div class="stat-item rejected">
+                <span class="stat-value">{{ reportStats.rejected }}</span>
+                <span class="stat-label">Rejected</span>
+              </div>
+              <div class="stat-item published">
+                <span class="stat-value">{{ reportStats.published }}</span>
+                <span class="stat-label">Published</span>
               </div>
             </div>
-            
-            <!-- Report Content -->
-            <div class="report-content">
-              <div class="report-meta">
-                <div class="meta-item">
-                  <i class="fas fa-tag meta-icon"></i>
-                  <span>{{ report.category }}</span>
-                </div>
-                <div class="meta-item">
-                  <i class="fas fa-cog meta-icon"></i>
-                  <span>{{ report.service }}</span>
-                </div>
-                <div v-if="report.service === 'Penipuan'" class="meta-item">
-                  <i class="fas fa-exclamation-triangle meta-icon"></i>
-                  <span>{{ report.source || 'Tidak Ada Sumber' }}</span>
-                </div>
-              </div>
-              <p class="description">{{ truncate(report.description, 120) }}</p>
-            </div>
-            
-            <!-- Report Actions -->
-            <div class="report-actions">
-              <button @click="viewReport(report)" class="view-button">
-                <i class="fas fa-eye"></i> Lihat Detail
+          </div>
+        </div>
+        
+        <!-- Filter Section -->
+        <div class="filter-section">
+          <div class="section-header">
+            <h2>Laporan Masuk</h2>
+            <div class="view-toggle">
+              <button 
+                @click="viewMode = 'grid'" 
+                :class="['toggle-btn', viewMode === 'grid' ? 'active' : '']"
+                title="Grid View"
+              >
+                <i class="fas fa-th-large"></i>
               </button>
-              <div class="action-buttons">
-                <button 
-                  @click="quickAction(report, 'approved')" 
-                  :class="['quick-action', 'approve', report.status === 'approved' ? 'active' : '', { 'loading': loading[report.id] }]" 
-                  title="Approve"
-                  :disabled="loading[report.id]"
-                >
-                  <span v-if="loading[report.id]" class="spinner"></span>
-                  Approve
-                </button>
-                <button 
-                  @click="quickAction(report, 'rejected')" 
-                  :class="['quick-action', 'reject', report.status === 'rejected' ? 'active' : '', { 'loading': loading[report.id] }]" 
-                  title="Reject"
-                  :disabled="loading[report.id]"
-                >
-                  <span v-if="loading[report.id]" class="spinner"></span>
-                  Reject
-                </button>
-                <button 
-                  @click="quickAction(report, 'published')" 
-                  :class="['quick-action', 'publish', report.status === 'published' ? 'active' : '', { 'loading': loading[report.id] }]" 
-                  title="Publish"
-                  :disabled="loading[report.id]"
-                >
-                  <span v-if="loading[report.id]" class="spinner"></span>
-                  Publish
-                </button>
-              </div>
+              <button 
+                @click="viewMode = 'list'" 
+                :class="['toggle-btn', viewMode === 'list' ? 'active' : '']"
+                title="List View"
+              >
+                <i class="fas fa-list"></i>
+              </button>
             </div>
           </div>
+          
+          <div class="search-bar">
+            <div class="search-wrapper">
+              <i class="fas fa-search search-icon"></i>
+              <input
+                v-model="searchQuery"
+                type="text"
+                class="search-input"
+                placeholder="Cari laporan..."
+              />
+              <button v-if="searchQuery" @click="searchQuery = ''" class="clear-btn">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="filters">
+            <div class="dropdown-filter">
+              <select v-model="selectedCategory" class="filter-select">
+                <option value="">Semua Kategori</option>
+                <option v-for="category in categories" :key="category" :value="category">
+                  {{ category }}
+                </option>
+              </select>
+              <i class="fas fa-chevron-down dropdown-icon"></i>
+            </div>
+            
+            <div class="dropdown-filter">
+              <select v-model="selectedService" class="filter-select">
+                <option value="">Semua Layanan</option>
+                <option v-for="service in services" :key="service" :value="service">
+                  {{ service }}
+                </option>
+              </select>
+              <i class="fas fa-chevron-down dropdown-icon"></i>
+            </div>
+            
+            <div class="dropdown-filter">
+              <select v-model="selectedStatus" class="filter-select">
+                <option value="">Semua Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="published">Published</option>
+              </select>
+              <i class="fas fa-chevron-down dropdown-icon"></i>
+            </div>
+            
+            <div class="dropdown-filter">
+              <select v-model="sortDirection" class="filter-select">
+                <option value="desc">Terbaru</option>
+                <option value="asc">Terlama</option>
+              </select>
+              <i class="fas fa-chevron-down dropdown-icon"></i>
+            </div>
+            
+            <button @click="resetFilters" class="reset-btn" :disabled="!hasActiveFilters">
+              <i class="fas fa-sync-alt"></i> Reset
+            </button>
+          </div>
+          
+          <div v-if="hasActiveFilters" class="active-filters">
+            <div class="filter-chips">
+              <div v-if="selectedCategory" class="filter-chip">
+                Kategori: {{ selectedCategory }}
+                <button @click="selectedCategory = ''" class="remove-filter">×</button>
+              </div>
+              <div v-if="selectedService" class="filter-chip">
+                Layanan: {{ selectedService }}
+                <button @click="selectedService = ''" class="remove-filter">×</button>
+              </div>
+              <div v-if="selectedStatus" class="filter-chip">
+                Status: {{ capitalize(selectedStatus) }}
+                <button @click="selectedStatus = ''" class="remove-filter">×</button>
+              </div>
+              <div v-if="searchQuery" class="filter-chip">
+                Pencarian: "{{ searchQuery }}"
+                <button @click="searchQuery = ''" class="remove-filter">×</button>
+              </div>
+            </div>
+            <p class="results-count">{{ filteredReports.length }} laporan ditemukan</p>
+          </div>
         </div>
-      </template>
-      
-      <template v-else>
-        <!-- List View -->
-        <table class="reports-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Pelapor</th>
-              <th>Kategori</th>
-              <th>Layanan</th>
-              <th>Status</th>
-              <th>Deskripsi</th>
-              <th>Tanggal</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(report, index) in paginatedReports" :key="report.id" :class="['report-row', report.status]">
-              <td class="number-cell">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
-              <td>
-                <div class="user-info">
-                  <img :src="report.user.avatar_url" alt="User Avatar" class="user-avatar-small" />
-                  <span class="user-name">{{ report.user.name }}</span>
-                </div>
-              </td>
-              <td>{{ report.category }}</td>
-              <td>{{ report.service }}</td>
-              <td>
-                <span :class="['status-badge', report.status]">
-                  {{ capitalize(report.status) }}
-                </span>
-              </td>
-              <td class="description-cell">{{ truncate(report.description, 60) }}</td>
-              <td>{{ formatDateShort(report.created_at) }}</td>
-              <td>
-                <div class="table-actions">
-                  <button @click="viewReport(report)" class="table-action view" title="Lihat Detail">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button 
-                    @click="quickAction(report, 'approved')" 
-                    :class="['table-action', 'approve', report.status === 'approved' ? 'active' : '', { 'loading': loading[report.id] }]" 
-                    title="Approve"
-                    :disabled="loading[report.id]"
-                  >
-                    <span v-if="loading[report.id]" class="spinner"></span>
-                    Approve
-                  </button>
-                  <button 
-                    @click="quickAction(report, 'rejected')" 
-                    :class="['table-action', 'reject', report.status === 'rejected' ? 'active' : '', { 'loading': loading[report.id] }]" 
-                    title="Reject"
-                    :disabled="loading[report.id]"
-                  >
-                    <span v-if="loading[report.id]" class="spinner"></span>
-                    Reject
-                  </button>
-                  <button 
-                    @click="quickAction(report, 'published')" 
-                    :class="['table-action', 'publish', report.status === 'published' ? 'active' : '', { 'loading': loading[report.id] }]" 
-                    title="Publish"
-                    :disabled="loading[report.id]"
-                  >
-                    <span v-if="loading[report.id]" class="spinner"></span>
-                    Publish
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </template>
-    </div>
 
-    <div v-else class="no-results">
-      <div class="empty-state">
-        <i class="fas fa-folder-open empty-icon"></i>
-        <h3>Tidak ada laporan ditemukan</h3>
-        <p>Coba ubah filter pencarian atau reset filter</p>
-        <button @click="resetFilters" class="reset-btn-empty">Reset Filter</button>
+        <!-- Reports Display -->
+        <div v-if="paginatedReports.length" :class="['reports-container', viewMode]">
+          <template v-if="viewMode === 'grid'">
+            <!-- Grid View -->
+            <div class="reports-grid">
+              <div v-for="report in paginatedReports" :key="report.id" class="report-card">
+                <!-- Report Badge -->
+                <div :class="['report-badge', report.status]"></div>
+                
+                <!-- Report Header -->
+                <div class="report-header">
+                  <div class="user-info">
+                    <img :src="report.user.avatar_url" alt="User Avatar" class="user-avatar" />
+                    <div class="user-details">
+                      <span class="user-name">{{ report.user.name }}</span>
+                      <span class="timestamp">{{ formatDate(report.created_at) }}</span>
+                    </div>
+                  </div>
+                  <div class="report-labels">
+                    <span :class="['status-badge', report.status]">
+                      {{ capitalize(report.status) }}
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Report Content -->
+                <div class="report-content">
+                  <div class="report-meta">
+                    <div class="meta-item">
+                      <i class="fas fa-tag meta-icon"></i>
+                      <span>{{ report.category }}</span>
+                    </div>
+                    <div class="meta-item">
+                      <i class="fas fa-cog meta-icon"></i>
+                      <span>{{ report.service }}</span>
+                    </div>
+                    <div v-if="report.service === 'Penipuan'" class="meta-item">
+                      <i class="fas fa-exclamation-triangle meta-icon"></i>
+                      <span>{{ report.source || 'Tidak Ada Sumber' }}</span>
+                    </div>
+                  </div>
+                  <p class="description">{{ truncate(report.description, 120) }}</p>
+                </div>
+                
+                <!-- Report Actions -->
+                <div class="report-actions">
+                  <button @click="viewReport(report)" class="view-button">
+                    <i class="fas fa-eye"></i> Lihat Detail
+                  </button>
+                  <div class="action-buttons">
+                    <button 
+                      @click="quickAction(report, 'approved')" 
+                      :class="['quick-action', 'approve', report.status === 'approved' ? 'active' : '', { 'loading': loading[report.id] }]" 
+                      title="Approve"
+                      :disabled="loading[report.id]"
+                    >
+                      <span v-if="loading[report.id]" class="spinner"></span>
+                      Approve
+                    </button>
+                    <button 
+                      @click="quickAction(report, 'rejected')" 
+                      :class="['quick-action', 'reject', report.status === 'rejected' ? 'active' : '', { 'loading': loading[report.id] }]" 
+                      title="Reject"
+                      :disabled="loading[report.id]"
+                    >
+                      <span v-if="loading[report.id]" class="spinner"></span>
+                      Reject
+                    </button>
+                    <button 
+                      @click="quickAction(report, 'published')" 
+                      :class="['quick-action', 'publish', report.status === 'published' ? 'active' : '', { 'loading': loading[report.id] }]" 
+                      title="Publish"
+                      :disabled="loading[report.id]"
+                    >
+                      <span v-if="loading[report.id]" class="spinner"></span>
+                      Publish
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+          
+          <template v-else>
+            <!-- List View -->
+            <table class="reports-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Pelapor</th>
+                  <th>Kategori</th>
+                  <th>Layanan</th>
+                  <th>Status</th>
+                  <th>Deskripsi</th>
+                  <th>Tanggal</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(report, index) in paginatedReports" :key="report.id" :class="['report-row', report.status]">
+                  <td class="number-cell">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+                  <td>
+                    <div class="user-info">
+                      <img :src="report.user.avatar_url" alt="User Avatar" class="user-avatar-small" />
+                      <span class="user-name">{{ report.user.name }}</span>
+                    </div>
+                  </td>
+                  <td>{{ report.category }}</td>
+                  <td>{{ report.service }}</td>
+                  <td>
+                    <span :class="['status-badge', report.status]">
+                      {{ capitalize(report.status) }}
+                    </span>
+                  </td>
+                  <td class="description-cell">{{ truncate(report.description, 60) }}</td>
+                  <td>{{ formatDateShort(report.created_at) }}</td>
+                  <td>
+                    <div class="table-actions">
+                      <button @click="viewReport(report)" class="table-action view" title="Lihat Detail">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button 
+                        @click="quickAction(report, 'approved')" 
+                        :class="['table-action', 'approve', report.status === 'approved' ? 'active' : '', { 'loading': loading[report.id] }]" 
+                        title="Approve"
+                        :disabled="loading[report.id]"
+                      >
+                        <span v-if="loading[report.id]" class="spinner"></span>
+                        Approve
+                      </button>
+                      <button 
+                        @click="quickAction(report, 'rejected')" 
+                        :class="['table-action', 'reject', report.status === 'rejected' ? 'active' : '', { 'loading': loading[report.id] }]" 
+                        title="Reject"
+                        :disabled="loading[report.id]"
+                      >
+                        <span v-if="loading[report.id]" class="spinner"></span>
+                        Reject
+                      </button>
+                      <button 
+                        @click="quickAction(report, 'published')" 
+                        :class="['table-action', 'publish', report.status === 'published' ? 'active' : '', { 'loading': loading[report.id] }]" 
+                        title="Publish"
+                        :disabled="loading[report.id]"
+                      >
+                        <span v-if="loading[report.id]" class="spinner"></span>
+                        Publish
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </template>
+        </div>
+
+        <div v-else class="no-results">
+          <div class="empty-state">
+            <i class="fas fa-folder-open empty-icon"></i>
+            <h3>Tidak ada laporan ditemukan</h3>
+            <p>Coba ubah filter pencarian atau reset filter</p>
+            <button @click="resetFilters" class="reset-btn-empty">Reset Filter</button>
+          </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div v-if="filteredReports.length > 0" class="pagination">
+          <button :disabled="currentPage === 1" @click="currentPage--" class="page-btn">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="page-info">{{ currentPage }} dari {{ totalPages }}</span>
+          <button :disabled="currentPage === totalPages" @click="currentPage++" class="page-btn">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Enhanced Modal -->
+        <Modal 
+          :report="currentReport" 
+          :isVisible="showModal" 
+          @close="closeModal"
+          @update-status="updateReportStatus" 
+        />
       </div>
     </div>
-    
-    <!-- Pagination -->
-    <div v-if="filteredReports.length > 0" class="pagination">
-      <button :disabled="currentPage === 1" @click="currentPage--" class="page-btn">
-        <i class="fas fa-chevron-left"></i>
-      </button>
-      <span class="page-info">{{ currentPage }} dari {{ totalPages }}</span>
-      <button :disabled="currentPage === totalPages" @click="currentPage++" class="page-btn">
-        <i class="fas fa-chevron-right"></i>
-      </button>
-    </div>
-
-    <!-- Enhanced Modal -->
-    <Modal 
-      :report="currentReport" 
-      :isVisible="showModal" 
-      @close="closeModal"
-      @update-status="updateReportStatus" 
-    />
-  </div>
   </AdminLayout>
 </template>
 
@@ -520,12 +522,6 @@ watch([searchQuery, selectedCategory, selectedService, selectedStatus], () => {
 </script>
 
 <style scoped>
-/* Global Styles */
-.container {
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 24px 16px;
-}
 
 /* Dashboard Header */
 .dashboard-header {

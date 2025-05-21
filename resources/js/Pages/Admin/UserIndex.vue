@@ -1,15 +1,15 @@
 <template>
   <AdminLayout>
     <Head title="Manajemen Pengguna" />
-    <div class="container py-5">
+    <div class="container py-5 overflow-hidden-container">
       <!-- Modern Page Header with gradient background -->
       <div class="card border-0 shadow-lg mb-5 overflow-hidden">
         <div class="card-body position-relative p-0">
-          <div class="gradient-header p-4">
+          <div class="-mt-4 gradient-header p-4">
             <div class="d-flex justify-content-between align-items-center position-relative z-10">
               <div>
-                <h2 class="mb-1 fw-bold text-white">User Management</h2>
-                <p class="text-white-50 mb-0">Manage users and roles in your application</p>
+                <h2 class="mb-1 fw-bold text-white">Manajemen Pengguna</h2>
+                <p class="text-white-50 mb-0">Kelola pengguna dan peran dalam aplikasi Anda</p>
               </div>
               <div class="badge bg-white text-primary fw-bold px-3 py-2 fs-6 shadow-sm">
                 Total Users: {{ users.length }}
@@ -421,17 +421,23 @@ function submitNewRole() {
 </script>
 
 <style>
-body {
-  background-color: #f8fafc;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+.overflow-hidden-container {
+  height: 100vh;
+  top: 0;
+
+  bottom: 0;
 }
 
-/* Modern Header with Gradient */
 .gradient-header {
+  padding-top: 24px;
   background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
   position: relative;
   overflow: hidden;
   border-radius: 0.5rem;
+}
+
+.gradient-header h2 {
+  font-size: 1.8rem;
 }
 
 .gradient-header::before {

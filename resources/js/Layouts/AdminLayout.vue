@@ -21,8 +21,13 @@ import NavBarAdmin from '@/Components/NavBarAdmin.vue';
 
 
 .main-content {
-  flex: 1;
-  margin-left: 250px; /* Match sidebar width */
-  padding: 1rem;
+  flex:2;
+  margin-left: 260px; /* Match sidebar width */
+  padding-top: 65px;
+  background-color: #f8f9fa; ;
+
+  
+
 }
 </style>
+

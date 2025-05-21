@@ -1,220 +1,445 @@
 <template>
-  <Head title="Dashboard" />
-  <AppLayout>
-    <div class="dashboard-container">
-      <WelcomeHeader :nama-user="namaUser" :level-user="levelUser" />
-      <div class="row g-4 mb-5">
-        <div class="col-md-4 col-sm-6 animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
-          <SummaryCard
-            title="Saldo Kredit"
-            icon="bi-wallet2"
-            :value="formatRupiah(saldoKredit)"
-            icon-bg="rgba(67, 97, 238, 0.1)"
-            icon-color="var(--primary-color)"
-          >
-            <Link
-              href="/top-ups"
-              class="btn btn-sm btn-primary mt-2">
-              Isi Saldo <i class="bi bi-plus-circle ms-1"></i>
-            </Link>
-            <div class="progress mt-3" style="height: 4px;">
-              <div class="progress-bar bg-primary" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-          </SummaryCard>
+  <AdminLayout>
+    <Head title="Dashboard Admin" />
+    <div class="wrapper">
+      <div class="container-fluid p-3">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="fw-bold mb-0">Dashboard Laporan</h2>
         </div>
-        <div class="col-md-4 col-sm-6 animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
-          <SummaryCard
-            title="Status Verifikasi"
-            icon="bi-shield-check"
-            icon-bg="rgba(40, 167, 69, 0.1)"
-            icon-color="var(--success-color)"
-          >
-            <div class="verification-progress">
-              <div class="progress-container">
-                <div class="progress">
-                  <div class="progress-bar bg-success" role="progressbar" :style="`width: ${progresVerifikasi}%`" :aria-valuenow="progresVerifikasi" aria-valuemin="0" aria-valuemax="100"></div>
+
+        <!-- Stat Cards -->
+        <div class="row mb-4">
+          <!-- Laporan Masuk Card -->
+          <div class="col-md-3 col-6 mb-3">
+            <div class="card h-100 border-0 shadow-sm custom-card">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="text-content">
+                  <div class="text-muted mb-1">Laporan Masuk</div>
+                  <h3 class="mb-0">{{ dashboardStats.laporanMasuk.count }}</h3>
+                  <div class="text-success small">
+                    <i class="bi bi-arrow-up-short"></i>
+                    {{ dashboardStats.laporanMasuk.percentage }}% dari bulan lalu
+                  </div>
                 </div>
-                <span>{{ progresVerifikasi }}%</span>
+                <div class="icon-circle bg-primary">
+                  <i class="bi bi-file-earmark-arrow-down text-white"></i>
+                </div>
               </div>
             </div>
-            <div class="verification-badges">
-              <span class="badge" :class="statusVerifikasi.npwp ? 'bg-success' : 'bg-secondary'">NPWP</span>
-              <span class="badge" :class="statusVerifikasi.identitas ? 'bg-success' : 'bg-secondary'">Identitas</span>
-              <span class="badge" :class="statusVerifikasi.noHp ? 'bg-success' : 'bg-secondary'">No. HP</span>
-              <span class="badge" :class="statusVerifikasi.email ? 'bg-success' : 'bg-secondary'">Email</span>
-              <span class="badge" :class="statusVerifikasi.rekening ? 'bg-success' : 'bg-secondary'">Rekening</span>
+          </div>
+
+          <!-- Laporan Terverifikasi Card -->
+          <div class="col-md-3 col-6 mb-3">
+            <div class="card h-100 border-0 shadow-sm custom-card">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="text-content">
+                  <div class="text-muted mb-1">Laporan Terverifikasi</div>
+                  <h3 class="mb-0">{{ dashboardStats.laporanTerverifikasi.count }}</h3>
+                  <div class="text-success small">
+                    <i class="bi bi-arrow-up-short"></i>
+                    {{ dashboardStats.laporanTerverifikasi.percentage }}% dari bulan lalu
+                  </div>
+                </div>
+                <div class="icon-circle bg-success">
+                  <i class="bi bi-check-circle text-white"></i>
+                </div>
+              </div>
             </div>
-            <button class="btn btn-sm btn-outline-success w-100 mt-3" v-if="!statusVerifikasi.noHp">Verifikasi Data</button>
-          </SummaryCard>
+          </div>
+
+          <!-- Total Pengguna Card -->
+          <div class="col-md-3 col-6 mb-3">
+            <div class="card h-100 border-0 shadow-sm custom-card">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="text-content">
+                  <div class="text-muted mb-1">Total Pengguna</div>
+                  <h3 class="mb-0">{{ dashboardStats.totalPengguna.count }}</h3>
+                  <div class="text-success small">
+                    <i class="bi bi-arrow-up-short"></i>
+                    {{ dashboardStats.totalPengguna.percentage }}% dari bulan lalu
+                  </div>
+                </div>
+                <div class="icon-circle bg-info">
+                  <i class="bi bi-people-fill text-white"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Saldo Top-Up Card -->
+          <div class="col-md-3 col-6 mb-3">
+            <div class="card h-100 border-0 shadow-sm custom-card">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="text-content">
+                  <div class="text-muted mb-1">Saldo Top-Up Masuk</div>
+                  <h3 class="mb-0">Rp {{ formatNumber(dashboardStats.saldoTopUp.amount) }}</h3>
+                  <div class="text-success small">
+                    <i class="bi bi-arrow-up-short"></i>
+                    {{ dashboardStats.saldoTopUp.percentage }}% transaksi dari bulan ini
+                  </div>
+                </div>
+                <div class="icon-circle bg-secondary">
+                  <i class="bi bi-wallet2 text-white"></i>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col-md-4 col-sm-12 animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
-          <SummaryCard
-            title="Total Laporan"
-            icon="bi-file-earmark-text"
-            :value="reports"
-            icon-bg="rgba(220, 53, 69, 0.1)"
-            icon-color="var(--danger-color)"
-          >
-            <div class="reports-stats">
-              <div class="stat-item">
-                <i class="bi bi-hourglass-split text-warning"></i>
-                <span>{{ in_process }} lagi diproses</span>
-              </div>
-              <div class="stat-item">
-                <i class="bi bi-check-circle-fill text-success"></i>
-                <span>{{ selected }} udah selesai</span>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+          <!-- Monthly Report Trend Chart -->
+          <div class="col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="card-title mb-0">Tren Laporan dan Verifikasi</h5>
+                  <button class="btn btn-sm btn-outline-secondary" @click="exportTrenData">
+                    <i class="bi bi-download me-1"></i> Ekspor
+                  </button>
+                </div>
+                <div class="chart-container" style="position: relative; height: 300px;">
+                  <canvas ref="trendChart"></canvas>
+                </div>
               </div>
             </div>
-            <Link
-              href="/laporan-saya"
-              class="btn btn-sm btn-outline-primary w-100 mt-3">
-              Lihat Semua Laporan
-            </Link>
-          </SummaryCard>
+          </div>
+
+          <!-- Status Distribution Chart -->
+          <div class="col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="card-title mb-0">Distribusi Aktivitas Pengguna</h5>
+                  <button class="btn btn-sm btn-outline-secondary" @click="exportStatusData">
+                    <i class="bi bi-download me-1"></i> Ekspor
+                  </button>
+                </div>
+                <div class="chart-container" style="position: relative; height: 300px;">
+                  <canvas ref="statusChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Reports Summary -->
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title mb-0">Ringkasan Laporan Terbaru</h5>
+              <div class="d-flex">
+                <button class="btn btn-sm btn-outline-secondary mr-2" @click="showFilterModal">
+                  <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" @click="exportSummaryData">
+                  <i class="bi bi-download me-1"></i> Ekspor
+                </button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3" v-for="report in reports.slice(0, 3)" :key="report.id">
+                <div class="card h-100 border-0 shadow-sm report-card">
+                  <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">{{ report.jenisPengaduan }}</h6>
+                    <p class="card-text"><strong>Pelapor:</strong> {{ report.pelapor }}</p>
+                    <p class="card-text"><strong>Status:</strong> 
+                      <span :class="'badge badge-' + getStatusClass(report.status)">
+                        {{ report.status }}
+                      </span>
+                    </p>
+                    <p class="card-text"><strong>Tanggal:</strong> {{ report.tanggal }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <LevelProgress :progres-level="progresLevel" />
-      <div class="row g-4 mb-4">
-        <div class="col-lg-3 col-md-4 animate__animated animate__fadeInLeft" style="animation-delay: 0.2s">
-          <QuickActions :aksi-cepat="aksiCepat" />
-        </div>
-        <div class="col-lg-5 col-md-8 animate__animated animate__fadeIn" style="animation-delay: 0.3s">
-          <RecentActivity :aktivitas="aktivitas" />
-        </div>
-        <div class="col-lg-4 animate__animated animate__fadeInRight" style="animation-delay: 0.4s">
-          <FeedbackCard
-            :feedbacks="props.feedbacks" 
-            />
-        </div>
-      </div>
-      <RecentReports :laporan-terbaru="laporanTerbaru" @show-modal="showModal" />
-      <DashboardFooter />
     </div>
-  </AppLayout>
+  </AdminLayout>
 </template>
 
-<script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, usePage, Link} from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
-import WelcomeHeader from '@/Components/Dashboard/WelcomeHeader.vue';
-import SummaryCard from '@/Components/Dashboard/SummaryCard.vue';
 
-import QuickActions from '@/Components/Dashboard/QuickActions.vue';
-import RecentActivity from '@/Components/Dashboard/RecentActivity.vue';
-import FeedbackCard from '@/Components/Dashboard/FeedbackCard.vue';
-import RecentReports from '@/Components/Dashboard/RecentReports.vue';
-import DashboardFooter from '@/Components/Dashboard/DashboardFooter.vue';
-import { Modal } from 'bootstrap';
+<script>
+import { ref, onMounted } from 'vue';
+import Chart from 'chart.js/auto';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { Head } from '@inertiajs/vue3';
+import axios from 'axios';
 
-const props = defineProps({
-  feedbacks: Array,
-  auth: Object,
-  stats: Object,
-  reports: Array
-})
+export default {
+  components: {
+    AdminLayout,
+    Head
+  },
+  setup() {
+    // Refs for charts
+    const trendChart = ref(null);
+    const statusChart = ref(null);
+    let trendChartInstance = null;
+    let statusChartInstance = null;
 
-// Setup layout halaman
-const page = usePage();
-page.layout = AppLayout;
+    // Dashboard stats
+    const dashboardStats = ref({
+      laporanMasuk: { count: 156, percentage: 2.3 },
+      laporanTerverifikasi: { count: 800, percentage: 2.5 },
+      totalPengguna: { count: 3000, percentage: 12.5 },
+      saldoTopUp: { amount: 15250000, percentage: 3.5 }
+    });
 
-// Model data
-const saldoKredit = computed(() => page.props.user?.balance ?? 0);
-const namaUser = computed(() => page.props.auth?.user?.name || 'User');
+    // Reports data
+    const reports = ref([
+   
+    ]);
 
-// Status verifikasi
-const statusVerifikasi = ref(page.props.statusVerifikasi ?? {
-  npwp: true,
-  identitas: true,
-  noHp: false,
-  email: true,
-  rekening: false
-});
+    // Charts initialization
+    const initCharts = () => {
+      // Trend Chart (Laporan Masuk dan Verifikasi)
+      const trendCtx = trendChart.value.getContext('2d');
+      trendChartInstance = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+          datasets: [
+            {
+              label: 'Laporan Masuk',
+              data: [120, 150, 180, 200, 220],
+              borderColor: '#4e73df',
+              backgroundColor: 'rgba(78, 115, 223, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.3
+            },
+            {
+              label: 'Verifikasi Dilakukan',
+              data: [50, 80, 100, 120, 150],
+              borderColor: '#1cc88a',
+              backgroundColor: 'rgba(28, 200, 138, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                drawBorder: false
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
 
-// Data laporan dari backend
-const laporanTerbaru = ref(page.props.reports ?? []);
+      // Status Distribution Chart (Aktivitas Pengguna)
+      const statusCtx = statusChart.value.getContext('2d');
+      statusChartInstance = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pelaporan', 'Verifikasi'],
+          datasets: [{
+            data: [70, 30], // Contoh distribusi: 70% pelaporan, 30% verifikasi
+            backgroundColor: ['#4e73df', '#1cc88a'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
+          plugins: {
+            legend: {
+              position: 'right'
+            }
+          }
+        }
+      });
+    };
 
+    onMounted(() => {
+      initCharts();
+      fetchDashboardData();
+      fetchReports();
+    });
 
-// Aktivitas
-const aktivitas = ref(page.props.aktivitas ?? [
-  { icon: '✅', aksi: 'Cek NPWP', detail: '', tanggal: '1 hari lalu', kategori: 'Verifikasi' },
-  { icon: '⚠️', aksi: 'Lapor kasus penipuan', detail: '#PL1234', tanggal: '2 hari lalu', kategori: 'Laporan' },
-  { icon: '🔍', aksi: 'Cek blacklist buat', detail: '089xxxxxxx', tanggal: '3 hari lalu', kategori: 'Blacklist' },
-  { icon: '🧾', aksi: 'Isi saldo sebesar', detail: 'Rp 50.000', tanggal: '5 hari lalu', kategori: 'Pembayaran' }
-]);
+    // Helper methods
+    const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
 
-// Aksi cepat
-const aksiCepat = ref([
-  { icon: '📝', label: 'Bikin Laporan Baru', variant: 'primary', url: '/pelaporan' },
-  { icon: '🔎', label: 'Cari Laporan', variant: 'info', url: '/CariLaporan' },
-  { icon: '💰', label: 'Isi Credit', variant: 'warning', url: '/top-ups' },
-  { icon: '📊', label: 'Laporan Saya', variant: 'secondary', url: '/laporan-saya' },
-  { icon: '📱', label: 'Verifikasi Data', variant: 'danger', url: '/verifikasi' }
-]);
+    const getStatusClass = (status) => {
+      switch (status) {
+        case 'Pending': return 'warning';
+        case 'In Progress': return 'primary';
+        case 'Resolved': return 'success';
+        default: return 'secondary';
+      }
+    };
 
-// Feedback dinamis
-const userAvatar = ref(page.props.auth?.user?.avatar ?? '/Default-Profile.png');
+    // API calls
+    const fetchDashboardData = async () => {
+      try {
+        console.log('Dashboard data fetched');
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
 
+    const fetchReports = async () => {
+      try {
+        console.log('Reports fetched');
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+      }
+    };
 
-// Format rupiah
-const formatRupiah = (jumlah) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(jumlah);
-};
+    // Action methods
+    const exportTrenData = () => {
+      console.log('Exporting trend data');
+    };
 
-// Persentase verifikasi
-const progresVerifikasi = computed(() => {
-  const total = Object.keys(statusVerifikasi.value).length;
-  const terverifikasi = Object.values(statusVerifikasi.value).filter(status => status).length;
-  return Math.round((terverifikasi / total) * 100);
-});
+    const exportStatusData = () => {
+      console.log('Exporting status data');
+    };
 
-// Modal logic
-const showModal = (laporanId) => {
-  const modalElement = document.getElementById('laporanModal');
-  const modal = new Modal(modalElement);
-  modal.show();
+    const exportSummaryData = () => {
+      console.log('Exporting summary data');
+    };
+
+    const showFilterModal = () => {
+      console.log('Showing filter modal');
+    };
+
+    return {
+      trendChart,
+      statusChart,
+      dashboardStats,
+      reports,
+      formatNumber,
+      getStatusClass,
+      exportTrenData,
+      exportStatusData,
+      exportSummaryData,
+      showFilterModal
+    };
+  }
 };
 </script>
 
 <style scoped>
-:root {
-  --primary-color: #4361ee;
-  --secondary-color: #3f37c9;
-  --success-color: #28a745;
-  --warning-color: #f7b801;
-  --danger-color: #e5383b;
-  --info-color: #4cc9f0;
-  --light-color: #f8f9fa;
-  --dark-color: #212529;
-  --gray-color: #6c757d;
-  --card-bg: #ffffff;
-  --body-bg: #f5f7fa;
-  --text-color: #2c3e50;
-  --text-muted: #6c757d;
-  --border-radius: 12px;
-  --box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  --transition: all 0.3s ease;
+
+.card {
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  overflow: hidden;
+
+  
 }
 
-.dashboard-container {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  background-color: var(--body-bg);
-  color: var(--text-color);
-  min-height: 100vh;
-  transition: var(--transition);
+.custom-card {
+  border-radius: 12px;
+  background: #fff;
+  gap: 1rem;
 }
 
-@media (max-width: 992px) {
-  .dashboard-container {
-    padding: 1.5rem;
-  }
+.custom-card .card-body {
+  padding: 10px;
+  height: 102px;
+}
+
+.text-content {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background-color: #4e73df;
+}
+
+.bg-primary { background-color: #4e73df; }
+.bg-warning { background-color: #f6c23e; }
+.bg-success { background-color: #1cc88a; }
+.bg-info { background-color: #36b9cc; }
+.bg-secondary { background-color: #9370DB; }
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+.report-card {
+  padding: 15px;
+}
+
+.badge-danger { background-color: #e74a3b; }
+.badge-warning { background-color: #f6c23e; }
+.badge-info { background-color: #36b9cc; }
+.badge-success { background-color: #1cc88a; }
+.badge-primary { background-color: #4e73df; }
+
+.icon-circle i {
+  font-size: 1.5rem;
+}
+
+.col-md-3 {
+  padding: 0 5px;
+}
+
+.mb-3 {
+  margin-bottom: 0.5rem !important; /* Reduce bottom margin */
+}
+
+.row {
+  margin-right: -5px;
+  margin-left: -5px;
 }
 
 @media (max-width: 768px) {
-  .dashboard-container {
-    padding: 1rem;
+  .col-md-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+  .custom-card {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  .d-flex.justify-content-between {
+    flex-direction: column;
+  }
+  .d-flex.justify-content-between.align-items-center .d-flex {
+    flex-direction: column;
+    width: 100%;
+  }
+  .d-flex.justify-content-between.align-items-center .d-flex button {
+    margin-right: 0 !important;
+    margin-bottom: 0.5rem;
+    width: 100%;
   }
 }
 </style>

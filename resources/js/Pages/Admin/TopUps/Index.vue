@@ -3,8 +3,8 @@
     <Head title="Manajemen Top Up" />
     <div class="container py-5">
       <div class="dashboard-header mb-4">
-        <h1 class="fw-bold text-primary">Admin Panel</h1>
-        <h2 class="fw-light text-secondary">Top Up Management</h2>
+        <h1 class="fw-bold text-dark">Panel Admin</h1>
+        <h2 class="fw-light text-secondary">Manajemen Top Up</h2>
       </div>
 
       <!-- Filter dan Search -->
@@ -22,7 +22,7 @@
             </div>
 
             <div class="filter-item flex-grow-1">
-              <label class="form-label text-muted small mb-1">Search User</label>
+              <label class="form-label text-muted small mb-1">Cari User</label>
               <div class="input-group">
                 <input
                   v-model="filters.search"
@@ -104,7 +104,7 @@
       <!-- Table Top Ups -->
       <div class="card shadow">
         <div class="card-header bg-white py-3">
-          <h5 class="mb-0">Transaction History</h5>
+          <h5 class="mb-0">Riwayat Transaksi</h5>
         </div>
         <div class="table-responsive">
           <table class="table table-hover m-0">
@@ -162,25 +162,46 @@
                 </td>
                 <td class="text-end pe-4">
                   <div class="d-flex justify-content-end gap-2">
-                    <button
-                      v-if="topUp.status === 'pending'"
-                      @click="verifyTopUp(topUp.id)"
-                      class="btn btn-sm btn-outline-success"
-                      :disabled="loadingIds.includes(topUp.id)"
-                    >
-                      <span v-if="loadingIds.includes(topUp.id)" class="spinner-border spinner-border-sm me-1"></span>
-                      <i v-else class="fas fa-check me-1"></i> Verifikasi
-                    </button>
-                    <button
-                      v-if="topUp.status === 'pending'"
-                      @click="rejectTopUp(topUp.id)"
-                      class="btn btn-sm btn-outline-danger"
-                      :disabled="loadingIds.includes(topUp.id)"
-                    >
-                      <span v-if="loadingIds.includes(topUp.id)" class="spinner-border spinner-border-sm me-1"></span>
-                      <i v-else class="fas fa-times me-1"></i> Tolak
-                    </button>
-                    <span v-if="topUp.status !== 'pending'" class="text-muted">-</span>
+                    <div class="dropdown">
+                      <button
+                        class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                        type="button"
+                        id="actionMenuButton"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                      >
+                        <i class="fas fa-ellipsis-v"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionMenuButton">
+                        <li v-if="topUp.status === 'pending'">
+                          <button 
+                            class="dropdown-item text-success" 
+                            @click="verifyTopUp(topUp.id)"
+                            :disabled="loadingIds.includes(topUp.id)"
+                          >
+                            <i class="fas fa-check me-2"></i> Verifikasi
+                          </button>
+                        </li>
+                        <li v-if="topUp.status !== 'pending'">
+                          <button 
+                            class="dropdown-item text-warning" 
+                            @click="updateStatus(topUp.id, 'pending')"
+                            :disabled="loadingIds.includes(topUp.id)"
+                          >
+                            <i class="fas fa-clock me-2"></i> Atur Pending
+                          </button>
+                        </li>
+                        <li v-if="topUp.status !== 'rejected'">
+                          <button 
+                            class="dropdown-item text-danger" 
+                            @click="rejectTopUp(topUp.id)"
+                            :disabled="loadingIds.includes(topUp.id)"
+                          >
+                            <i class="fas fa-times me-2"></i> Tolak
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -266,19 +287,12 @@
       </div>
 
       <!-- Modal Export Logs -->
-      <div
-        class="modal fade"
-        id="exportModal"
-        tabindex="-1"
-        aria-labelledby="exportModalLabel"
-        aria-hidden="true"
-        ref="exportModalRef"
-      >
+      <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true" ref="exportModalRef">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="exportModalLabel">
-                <i class="fas fa-file-export me-2"></i>Export Logs
+                <i class="fas fa-file-export me-2"></i>Ekspor Data
               </h5>
               <button
                 type="button"
@@ -311,7 +325,7 @@
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" @click="closeExportModal">Batal</button>
               <button type="button" class="btn btn-success" @click="exportLogs">
-                <i class="fas fa-download me-1"></i> Download CSV
+                <i class="fas fa-download me-1"></i> Unduh CSV
               </button>
             </div>
           </div>
