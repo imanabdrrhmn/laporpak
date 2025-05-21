@@ -23,25 +23,25 @@
         <div class="section-title">MAIN MENU</div>
         <ul class="nav flex-column">
           <li class="nav-item">
-            <a class="nav-link admin-item" href="/admin/dashboard">
+            <Link class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/dashboard' }" href="/admin/dashboard">
               <i class="bi bi-grid-fill"></i>
               <span>Dashboard Admin</span>
-            </a>
+            </Link>
           </li>
           <li class="nav-item">
-            <a class="nav-link admin-item" href="/admin/pelaporan">
+            <Link class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/pelaporan' }" href="/admin/pelaporan">
               <i class="bi bi-file-earmark-excel-fill"></i>
               <span>Manajemen Pelaporan</span>
-            </a>
+            </Link>
           </li>
           <li class="nav-item">
-            <a class="nav-link admin-item" href="/admin/top-ups">
+            <a class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/top-ups' }" href="/admin/top-ups">
               <i class="bi bi-wallet-fill"></i>
               <span>Manajemen Top-up</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link admin-item" href="/admin/users">
+            <a class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/users' }" href="/admin/users">
               <i class="bi bi-people-fill"></i>
               <span>Manajemen Pengguna</span>
             </a>
@@ -83,7 +83,12 @@
 </template>
 
 <script>
+import { Link } from '@inertiajs/vue3'
+
 export default {
+  components: {
+    Link
+  },
   methods: {
     logout() {
       // Submit a POST request to the logout endpoint
@@ -201,7 +206,7 @@ export default {
   color: #ffffff; /* Changed to white */
   font-weight: 500;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   border-radius: 6px;
 }
 
@@ -228,10 +233,33 @@ export default {
   color: #ffffff; /* Keeping icon white on hover */
 }
 
-.admin-item.active {
+.admin-item.active-dashboard {
   color: #ffffff; /* Changed to white */
   font-weight: 600;
-  background-color: rgba(255, 255, 255, 0.25); /* Highlighted background for active items */
+  background-color: rgba(255, 255, 255, 0.25); 
+}
+
+.active-item {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+  font-weight: 600;
+  position: relative;
+}
+
+.active-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: #ffffff;
+  border-radius: 0 4px 4px 0;
+}
+
+.admin-item:not(.active-item):hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(3px);
 }
 
 .bottom-menu {
