@@ -170,7 +170,7 @@ import axios from 'axios';
 
 export default {
   components: {
-    AdminLayout,
+    AppLayout,
     Head
   },
   setup() {
