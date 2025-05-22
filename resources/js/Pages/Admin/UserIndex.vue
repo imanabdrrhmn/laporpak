@@ -137,6 +137,14 @@
                           </select>
                         </form>
                       </td>
+                      <td>
+                        <button
+                          class="btn btn-sm btn-primary"
+                          @click="openPermissionModal(user)"
+                        >
+                          Edit Permissions
+                        </button>
+                      </td>
                       <td class="text-center">
                         <form :action="route('admin.users.delete', user.id)" method="POST">
                           <input type="hidden" name="_method" value="DELETE" />
@@ -154,6 +162,25 @@
                             </table>
                           </div>
                         </div>
+
+              <!-- Modal Permission -->
+                <Modal v-if="showModal" @close="showModal = false">
+                  <template #title>Permission untuk {{ selectedUser.name }}</template>
+
+                  <form @submit.prevent="submitPermissions">
+                    <div v-for="perm in allPermissions" :key="perm">
+                      <label>
+                        <input
+                          type="checkbox"
+                          :value="perm"
+                          v-model="selectedPermissions"
+                        />
+                        {{ perm }}
+                      </label>
+                    </div>
+                    <button type="submit">Simpan</button>
+                  </form>
+                </Modal>
               
               <!-- Roles Tab -->
               <div class="tab-pane fade" id="roles" role="tabpanel" aria-labelledby="roles-tab">
@@ -267,6 +294,7 @@ import Swal from 'sweetalert2'
 import { ref, computed } from 'vue'
 import { usePage, Head } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue';
+import Modal from '@/Pages/Admin/Modal.vue'
 
 const { props } = usePage()
 const users = props.users
@@ -415,6 +443,33 @@ function submitNewRole() {
       console.error(err)
     })
 }
+
+
+const showModal = ref(false)
+const selectedUser = ref({})
+const selectedPermissions = ref([])
+const allPermissions = ref([])
+
+function openPermissionModal(user) {
+  axios.get(`/admin/users/${user.id}/permissions`).then((res) => {
+    selectedUser.value = res.data.user
+    allPermissions.value = res.data.allPermissions
+    selectedPermissions.value = res.data.user.permissions
+    showModal.value = true
+  })
+}
+
+function submitPermissions() {
+  axios
+    .patch(`/admin/users/${selectedUser.value.id}/permissions`, {
+      permissions: selectedPermissions.value,
+    })
+    .then(() => {
+      showModal.value = false
+      alert('Permission berhasil diperbarui!')
+    })
+}
+
 </script>
 
 <style>
