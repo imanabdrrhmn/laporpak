@@ -39,6 +39,7 @@ class ReportManagementController
         'status' => $report->status,
         'latitude' => $report->latitude,
         'longitude' => $report->longitude,
+        'address' => $report->address,
         'service' => $report->service,
         'source' => $report->source,
         'created_at' => $report->created_at->toDateTimeString(),

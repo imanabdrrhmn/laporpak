@@ -45,8 +45,7 @@
           </div>
           <div>
             <strong>Lokasi:</strong><br />
-            Latitude: {{ report.latitude }}<br />
-            Longitude: {{ report.longitude }}
+            {{ report.address}}
           </div>
         </div>
 

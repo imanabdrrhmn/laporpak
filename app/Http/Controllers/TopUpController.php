@@ -71,6 +71,8 @@ class TopUpController extends Controller
             'id' => $topUp->id,
             'amount' => $topUp->amount,
             'status' => $topUp->status,
+            'proof' => $topUp->proof,
+            'payment_method' => $topUp->payment_method,
             'created_at' => $topUp->created_at->toDateTimeString(),
             'user' => [
                 'id' => $topUp->user->id,

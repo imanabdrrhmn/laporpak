@@ -527,8 +527,8 @@ const totalPages = computed(() => {
 });
 
 // Modal Bukti Pembayaran
-const showProofModal = (imgPath) => {
-  proofModalUrl.value = getProofUrl(imgPath);
+const showProofModal = (path) => {
+  proofModalUrl.value = getProofUrl(path);
   if (!proofModalInstance.value && proofModalRef.value) {
     proofModalInstance.value = new Modal(proofModalRef.value);
   }

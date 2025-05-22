@@ -90,6 +90,7 @@
                       <th>Email</th>
                       <th>Role</th>
                       <th>Change Role</th>
+                      <th>Permissions</th>
                       <th class="text-center">Actions</th>
                     </tr>
                   </thead>
