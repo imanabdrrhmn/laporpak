@@ -33,7 +33,6 @@ class ProfileController extends Controller
         'reports' => $reportCounts->total ?? 0,
         'selected' => $reportCounts->selected ?? 0,
         'in_process' => $reportCounts->in_process ?? 0,
-        // 'last_login' => optional($user->last_login_at)->diffForHumans() ?? 'Belum pernah login',
         'joined_at' => $user->created_at->translatedFormat('d F Y'),
         'is_verified' => $user->hasVerifiedEmail(),
         'is_active_reporter' => $reportCounts->total > 3,

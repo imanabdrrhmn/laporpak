@@ -20,11 +20,9 @@ class UserManagementController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $user->roles->pluck('name')->join(', '),
-                'avatar_url' => !$user->avatar 
-                    ? asset('/Default-Profile.png')
-                    : (str_starts_with($user->avatar, 'http://') || str_starts_with($user->avatar, 'https://') 
-                        ? $user->avatar 
-                        : asset('storage/' . $user->avatar)),
+                'avatar_url' => $user && $user->avatar
+                    ? asset('storage/' . $user->avatar)
+                    : asset('/Default-Profile.png'),
             ];
         });
 

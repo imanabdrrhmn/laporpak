@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -78,27 +82,40 @@ class AuthenticatedSessionController extends Controller
 
 
     public function handleGoogleCallback()
-{
-    try {
-        $googleUser = Socialite::driver('google')->user();
-        
-        $user = User::firstOrCreate([
-            'email' => $googleUser->getEmail(),
-        ], [
-            'name' => $googleUser->getName(),
-            'google_id' => $googleUser->getId(),
-            'avatar' => $googleUser->getAvatar(),
-            'password' => bcrypt(uniqid()) 
-        ]);
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
 
-        if (!$user->hasRole('user')) {
-            $user->assignRole('user');
-        }
+            // Coba unduh avatar Google
+            $avatarUrl = $googleUser->getAvatar();
+            $avatarPath = null;
 
-        Auth::login($user);
-        session()->regenerate();
+            try {
+                $avatarContents = Http::get($avatarUrl)->body();
+                $avatarPath = 'avatars/' . Str::uuid() . '.jpg';
+                Storage::disk('public')->put($avatarPath, $avatarContents);
+            } catch (\Exception $e) {
+                \Log::warning('Gagal download avatar dari Google: ' . $e->getMessage());
+            }
 
-        return redirect()->to(session()->pull('url.intended', '/'));
+            // Buat atau ambil user
+            $user = User::firstOrCreate([
+                'email' => $googleUser->getEmail(),
+            ], [
+                'name' => $googleUser->getName(),
+                'google_id' => $googleUser->getId(),
+                'avatar' => $avatarPath,
+                'password' => bcrypt(uniqid())
+            ]);
+
+            if (!$user->hasRole('user')) {
+                $user->assignRole('user');
+            }
+
+            Auth::login($user);
+            session()->regenerate();
+
+            return redirect()->to(session()->pull('url.intended', '/'));
 
         } catch (\Exception $e) {
             return redirect('/login')->with('error', 'Login dengan Google gagal.');
