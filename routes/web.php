@@ -19,7 +19,11 @@ Route::get('/', function () {
     return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'feedbacks' => $feedbacks
+        'feedbacks' => $feedbacks,
+        'flash' => [
+            'status' => session('status'),
+            'error' => session('error'),
+        ],
     ]);
 });
 

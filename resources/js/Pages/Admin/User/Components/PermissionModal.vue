@@ -257,7 +257,10 @@ const getPermissionDescription = (permission) => {
     'user_management': 'Mengelola pengguna',
     'settings': 'Mengatur konfigurasi',
     'reports': 'Melihat laporan',
-    'export': 'Mengekspor data'
+    'export': 'Mengekspor data',
+    'view_reports_penipuan' : 'Melihat Laporan Penipuan',
+    'view_reports_infrastruktur' : 'Melihat Laporan Kerusakan Infrastruktur',
+    'verify_reports': 'Verifikasi Laporan'
   }
   return descriptions[permission] || 'Akses khusus'
 }
