@@ -33,12 +33,6 @@
 
         <!-- Grid Info -->
         <div class="info-grid">
-          <div v-if="report.service === 'fraud'" style="margin-top: 12px">
-          <strong>Sumber Penipuan:</strong><br />
-          <a>
-            {{ report.source }}
-          </a>
-        </div>
           <div>
             <strong>Kategori:</strong><br />
             {{ report.category }}
@@ -46,6 +40,12 @@
           <div>
             <strong>Lokasi:</strong><br />
             {{ report.address}}
+          </div>
+          <div v-if="report.source">
+            <strong>Sumber Penipuan:</strong><br />
+            <a :href="report.source" target="_blank" class="source-link">
+              {{ report.source }}
+            </a>
           </div>
         </div>
 
@@ -177,8 +177,8 @@ const onImageLoad = (event) => {
   align-items: center;
   overflow-y: auto;
   padding: 40px 16px;
+  animation: fadeIn 0.3s ease;
 }
-
 
 .modal-content {
   background: white;
@@ -190,19 +190,30 @@ const onImageLoad = (event) => {
   overflow-y: auto;  
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease;
 }
-
 
 .close-btn {
   position: absolute;
-  top: 12px;
-  right: 16px;
-  font-size: 1.5rem;
-  background: none;
+  top: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  font-size: 36px;
+  background: transparent;
   border: none;
-  color: #999;
+  color: #666;
   cursor: pointer;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  transform: rotate(90deg);
+  color: #dc3545;
 }
 
 .modal-header {
@@ -220,10 +231,17 @@ const onImageLoad = (event) => {
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
   font-size: 14px;
+}
+
+.info-grid > div {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
 }
 
 .modal-section {
@@ -247,6 +265,7 @@ const onImageLoad = (event) => {
   max-width: 100%;
   height: 200px; 
   overflow: hidden;
+  margin-top: 20px; /* Add margin to prevent overlap with close button */
 }
 
 
@@ -353,4 +372,29 @@ const onImageLoad = (event) => {
   background-color: transparent; /* Warna track */
 }
 
+.source-link {
+  color: #007bff;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.source-link:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 </style>
