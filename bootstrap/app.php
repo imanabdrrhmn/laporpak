@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'contact.verified' => \App\Http\Middleware\EnsureContactIsVerified::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'auth' => \App\Http\Middleware\Authenticate::class,
+            'email.not.verified' => \App\Http\Middleware\EnsureEmailIsNotVerified::class,
         ]);
 
         //

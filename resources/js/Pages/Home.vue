@@ -10,7 +10,7 @@ import Feedback from '@/Components/Feedback.vue'
 import LoginModal from '@/Components/modals/LoginModal.vue'
 import RegisterModal from '@/Components/modals/RegisterModal.vue'
 import ForgotPasswordModal from '@/Components/modals/ResetPasswordModal.vue'
-
+import Notification from '@/Components/Notification.vue'
 
 const page = usePage()
 const feedbacks = page.props.feedbacks
@@ -18,6 +18,9 @@ const feedbacks = page.props.feedbacks
 const showLogin = ref(false)
 const showRegister = ref(false)
 const showForgotPassword = ref(false)
+const status = ref(page.props.flash.status || '')
+const error = ref(page.props.flash.error || '')
+
 
 watch(
   () => page.props.auth.user,
@@ -74,6 +77,9 @@ watch(
         @update:visible="showForgotPassword = $event"
         @open-login="() => switchModal('login')"
       />
+    <Notification v-if="status" type="success" :message="status" />
+    <!-- Notification untuk error -->
+    <Notification v-if="error" type="error" :message="error" />
     </div>
   </AppLayout>
 </template>

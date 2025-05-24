@@ -3,10 +3,8 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\TokenEmailVerificationController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\PhoneVerificationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\EnsureContactVerified;
@@ -42,16 +40,16 @@ Route::middleware('guest')->group(function () {
     });
 
 Route::middleware('auth')->group(function () {
-    Route::get('verify-email', EmailVerificationPromptController::class)
-        ->name('verification.notice');
-
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-
-    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
+    
+    Route::get('/verify-email', function () {
+        return Inertia::render('VerifyEmail', [
+            'status' => session('status'),
+        ]);
+    })->middleware('auth','email.not.verified')->name('verification.notice');
+    
+    Route::post('/email/verify/send-token', [TokenEmailVerificationController::class, 'send'])
+    ->middleware('auth')
+    ->name('email.verify.send');
 
     Route::get('/verify-phone', function () {
     return Inertia::render('VerifyPhone');})->name('verification.phone.notice');
@@ -64,3 +62,5 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+
+Route::get('/email/verify-token', [TokenEmailVerificationController::class, 'verify'])->name('email.verify.token');
