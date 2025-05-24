@@ -1,24 +1,28 @@
 <template>
-  <!-- Main Layout Container -->
   <div class="admin-layout">
     <!-- Top Navbar -->
     <div class="top-navbar">
       <div class="navbar-brand">
         <img src="/images/logo-Navbar.svg" alt="LaporPak Logo" class="navbar-logo">
       </div>
-      <div class="navbar-actions">
-        <div class="user-info">
+
+      <div class="navbar-right">
+        <div class="user-info d-none d-md-block">
           <span class="user-greeting">Selamat datang, {{ user.name }}</span>
         </div>
-        <div class="navbar-icons">
+        <button class="hamburger-btn d-md-none" @click="toggleSidebar">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="navbar-icons d-none d-md-flex">
           <i class="bi bi-bell"></i>
           <i class="bi bi-gear"></i>
         </div>
       </div>
     </div>
-    
-    <!-- Sidebar Component -->
-    <div class="sidebar">
+
+
+    <!-- Sidebar -->
+    <div class="sidebar d-none d-md-flex" ref="sidebar">
       <div class="sidebar-section">
         <div class="section-title">MAIN MENU</div>
         <ul class="nav flex-column">
@@ -35,28 +39,28 @@
             </Link>
           </li>
           <li class="nav-item">
-            <a class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/top-ups' }" href="/admin/top-ups">
+            <Link class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/top-ups' }" href="/admin/top-ups">
               <i class="bi bi-wallet-fill"></i>
               <span>Manajemen Top-up</span>
-            </a>
+            </Link>
           </li>
           <li class="nav-item">
-            <a class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/users' }" href="/admin/users">
+            <Link class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/users' }" href="/admin/users">
               <i class="bi bi-people-fill"></i>
               <span>Manajemen Pengguna</span>
-            </a>
+            </Link>
           </li>
         </ul>
       </div>
-      
+
       <div class="sidebar-section">
         <div class="section-title">LAINNYA</div>
         <ul class="nav flex-column">
           <li class="nav-item">
-            <a class="nav-link admin-item" href="/admin/feedback">
+            <Link class="nav-link admin-item" href="/admin/feedback">
               <i class="bi bi-chat-left-text-fill"></i>
               <span>Feedback Pengguna</span>
-            </a>
+            </Link>
           </li>
           <li class="nav-item">
             <a class="nav-link admin-item" href="/dashboard" target="_blank">
@@ -65,23 +69,23 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link admin-item" href="/admin/about">
+            <Link class="nav-link admin-item" href="/admin/about">
               <i class="bi bi-info-circle-fill"></i>
               <span>Tentang Aplikasi</span>
-            </a>
+            </Link>
           </li>
         </ul>
       </div>
-      
+
       <div class="bottom-menu">
-        <a class="nav-link admin-item danger-item" href="/logout" @click.prevent="logout">
+        <a class="nav-link admin-item danger-item" href="#" @click.prevent="logout">
           <i class="bi bi-box-arrow-right"></i>
           <span>Keluar</span>
         </a>
       </div>
     </div>
-    
-    <!-- Main Content Area -->
+
+    <!-- Main Content -->
     <div class="main-content">
       <slot></slot>
     </div>
@@ -89,17 +93,26 @@
 </template>
 
 <script setup>
-import { Link, useForm, usePage} from '@inertiajs/vue3';
-import { computed} from 'vue';
+import { Link, useForm, usePage } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 
-const page = usePage();
-const user = computed(() => page.props.auth?.user || {});
+const page = usePage()
+const user = computed(() => page.props.auth?.user || {})
+
+// Sidebar toggle logic (optional)
+const sidebar = ref(null)
+const toggleSidebar = () => {
+  sidebar.value.classList.toggle('d-none')
+}
 
 
+// Logout logic
+const form = useForm({})
 const logout = () => {
-  useForm({}).post('/logout');
-};
+  form.post('/logout')
+}
 </script>
+
 
 <style scoped>
 /* Main Layout Styles */
@@ -191,6 +204,10 @@ const logout = () => {
   padding: 0 0.8rem;
 }
 
+.hamburger-btn {
+  background-color: #0d6efd;
+}
+
 .section-title {
   font-size: 0.75rem;
   font-weight: 600;
@@ -203,6 +220,12 @@ const logout = () => {
   padding: 0;
   margin: 0;
 }
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
 
 .nav-item {
   list-style: none;
@@ -300,5 +323,18 @@ const logout = () => {
 .main-content {
   display: flex;
 
+}
+
+@media (max-width: 767.98px) {
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .user-info,
+  .navbar-icons {
+    display: none !important;
+  }
 }
 </style>
