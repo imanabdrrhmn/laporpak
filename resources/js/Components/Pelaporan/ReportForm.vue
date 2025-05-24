@@ -227,12 +227,15 @@ const validatePhoneNumber = () => {
 const validateEmail = () => {
   const email = props.formData.email;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   if (emailRegex.test(email)) {
     props.validationErrors.email = false;
+    props.formData.source = email; 
   } else {
     props.validationErrors.email = true;
   }
 };
+
 
 const onPhoneKeypress = (e) => {
   // Allow only numeric input
