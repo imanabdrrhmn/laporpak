@@ -279,26 +279,21 @@ const logout = () => {
 }
 
 .danger-item {
-  color: #dc3545 !important;
+  color: #ffffff !important;
   background-color: transparent !important;
 }
 
 .danger-item i {
-  color: #dc3545 !important;
+  color: #ffffff !important;
 }
 
 .danger-item span {
-  color: #dc3545 !important;
+  color: #ffffff !important;
 }
 
 .danger-item:hover {
   color: #ffffff !important;
   background-color: #dc3545 !important;
-}
-
-.danger-item:hover i,
-.danger-item:hover span {
-  color: #ffffff !important;
 }
 
 /* Main Content Area */

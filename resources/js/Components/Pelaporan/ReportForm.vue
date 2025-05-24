@@ -49,22 +49,52 @@
               Kategori harus dipilih
             </div>
           </div>
-          <div class="col-12" v-if="selectedService === 'Penipuan'">
-            <label for="source" class="form-label mb-2">Sumber Penipuan</label>
+          <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category === 'Email' && formData.category">
+            <label for="email" class="form-label mb-2">Alamat Email</label>
             <input
-              id="source"
-              v-model="formData.source"
-              type="text"
+              id="email"
+              v-model="formData.email"
+              type="email"
               class="form-control"
-              :class="{'is-invalid': validationErrors.source}"
-              placeholder="Contoh: telepon, WhatsApp, dll"
-              maxlength="255"
-              @input="validationErrors.source = false"
-              aria-label="Sumber Penipuan"
+              :class="{'is-invalid': validationErrors.email}"
+              placeholder="Masukkan alamat email"
+              @input="validateEmail"
               required
             />
+            <div v-if="validationErrors.email" class="invalid-feedback">
+              Alamat email tidak valid
+            </div>
+          </div>
+          <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category !== 'Email' && formData.category">
+            <label for="source" class="form-label mb-2">Sumber Penipuan</label>
+            <div class="input-group">
+              <select 
+                v-model="selectedCountry" 
+                class="form-select country-select"
+                @change="onCountryChange"
+              >
+                <option 
+                  v-for="country in sortedCountries" 
+                  :key="country.iso2"
+                  :value="country"
+                >
+                  {{ getFlagEmoji(country.iso2) }} +{{ country.dialCode }}
+                </option>
+              </select>
+              <input
+                id="source"
+                v-model="localPhoneNumber"
+                type="tel"
+                class="form-control"
+                :class="{'is-invalid': validationErrors.source}"
+                placeholder="Masukkan nomor telepon"
+                @input="onPhoneInput"
+                @keypress="onPhoneKeypress"
+                required
+              />
+            </div>
             <div v-if="validationErrors.source" class="invalid-feedback">
-              Sumber penipuan harus diisi
+              Nomor telepon tidak valid
             </div>
           </div>
           <div class="col-12">
@@ -140,9 +170,10 @@
 
 <script setup>
 import MapContainer from './MapContainer.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { allCountries } from 'country-telephone-data';
 
-defineProps({
+const props = defineProps({
   selectedService: String,
   services: Array,
   serviceInfo: Object,
@@ -157,6 +188,65 @@ defineEmits(['select-service', 'submit-report', 'file-upload', 'validate-descrip
 defineExpose({
   formRef: ref(null)
 });
+
+const selectedCountry = ref(allCountries.find(c => c.iso2 === 'id'));
+const localPhoneNumber = ref('');
+
+const getFlagEmoji = (countryCode) => {
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt());
+  return String.fromCodePoint(...codePoints);
+};
+
+const sortedCountries = computed(() => {
+  return allCountries.sort((a, b) => {
+    if (a.iso2 === 'id') return -1;
+    if (b.iso2 === 'id') return 1;
+    return a.name.localeCompare(b.name);
+  });
+});
+
+const onCountryChange = () => {
+  validatePhoneNumber();
+};
+
+const validatePhoneNumber = () => {
+  const phoneNumber = localPhoneNumber.value.replace(/\D/g, '');
+  const isValid = phoneNumber.length >= 8 && phoneNumber.length <= 15;
+  
+  if (isValid) {
+    props.formData.source = `+${selectedCountry.value.dialCode}${phoneNumber}`;
+    props.validationErrors.source = false;
+  } else {
+    props.validationErrors.source = true;
+  }
+};
+
+const validateEmail = () => {
+  const email = props.formData.email;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (emailRegex.test(email)) {
+    props.validationErrors.email = false;
+  } else {
+    props.validationErrors.email = true;
+  }
+};
+
+const onPhoneKeypress = (e) => {
+  // Allow only numeric input
+  if (!/[\d]/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
+const onPhoneInput = (e) => {
+  // Remove any non-numeric characters that might have been pasted
+  e.target.value = e.target.value.replace(/\D/g, '');
+  localPhoneNumber.value = e.target.value;
+  validatePhoneNumber();
+};
 </script>
 
 <style scoped>
@@ -262,6 +352,24 @@ defineExpose({
 .service-tabs {
   border-bottom: 1px solid #dee2e6;
   padding-bottom: 1rem;
+}
+
+.country-select {
+  min-width: 140px;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input-group .country-select {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group .form-control {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 @keyframes shake {
