@@ -25,7 +25,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'contact.verified'])->name('dashboard');
 Route::get('admin/dashboard', function () {
-    return Inertia::render('Admin/DashboardAdmin', [
+    return Inertia::render('Admin/Dashboard/DashboardAdmin', [
     ]);
 })->middleware(['auth', 'contact.verified', 'role:admin||verifier'])->name('dashboard.admin');
 

@@ -26,7 +26,7 @@ class UserManagementController extends Controller
             ];
         });
 
-        return inertia('Admin/UserIndex', [
+        return inertia('Admin/User/UserIndex', [
             'users' => $users,
             'roles' => Role::pluck('name'),
         ]);
