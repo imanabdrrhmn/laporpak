@@ -1,8 +1,8 @@
 <template>
   <div>
-    <!-- Search & Filter Row -->
+    <!-- Search & Filter Row (tetap tampil di semua layar) -->
     <div class="row mb-4 align-items-center">
-      <div class="col-md-6">
+      <div class="col-12 col-md-6 mb-3 mb-md-0">
         <div class="search-container">
           <div class="input-group">
             <span class="input-group-text bg-transparent border-end-0">
@@ -17,9 +17,9 @@
           </div>
         </div>
       </div>
-      <div class="col-md-6 text-md-end mt-3 mt-md-0">
-        <div class="custom-select-container">
-          <select v-model="filterRole" class="form-select form-select-lg custom-select">
+      <div class="col-12 col-md-6 text-md-end">
+        <div class="custom-select-container mx-auto mx-md-0">
+          <select v-model="filterRole" class="form-select form-select-lg custom-select w-100 w-md-auto">
             <option value="">Semua Role</option>
             <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
           </select>
@@ -27,104 +27,138 @@
       </div>
     </div>
 
-    <!-- Users Table -->
-    <div class="table-responsive custom-table-container">
-      <table class="table custom-table align-middle">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nama</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Ubah Role</th>
-            <th>Izin</th>
-            <th class="text-center">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(user, index) in filteredUsers" :key="user.id" class="align-middle">
-            <td>{{ index + 1 }}</td>
-            <td>
-              <div class="d-flex align-items-center">
-                <img 
-                  :src="user.avatar_url" 
-                  alt="Avatar" 
-                  class="user-avatar rounded-circle me-2" 
-                  style="width: 40px; height: 40px; object-fit: cover;"
-                >
-                <span class="fw-medium">{{ user.name }}</span>
-              </div>
-            </td>
-            <td>{{ user.email }}</td>
-            <td>
-              <span v-if="user.roles.length" class="badge role-badge text-primary">
-                {{ user.roles }}
-              </span>
-              <span v-else class="badge no-role-badge">
-                Tidak Ada Role
-              </span>
-            </td>
-            <td class="position-relative">
-              <!-- Loading/Success Overlay -->
-              <div 
-                v-if="userStates[user.id]?.isSubmitting" 
-                class="loading-overlay-cell"
-              >
-                <div class="loading-content">
-                  <div v-if="userStates[user.id]?.submitSuccess" class="success-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="3">
-                      <polyline points="20,6 9,17 4,12"></polyline>
-                    </svg>
-                  </div>
-                  <div v-else class="loading-spinner-container">
-                    <div class="loading-spinner-small"></div>
-                    <div class="loading-spinner-glow"></div>
-                  </div>
+    <!-- Desktop: tabel (≥1025px) -->
+  <div class="d-none d-custom-table-block table-responsive custom-table-container">
+    <table class="table custom-table align-middle mb-0">
+      <thead>
+        <tr>
+          <th style="width: 30px;">#</th>
+          <th style="min-width: 120px;">Nama</th>
+          <th style="min-width: 160px;">Email</th>
+          <th style="width: 100px;">Role</th>
+          <th style="width: 130px;">Ubah Role</th>
+          <th style="width: 80px;">Izin</th>
+          <th class="text-center" style="width: 70px;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(user, index) in filteredUsers" :key="user.id" class="align-middle">
+          <td>{{ index + 1 }}</td>
+          <td>
+            <div class="d-flex align-items-center">
+              <img :src="user.avatar_url" alt="Avatar" class="user-avatar rounded-circle me-2" />
+              <span class="fw-medium user-name-text">{{ user.name }}</span>
+            </div>
+          </td>
+          <td>{{ user.email }}</td>
+          <td>
+            <span v-if="user.roles.length" class="badge role-badge text-primary">{{ user.roles }}</span>
+            <span v-else class="badge no-role-badge">Tidak Ada Role</span>
+          </td>
+          <td class="position-relative">
+            <div 
+              v-if="userStates[user.id]?.isSubmitting" 
+              class="loading-overlay-cell"
+            >
+              <div class="loading-content">
+                <div v-if="userStates[user.id]?.submitSuccess" class="success-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="3">
+                    <polyline points="20,6 9,17 4,12"></polyline>
+                  </svg>
+                </div>
+                <div v-else class="loading-spinner-container">
+                  <div class="loading-spinner-small"></div>
+                  <div class="loading-spinner-glow"></div>
                 </div>
               </div>
-              <select
-                name="role"
-                class="form-select form-select-sm custom-role-select"
-                @change="(e) => submitRoleChange(e, user.id, user.name)"
-                :disabled="userStates[user.id]?.isSubmitting"
+            </div>
+
+            <select
+              name="role"
+              class="form-select form-select-sm custom-role-select"
+              @change="(e) => submitRoleChange(e, user.id, user.name)"
+              :disabled="userStates[user.id]?.isSubmitting"
+              style="max-width: 120px;"
+            >
+              <option disabled selected>Pilih role</option>
+              <option
+                v-for="role in roles"
+                :key="role"
+                :value="role"
+                :selected="user.roles === role"
               >
-                <option disabled selected>Pilih role</option>
-                <option
-                  v-for="role in roles"
-                  :key="role"
-                  :value="role"
-                  :selected="user.roles === role"
-                >
-                  {{ role }}
-                </option>
-              </select>
-            </td>
-            <td>
+                {{ role }}
+              </option>
+            </select>
+          </td>
+          <td class="text-center">
+            <button
+              class="btn btn-sm btn-icon btn-primary"
+              type="button"
+              @click="$emit('open-permission-modal', user)"
+              title="Edit Izin"
+            >
+              <i class="bi bi-pencil-square"></i>
+            </button>
+          </td>
+          <td class="text-center">
+            <form :action="route('admin.users.delete', user.id)" method="POST">
+              <input type="hidden" name="_method" value="DELETE" />
+              <input type="hidden" name="_token" :value="csrf" />
               <button
-                class="btn btn-sm btn-primary"
-                @click="$emit('open-permission-modal', user)"
+                class="btn btn-sm btn-icon btn-danger"
+                type="submit"
+                @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
+                title="Hapus Pengguna"
               >
-                Edit Izin
+                <i class="bi bi-trash"></i>
               </button>
-            </td>
-            <td class="text-center">
-              <form :action="route('admin.users.delete', user.id)" method="POST">
-                <input type="hidden" name="_method" value="DELETE" />
-                <input type="hidden" name="_token" :value="csrf" />
-                <button
-                  class="btn btn-delete"
-                  @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
-                >
-                  <i class="bi bi-trash me-1"></i> Hapus
-                </button>
-              </form>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+    <!-- Mobile & tablet: card list (≤1024px) -->
+    <div class="d-block d-custom-table-none">
+      <div v-for="(user, index) in filteredUsers" :key="user.id" class="card mb-3 p-3 shadow-sm">
+        <div class="d-flex align-items-center mb-2">
+          <img :src="user.avatar_url" alt="Avatar" class="user-avatar rounded-circle me-3" />
+          <div>
+            <div class="fw-semibold">{{ user.name }}</div>
+            <div class="text-muted small">{{ user.email }}</div>
+          </div>
+        </div>
+        <div class="mb-2">
+          <strong>Role: </strong>
+          <span v-if="user.roles.length" class="badge role-badge text-primary">{{ user.roles }}</span>
+          <span v-else class="badge no-role-badge">Tidak Ada Role</span>
+        </div>
+        <div class="mb-2">
+          <label class="form-label mb-1"><strong>Ubah Role</strong></label>
+          <select
+            class="form-select form-select-sm"
+            @change="(e) => submitRoleChange(e, user.id, user.name)"
+            :disabled="userStates[user.id]?.isSubmitting"
+          >
+            <option disabled selected>Pilih role</option>
+            <option v-for="role in roles" :key="role" :value="role" :selected="user.roles === role">{{ role }}</option>
+          </select>
+          <!-- loading overlay bisa ditambahkan jika perlu -->
+        </div>
+        <div class="mb-2 d-flex gap-2 flex-wrap">
+          <button class="btn btn-primary btn-sm flex-grow-1" @click="$emit('open-permission-modal', user)">Edit Izin</button>
+          <button class="btn btn-delete btn-sm flex-grow-1" @click.prevent="confirmDelete(user.name, $event.target.closest('form'))">
+            <i class="bi bi-trash me-1"></i> Hapus
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
@@ -258,7 +292,43 @@ function confirmDelete(userName, form) {
 </script>
 
 <style scoped>
-/* Styling untuk animasi loading dan sukses */
+/* Responsive adjustments */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+@media (max-width: 576px) {
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .user-name-text {
+    font-size: 0.9rem;
+  }
+  .user-email-text {
+    font-size: 0.85rem;
+  }
+  .custom-role-select {
+    max-width: 120px;
+    font-size: 0.85rem;
+  }
+
+  .btn-delete {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  .custom-select-container {
+    max-width: 100%;
+  }
+  .search-container {
+    max-width: 100%;
+  }
+}
+
+/* Loading & success animations */
 .loading-overlay-cell {
   position: absolute;
   top: 0;
@@ -346,7 +416,7 @@ function confirmDelete(userName, form) {
   }
 }
 
-/* Styling lainnya (tetap dari kode asli) */
+
 .search-container {
   max-width: 400px;
 }
@@ -373,16 +443,14 @@ function confirmDelete(userName, form) {
   font-weight: 600;
   padding: 16px;
   border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
 }
 
 .custom-table td {
   padding: 16px;
   vertical-align: middle;
   border-bottom: 1px solid #e5e7eb;
-}
-
-.user-avatar {
-  border: 2px solid #e5e7eb;
+  white-space: nowrap;
 }
 
 .role-badge {
@@ -391,6 +459,7 @@ function confirmDelete(userName, form) {
   font-weight: 500;
   padding: 6px 12px;
   border-radius: 12px;
+  white-space: nowrap;
 }
 
 .no-role-badge {
@@ -399,6 +468,7 @@ function confirmDelete(userName, form) {
   font-weight: 500;
   padding: 6px 12px;
   border-radius: 12px;
+  white-space: nowrap;
 }
 
 .custom-role-select {
@@ -422,7 +492,9 @@ function confirmDelete(userName, form) {
   color: white;
   border: none;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 5px;
+  height: 35px;
+  width: 20px;
   transition: all 0.2s ease;
 }
 
@@ -430,4 +502,130 @@ function confirmDelete(userName, form) {
   background: #c53030;
   transform: translateY(-1px);
 }
+
+/* Custom display classes for 1024px breakpoint */
+@media (min-width: 1025px) {
+  .d-custom-table-block {
+    display: block !important;
+  }
+  .d-custom-table-none {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .d-custom-table-block {
+    display: none !important;
+  }
+  .d-custom-table-none {
+    display: block !important;
+  }
+}
+
+/* Styling responsive untuk avatar dan font */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+@media (max-width: 576px) {
+  .user-avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .fw-semibold, .fw-medium, .user-name-text {
+    font-size: 1rem !important;
+  }
+  .text-muted.small {
+    font-size: 0.75rem !important;
+  }
+  .role-badge, .no-role-badge {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  select.form-select {
+    max-width: 100% !important;
+    font-size: 0.85rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  .d-flex.gap-2 {
+    flex-wrap: wrap;
+  }
+  .btn.btn-primary.btn-sm,
+  .btn.btn-delete.btn-sm {
+    flex: 1 1 48%;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.85rem !important;
+  }
+  .btn.btn-primary.btn-sm {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Tablet mini (≥ 600px) */
+@media (min-width: 600px) and (max-width: 767.98px) {
+  .user-avatar {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .fw-semibold, .fw-medium, .user-name-text {
+    font-size: 1.1rem !important;
+  }
+  .text-muted.small {
+    font-size: 0.85rem !important;
+  }
+  .role-badge, .no-role-badge {
+    font-size: 0.8rem !important;
+    padding: 0.3rem 0.6rem !important;
+  }
+  select.form-select {
+    max-width: 150px !important;
+    font-size: 0.9rem !important;
+    padding: 0.3rem 0.6rem !important;
+  }
+  .d-flex.gap-2 {
+    flex-wrap: nowrap;
+  }
+  .btn.btn-primary.btn-sm,
+  .btn.btn-delete.btn-sm {
+    flex: 0 0 auto;
+    padding: 0.4rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Tablet besar (≥ 768px dan ≤ 991.98px) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .user-avatar {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .fw-semibold, .fw-medium, .user-name-text {
+    font-size: 1.15rem !important;
+  }
+  .text-muted.small {
+    font-size: 0.9rem !important;
+  }
+  .role-badge, .no-role-badge {
+    font-size: 0.85rem !important;
+    padding: 0.35rem 0.75rem !important;
+  }
+  select.form-select {
+    max-width: 180px !important;
+    font-size: 1rem !important;
+    padding: 0.35rem 0.75rem !important;
+  }
+  .d-flex.gap-2 {
+    flex-wrap: nowrap;
+  }
+  .btn.btn-primary.btn-sm,
+  .btn.btn-delete.btn-sm {
+    flex: 0 0 auto;
+    padding: 0.5rem 1.25rem !important;
+    font-size: 1rem !important;
+  }
+}
+
 </style>
