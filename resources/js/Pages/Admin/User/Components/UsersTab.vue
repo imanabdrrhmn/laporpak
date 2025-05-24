@@ -315,7 +315,10 @@ function confirmDelete(userName, form) {
     max-width: 120px;
     font-size: 0.85rem;
   }
-
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
   .btn-delete {
     padding: 6px 12px;
     font-size: 0.85rem;
@@ -492,9 +495,7 @@ function confirmDelete(userName, form) {
   color: white;
   border: none;
   padding: 8px 16px;
-  border-radius: 5px;
-  height: 35px;
-  width: 20px;
+  border-radius: 8px;
   transition: all 0.2s ease;
 }
 
