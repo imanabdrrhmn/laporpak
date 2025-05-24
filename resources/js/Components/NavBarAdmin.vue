@@ -179,25 +179,25 @@ const logout = () => {
 /* Sidebar Styles */
 .sidebar {
   width: 260px;
-  height: 100vh;
-  background-color: #0d6efd; /* Changed to blue */
-  padding-top: 75px;
+  height: 100vh; /* penuh tinggi viewport */
   position: fixed;
   top: 0;
   left: 0;
-  overflow-y: auto;
+  padding-top: 75px;
+  background-color: #0d6efd;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255, 255, 255, 0.1); /* Updated for better contrast */
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-y: auto; 
   z-index: 900;
-  /* Hide scrollbar for Chrome, Safari and Opera */
   &::-webkit-scrollbar {
     display: none;
   }
-  /* Hide scrollbar for IE, Edge and Firefox */
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  /* Hilangkan scrollbar untuk Firefox dan IE/Edge */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
+
 
 .sidebar-section {
   margin-bottom: 1.5rem;

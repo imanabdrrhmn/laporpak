@@ -1,37 +1,7 @@
 <template>
   <div class="row">
-    <!-- Form Add New Role with improved styling -->
-    <div class="col-md-5 mb-4">
-      <div class="card h-100 border-0 shadow-sm">
-        <div class="card-header role-card-header">
-          <h5 class="card-title mb-0">
-            <i class="bi bi-plus-circle me-2"></i>Add New Role
-          </h5>
-        </div>
-        <div class="card-body p-4">
-          <form :action="route('admin.roles.store')" method="POST" @submit.prevent="submitNewRole">
-            <input type="hidden" name="_token" :value="csrf" />
-            <div class="mb-4">
-              <label for="newRoleName" class="form-label fw-medium">Role Name</label>
-              <input
-                type="text"
-                id="newRoleName"
-                v-model="newRoleName"
-                class="form-control form-control-lg"
-                placeholder="Enter role name"
-                required
-              />
-            </div>
-            <button class="btn btn-primary btn-lg w-100" type="submit">
-              <i class="bi bi-plus-lg me-2"></i>Add Role
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Role List with improved styling -->
-    <div class="col-md-7 mb-4">
+    <!-- Role List Desktop (Tabel) -->
+    <div class="col-12 col-md-7 mb-4 d-none d-md-block">
       <div class="card h-100 border-0 shadow-sm">
         <div class="card-header role-card-header">
           <h5 class="card-title mb-0">
@@ -45,7 +15,6 @@
                 <tr>
                   <th>Role Name</th>
                   <th>Users</th>
-                  <th class="text-end">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -62,19 +31,6 @@
                     <span class="badge users-count-badge">
                       {{ getUserCountByRole(role) }}
                     </span>
-                  </td>
-                  <td class="text-end">
-                    <form
-                      :action="route('admin.roles.destroy', role)"
-                      method="POST"
-                      @submit.prevent="confirmDeleteRole(role, $event.target)"
-                    >
-                      <input type="hidden" name="_method" value="DELETE" />
-                      <input type="hidden" name="_token" :value="csrf" />
-                      <button class="btn btn-role-delete" type="submit">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </form>
                   </td>
                 </tr>
                 <tr v-if="roles.length === 0">
@@ -94,94 +50,107 @@
         </div>
       </div>
     </div>
+
+    <!-- Role List Mobile (Card/List) -->
+    <div class="col-12 d-md-none">
+      <div v-if="roles.length" class="list-group">
+        <div v-for="role in roles" :key="role" class="list-group-item d-flex justify-content-between align-items-center flex-column flex-sm-row">
+          <div class="d-flex align-items-center mb-2 mb-sm-0 w-100">
+            <div class="role-icon me-3">
+              <i class="bi bi-shield-fill"></i>
+            </div>
+            <div>
+              <div class="fw-medium">{{ role }}</div>
+              <small class="text-muted">Users: <span class="users-count-badge">{{ getUserCountByRole(role) }}</span></small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else class="empty-state text-center py-5">
+        <div class="empty-icon mb-3">
+          <i class="bi bi-shield-slash"></i>
+        </div>
+        <h5>No roles available</h5>
+        <p class="text-muted">Create your first role to get started</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import Swal from 'sweetalert2'
-import axios from 'axios'
-
 const props = defineProps({
   users: Array,
   roles: Array,
   csrf: String
 })
 
-const newRoleName = ref('')
-
-// Count users with a specific role
 function getUserCountByRole(roleName) {
   return props.users.filter(user => 
     user.roles.length && user.roles === roleName
   ).length
 }
 
-function submitNewRole() {
-  if (!newRoleName.value.trim()) {
-    Swal.fire({
-      title: 'Error',
-      text: 'Role name cannot be empty',
-      icon: 'error',
-      customClass: {
-        confirmButton: 'btn btn-primary'
-      },
-      buttonsStyling: false
-    })
-    return
-  }
-  
-  const data = {
-    name: newRoleName.value.trim(),
-  }
-  
-  axios.post(route('admin.roles.store'), data)
-    .then(() => {
-      Swal.fire({
-        title: 'Success',
-        text: 'New role has been created successfully',
-        icon: 'success',
-        customClass: {
-          confirmButton: 'btn btn-primary'
-        },
-        buttonsStyling: false
-      }).then(() => {
-        window.location.reload()
-      })
-    })
-    .catch(err => {
-      Swal.fire({
-        title: 'Failed',
-        text: 'Failed to create new role',
-        icon: 'error',
-        customClass: {
-          confirmButton: 'btn btn-primary'
-        },
-        buttonsStyling: false
-      })
-      console.error(err)
-    })
+</script>
+
+<style scoped>
+.role-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: rgba(78, 115, 223, 0.15);
+  color: #4e73df;
 }
 
-function confirmDeleteRole(role, form) {
-  Swal.fire({
-    title: `Delete role "${role}"?`,
-    text: 'This will affect all users with this role!',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#e3342f',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: 'Yes, delete!',
-    cancelButtonText: 'Cancel',
-    customClass: {
-      confirmButton: 'btn btn-danger',
-      cancelButton: 'btn btn-secondary'
-    },
-    buttonsStyling: false
-  }).then((result) => {
-    if (result.isConfirmed) {
-      form.submit()
-    }
-  })
+.users-count-badge {
+  background-color: rgba(13, 202, 240, 0.15);
+  color: #0dcaf0;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
 }
-</script>
+
+/* List group item responsive */
+.list-group-item {
+  border-radius: 0.5rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 1rem 1.25rem;
+}
+
+.role-card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1rem 1.5rem;
+}
+
+.custom-role-table thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #e9ecef;
+  padding: 1rem 1.5rem;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.custom-role-table tbody td {
+  padding: 1rem 1.5rem;
+  border-color: #f8f9fa;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  opacity: 0.5;
+}
+</style>

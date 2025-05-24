@@ -6,20 +6,17 @@
         <!-- Modern Page Header with gradient background -->
         <div class="card border-0 shadow-lg mb-5 overflow-hidden">
           <div class="card-body position-relative p-0">
-            <div class="-mt-4 gradient-header p-4">
-              <div class="d-flex justify-content-between align-items-center position-relative z-10">
-                <div>
-                  <h2 class="mb-1 fw-bold text-white">Manajemen Pengguna</h2>
-                  <p class="text-white-50 mb-0">Kelola pengguna dan peran dalam aplikasi Anda</p>
-                </div>
-                <div class="badge bg-white text-primary fw-bold px-3 py-2 fs-6 shadow-sm">
-                  Total Users: {{ users.length }}
-                </div>
+            <div class="gradient-header p-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+              <div class="mb-3 mb-md-0">
+                <h2 class="mb-1 fw-bold text-white">Manajemen Pengguna</h2>
+                <p class="text-white-50 mb-0">Kelola pengguna dan peran dalam aplikasi Anda</p>
+              </div>
+              <div class="badge bg-white text-primary fw-bold px-3 py-2 fs-6 shadow-sm flex-shrink-0">
+                Total Users: {{ users.length }}
               </div>
             </div>
           </div>
         </div>
-
         <!-- Success Alert -->
         <div v-if="flashMessage" class="alert custom-alert shadow-sm border-0 animate__animated animate__fadeInDown">
           <div class="d-flex align-items-center">
@@ -119,7 +116,6 @@ const allPermissions = ref([])
 const flashMessage = ref(props.flash?.success || '')
 const flashError = ref(props.flash?.error || '')
 
-// Auto-dismiss flash messages after 5 seconds
 watch(() => props.flash?.success, (newMessage) => {
   if (newMessage) {
     flashMessage.value = newMessage
@@ -157,9 +153,6 @@ function submitPermissions({ userId, permissions }) {
       _token: csrf
     })
     .then((response) => {
-      // Tidak menutup modal otomatis
-      // Hapus SweetAlert sukses, gunakan animasi checkmark di PermissionModal.vue
-      // Perbarui permissions pengguna secara lokal
       const user = users.find(u => u.id === userId)
       if (user) {
         user.permissions = permissions
@@ -188,11 +181,17 @@ function submitPermissions({ userId, permissions }) {
 }
 
 .gradient-header {
-  padding-top: 24px;
   background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+  border-radius: 0.5rem;
   position: relative;
   overflow: hidden;
-  border-radius: 0.5rem;
+  padding-top: 1.5rem; 
+  padding-bottom: 1.5rem;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .gradient-header h2 {
@@ -310,42 +309,70 @@ function submitPermissions({ userId, permissions }) {
 
 /* Custom Table */
 .custom-table-container {
+  overflow-x: auto; /* buat scroll muncul kalau perlu */
   border-radius: 0.5rem;
-  overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
+
 .custom-table {
+  width: 100%;
+  table-layout: fixed; 
   margin-bottom: 0;
 }
 
-.custom-table thead {
-  background-color: #f8f9fa;
+
+.custom-table th, .custom-table td {
+  padding: 0.75rem 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.custom-table thead th {
-  font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #e9ecef;
-  padding: 1rem;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.5px;
+.custom-table th:nth-child(1), 
+.custom-table td:nth-child(1) {
+  width: 30px;
 }
 
-.custom-table tbody td {
-  padding: 1rem;
-  border-color: #f8f9fa;
-  vertical-align: middle;
+.custom-table th:nth-child(2), 
+.custom-table td:nth-child(2) {
+  max-width: 140px;
 }
 
-.custom-table tbody tr {
-  transition: all 0.2s ease;
+.custom-table th:nth-child(3), 
+.custom-table td:nth-child(3) {
+  max-width: 180px;
+  white-space: nowrap;
 }
 
-.custom-table tbody tr:hover {
-  background-color: rgba(78, 115, 223, 0.05);
+.custom-table th:nth-child(4), 
+.custom-table td:nth-child(4) {
+  width: 110px;
 }
+
+.custom-table th:nth-child(5),
+.custom-table td:nth-child(5) {
+  width: 130px;
+}
+
+.custom-table th:nth-child(6),
+.custom-table td:nth-child(6) {
+  width: 80px;
+}
+
+.custom-table th:nth-child(7), 
+.custom-table td:nth-child(7) {
+  width: 70px;
+}
+
+.user-name-text, 
+.custom-table td:nth-child(3) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 
 /* User Avatar */
 .user-avatar {
@@ -450,29 +477,6 @@ function submitPermissions({ userId, permissions }) {
   font-size: 0.8rem;
 }
 
-/* Role Delete Button */
-.btn-role-delete {
-  background-color: transparent;
-  color: #dc3545;
-  border: 1px solid rgba(220, 53, 69, 0.25);
-  border-radius: 0.375rem;
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.btn-role-delete:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-}
-
-/* Custom Role Table */
-.custom-role-table thead {
-  background-color: #f8f9fa;
-}
-
 .custom-role-table thead th {
   font-weight: 600;
   color: #495057;
@@ -497,4 +501,121 @@ function submitPermissions({ userId, permissions }) {
 .animate-fade-in {
   animation: fadeIn 0.3s ease forwards;
 }
+
+/* Responsif umum */
+@media (max-width: 767.98px) {
+  /* Header teks dan badge */
+  .gradient-header h2 {
+    font-size: 1.4rem;
+  }
+  .gradient-header p {
+    font-size: 0.9rem;
+  }
+  .badge.bg-white.text-primary {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  /* Tabs nav scroll horizontal */
+  .nav-tabs-modern {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-tabs-modern .nav-item {
+    flex: 0 0 auto;
+  }
+
+  /* Alerts */
+  .custom-alert {
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Card body padding */
+  .card-body.p-4 {
+    padding: 1rem !important;
+  }
+
+  /* Table responsive adjustments */
+  .custom-table-container {
+    box-shadow: none;
+  }
+  .custom-table thead th,
+  .custom-table tbody td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  /* Avatar kecil */
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  /* Role badges */
+  .role-badge, .no-role-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .btn-delete {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .custom-role-select {
+    max-width: 120px;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .gradient-header h2 {
+    font-size: 1.2rem;
+  }
+  .gradient-header p {
+    font-size: 0.8rem;
+  }
+
+  .badge.bg-white.text-primary {
+    font-size: 0.75rem;
+    top: 0.8rem;
+    right: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .search-container .form-control {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .search-container .form-control {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.5rem;
+  }
+}
+
+@media (min-width: 576px) {
+  .search-container .form-control {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .search-container .form-control {
+    font-size: 1.1rem;
+    padding: 0.6rem 1rem;
+  }
+}
+
 </style>
