@@ -13,7 +13,6 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class ReportController
 {
     use AuthorizesRequests;
-    // Menampilkan form untuk membuat laporan
     public function create(Request $request)
     {
         $feedbacks = Feedback::where('kategori', 'Pelaporan')->with('user')->latest()->take(10)->get();
@@ -23,7 +22,6 @@ class ReportController
         ]);
     }
 
-    // Menyimpan laporan baru
     public function store(Request $request)
     {
         $user = $request->user();
@@ -101,7 +99,31 @@ class ReportController
     
     public function search(Request $request)
     {
-        $reports = Report::where('status', 'published')->get();
+        $reports = Report::with('user')->where('status', 'published')->latest()->get()->map(function ($report) {
+            return [
+                'id' => $report->id,
+                'user_id' => $report->user_id,
+                'user' => [
+                    'id' => $report->user->id,
+                    'name' => $report->user->name,
+                    'avatar_url' => $report->user->avatar 
+                        ? asset('storage/' . $report->user->avatar) 
+                        : asset('/Default-Profile.png'),
+                ],
+                'category' => $report->category,
+                'description' => $report->description,
+                'status' => $report->status,
+                'latitude' => $report->latitude,
+                'longitude' => $report->longitude,
+                'address' => $report->address,
+                'service' => $report->service,
+                'source' => $report->source,
+                'created_at' => $report->created_at->toDateTimeString(),
+                'evidence' => $report->evidence 
+                    ? asset('storage/' . $report->evidence) 
+                    : null,
+            ];
+        });
         $feedbacks = Feedback::where('kategori', 'Cari Laporan')->with('user')->latest()->take(10)->get();
 
         return Inertia::render('Pelaporan/CariLaporan', [
