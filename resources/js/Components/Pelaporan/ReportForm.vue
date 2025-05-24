@@ -66,7 +66,7 @@
             </div>
           </div>
           <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category !== 'Email' && formData.category">
-            <label for="source" class="form-label mb-2">Sumber Penipuan</label>
+            <label for="source" class="form-label mb-2">Nomer Telepon</label>
             <div class="input-group">
               <select 
                 v-model="selectedCountry" 
