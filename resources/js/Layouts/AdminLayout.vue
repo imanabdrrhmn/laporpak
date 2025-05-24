@@ -1,11 +1,6 @@
 <template>
   <div class="admin-layout">
     <NavBarAdmin @toggleSidebar="toggleSidebar" />
-    <div
-      class="sidebar-overlay"
-      v-if="isSidebarOpen"
-      @click="closeSidebar"
-    ></div>
     <div class="main-content" @click="closeSidebar">
       <slot />
     </div>
