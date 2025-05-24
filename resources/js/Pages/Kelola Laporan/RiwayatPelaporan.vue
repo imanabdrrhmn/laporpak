@@ -49,7 +49,7 @@
               <h6 class="text-muted mb-3 fw-bold text-uppercase">Statistik</h6>
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-secondary">Total Laporan</span>
-                <span class="badge bg-primary rounded-pill">{{ selectedTab === 'reports' ? props.reports.length : verifications.value.length }}</span>
+                <span class="badge bg-primary rounded-pill">{{ selectedTab === 'reports' ? props.reports.length : verifications.length }}</span>
               </div>
               <div class="progress" style="height: 6px;">
                 <div class="progress-bar bg-success" role="progressbar" :style="`width: ${selectedTab === 'reports' ? 75 : 60}%`"></div>
@@ -81,12 +81,20 @@
               <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                   <thead class="bg-light">
-                    <tr>
+                    <tr v-if="selectedTab === 'reports'">
                       <th scope="col" class="ps-4" width="5%">No</th>
                       <th scope="col" width="12%">Tanggal</th>
                       <th scope="col" width="12%">Kategori</th>
                       <th scope="col" width="15%">Sumber Penipuan</th>
                       <th scope="col">Deskripsi</th>
+                      <th scope="col" width="10%">Status</th>
+                      <th scope="col" width="8%" class="text-center">Aksi</th>
+                    </tr>
+                    <tr v-else>
+                      <th scope="col" class="ps-4" width="5%">No</th>
+                      <th scope="col" width="12%">Tanggal</th>
+                      <th scope="col">Data</th>
+                      <th scope="col">Query</th>
                       <th scope="col" width="10%">Status</th>
                       <th scope="col" width="8%" class="text-center">Aksi</th>
                     </tr>
@@ -115,7 +123,7 @@
                       </td>
                     </tr>
                     <tr v-if="displayedData.length === 0">
-                      <td colspan="6" class="text-center py-4 text-muted">
+                      <td colspan="7" class="text-center py-4 text-muted">
                         <i class="fas fa-folder-open mb-2 fa-2x"></i>
                         <p>Tidak ada laporan yang tersedia</p>
                       </td>
@@ -125,12 +133,11 @@
                     <tr v-for="(item, index) in displayedData" :key="index" class="border-bottom">
                       <td class="ps-4 fw-medium">{{ index + 1 }}</td>
                       <td>{{ formatDate(item.tanggal) }}</td>
-                      <td>
-                        <span class="badge bg-light text-dark border">{{ item.jenis }}</span>
-                      </td>
-                      <td>{{ item.sumber || 'Whatsapp' }}</td>
                       <td class="text-truncate" style="max-width: 250px;">
                         {{ truncateText(item.data, 150) }}
+                      </td>
+                      <td class="text-truncate" style="max-width: 250px;">
+                        {{ truncateText(item.query, 150) }}
                       </td>
                       <td>
                         <div class="d-flex align-items-center">
@@ -199,8 +206,30 @@ const props = defineProps({
   reports: Array,
 });
 
-// Placeholder for verifications data (replace with actual data source if available)
-const verifications = ref([]); // Example: [{ tanggal: '2025-05-20', jenis: 'Fraud', sumber: 'Email', data: 'Description', hasil: 'approved' }]
+// Contoh data untuk verifikasi
+const verifications = ref([
+  {
+    id: 1,
+    tanggal: '2025-05-20',
+    data: 'Transaksi mencurigakan melalui WhatsApp',
+    query: 'Cek nomor +628123456789',
+    hasil: 'rejected',
+  },
+  {
+    id: 2,
+    tanggal: '2025-05-21',
+    data: 'Email phishing terdeteksi',
+    query: 'Verifikasi email support@bank.com',
+    hasil: 'pending',
+  },
+  {
+    id: 3,
+    tanggal: '2025-05-22',
+    data: 'SMS penipuan minta transfer',
+    query: 'Cek nomor +628987654321',
+    hasil: 'approved',
+  },
+]);
 
 const selectedTab = ref('reports');
 
@@ -245,8 +274,10 @@ const getStatusClass = (status) => {
       return 'bg-warning';
     case 'approved':
       return 'bg-success';
+    case 'published':
+      return 'bg-primary';
     default:
-      return 'bg-secondary'; // Fallback for unknown status
+      return 'bg-secondary';
   }
 };
 
@@ -258,8 +289,10 @@ const getStatusTextClass = (status) => {
       return 'text-warning';
     case 'approved':
       return 'text-success';
+    case 'published':
+      return 'text-primary';
     default:
-      return 'text-secondary'; // Fallback for unknown status
+      return 'text-secondary';
   }
 };
 </script>
