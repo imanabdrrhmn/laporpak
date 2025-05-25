@@ -281,9 +281,9 @@ const selectedTab = ref('penipuan');
 
 const displayedData = computed(() => {
   if (selectedTab.value === 'penipuan') {
-    return props.reports.filter(r => r.category === 'Penipuan');
+    return props.reports.filter(r => r.service === 'Penipuan');
   } else if (selectedTab.value === 'infrastruktur') {
-    return props.reports.filter(r => r.category === 'Infrastruktur');
+    return props.reports.filter(r => r.service === 'Infrastruktur');
   } else {
     return verifications.value;
   }
