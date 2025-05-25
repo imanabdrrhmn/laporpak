@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\Admin\ReportManagementController;
+use App\Http\Controllers\Admin\DashboardAdminController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserHistoryReportController;
 use App\Http\Controllers\DashboardController;
@@ -28,10 +29,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'contact.verified'])->name('dashboard');
-Route::get('admin/dashboard', function () {
-    return Inertia::render('Admin/Dashboard/DashboardAdmin', [
-    ]);
-})->middleware(['auth', 'contact.verified', 'role:admin||verifier'])->name('dashboard.admin');
+
+Route::get('admin/dashboard', [DashboardAdminController::class, 'index'])
+    ->middleware(['auth', 'contact.verified', 'role:admin||verifier'])
+    ->name('dashboard.admin');
 
 Route::get('/verifikasi', function () {
     $feedbacks = Feedback::with('user')->where('kategori', 'Verifikasi')->latest()->take(10)->get();

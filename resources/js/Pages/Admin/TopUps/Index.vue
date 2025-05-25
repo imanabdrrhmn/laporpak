@@ -124,12 +124,12 @@
                 <td class="ps-4">
                   <div class="d-flex align-items-center">
                     <div class="user-avatar bg-primary-light text-primary me-2">
-                      <img 
-                        :src="topUp.user.avatar_url" 
-                        alt="Avatar" 
-                        class="user-avatar rounded-circle me-2" 
+                      <img
+                        :src="topUp.user.avatar_url"
+                        alt="Avatar"
+                        class="user-avatar rounded-circle me-2"
                         style="width: 40px; height: 40px; object-fit: cover;"
-                      >
+                      />
                     </div>
                     <div>
                       <div class="fw-semibold">{{ topUp.user.name }}</div>
@@ -137,17 +137,9 @@
                     </div>
                   </div>
                 </td>
-                <td>
-                  <span class="fw-semibold">Rp {{ formatCurrency(topUp.amount) }}</span>
-                </td>
-                <td>
-                  <span class="payment-method">{{ topUp.payment_method || '-' }}</span>
-                </td>
-                <td>
-                  <span :class="statusBadgeClass(topUp.status)" class="status-badge">
-                    {{ capitalize(topUp.status) }}
-                  </span>
-                </td>
+                <td><span class="fw-semibold">Rp {{ formatCurrency(topUp.amount) }}</span></td>
+                <td><span class="payment-method">{{ topUp.payment_method || '-' }}</span></td>
+                <td><span :class="statusBadgeClass(topUp.status)" class="status-badge">{{ capitalize(topUp.status) }}</span></td>
                 <td>
                   <div class="d-flex flex-column">
                     <span>{{ formatDate(topUp.created_at).date }}</span>
@@ -166,48 +158,13 @@
                   <span v-else class="text-muted">-</span>
                 </td>
                 <td class="text-end pe-4">
-                  <div class="d-flex justify-content-end gap-2">
-                    <div class="dropdown">
-                      <button
-                        class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                        type="button"
-                        id="actionMenuButton"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                        <i class="fas fa-ellipsis-v"></i>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionMenuButton">
-                        <li v-if="topUp.status === 'pending'">
-                          <button 
-                            class="dropdown-item text-success" 
-                            @click="verifyTopUp(topUp.id)"
-                            :disabled="loadingIds.includes(topUp.id)"
-                          >
-                            <i class="fas fa-check me-2"></i> Verifikasi
-                          </button>
-                        </li>
-                        <li v-if="topUp.status !== 'pending'">
-                          <button 
-                            class="dropdown-item text-warning" 
-                            @click="updateStatus(topUp.id, 'pending')"
-                            :disabled="loadingIds.includes(topUp.id)"
-                          >
-                            <i class="fas fa-clock me-2"></i> Atur Pending
-                          </button>
-                        </li>
-                        <li v-if="topUp.status !== 'rejected'">
-                          <button 
-                            class="dropdown-item text-danger" 
-                            @click="rejectTopUp(topUp.id)"
-                            :disabled="loadingIds.includes(topUp.id)"
-                          >
-                            <i class="fas fa-times me-2"></i> Tolak
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    @click="openActionModal(topUp)"
+                    title="Aksi"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
                 </td>
               </tr>
               <tr v-if="topUps.data.length === 0">
@@ -255,6 +212,58 @@
               </li>
             </ul>
           </nav>
+        </div>
+      </div>
+
+      <!-- Modal Aksi -->
+      <div
+        class="modal fade"
+        id="actionModal"
+        tabindex="-1"
+        aria-labelledby="actionModalLabel"
+        aria-hidden="true"
+        ref="actionModalRef"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="actionModalLabel">Pilih Aksi</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="closeActionModal"></button>
+            </div>
+            <div class="modal-body">
+              <p><strong>User:</strong> {{ selectedTopUp?.user.name }} ({{ selectedTopUp?.user.email }})</p>
+              <p><strong>Jumlah:</strong> Rp {{ formatCurrency(selectedTopUp?.amount) }}</p>
+              <div class="d-grid gap-2">
+                <button
+                  v-if="selectedTopUp?.status === 'pending'"
+                  class="btn btn-success"
+                  @click="confirmVerify"
+                  :disabled="loadingIds.includes(selectedTopUp?.id)"
+                >
+                  <i class="fas fa-check me-2"></i> Verifikasi
+                </button>
+                <button
+                  v-if="selectedTopUp && selectedTopUp.status !== 'pending'"
+                  class="btn btn-warning"
+                  @click="confirmSetPending"
+                  :disabled="loadingIds.includes(selectedTopUp?.id)"
+                >
+                  <i class="fas fa-clock me-2"></i> Atur Pending
+                </button>
+                <button
+                  v-if="selectedTopUp && selectedTopUp.status !== 'rejected'"
+                  class="btn btn-danger"
+                  @click="confirmReject"
+                  :disabled="loadingIds.includes(selectedTopUp?.id)"
+                >
+                  <i class="fas fa-times me-2"></i> Tolak
+                </button>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" @click="closeActionModal">Batal</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -365,7 +374,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { Inertia } from "@inertiajs/inertia";
 import { usePage, Head } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
@@ -376,6 +385,7 @@ const page = usePage();
 const props = defineProps({
   topUps: Object,
   filters: Object,
+  statusCounts: Object,
 });
 
 const filters = ref({
@@ -396,19 +406,118 @@ const proofModalUrl = ref("");
 const exportModalRef = ref(null);
 const exportModalInstance = ref(null);
 
-// Count by status
-const pendingCount = computed(() => 
-  props.topUps.data.filter(t => t.status === 'pending').length
+const actionModalRef = ref(null);
+let actionModalInstance = null;
+const selectedTopUp = ref(null);
+
+// Flag untuk pause polling saat modal dibuka
+const isModalOpen = ref(false);
+
+// Modal Aksi
+const openActionModal = (topUp) => {
+  selectedTopUp.value = topUp;
+  isModalOpen.value = true;
+  if (!actionModalInstance && actionModalRef.value) {
+    actionModalInstance = new Modal(actionModalRef.value);
+    // Deteksi saat modal ditutup untuk resume polling
+    actionModalInstance._element.addEventListener('hidden.bs.modal', () => {
+      isModalOpen.value = false;
+      selectedTopUp.value = null;
+    });
+  }
+  actionModalInstance.show();
+};
+
+const closeActionModal = () => {
+  actionModalInstance?.hide();
+};
+
+// Modal Bukti Pembayaran
+const showProofModal = (path) => {
+  proofModalUrl.value = getProofUrl(path);
+  isModalOpen.value = true;
+  if (!proofModalInstance.value && proofModalRef.value) {
+    proofModalInstance.value = new Modal(proofModalRef.value);
+    proofModalInstance.value._element.addEventListener('hidden.bs.modal', () => {
+      isModalOpen.value = false;
+      proofModalUrl.value = "";
+    });
+  }
+  proofModalInstance.value.show();
+};
+
+const closeProofModal = () => {
+  proofModalInstance.value?.hide();
+};
+
+// Polling data topUps, skip kalau modal terbuka
+const fetchTopUps = () => {
+  if (isModalOpen.value) return;
+  Inertia.get('/admin/top-ups', filters.value, {
+    preserveState: true,
+    replace: true,
+    only: ['topUps'],
+  });
+};
+
+let pollingInterval = null;
+
+onMounted(() => {
+  pollingInterval = setInterval(() => {
+    fetchTopUps();
+  }, 30000);
+});
+
+onUnmounted(() => {
+  clearInterval(pollingInterval);
+});
+
+// Fungsi aksi verifikasi, reject, set pending
+const confirmVerify = () => {
+  if (!selectedTopUp.value) return;
+  loadingIds.value.push(selectedTopUp.value.id);
+  Inertia.post(`/admin/top-ups/${selectedTopUp.value.id}/verify`, {}, {
+    onFinish: () => {
+      loadingIds.value = loadingIds.value.filter(id => id !== selectedTopUp.value.id);
+      closeActionModal();
+    }
+  });
+};
+
+const confirmSetPending = () => {
+  if (!selectedTopUp.value) return;
+  loadingIds.value.push(selectedTopUp.value.id);
+  Inertia.post(`/admin/top-ups/${selectedTopUp.value.id}/update-status`, { status: 'pending' }, {
+    onFinish: () => {
+      loadingIds.value = loadingIds.value.filter(id => id !== selectedTopUp.value.id);
+      closeActionModal();
+    }
+  });
+};
+
+const confirmReject = () => {
+  if (!selectedTopUp.value) return;
+  loadingIds.value.push(selectedTopUp.value.id);
+  Inertia.post(`/admin/top-ups/${selectedTopUp.value.id}/reject`, {}, {
+    onFinish: () => {
+      loadingIds.value = loadingIds.value.filter(id => id !== selectedTopUp.value.id);
+      closeActionModal();
+    }
+  });
+};
+
+// Hitung jumlah status
+const pendingCount = computed(() =>
+  props.statusCounts?.pending ?? 0
+);
+const verifiedCount = computed(() =>
+  props.statusCounts?.verified ?? 0
+);
+const rejectedCount = computed(() =>
+  props.statusCounts?.rejected ?? 0
 );
 
-const verifiedCount = computed(() => 
-  props.topUps.data.filter(t => t.status === 'verified').length
-);
-
-const rejectedCount = computed(() => 
-  props.topUps.data.filter(t => t.status === 'rejected').length
-);
-
+// Update filter pencarian/status
 const updateFilters = () => {
   Inertia.get("/admin/top-ups", filters.value, {
     preserveState: true,
@@ -416,6 +525,7 @@ const updateFilters = () => {
   });
 };
 
+// Format helper
 const formatCurrency = (value) =>
   new Intl.NumberFormat("id-ID", {
     style: "decimal",
@@ -455,7 +565,45 @@ const statusBadgeClass = (status) => {
 
 const getProofUrl = (path) => `/storage/${path}`;
 
+const goToPage = (page) => {
+  if (page < 1 || page > props.topUps.last_page) return;
+  Inertia.get("/admin/top-ups", { ...filters.value, page }, {
+    preserveState: true,
+  });
+};
 
+const totalPages = computed(() => {
+  const pages = [];
+  for (let i = 1; i <= props.topUps.last_page; i++) {
+    pages.push(i);
+  }
+  return pages;
+});
+
+// Modal Export Logs
+const showExportModal = () => {
+  if (!exportModalInstance.value && exportModalRef.value) {
+    exportModalInstance.value = new Modal(exportModalRef.value);
+  }
+  exportModalInstance.value.show();
+};
+
+const closeExportModal = () => {
+  exportModalInstance.value?.hide();
+};
+
+const exportLogs = () => {
+  const params = new URLSearchParams();
+  if (exportFilters.value.start_date) params.append("start_date", exportFilters.value.start_date);
+  if (exportFilters.value.end_date) params.append("end_date", exportFilters.value.end_date);
+
+  const url = `/admin/top-ups/export-logs?${params.toString()}`;
+  window.open(url, "_blank");
+
+  closeExportModal();
+};
+
+// Toast notification
 const toast = ref({
   show: false,
   message: "",
@@ -492,76 +640,8 @@ watch(
   },
   { immediate: true }
 );
-
-const verifyTopUp = async (id) => {
-  loadingIds.value.push(id);
-  Inertia.post(`/admin/top-ups/${id}/verify`, {}, {
-    onFinish: () => {
-      loadingIds.value = loadingIds.value.filter((i) => i !== id);
-    },
-  });
-};
-
-const rejectTopUp = async (id) => {
-  loadingIds.value.push(id);
-  Inertia.post(`/admin/top-ups/${id}/reject`, {}, {
-    onFinish: () => {
-      loadingIds.value = loadingIds.value.filter((i) => i !== id);
-    },
-  });
-};
-
-const goToPage = (page) => {
-  if (page < 1 || page > props.topUps.last_page) return;
-  Inertia.get("/admin/top-ups", { ...filters.value, page }, {
-    preserveState: true,
-  });
-};
-
-const totalPages = computed(() => {
-  const pages = [];
-  for (let i = 1; i <= props.topUps.last_page; i++) {
-    pages.push(i);
-  }
-  return pages;
-});
-
-// Modal Bukti Pembayaran
-const showProofModal = (path) => {
-  proofModalUrl.value = getProofUrl(path);
-  if (!proofModalInstance.value && proofModalRef.value) {
-    proofModalInstance.value = new Modal(proofModalRef.value);
-  }
-  proofModalInstance.value.show();
-};
-
-const closeProofModal = () => {
-  proofModalInstance.value?.hide();
-};
-
-// Modal Export Logs
-const showExportModal = () => {
-  if (!exportModalInstance.value && exportModalRef.value) {
-    exportModalInstance.value = new Modal(exportModalRef.value);
-  }
-  exportModalInstance.value.show();
-};
-
-const closeExportModal = () => {
-  exportModalInstance.value?.hide();
-};
-
-const exportLogs = () => {
-  const params = new URLSearchParams();
-  if (exportFilters.value.start_date) params.append("start_date", exportFilters.value.start_date);
-  if (exportFilters.value.end_date) params.append("end_date", exportFilters.value.end_date);
-
-  const url = `/admin/top-ups/export-logs?${params.toString()}`;
-  window.open(url, "_blank");
-
-  closeExportModal();
-};
 </script>
+
 
 <style scoped>
 .container {
@@ -824,5 +904,18 @@ const exportLogs = () => {
     overflow-x: auto;
     white-space: nowrap;
   }
+}
+
+.action-menu {
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+}
+
+.modal-body .btn {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.modal-body .btn:last-child {
+  margin-bottom: 0;
 }
 </style>
