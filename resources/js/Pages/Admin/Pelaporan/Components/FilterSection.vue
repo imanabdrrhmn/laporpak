@@ -10,7 +10,7 @@
           title="Grid View"
         >
           <i class="fas fa-th-large"></i>
-        </button>
+        </button> 
         <button
           @click="$emit('update:viewMode', 'list')"
           :class="['toggle-btn', viewMode === 'list' ? 'active' : '']"

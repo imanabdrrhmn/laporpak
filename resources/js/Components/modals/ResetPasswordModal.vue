@@ -69,7 +69,7 @@
           <!-- Login Prompt -->
           <p class="text-center text-muted mt-4">
             Ingat kata sandi?
-            <span class="text-primary fw-bold cursor-pointer" @click.prevent="triggerLogin">
+            <span class="text-primary fw-bold hover-pointer" @click.prevent="triggerLogin">
               Masuk
             </span>
           </p>
@@ -244,6 +244,18 @@ function startCooldown() {
 
 .alert {
   font-size: 0.875rem;
+}
+
+.hover-pointer:hover {
+  cursor: pointer;
+}
+
+.btn-close {
+  transition: transform 0.1s ease;
+}
+
+.btn-close:hover {
+  transform: rotate(90deg);
 }
 
 @media (max-width: 576px) {

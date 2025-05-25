@@ -23,17 +23,26 @@
               <div class="nav flex-column nav-pills">
                 <button
                   class="nav-link border-0 rounded-0 py-3 d-flex align-items-center"
-                  :class="{ 'active': selectedTab === 'reports' }"
-                  @click="selectedTab = 'reports'"
+                  :class="{ 'active': selectedTab === 'penipuan' }"
+                  @click="selectedTab = 'penipuan'"
                 >
                   <i class="fas fa-file-alt me-3"></i>
-                  <span class="fw-medium">Pelaporan</span>
+                  <span class="fw-medium">Penipuan</span>
                   <i class="fas fa-chevron-right ms-auto"></i>
                 </button>
                 <button
                   class="nav-link border-0 rounded-0 py-3 d-flex align-items-center"
-                  :class="{ 'active': selectedTab === 'verifications' }"
-                  @click="selectedTab = 'verifications'"
+                  :class="{ 'active': selectedTab === 'infrastruktur' }"
+                  @click="selectedTab = 'infrastruktur'"
+                >
+                  <i class="fas fa-building me-3"></i>
+                  <span class="fw-medium">Infrastruktur</span>
+                  <i class="fas fa-chevron-right ms-auto"></i>
+                </button>
+                <button
+                  class="nav-link border-0 rounded-0 py-3 d-flex align-items-center"
+                  :class="{ 'active': selectedTab === 'verifikasi' }"
+                  @click="selectedTab = 'verifikasi'"
                 >
                   <i class="fas fa-check-circle me-3"></i>
                   <span class="fw-medium">Verifikasi</span>
@@ -49,10 +58,10 @@
               <h6 class="text-muted mb-3 fw-bold text-uppercase">Statistik</h6>
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-secondary">Total Laporan</span>
-                <span class="badge bg-primary rounded-pill">{{ selectedTab === 'reports' ? props.reports.length : verifications.length }}</span>
+                <span class="badge bg-primary rounded-pill">{{ selectedTab === 'penipuan' ? props.reports.filter(r => r.category === 'Penipuan').length : selectedTab === 'infrastruktur' ? props.reports.filter(r => r.category === 'Infrastruktur').length : verifications.length }}</span>
               </div>
               <div class="progress" style="height: 6px;">
-                <div class="progress-bar bg-success" role="progressbar" :style="`width: ${selectedTab === 'reports' ? 75 : 60}%`"></div>
+                <div class="progress-bar bg-success" role="progressbar" :style="`width: ${selectedTab === 'penipuan' ? 75 : selectedTab === 'infrastruktur' ? 65 : 60}%`"></div>
               </div>
             </div>
           </div>
@@ -63,7 +72,7 @@
           <div class="card border-0 shadow-sm rounded-3">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
               <h5 class="mb-0 fw-bold text-primary">
-                {{ selectedTab === 'reports' ? 'Daftar Laporan' : 'Daftar Verifikasi' }}
+                {{ selectedTab === 'penipuan' ? 'Daftar Laporan Penipuan' : selectedTab === 'infrastruktur' ? 'Daftar Laporan Infrastruktur' : 'Daftar Verifikasi' }}
               </h5>
               <div class="d-flex">
                 <div class="input-group input-group-sm me-2" style="width: 200px;">
@@ -81,11 +90,19 @@
               <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                   <thead class="bg-light">
-                    <tr v-if="selectedTab === 'reports'">
+                    <tr v-if="selectedTab === 'penipuan'">
                       <th scope="col" class="ps-4" width="5%">No</th>
                       <th scope="col" width="12%">Tanggal</th>
                       <th scope="col" width="12%">Kategori</th>
                       <th scope="col" width="15%">Sumber Penipuan</th>
+                      <th scope="col">Deskripsi</th>
+                      <th scope="col" width="10%">Status</th>
+                      <th scope="col" width="8%" class="text-center">Aksi</th>
+                    </tr>
+                    <tr v-else-if="selectedTab === 'infrastruktur'">
+                      <th scope="col" class="ps-4" width="5%">No</th>
+                      <th scope="col" width="12%">Tanggal</th>
+                      <th scope="col" width="12%">Kategori</th>
                       <th scope="col">Deskripsi</th>
                       <th scope="col" width="10%">Status</th>
                       <th scope="col" width="8%" class="text-center">Aksi</th>
@@ -99,7 +116,7 @@
                       <th scope="col" width="8%" class="text-center">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody v-if="selectedTab === 'reports'">
+                  <tbody v-if="selectedTab === 'penipuan'">
                     <tr v-for="(item, index) in displayedData" :key="index" class="border-bottom">
                       <td class="ps-4 fw-medium">{{ index + 1 }}</td>
                       <td>{{ formatDate(item.created_at) }}</td>
@@ -124,6 +141,35 @@
                     </tr>
                     <tr v-if="displayedData.length === 0">
                       <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="fas fa-folder-open mb-2 fa-2x"></i>
+                        <p>Tidak ada laporan yang tersedia</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tbody v-else-if="selectedTab === 'infrastruktur'">
+                    <tr v-for="(item, index) in displayedData" :key="index" class="border-bottom">
+                      <td class="ps-4 fw-medium">{{ index + 1 }}</td>
+                      <td>{{ formatDate(item.created_at) }}</td>
+                      <td>
+                        <span class="badge bg-light text-dark border">{{ item.category }}</span>
+                      </td>
+                      <td class="text-truncate" style="max-width: 250px;">
+                        {{ truncateText(item.description, 150) }}
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="status-indicator" :class="getStatusClass(item.status)"></div>
+                          <span :class="getStatusTextClass(item.status)">{{ item.status }}</span>
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <button class="btn btn-light btn-sm rounded-circle shadow-sm" @click="openDetailModal(item)">
+                          <i class="fas fa-eye"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr v-if="displayedData.length === 0">
+                      <td colspan="6" class="text-center py-4 text-muted">
                         <i class="fas fa-folder-open mb-2 fa-2x"></i>
                         <p>Tidak ada laporan yang tersedia</p>
                       </td>
@@ -231,10 +277,16 @@ const verifications = ref([
   },
 ]);
 
-const selectedTab = ref('reports');
+const selectedTab = ref('penipuan');
 
 const displayedData = computed(() => {
-  return selectedTab.value === 'reports' ? props.reports : verifications.value;
+  if (selectedTab.value === 'penipuan') {
+    return props.reports.filter(r => r.category === 'Penipuan');
+  } else if (selectedTab.value === 'infrastruktur') {
+    return props.reports.filter(r => r.category === 'Infrastruktur');
+  } else {
+    return verifications.value;
+  }
 });
 
 const showModal = ref(false);

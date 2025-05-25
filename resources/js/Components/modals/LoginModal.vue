@@ -72,7 +72,7 @@
               <!-- Forgot Password (Only keeping this part) -->
               <div class="d-flex justify-content-end align-items-center mb-4">
                 <a
-                  class="text-danger small text-decoration-none"
+                  class="text-danger small text-decoration-none cursor-pointer"
                   @click.prevent="triggerResetPassword">
                   Lupa kata sandi?
                 </a>
@@ -413,5 +413,9 @@ function handleLogin() {
   .custom-login-modal {
     max-width: 480px;
   }
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>
