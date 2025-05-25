@@ -39,7 +39,7 @@
 
       <!-- Charts -->
       <div class="charts-grid">
-        <StatusChart @export="exportStatusData" />
+        <StatusChart @export="exportStatusData" :reportData="reportData" />
         <!-- <TrendChart @export="exportTrenData" /> -->
       </div>
 
@@ -74,6 +74,7 @@ export default {
     const page = usePage();
     const dashboardStats = computed(() => page.props.dashboardStats || {});
     const reports = computed(() => page.props.reports || []);
+    const reportData = computed(() => page.props.reportData || {});
 
     const formatNumber = (number) => {
       if (number === undefined || number === null) return '-';
@@ -97,6 +98,7 @@ export default {
     return {
       dashboardStats,
       reports,
+      reportData,
       formatNumber,
       getStatusClass,
       exportTrenData,
@@ -130,7 +132,7 @@ export default {
   margin-bottom: 2rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 950px) {
   .stats-grid {
     grid-template-columns: 1fr;
   }

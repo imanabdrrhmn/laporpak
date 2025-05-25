@@ -8,6 +8,7 @@ use App\Models\Report;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardAdminController extends Controller
 {
@@ -27,14 +28,14 @@ class DashboardAdminController extends Controller
 
         $laporanMasukPercentage = $this->calcPercentageChange($laporanMasukThisMonth, $laporanMasukLastMonth);
 
-        // Laporan terverifikasi total (misal status 'verified')
-        $laporanTerverifikasiCount = Report::where('status', 'verified')->count();
+        // Laporan terverifikasi total (misal status )
+        $laporanTerverifikasiCount = Report::whereIn('status', ['published', 'approved'])->count();
 
-        $laporanTerverifikasiThisMonth = Report::where('status', 'verified')
+        $laporanTerverifikasiThisMonth = Report::whereIn('status', ['published', 'approved'])
             ->where('updated_at', '>=', $startOfThisMonth)
             ->count();
 
-        $laporanTerverifikasiLastMonth = Report::where('status', 'verified')
+        $laporanTerverifikasiLastMonth = Report::whereIn('status', ['published', 'approved'])
             ->whereBetween('updated_at', [$startOfLastMonth, $endOfLastMonth])
             ->count();
 
@@ -56,8 +57,14 @@ class DashboardAdminController extends Controller
 
         $saldoTopUpPercentage = $this->calcPercentageChange($saldoTopUpThisMonth, $saldoTopUpLastMonth);
 
+        $reportData = Report::select('status', DB::raw('count(*) as total'))
+        ->groupBy('status')
+        ->pluck('total', 'status')
+        ->toArray();
+
         // Ambil 5 laporan terbaru
-        $recentReports = Report::latest()->take(5)->get();
+        $user = Auth::user();
+        $recentReports = Report::with('user')->latest()->get();
 
         $dashboardStats = [
             'laporanMasuk' => [
@@ -81,6 +88,7 @@ class DashboardAdminController extends Controller
         return inertia('Admin/Dashboard/DashboardAdmin', [
             'dashboardStats' => $dashboardStats,
             'reports' => $recentReports,
+            'reportData' => $reportData,
         ]);
     }
 
