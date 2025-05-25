@@ -15,217 +15,47 @@
       <div class="row g-4">
         <!-- Sidebar -->
         <div class="col-12 col-md-3">
-          <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
-            <div class="card-header bg-gradient-primary text-white py-3">
-              <h5 class="mb-0 fw-bold text-center">Menu Laporan</h5>
-            </div>
-            <div class="card-body p-0">
-              <div class="nav flex-column nav-pills">
-                <button
-                  class="nav-link border-0 rounded-0 py-3 d-flex align-items-center"
-                  :class="{ 'active': selectedTab === 'penipuan' }"
-                  @click="selectedTab = 'penipuan'"
-                >
-                  <i class="fas fa-file-alt me-3"></i>
-                  <span class="fw-medium">Penipuan</span>
-                  <i class="fas fa-chevron-right ms-auto"></i>
-                </button>
-                <button
-                  class="nav-link border-0 rounded-0 py-3 d-flex align-items-center"
-                  :class="{ 'active': selectedTab === 'infrastruktur' }"
-                  @click="selectedTab = 'infrastruktur'"
-                >
-                  <i class="fas fa-building me-3"></i>
-                  <span class="fw-medium">Infrastruktur</span>
-                  <i class="fas fa-chevron-right ms-auto"></i>
-                </button>
-                <button
-                  class="nav-link border-0 rounded-0 py-3 d-flex align-items-center"
-                  :class="{ 'active': selectedTab === 'verifikasi' }"
-                  @click="selectedTab = 'verifikasi'"
-                >
-                  <i class="fas fa-check-circle me-3"></i>
-                  <span class="fw-medium">Verifikasi</span>
-                  <i class="fas fa-chevron-right ms-auto"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Stats Card -->
-          <div class="card border-0 shadow-sm rounded-3 mt-4">
-            <div class="card-body">
-              <h6 class="text-muted mb-3 fw-bold text-uppercase">Statistik</h6>
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-secondary">Total Laporan</span>
-                <span class="badge bg-primary rounded-pill">{{ selectedTab === 'penipuan' ? props.reports.filter(r => r.category === 'Penipuan').length : selectedTab === 'infrastruktur' ? props.reports.filter(r => r.category === 'Infrastruktur').length : verifications.length }}</span>
-              </div>
-              <div class="progress" style="height: 6px;">
-                <div class="progress-bar bg-success" role="progressbar" :style="`width: ${selectedTab === 'penipuan' ? 75 : selectedTab === 'infrastruktur' ? 65 : 60}%`"></div>
-              </div>
-            </div>
-          </div>
+          <SidebarMenu
+            :selectedTab="selectedTab"
+            @update:selectedTab="selectedTab = $event"
+          />
+          <QuickStats
+            :selectedTab="selectedTab"
+            :totalCount="totalCount"
+          />
         </div>
 
         <!-- Main Content -->
         <div class="col-12 col-md-9">
           <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div class="card-header bg-white py-3">
               <h5 class="mb-0 fw-bold text-primary">
                 {{ selectedTab === 'penipuan' ? 'Daftar Laporan Penipuan' : selectedTab === 'infrastruktur' ? 'Daftar Laporan Infrastruktur' : 'Daftar Verifikasi' }}
               </h5>
-              <div class="d-flex">
-                <div class="input-group input-group-sm me-2" style="width: 200px;">
-                  <span class="input-group-text bg-light border-end-0">
-                    <i class="fas fa-search text-muted"></i>
-                  </span>
-                  <input type="text" class="form-control border-start-0 bg-light" placeholder="Cari...">
-                </div>
-                <button class="btn btn-sm btn-outline-primary">
-                  <i class="fas fa-filter me-1"></i> Filter
-                </button>
-              </div>
             </div>
             <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                  <thead class="bg-light">
-                    <tr v-if="selectedTab === 'penipuan'">
-                      <th scope="col" class="ps-4" width="5%">No</th>
-                      <th scope="col" width="12%">Tanggal</th>
-                      <th scope="col" width="12%">Kategori</th>
-                      <th scope="col" width="15%">Sumber Penipuan</th>
-                      <th scope="col">Deskripsi</th>
-                      <th scope="col" width="10%">Status</th>
-                      <th scope="col" width="8%" class="text-center">Aksi</th>
-                    </tr>
-                    <tr v-else-if="selectedTab === 'infrastruktur'">
-                      <th scope="col" class="ps-4" width="5%">No</th>
-                      <th scope="col" width="12%">Tanggal</th>
-                      <th scope="col" width="12%">Kategori</th>
-                      <th scope="col">Deskripsi</th>
-                      <th scope="col" width="10%">Status</th>
-                      <th scope="col" width="8%" class="text-center">Aksi</th>
-                    </tr>
-                    <tr v-else>
-                      <th scope="col" class="ps-4" width="5%">No</th>
-                      <th scope="col" width="12%">Tanggal</th>
-                      <th scope="col">Data</th>
-                      <th scope="col">Query</th>
-                      <th scope="col" width="10%">Status</th>
-                      <th scope="col" width="8%" class="text-center">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody v-if="selectedTab === 'penipuan'">
-                    <tr v-for="(item, index) in displayedData" :key="index" class="border-bottom">
-                      <td class="ps-4 fw-medium">{{ index + 1 }}</td>
-                      <td>{{ formatDate(item.created_at) }}</td>
-                      <td>
-                        <span class="badge bg-light text-dark border">{{ item.category }}</span>
-                      </td>
-                      <td>{{ item.source || 'SMS' }}</td>
-                      <td class="text-truncate" style="max-width: 250px;">
-                        {{ truncateText(item.description, 150) }}
-                      </td>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <div class="status-indicator" :class="getStatusClass(item.status)"></div>
-                          <span :class="getStatusTextClass(item.status)">{{ item.status }}</span>
-                        </div>
-                      </td>
-                      <td class="text-center">
-                        <button class="btn btn-light btn-sm rounded-circle shadow-sm" @click="openDetailModal(item)">
-                          <i class="fas fa-eye"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr v-if="displayedData.length === 0">
-                      <td colspan="7" class="text-center py-4 text-muted">
-                        <i class="fas fa-folder-open mb-2 fa-2x"></i>
-                        <p>Tidak ada laporan yang tersedia</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                  <tbody v-else-if="selectedTab === 'infrastruktur'">
-                    <tr v-for="(item, index) in displayedData" :key="index" class="border-bottom">
-                      <td class="ps-4 fw-medium">{{ index + 1 }}</td>
-                      <td>{{ formatDate(item.created_at) }}</td>
-                      <td>
-                        <span class="badge bg-light text-dark border">{{ item.category }}</span>
-                      </td>
-                      <td class="text-truncate" style="max-width: 250px;">
-                        {{ truncateText(item.description, 150) }}
-                      </td>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <div class="status-indicator" :class="getStatusClass(item.status)"></div>
-                          <span :class="getStatusTextClass(item.status)">{{ item.status }}</span>
-                        </div>
-                      </td>
-                      <td class="text-center">
-                        <button class="btn btn-light btn-sm rounded-circle shadow-sm" @click="openDetailModal(item)">
-                          <i class="fas fa-eye"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr v-if="displayedData.length === 0">
-                      <td colspan="6" class="text-center py-4 text-muted">
-                        <i class="fas fa-folder-open mb-2 fa-2x"></i>
-                        <p>Tidak ada laporan yang tersedia</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                  <tbody v-else>
-                    <tr v-for="(item, index) in displayedData" :key="index" class="border-bottom">
-                      <td class="ps-4 fw-medium">{{ index + 1 }}</td>
-                      <td>{{ formatDate(item.tanggal) }}</td>
-                      <td class="text-truncate" style="max-width: 250px;">
-                        {{ truncateText(item.data, 150) }}
-                      </td>
-                      <td class="text-truncate" style="max-width: 250px;">
-                        {{ truncateText(item.query, 150) }}
-                      </td>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <div class="status-indicator" :class="getStatusClass(item.hasil)"></div>
-                          <span :class="getStatusTextClass(item.hasil)">{{ item.hasil }}</span>
-                        </div>
-                      </td>
-                      <td class="text-center">
-                        <button class="btn btn-light btn-sm rounded-circle shadow-sm" @click="openDetailModal(item)">
-                          <i class="fas fa-eye"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr v-if="displayedData.length === 0">
-                      <td colspan="6" class="text-center py-4 text-muted">
-                        <i class="fas fa-folder-open mb-2 fa-2x"></i>
-                        <p>Tidak ada verifikasi yang tersedia</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <ReportsTable
+                :selectedTab="selectedTab"
+                :displayedData="displayedData"
+                :formatDate="formatDate"
+                :truncateText="truncateText"
+                :getStatusClass="getStatusClass"
+                :getStatusTextClass="getStatusTextClass"
+                @openDetailModal="openDetailModal"
+              />
             </div>
             <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
-              <span class="text-muted small">Menampilkan {{ displayedData.length }} entri</span>
-              <nav aria-label="Page navigation">
-                <ul class="pagination pagination-sm mb-0">
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#" aria-label="Previous">
-                      <span aria-hidden="true">«</span>
-                    </a>
-                  </li>
-                  <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                  <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                      <span aria-hidden="true">»</span>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
+              <span class="text-muted small">
+                Menampilkan {{ ((currentPage - 1) * itemsPerPage) + 1 }} - 
+                {{ Math.min(currentPage * itemsPerPage, totalCount) }} 
+                dari {{ totalCount }} entri
+              </span>
+              <Pagination
+                v-if="totalPages > 1"
+                :totalPages="totalPages"
+                :currentPage="currentPage"
+                @goToPage="goToPage"
+              />
             </div>
           </div>
         </div>
@@ -243,10 +73,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import DetailModal from './Partials/Modals.vue';
+import SidebarMenu from './Partials/SidebarMenu.vue';
+import QuickStats from './Partials/QuickStats.vue';
+import ReportsTable from './Partials/ReportsTable.vue';
+import Pagination from './Partials/Pagination.vue';
 
 const props = defineProps({
   reports: Array,
@@ -278,15 +112,46 @@ const verifications = ref([
 ]);
 
 const selectedTab = ref('penipuan');
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
+const totalCount = computed(() => {
+  if (selectedTab.value === 'penipuan') {
+    return props.reports?.filter(r => r.service === 'Penipuan').length || 0;
+  } else if (selectedTab.value === 'infrastruktur') {
+    return props.reports?.filter(r => r.service === 'Infrastruktur').length || 0;
+  } else {
+    return verifications.value.length;
+  }
+});
+
+const totalPages = computed(() => {
+  const totalItems = props.reports ? (
+    selectedTab.value === 'penipuan' 
+      ? props.reports.filter(r => r.service === 'Penipuan').length
+      : selectedTab.value === 'infrastruktur'
+        ? props.reports.filter(r => r.service === 'Infrastruktur').length
+        : verifications.value.length
+  ) : 0;
+  
+  return Math.ceil(totalItems / itemsPerPage);
+});
 
 const displayedData = computed(() => {
+  if (!props.reports) return [];
+  
+  let data;
   if (selectedTab.value === 'penipuan') {
-    return props.reports.filter(r => r.service === 'Penipuan');
+    data = props.reports.filter(r => r.service === 'Penipuan');
   } else if (selectedTab.value === 'infrastruktur') {
-    return props.reports.filter(r => r.service === 'Infrastruktur');
+    data = props.reports.filter(r => r.service === 'Infrastruktur');
   } else {
-    return verifications.value;
+    data = verifications.value;
   }
+  
+  const startIndex = (currentPage.value - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  return data.slice(startIndex, endIndex);
 });
 
 const showModal = ref(false);
@@ -347,6 +212,17 @@ const getStatusTextClass = (status) => {
       return 'text-secondary';
   }
 };
+
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+// Reset page when tab changes
+watch(selectedTab, () => {
+  currentPage.value = 1;
+});
 </script>
 
 <style scoped>
