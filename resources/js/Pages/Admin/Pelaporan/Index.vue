@@ -254,11 +254,6 @@ const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '
 watch([searchQuery, selectedCategory, selectedService, selectedStatus], () => {
   currentPage.value = 1;
 });
-
-// Debugging log
-watch(props.reports, (newReports) => {
-  console.log('Reports received:', newReports);
-});
 </script>
 
 <style scoped>

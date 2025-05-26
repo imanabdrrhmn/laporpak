@@ -284,12 +284,7 @@ const handleVerification = () => {
     
     setTimeout(() => {
       isModal2Visible.value = true;
-      
-      // Log form data
-      console.log('Form Data:', {
-        service: selectedService.value,
-        ...formData.value
-      });
+    
       
       resetForm();
     }, 400);
