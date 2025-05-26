@@ -492,6 +492,37 @@ function submitPermissions({ userId, permissions }) {
   border-color: #f8f9fa;
 }
 
+/* Margin antar tombol Swal */
+.swal-confirm {
+  margin-right: 0.6rem !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  font-weight: 600 !important;
+  transition: background-color 0.2s ease;
+}
+
+.swal-confirm:hover {
+  background-color: #2563eb !important; /* Hover warna lebih gelap */
+}
+
+.swal-cancel {
+  margin-left: 0.6rem !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  font-weight: 600 !important;
+  transition: background-color 0.2s ease;
+}
+
+.swal-cancel:hover {
+  background-color: #6c757d !important; /* Hover warna lebih gelap */
+}
+
+/* Optional: Buat tombol Swal lebih lebar agar lebih mudah diklik */
+.swal2-actions button {
+  min-width: 100px;
+}
+
+
 /* Animation Extras */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }

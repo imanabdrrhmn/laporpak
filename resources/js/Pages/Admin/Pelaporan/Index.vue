@@ -1,4 +1,3 @@
-<!-- resources/js/Pages/Pelaporan/LaporanManajemen.vue -->
 <template>
   <AppLayout>
     <Head title="Manajemen Laporan" />
@@ -24,6 +23,7 @@
           :current-page="currentPage"
           :items-per-page="itemsPerPage"
           :loading="loading"
+          :can="props.can"
           @view-report="viewReport"
           @quick-action="quickAction"
         />
@@ -66,6 +66,10 @@ const props = defineProps({
         return isValid;
       });
     }
+  },
+  can: {
+    type: Object,
+    default: () => ({})
   }
 });
 

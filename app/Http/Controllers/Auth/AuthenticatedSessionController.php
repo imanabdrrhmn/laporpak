@@ -108,7 +108,7 @@ class AuthenticatedSessionController extends Controller
                 'password' => bcrypt(uniqid())
             ]);
 
-            if (!$user->hasRole('user')) {
+            if ($user->hasRole(null)) {
                 $user->assignRole('user');
             }
 
