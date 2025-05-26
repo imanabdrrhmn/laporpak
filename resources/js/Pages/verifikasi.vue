@@ -19,7 +19,7 @@
 import { ref, onMounted } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import Alur from '@/Components/alurverifikasi.vue';
+import Alur from '@/Components/VerificationFlow.vue';
 import Section from '@/Components/Section.vue';
 import Feedback from '@/Components/Feedback.vue';
 import HeroContent from '@/Components/Verifikasi/HeroContent.vue';
