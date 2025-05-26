@@ -1,7 +1,5 @@
 <?php
 
-// app/Policies/TopUpPolicy.php
-
 namespace App\Policies;
 
 use App\Models\User;
@@ -11,16 +9,16 @@ class TopUpPolicy
 {
     public function viewAny(User $user)
     {
-        return $user->role === 'admin' || 'verifier';
+        return $user->can('view_topup');
     }
 
     public function verify(User $user, TopUp $topUp)
     {
-        return $user->role === 'admin' || 'verifier';
+        return $user->can('verify_topup');
     }
 
     public function reject(User $user, TopUp $topUp)
     {
-        return $user->role === 'admin' || 'verifier';
+        return $user->can('verify_topup');
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\Admin\ReportManagementController;
+use App\Http\Controllers\Admin\DashboardAdminController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserHistoryReportController;
 use App\Http\Controllers\DashboardController;
@@ -28,10 +29,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'contact.verified'])->name('dashboard');
-Route::get('admin/dashboard', function () {
-    return Inertia::render('Admin/Dashboard/DashboardAdmin', [
-    ]);
-})->middleware(['auth', 'contact.verified', 'role:admin||verifier'])->name('dashboard.admin');
+
+Route::get('admin/dashboard', [DashboardAdminController::class, 'index'])
+    ->middleware(['auth', 'contact.verified', 'role:admin||verifier'])
+    ->name('dashboard.admin');
 
 Route::get('/verifikasi', function () {
     $feedbacks = Feedback::with('user')->where('kategori', 'Verifikasi')->latest()->take(10)->get();
@@ -90,16 +91,23 @@ Route::middleware(['auth','contact.verified'])->group(function () {
     Route::get('/top-ups/history', [TopUpController::class, 'index'])->name('top-ups.index');     
     Route::get('/top-ups', [TopUpController::class, 'create'])->name('top-ups.create');; 
     Route::post('/top-ups/create', [TopUpController::class, 'store'])->name('top-ups.store');       
-
-    // Admin routes
-    Route::middleware('can:viewAny,App\Models\TopUp', 'role:admin||verifier')->group(function () {
-        Route::get('/admin/top-ups', [TopUpController::class, 'adminIndex']);
-        Route::post('/admin/top-ups/{id}/verify', [TopUpController::class, 'verify']);
-        Route::post('/admin/top-ups/{id}/reject', [TopUpController::class, 'reject']);
-        Route::get('/admin/top-ups/export-logs', [TopUpController::class, 'exportTopUpLogsToCsv']);
-        
-    });
 });
+
+Route::middleware(['auth', 'contact.verified', 'role:admin|verifier'])->group(function () {
+    Route::get('/admin/top-ups', [TopUpController::class, 'adminIndex'])->name('admin.topups.index');
+
+    Route::post('/admin/top-ups/{topUp}/verify', [TopUpController::class, 'verify'])
+        ->middleware('can:verify,topUp')
+        ->name('admin.topups.verify');
+
+    Route::post('/admin/top-ups/{topUp}/reject', [TopUpController::class, 'reject'])
+        ->middleware('can:reject,topUp')
+        ->name('admin.topups.reject');
+
+    Route::get('/admin/top-ups/export-logs', [TopUpController::class, 'exportTopUpLogsToCsv'])
+        ->name('admin.topups.exportLogs');
+});
+
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');

@@ -70,232 +70,200 @@
   </div>
 </template>
 
-<script>
-import { ref, onMounted, onUnmounted } from 'vue';
-import Chart from 'chart.js/auto';
+<script setup>
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import Chart from 'chart.js/auto'
 
-export default {
-  props: {
-    reportData: {
-      type: Object,
-      default: () => ({
-        approved: 45,
-        pending: 23,
-        rejected: 12,
-        published: 67
-      })
+const props = defineProps({
+  reportData: {
+    type: Object,
+    default: () => ({
+      approved: 45,
+      pending: 23,
+      rejected: 12,
+      published: 67
+    })
+  },
+  verificationData: {
+    type: Object,
+    default: () => ({
+      success: 89,
+      failed: 15
+    })
+  },
+  monthlyData: {
+    type: Array,
+    default: () => [
+      { month: 'Jan', reports: 45, verifications: 32 },
+      { month: 'Feb', reports: 52, verifications: 41 },
+      { month: 'Mar', reports: 48, verifications: 38 },
+      { month: 'Apr', reports: 61, verifications: 45 },
+      { month: 'Mei', reports: 55, verifications: 42 },
+      { month: 'Jun', reports: 67, verifications: 48 }
+    ]
+  }
+})
+
+// Refs
+const statusChart = ref(null)
+const reportChart = ref(null)
+const verificationChart = ref(null)
+const trendChart = ref(null)
+
+// Cleanup references
+let statusChartInstance = null
+let reportChartInstance = null
+let verificationChartInstance = null
+let trendChartInstance = null
+
+// Safe access to reportData
+const reportStats = computed(() => ({
+  approved: props.reportData?.approved ?? 0,
+  pending: props.reportData?.pending ?? 0,
+  rejected: props.reportData?.rejected ?? 0,
+  published: props.reportData?.published ?? 0
+}))
+
+// Chart init functions
+const initStatusChart = () => {
+  statusChartInstance = new Chart(statusChart.value.getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Pelaporan', 'Verifikasi'],
+      datasets: [{
+        data: [70, 30],
+        backgroundColor: ['#4e73df', '#1cc88a'],
+        borderWidth: 0
+      }]
     },
-    verificationData: {
-      type: Object,
-      default: () => ({
-        success: 89,
-        failed: 15
-      })
-    },
-    monthlyData: {
-      type: Array,
-      default: () => [
-        { month: 'Jan', reports: 45, verifications: 32 },
-        { month: 'Feb', reports: 52, verifications: 41 },
-        { month: 'Mar', reports: 48, verifications: 38 },
-        { month: 'Apr', reports: 61, verifications: 45 },
-        { month: 'Mei', reports: 55, verifications: 42 },
-        { month: 'Jun', reports: 67, verifications: 48 }
-      ]
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: { position: 'right' }
+      }
     }
-  },
-  
-  setup(props) {
-    const statusChart = ref(null);
-    const reportChart = ref(null);
-    const verificationChart = ref(null);
-    const trendChart = ref(null);
-    
-    let statusChartInstance = null;
-    let reportChartInstance = null;
-    let verificationChartInstance = null;
-    let trendChartInstance = null;
+  })
+}
 
-    const initStatusChart = () => {
-      const statusCtx = statusChart.value.getContext('2d');
-      statusChartInstance = new Chart(statusCtx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Pelaporan', 'Verifikasi'],
-          datasets: [
-            {
-              data: [70, 30],
-              backgroundColor: ['#4e73df', '#1cc88a'],
-              borderWidth: 0,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '60%',
-          plugins: {
-            legend: {
-              position: 'right',
-            },
-          },
-        },
-      });
-    };
+const initReportChart = () => {
+  reportChartInstance = new Chart(reportChart.value.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Approved', 'Pending', 'Rejected', 'Published'],
+      datasets: [{
+        label: 'Jumlah Laporan',
+        data: [
+          reportStats.value.approved,
+          reportStats.value.pending,
+          reportStats.value.rejected,
+          reportStats.value.published
+        ],
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8'],
+        borderWidth: 0,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 10 }
+        }
+      }
+    }
+  })
+}
 
-    const initReportChart = () => {
-      const reportCtx = reportChart.value.getContext('2d');
-      reportChartInstance = new Chart(reportCtx, {
-        type: 'bar',
-        data: {
-          labels: ['Approved', 'Pending', 'Rejected', 'Published'],
-          datasets: [
-            {
-              label: 'Jumlah Laporan',
-              data: [
-                props.reportData.approved,
-                props.reportData.pending,
-                props.reportData.rejected,
-                props.reportData.published
-              ],
-              backgroundColor: [
-                '#28a745', // Green for approved
-                '#ffc107', // Yellow for pending
-                '#dc3545', // Red for rejected
-                '#17a2b8'  // Blue for published
-              ],
-              borderWidth: 0,
-              borderRadius: 4,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 10,
-              },
-            },
-          },
-        },
-      });
-    };
+const initVerificationChart = () => {
+  verificationChartInstance = new Chart(verificationChart.value.getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: ['Berhasil', 'Gagal'],
+      datasets: [{
+        data: [
+          props.verificationData.success ?? 0,
+          props.verificationData.failed ?? 0
+        ],
+        backgroundColor: ['#28a745', '#dc3545'],
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  })
+}
 
-    const initVerificationChart = () => {
-      const verificationCtx = verificationChart.value.getContext('2d');
-      verificationChartInstance = new Chart(verificationCtx, {
-        type: 'pie',
-        data: {
-          labels: ['Berhasil', 'Gagal'],
-          datasets: [
-            {
-              data: [
-                props.verificationData.success,
-                props.verificationData.failed
-              ],
-              backgroundColor: [
-                '#28a745', // Green for success
-                '#dc3545'  // Red for failed
-              ],
-              borderWidth: 2,
-              borderColor: '#ffffff',
-            },
-          ],
+const initTrendChart = () => {
+  trendChartInstance = new Chart(trendChart.value.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: props.monthlyData.map(item => item.month),
+      datasets: [
+        {
+          label: 'Laporan',
+          data: props.monthlyData.map(item => item.reports),
+          borderColor: '#4e73df',
+          backgroundColor: 'rgba(78, 115, 223, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-            },
-          },
-        },
-      });
-    };
+        {
+          label: 'Verifikasi',
+          data: props.monthlyData.map(item => item.verifications),
+          borderColor: '#1cc88a',
+          backgroundColor: 'rgba(28, 200, 138, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 10 }
+        }
+      }
+    }
+  })
+}
 
-    const initTrendChart = () => {
-      const trendCtx = trendChart.value.getContext('2d');
-      trendChartInstance = new Chart(trendCtx, {
-        type: 'line',
-        data: {
-          labels: props.monthlyData.map(item => item.month),
-          datasets: [
-            {
-              label: 'Laporan',
-              data: props.monthlyData.map(item => item.reports),
-              borderColor: '#4e73df',
-              backgroundColor: 'rgba(78, 115, 223, 0.1)',
-              borderWidth: 3,
-              fill: true,
-              tension: 0.4,
-            },
-            {
-              label: 'Verifikasi',
-              data: props.monthlyData.map(item => item.verifications),
-              borderColor: '#1cc88a',
-              backgroundColor: 'rgba(28, 200, 138, 0.1)',
-              borderWidth: 3,
-              fill: true,
-              tension: 0.4,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 10,
-              },
-            },
-          },
-        },
-      });
-    };
+const destroyCharts = () => {
+  statusChartInstance?.destroy()
+  reportChartInstance?.destroy()
+  verificationChartInstance?.destroy()
+  trendChartInstance?.destroy()
+}
 
-    const destroyCharts = () => {
-      if (statusChartInstance) statusChartInstance.destroy();
-      if (reportChartInstance) reportChartInstance.destroy();
-      if (verificationChartInstance) verificationChartInstance.destroy();
-      if (trendChartInstance) trendChartInstance.destroy();
-    };
+// Lifecycle
+onMounted(() => {
+  initStatusChart()
+  initReportChart()
+  initVerificationChart()
+  initTrendChart()
+})
 
-    onMounted(() => {
-      initStatusChart();
-      initReportChart();
-      initVerificationChart();
-      initTrendChart();
-    });
-
-    onUnmounted(() => {
-      destroyCharts();
-    });
-
-    return {
-      statusChart,
-      reportChart,
-      verificationChart,
-      trendChart,
-    };
-  },
-};
+onUnmounted(() => {
+  destroyCharts()
+})
 </script>
+
 
 <style scoped>
 .card {

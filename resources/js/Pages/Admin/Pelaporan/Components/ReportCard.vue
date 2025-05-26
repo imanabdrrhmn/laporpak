@@ -38,6 +38,7 @@
         <i class="fas fa-eye"></i> Lihat Detail
       </button>
       <button
+        v-if="can.verifyReports"
         :class="['publish-button', getPublishButtonClasses]"
         :disabled="loading || report.status === 'pending' || report.status === 'rejected'"
         @click="$emit('quickAction', { report, action: 'published' })"
@@ -47,7 +48,7 @@
         <span v-else-if="report.status === 'rejected'">Ditolak</span>
         <span v-else>{{ report.status === 'published' ? 'Published' : 'Unpublished' }}</span>
       </button>
-      <div class="action-buttons">
+      <div class="action-buttons" v-if="can.verifyReports">
         <button
           @click="$emit('quickAction', { report, action: 'approved' })"
           :class="['quick-action', 'approve', report.status === 'approved' ? 'active' : '', { 'loading': loading }]"
@@ -76,7 +77,11 @@ import { computed } from 'vue';
 
 const props = defineProps({
   report: Object,
-  loading: Boolean
+  loading: Boolean,
+  can: {
+    type: Object,
+    default: () => ({})
+  }
 });
 
 const emit = defineEmits(['viewReport', 'quickAction']);

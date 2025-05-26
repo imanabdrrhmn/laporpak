@@ -12,5 +12,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'verify_reports']);
         Permission::firstOrCreate(['name' => 'view_reports_penipuan']);
         Permission::firstOrCreate(['name' => 'view_reports_infrastruktur']);
+        Permission::firstOrCreate(['name' => 'view_dashboard']);
+        Permission::firstOrCreate(['name' => 'verify_topup']);
+        Permission::firstOrCreate(['name' => 'view_topup']);
     }
 }

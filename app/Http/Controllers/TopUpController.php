@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Policies\TopUpPolicy;
+
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class TopUpController extends Controller
@@ -50,70 +52,88 @@ class TopUpController extends Controller
         return redirect()->route('top-ups.index')->with('success', 'Top up request submitted');
     }
 
-   public function adminIndex(Request $request)
-{
-    $query = TopUp::with('user')->orderBy('created_at', 'desc');
-
-    if ($request->has('status') && in_array($request->status, ['pending','verified','rejected'])) {
-        $query->where('status', $request->status);
-    }
-
-    if ($request->has('search') && $request->search) {
-        $search = $request->search;
-        $query->whereHas('user', function($q) use ($search) {
-            $q->where('name', 'like', "%$search%")
-              ->orWhere('email', 'like', "%$search%");
-        });
-    }
-
-    $topUps = $query->paginate(10)->withQueryString()->through(function ($topUp) {
-        return [
-            'id' => $topUp->id,
-            'amount' => $topUp->amount,
-            'status' => $topUp->status,
-            'proof' => $topUp->proof,
-            'payment_method' => $topUp->payment_method,
-            'created_at' => $topUp->created_at->toDateTimeString(),
-            'user' => [
-                'id' => $topUp->user->id,
-                'name' => $topUp->user->name,
-                'email' => $topUp->user->email,
-                'avatar_url' => $topUp->user->avatar 
-                    ? asset('storage/' . $topUp->user->avatar) 
-                    : asset('/Default-Profile.png'),
-            ],
-        ];
-    });
-
-    return Inertia::render('Admin/TopUps/Index', [
-        'topUps' => $topUps,
-        'filters' => $request->only('status', 'search'),
-    ]);
-}
-
-
-    public function verify($id)
+    public function adminIndex(Request $request)
     {
-        $topUp = TopUp::findOrFail($id);
+        $canViewTopUp = $request->user()->can('view_topup');
+
+        if (!$canViewTopUp) {
+            // Kirim ke frontend flag tidak punya akses
+            return Inertia::render('Admin/TopUps/Index', [
+                'canViewTopUp' => false,
+            ]);
+        }
+
+        $query = TopUp::with('user')->orderBy('created_at', 'desc');
+
+        if ($request->has('status') && in_array($request->status, ['pending','verified','rejected'])) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                ->orWhere('email', 'like', "%$search%");
+            });
+        }
+
+        $topUps = $query->paginate(10)->withQueryString()->through(function ($topUp) {
+            return [
+                'id' => $topUp->id,
+                'amount' => $topUp->amount,
+                'status' => $topUp->status,
+                'proof' => $topUp->proof,
+                'payment_method' => $topUp->payment_method,
+                'created_at' => $topUp->created_at->toDateTimeString(),
+                'user' => [
+                    'id' => $topUp->user->id,
+                    'name' => $topUp->user->name,
+                    'email' => $topUp->user->email,
+                    'avatar_url' => $topUp->user->avatar 
+                        ? asset('storage/' . $topUp->user->avatar) 
+                        : asset('/Default-Profile.png'),
+                ],
+            ];
+        });
+
+        $pendingCount = TopUp::where('status', 'pending')->count();
+        $verifiedCount = TopUp::where('status', 'verified')->count();
+        $rejectedCount = TopUp::where('status', 'rejected')->count();
+
+        return Inertia::render('Admin/TopUps/Index', [
+            'topUps' => $topUps,
+            'filters' => $request->only('status', 'search'),
+            'statusCounts' => [
+                'pending' => $pendingCount,
+                'verified' => $verifiedCount,
+                'rejected' => $rejectedCount,
+            ],
+        ]);
+    }
+
+        public function verify(TopUp $topUp)
+    {
         $this->authorize('verify', $topUp);
 
         if ($topUp->status !== 'pending') {
             return redirect()->back()->with('error', 'Top up sudah diproses sebelumnya.');
         }
 
-        $user = $topUp->user;
-        $user->balance += $topUp->amount;
-        $user->save();
-
         $topUp->status = 'verified';
         $topUp->save();
 
-        return redirect()->back()->with('success', 'Top up berhasil diverifikasi.');
+        // Simpan log status
+        TopUpStatusLog::create([
+            'topup_id' => $topUp->id,
+            'changed_by' => Auth::id(),
+            'status' => 'verified',
+        ]);
+
+        return redirect()->route('admin.topups.index')->with('success', 'Top up berhasil diverifikasi.');
     }
 
-    public function reject($id)
+    public function reject(TopUp $topUp)
     {
-        $topUp = TopUp::findOrFail($id);
         $this->authorize('reject', $topUp);
 
         if ($topUp->status !== 'pending') {
@@ -123,10 +143,18 @@ class TopUpController extends Controller
         $topUp->status = 'rejected';
         $topUp->save();
 
-        return redirect()->back()->with('success', 'Top up berhasil ditolak.');
+        // Simpan log status
+        TopUpStatusLog::create([
+            'topup_id' => $topUp->id,
+            'changed_by' => Auth::id(),
+            'status' => 'rejected',
+        ]);
+
+        return redirect()->route('admin.topups.index')->with('success', 'Top up berhasil ditolak.');
     }
 
-    public function exportTopUpLogsToCsv(Request $request)
+
+        public function exportTopUpLogsToCsv(Request $request)
     {
         $request->validate([
             'start_date' => 'nullable|date',

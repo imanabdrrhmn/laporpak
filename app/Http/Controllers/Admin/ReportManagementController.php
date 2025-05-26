@@ -23,7 +23,9 @@ class ReportManagementController
         abort(403, 'Unauthorized action.');
     }
 
-    $reports = Report::with('user')->latest()->get()->map(function ($report) {
+    $reports = Report::with('user')->latest()->get()->filter(function ($report) use ($user) {
+        return $user->can('view', $report); 
+    })->map(function ($report) {
     return [
         'id' => $report->id,
         'user_id' => $report->user_id,
@@ -51,7 +53,10 @@ class ReportManagementController
 
 
     return Inertia::render('Admin/Pelaporan/Index', [
-        'reports' => $reports,
+        'reports' => $reports->values()->all(),
+        'can' => [
+            'verifyReports' => $request->user()->can('verify_reports'),
+        ],
     ]);
 }
 

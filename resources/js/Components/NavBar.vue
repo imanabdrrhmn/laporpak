@@ -326,7 +326,12 @@
               <span>Tentang Kami</span>
             </Link>
           </li>
-
+          <li class="nav-item" v-if="isAdmin">
+            <Link href="/admin/dashboard" class="nav-link" @click="closeMobileNav">
+              <i class="bi bi-shield-fill me-2"></i>
+                Admin Panel
+            </Link>
+          </li>
           <!-- Logout and Login Buttons -->
           <li v-if="isLoggedIn" class="nav-item mt-3">
             <a class="nav-link text-danger" href="#" @click.prevent="logout">

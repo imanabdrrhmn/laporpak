@@ -8,6 +8,7 @@
           :key="report.id"
           :report="report"
           :loading="loading[report.id]"
+          :can="can"
           @view-report="$emit('viewReport', report)"
           @quick-action="$emit('quickAction', $event)"
         />
@@ -43,7 +44,8 @@ defineProps({
   viewMode: String,
   currentPage: Number,
   itemsPerPage: Number,
-  loading: Object
+  loading: Object,
+  can: Object
 });
 
 defineEmits(['viewReport', 'quickAction', 'resetFilters']);

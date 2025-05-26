@@ -211,8 +211,8 @@ async function submitRoleChange(e, userId, userName) {
     confirmButtonText: 'Ya, ubah!',
     cancelButtonText: 'Batal',
     customClass: {
-      confirmButton: 'btn btn-primary',
-      cancelButton: 'btn btn-secondary'
+      confirmButton: 'swal-confirm btn btn-primary',
+      cancelButton: 'swal-cancel btn btn-secondary'
     },
     buttonsStyling: false
   })
@@ -477,6 +477,14 @@ function confirmDelete(userName, form) {
 .custom-role-select {
   max-width: 150px;
   border-radius: 8px;
+}
+
+.swal-confirm {
+  margin-right: 0.5rem !important;
+}
+
+.swal-cancel {
+  margin-left: 0.5rem !important;
 }
 
 .btn-primary {
