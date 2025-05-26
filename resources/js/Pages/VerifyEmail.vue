@@ -5,8 +5,19 @@
       <div class="card-container">
         <div class="card">
           <div class="icon-container">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="email-icon">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="email-icon"
+            >
+              <path
+                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              ></path>
               <polyline points="22,6 12,13 2,6"></polyline>
             </svg>
           </div>
@@ -18,11 +29,21 @@
             Silakan klik tombol kirim di bawah untuk menerima email.
           </p>
           <p class="subtitle" v-else>
-            Kami telah mengirimkan link verifikasi ke email Anda. Silakan cek inbox Anda dan klik tautan untuk memverifikasi akun.
+            Kami telah mengirimkan link verifikasi ke email Anda. Silakan cek
+            inbox Anda dan klik tautan untuk memverifikasi akun.
           </p>
 
           <div v-if="isVerified" class="status-box success">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="status-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="status-icon"
+            >
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
@@ -30,7 +51,9 @@
           </div>
 
           <div v-if="!isVerified" class="resend-wrapper">
-            <p class="muted-text">Tidak menerima email? Anda dapat mengirim ulang link verifikasi.</p>
+            <p class="muted-text">
+              Tidak menerima email? Anda dapat mengirim ulang link verifikasi.
+            </p>
 
             <button
               @click="resendVerification"
@@ -44,7 +67,16 @@
             </button>
 
             <div v-if="status === 'verification-link-sent'" class="status-box info">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="status-icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="status-icon"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -54,7 +86,9 @@
           </div>
 
           <div class="help-section">
-            <p class="help-text">Butuh bantuan? <a href="#" class="help-link">Hubungi support</a></p>
+            <p class="help-text">
+              Butuh bantuan? <a href="#" class="help-link">Hubungi support</a>
+            </p>
           </div>
         </div>
       </div>
@@ -79,18 +113,36 @@ const isVerified = ref(false)
 const hasSent = ref(false)
 let timer = null
 
-const page = usePage()
+const COUNTDOWN_DURATION = 60 // detik
+const STORAGE_KEY = 'emailVerificationCountdownEnd'
 
-function startCountdown() {
-  countdown.value = 60
+function startCountdown(duration = COUNTDOWN_DURATION) {
+  countdown.value = duration
+  const countdownEndTimestamp = Date.now() + duration * 1000
+  localStorage.setItem(STORAGE_KEY, countdownEndTimestamp)
+
   if (timer) clearInterval(timer)
   timer = setInterval(() => {
     countdown.value--
     if (countdown.value <= 0) {
       clearInterval(timer)
       timer = null
+      localStorage.removeItem(STORAGE_KEY)
     }
   }, 1000)
+}
+
+function restoreCountdown() {
+  const storedEnd = localStorage.getItem(STORAGE_KEY)
+  if (storedEnd) {
+    const remaining = Math.floor((storedEnd - Date.now()) / 1000)
+    if (remaining > 0) {
+      hasSent.value = true
+      startCountdown(remaining)
+    } else {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+  }
 }
 
 const resendVerification = () => {
@@ -100,9 +152,9 @@ const resendVerification = () => {
   router.post(route('email.verify.send'), {}, {
     onFinish: () => {
       processing.value = false
-      status.value = 'verification-link-sent'
       hasSent.value = true
       startCountdown()
+      status.value = 'verification-link-sent'
     },
     onError: () => {
       processing.value = false
@@ -111,7 +163,11 @@ const resendVerification = () => {
   })
 }
 
+const page = usePage()
+
 onMounted(() => {
+  restoreCountdown()
+
   if (page.props.value?.auth?.user && page.props.value.auth.user.email_verified_at) {
     isVerified.value = true
   } else {
@@ -338,7 +394,9 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Help section */
@@ -367,20 +425,16 @@ onMounted(() => {
 
 /* Modal styling */
 
-@keyframes scaleIn {
-  to { transform: scale(1); }
-}
-
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .card {
     padding: 2rem 1.5rem;
   }
-  
+
   .title {
     font-size: 1.75rem;
   }
-  
+
   .subtitle {
     font-size: 1rem;
   }
