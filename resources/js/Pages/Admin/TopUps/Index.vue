@@ -2,373 +2,410 @@
   <AppLayout>
     <Head title="Manajemen Top Up" />
     <div class="container py-5">
-      <div class="dashboard-header mb-4">
-        <h1 class="fw-bold text-dark">Panel Admin</h1>
-        <h2 class="fw-light text-secondary">Manajemen Top Up</h2>
-      </div>
+      <template v-if="canViewTopUp">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header mb-4">
+          <h1 class="fw-bold text-dark">Panel Admin</h1>
+          <h2 class="fw-light text-secondary">Manajemen Top Up</h2>
+        </div>
 
-      <!-- Filter dan Search -->
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <div class="filter-controls">
-            <div class="filter-item">
-              <label class="form-label text-muted small mb-1">Status Filter</label>
-              <select v-model="filters.status" @change="updateFilters" class="form-select form-select-sm">
-                <option value="">Semua Status</option>
-                <option value="pending">Pending</option>
-                <option value="verified">Verified</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
+        <!-- Filter dan Search -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-body">
+            <div class="filter-controls">
+              <div class="filter-item">
+                <label class="form-label text-muted small mb-1">Status Filter</label>
+                <select v-model="filters.status" @change="updateFilters" class="form-select form-select-sm">
+                  <option value="">Semua Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="verified">Verified</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
 
-            <div class="filter-item flex-grow-1">
-              <label class="form-label text-muted small mb-1">Cari User</label>
-              <div class="input-group">
-                <input
-                  v-model="filters.search"
-                  @keyup.enter="updateFilters"
-                  type="search"
-                  placeholder="Cari user (nama/email)..."
-                  class="form-control form-control-sm"
-                />
-                <button @click="updateFilters" class="btn btn-primary btn-sm">
-                  <i class="fas fa-search me-1"></i> Cari
+              <div class="filter-item flex-grow-1">
+                <label class="form-label text-muted small mb-1">Cari User</label>
+                <div class="input-group">
+                  <input
+                    v-model="filters.search"
+                    @keyup.enter="updateFilters"
+                    type="search"
+                    placeholder="Cari user (nama/email)..."
+                    class="form-control form-control-sm"
+                  />
+                  <button @click="updateFilters" class="btn btn-primary btn-sm">
+                    <i class="fas fa-search me-1"></i> Cari
+                  </button>
+                </div>
+              </div>
+
+              <div class="filter-item">
+                <label class="form-label text-muted small mb-1">Export Data</label>
+                <button
+                  @click="showExportModal"
+                  class="btn btn-outline-success btn-sm w-100"
+                >
+                  <i class="fas fa-file-export me-1"></i> Export Logs
                 </button>
               </div>
             </div>
-
-            <div class="filter-item">
-              <label class="form-label text-muted small mb-1">Export Data</label>
-              <button
-                @click="showExportModal"
-                class="btn btn-outline-success btn-sm w-100"
-              >
-                <i class="fas fa-file-export me-1"></i> Export Logs
-              </button>
-            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Status Cards -->
-      <div class="status-cards mb-4">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <div class="card status-card shadow-sm border-warning">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="card-subtitle mb-1 text-muted">Pending</h6>
-                    <h3 class="card-title mb-0">{{ pendingCount }}</h3>
-                  </div>
-                  <div class="status-icon bg-warning-light text-warning">
-                    <i class="fas fa-clock"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card status-card shadow-sm border-success">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="card-subtitle mb-1 text-muted">Verified</h6>
-                    <h3 class="card-title mb-0">{{ verifiedCount }}</h3>
-                  </div>
-                  <div class="status-icon bg-success-light text-success">
-                    <i class="fas fa-check-circle"></i>
+        <!-- Status Cards -->
+        <div class="status-cards mb-4">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="card status-card shadow-sm border-warning">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="card-subtitle mb-1 text-muted">Pending</h6>
+                      <h3 class="card-title mb-0">{{ pendingCount }}</h3>
+                    </div>
+                    <div class="status-icon bg-warning-light text-warning">
+                      <i class="fas fa-clock"></i>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card status-card shadow-sm border-danger">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="card-subtitle mb-1 text-muted">Rejected</h6>
-                    <h3 class="card-title mb-0">{{ rejectedCount }}</h3>
+            <div class="col-md-4">
+              <div class="card status-card shadow-sm border-success">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="card-subtitle mb-1 text-muted">Verified</h6>
+                      <h3 class="card-title mb-0">{{ verifiedCount }}</h3>
+                    </div>
+                    <div class="status-icon bg-success-light text-success">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
                   </div>
-                  <div class="status-icon bg-danger-light text-danger">
-                    <i class="fas fa-times-circle"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card status-card shadow-sm border-danger">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="card-subtitle mb-1 text-muted">Rejected</h6>
+                      <h3 class="card-title mb-0">{{ rejectedCount }}</h3>
+                    </div>
+                    <div class="status-icon bg-danger-light text-danger">
+                      <i class="fas fa-times-circle"></i>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Table Top Ups -->
-      <div class="card shadow">
-        <div class="card-header bg-white py-3">
-          <h5 class="mb-0">Riwayat Transaksi</h5>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-hover m-0">
-            <thead class="table-light">
-              <tr>
-                <th class="ps-4">User</th>
-                <th>Jumlah</th>
-                <th>Metode Pembayaran</th>
-                <th>Status</th>
-                <th>Tanggal</th>
-                <th>Bukti</th>
-                <th class="text-end pe-4">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="topUp in topUps.data" :key="topUp.id" class="align-middle">
-                <td class="ps-4">
-                  <div class="d-flex align-items-center">
-                    <div class="user-avatar bg-primary-light text-primary me-2">
+        <!-- Table Top Ups -->
+        <div class="card shadow">
+          <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Riwayat Transaksi</h5>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover m-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">User</th>
+                  <th>Jumlah</th>
+                  <th>Metode Pembayaran</th>
+                  <th>Status</th>
+                  <th>Tanggal</th>
+                  <th>Bukti</th>
+                  <th class="text-end pe-4">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="topUp in topUps.data" :key="topUp.id" class="align-middle">
+                  <td class="ps-4">
+                    <div class="d-flex align-items-center">
+                      <div class="user-avatar bg-primary-light text-primary me-2">
+                        <img
+                          :src="topUp.user.avatar_url"
+                          alt="Avatar"
+                          class="user-avatar rounded-circle me-2"
+                          style="width: 40px; height: 40px; object-fit: cover;"
+                        />
+                      </div>
+                      <div>
+                        <div class="fw-semibold">{{ topUp.user.name }}</div>
+                        <small class="text-muted">{{ topUp.user.email }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="fw-semibold">Rp {{ formatCurrency(topUp.amount) }}</span></td>
+                  <td><span class="payment-method">{{ topUp.payment_method || '-' }}</span></td>
+                  <td><span :class="statusBadgeClass(topUp.status)" class="status-badge">{{ capitalize(topUp.status) }}</span></td>
+                  <td>
+                    <div class="d-flex flex-column">
+                      <span>{{ formatDate(topUp.created_at).date }}</span>
+                      <small class="text-muted">{{ formatDate(topUp.created_at).time }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div v-if="topUp.proof" class="proof-container">
                       <img
-                        :src="topUp.user.avatar_url"
-                        alt="Avatar"
-                        class="user-avatar rounded-circle me-2"
-                        style="width: 40px; height: 40px; object-fit: cover;"
+                        :src="getProofUrl(topUp.proof)"
+                        alt="Bukti"
+                        class="proof-thumb"
+                        @click="showProofModal(topUp.proof)"
                       />
                     </div>
-                    <div>
-                      <div class="fw-semibold">{{ topUp.user.name }}</div>
-                      <small class="text-muted">{{ topUp.user.email }}</small>
+                    <span v-else class="text-muted">-</span>
+                  </td>
+                  <td class="text-end pe-4">
+                    <button
+                      class="btn btn-sm btn-outline-secondary"
+                      @click="openActionModal(topUp)"
+                      title="Aksi"
+                    >
+                      <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="topUps.data.length === 0">
+                  <td colspan="7" class="text-center py-4">
+                    <div class="empty-state">
+                      <i class="fas fa-receipt text-muted mb-2"></i>
+                      <p>Tidak ada data transaksi yang ditemukan</p>
                     </div>
-                  </div>
-                </td>
-                <td><span class="fw-semibold">Rp {{ formatCurrency(topUp.amount) }}</span></td>
-                <td><span class="payment-method">{{ topUp.payment_method || '-' }}</span></td>
-                <td><span :class="statusBadgeClass(topUp.status)" class="status-badge">{{ capitalize(topUp.status) }}</span></td>
-                <td>
-                  <div class="d-flex flex-column">
-                    <span>{{ formatDate(topUp.created_at).date }}</span>
-                    <small class="text-muted">{{ formatDate(topUp.created_at).time }}</small>
-                  </div>
-                </td>
-                <td>
-                  <div v-if="topUp.proof" class="proof-container">
-                    <img
-                      :src="getProofUrl(topUp.proof)"
-                      alt="Bukti"
-                      class="proof-thumb"
-                      @click="showProofModal(topUp.proof)"
-                    />
-                  </div>
-                  <span v-else class="text-muted">-</span>
-                </td>
-                <td class="text-end pe-4">
-                  <button
-                    class="btn btn-sm btn-outline-secondary"
-                    @click="openActionModal(topUp)"
-                    title="Aksi"
-                  >
-                    <i class="fas fa-ellipsis-v"></i>
-                  </button>
-                </td>
-              </tr>
-              <tr v-if="topUps.data.length === 0">
-                <td colspan="7" class="text-center py-4">
-                  <div class="empty-state">
-                    <i class="fas fa-receipt text-muted mb-2"></i>
-                    <p>Tidak ada data transaksi yang ditemukan</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-        <!-- Pagination -->
-        <div v-if="topUps.last_page > 1" class="card-footer bg-white">
-          <nav aria-label="Page navigation">
-            <ul class="pagination pagination-sm justify-content-center flex-wrap mb-0">
-              <li
-                class="page-item"
-                :class="{ disabled: !topUps.prev_page_url }"
-                @click.prevent="goToPage(topUps.current_page - 1)"
-              >
-                <a class="page-link" href="#">
-                  <i class="fas fa-chevron-left"></i>
-                </a>
-              </li>
-              <li
-                v-for="page in totalPages"
-                :key="page"
-                class="page-item"
-                :class="{ active: page === topUps.current_page }"
-                @click.prevent="goToPage(page)"
-              >
-                <a class="page-link" href="#">{{ page }}</a>
-              </li>
-              <li
-                class="page-item"
-                :class="{ disabled: !topUps.next_page_url }"
-                @click.prevent="goToPage(topUps.current_page + 1)"
-              >
-                <a class="page-link" href="#">
-                  <i class="fas fa-chevron-right"></i>
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </div>
-
-      <!-- Modal Aksi -->
-      <div
-        class="modal fade"
-        id="actionModal"
-        tabindex="-1"
-        aria-labelledby="actionModalLabel"
-        aria-hidden="true"
-        ref="actionModalRef"
-      >
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="actionModalLabel">Pilih Aksi</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="closeActionModal"></button>
-            </div>
-            <div class="modal-body">
-              <p><strong>User:</strong> {{ selectedTopUp?.user.name }} ({{ selectedTopUp?.user.email }})</p>
-              <p><strong>Jumlah:</strong> Rp {{ formatCurrency(selectedTopUp?.amount) }}</p>
-              <div class="d-grid gap-2">
-                <button
-                  v-if="selectedTopUp?.status === 'pending'"
-                  class="btn btn-success"
-                  @click="confirmVerify"
-                  :disabled="loadingIds.includes(selectedTopUp?.id)"
+          <!-- Pagination -->
+          <div v-if="topUps.last_page > 1" class="card-footer bg-white">
+            <nav aria-label="Page navigation">
+              <ul class="pagination pagination-sm justify-content-center flex-wrap mb-0">
+                <li
+                  class="page-item"
+                  :class="{ disabled: !topUps.prev_page_url }"
+                  @click.prevent="goToPage(topUps.current_page - 1)"
                 >
-                  <i class="fas fa-check me-2"></i> Verifikasi
-                </button>
-                <button
-                  v-if="selectedTopUp && selectedTopUp.status !== 'pending'"
-                  class="btn btn-warning"
-                  @click="confirmSetPending"
-                  :disabled="loadingIds.includes(selectedTopUp?.id)"
+                  <a class="page-link" href="#">
+                    <i class="fas fa-chevron-left"></i>
+                  </a>
+                </li>
+                <li
+                  v-for="page in totalPages"
+                  :key="page"
+                  class="page-item"
+                  :class="{ active: page === topUps.current_page }"
+                  @click.prevent="goToPage(page)"
                 >
-                  <i class="fas fa-clock me-2"></i> Atur Pending
-                </button>
-                <button
-                  v-if="selectedTopUp && selectedTopUp.status !== 'rejected'"
-                  class="btn btn-danger"
-                  @click="confirmReject"
-                  :disabled="loadingIds.includes(selectedTopUp?.id)"
+                  <a class="page-link" href="#">{{ page }}</a>
+                </li>
+                <li
+                  class="page-item"
+                  :class="{ disabled: !topUps.next_page_url }"
+                  @click.prevent="goToPage(topUps.current_page + 1)"
                 >
-                  <i class="fas fa-times me-2"></i> Tolak
-                </button>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="closeActionModal">Batal</button>
-            </div>
+                  <a class="page-link" href="#">
+                    <i class="fas fa-chevron-right"></i>
+                  </a>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
-      </div>
 
-      <!-- Modal Bukti Pembayaran -->
-      <div
-        class="modal fade"
-        id="proofModal"
-        tabindex="-1"
-        aria-labelledby="proofModalLabel"
-        aria-hidden="true"
-        ref="proofModalRef"
-      >
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="proofModalLabel">Bukti Pembayaran</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-                @click="closeProofModal"
-              ></button>
-            </div>
-            <div class="modal-body p-0">
-              <img :src="proofModalUrl" alt="Bukti Pembayaran" class="img-fluid w-100" />
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="closeProofModal">
-                Tutup
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Modal Export Logs -->
-      <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true" ref="exportModalRef">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exportModalLabel">
-                <i class="fas fa-file-export me-2"></i>Ekspor Data
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-                @click="closeExportModal"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <div class="mb-3">
-                <label for="startDate" class="form-label">Tanggal Mulai</label>
-                <input
-                  type="date"
-                  id="startDate"
-                  v-model="exportFilters.start_date"
-                  class="form-control"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="endDate" class="form-label">Tanggal Akhir</label>
-                <input
-                  type="date"
-                  id="endDate"
-                  v-model="exportFilters.end_date"
-                  class="form-control"
-                />
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="closeExportModal">Batal</button>
-              <button type="button" class="btn btn-success" @click="exportLogs">
-                <i class="fas fa-download me-1"></i> Unduh CSV
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Toast Notification -->
-      <div
-        v-if="toast.show"
-        :class="['toast-notification', 'toast-' + toast.type]"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
-        <div class="toast-icon">
-          <i :class="toastIcon"></i>
-        </div>
-        <div class="toast-content">
-          {{ toast.message }}
-        </div>
-        <button
-          type="button"
-          class="toast-close"
-          aria-label="Close"
-          @click="toast.show = false"
+        <!-- Modal Aksi -->
+        <div
+          class="modal fade"
+          id="actionModal"
+          tabindex="-1"
+          aria-labelledby="actionModalLabel"
+          aria-hidden="true"
+          ref="actionModalRef"
         >
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="actionModalLabel">Pilih Aksi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="closeActionModal"></button>
+              </div>
+              <div class="modal-body">
+                <p><strong>User:</strong> {{ selectedTopUp?.user.name }} ({{ selectedTopUp?.user.email }})</p>
+                <p><strong>Jumlah:</strong> Rp {{ formatCurrency(selectedTopUp?.amount) }}</p>
+                <div class="d-grid gap-2">
+                  <button
+                    v-if="selectedTopUp?.status === 'pending'"
+                    class="btn btn-success"
+                    @click="confirmVerify"
+                    :disabled="loadingIds.includes(selectedTopUp?.id)"
+                  >
+                    <i class="fas fa-check me-2"></i> Verifikasi
+                  </button>
+                  <button
+                    v-if="selectedTopUp && selectedTopUp.status !== 'pending'"
+                    class="btn btn-warning"
+                    @click="confirmSetPending"
+                    :disabled="loadingIds.includes(selectedTopUp?.id)"
+                  >
+                    <i class="fas fa-clock me-2"></i> Atur Pending
+                  </button>
+                  <button
+                    v-if="selectedTopUp && selectedTopUp.status !== 'rejected'"
+                    class="btn btn-danger"
+                    @click="confirmReject"
+                    :disabled="loadingIds.includes(selectedTopUp?.id)"
+                  >
+                    <i class="fas fa-times me-2"></i> Tolak
+                  </button>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="closeActionModal">Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Bukti Pembayaran -->
+        <div
+          class="modal fade"
+          id="proofModal"
+          tabindex="-1"
+          aria-labelledby="proofModalLabel"
+          aria-hidden="true"
+          ref="proofModalRef"
+        >
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="proofModalLabel">Bukti Pembayaran</h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  @click="closeProofModal"
+                ></button>
+              </div>
+              <div class="modal-body p-0">
+                <img :src="proofModalUrl" alt="Bukti Pembayaran" class="img-fluid w-100" />
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="closeProofModal">
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Export Logs -->
+        <div
+          class="modal fade"
+          id="exportModal"
+          tabindex="-1"
+          aria-labelledby="exportModalLabel"
+          aria-hidden="true"
+          ref="exportModalRef"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">
+                  <i class="fas fa-file-export me-2"></i> Ekspor Data
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  @click="closeExportModal"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="startDate" class="form-label">Tanggal Mulai</label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    v-model="exportFilters.start_date"
+                    class="form-control"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="endDate" class="form-label">Tanggal Akhir</label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    v-model="exportFilters.end_date"
+                    class="form-control"
+                  />
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="closeExportModal">Batal</button>
+                <button type="button" class="btn btn-success" @click="exportLogs">
+                  <i class="fas fa-download me-1"></i> Unduh CSV
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div
+          v-if="toast.show"
+          :class="['toast-notification', 'toast-' + toast.type]"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          <div class="toast-icon">
+            <i :class="toastIcon"></i>
+          </div>
+          <div class="toast-content">
+            {{ toast.message }}
+          </div>
+          <button
+            type="button"
+            class="toast-close"
+            aria-label="Close"
+            @click="toast.show = false"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </template>
+
+      <template v-else>
+        <div class="access-denied-container text-center py-5 px-3">
+          <div class="icon-wrapper mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 9v3m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h3 class="mb-3 fw-bold text-danger">Akses Ditolak</h3>
+          <p class="text-muted fs-5 mx-auto" style="max-width: 400px;">
+            Anda tidak memiliki akses untuk halaman ini.<br />
+            Silakan hubungi admin untuk mendapatkan akses.
+          </p>
+        </div>
+      </template>
     </div>
   </AppLayout>
 </template>
@@ -386,12 +423,17 @@ const props = defineProps({
   topUps: Object,
   filters: Object,
   statusCounts: Object,
+  canViewTopUp: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const filters = ref({
-  status: props.filters.status || "",
-  search: props.filters.search || "",
+  status: props.filters?.status || "",
+  search: props.filters?.search || "",
 });
+
 
 const exportFilters = ref({
   start_date: '',
@@ -918,4 +960,21 @@ watch(
 .modal-body .btn:last-child {
   margin-bottom: 0;
 }
+
+.access-denied-container {
+  user-select: none;
+}
+
+.icon-wrapper {
+  width: 80px;
+  height: 80px;
+  color: #dc3545; /* Bootstrap danger color */
+  margin: 0 auto;
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
+}
+
 </style>

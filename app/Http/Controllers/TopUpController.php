@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Policies\TopUpPolicy;
+
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class TopUpController extends Controller
@@ -52,6 +54,15 @@ class TopUpController extends Controller
 
     public function adminIndex(Request $request)
     {
+        $canViewTopUp = $request->user()->can('view_topup');
+
+        if (!$canViewTopUp) {
+            // Kirim ke frontend flag tidak punya akses
+            return Inertia::render('Admin/TopUps/Index', [
+                'canViewTopUp' => false,
+            ]);
+        }
+
         $query = TopUp::with('user')->orderBy('created_at', 'desc');
 
         if ($request->has('status') && in_array($request->status, ['pending','verified','rejected'])) {
@@ -85,7 +96,6 @@ class TopUpController extends Controller
             ];
         });
 
-        // Hitung jumlah total berdasarkan status, *abaikan filter status dan search* agar total selalu global
         $pendingCount = TopUp::where('status', 'pending')->count();
         $verifiedCount = TopUp::where('status', 'verified')->count();
         $rejectedCount = TopUp::where('status', 'rejected')->count();
@@ -99,5 +109,98 @@ class TopUpController extends Controller
                 'rejected' => $rejectedCount,
             ],
         ]);
+    }
+
+        public function verify(TopUp $topUp)
+    {
+        $this->authorize('verify', $topUp);
+
+        if ($topUp->status !== 'pending') {
+            return redirect()->back()->with('error', 'Top up sudah diproses sebelumnya.');
+        }
+
+        $topUp->status = 'verified';
+        $topUp->save();
+
+        // Simpan log status
+        TopUpStatusLog::create([
+            'topup_id' => $topUp->id,
+            'changed_by' => Auth::id(),
+            'status' => 'verified',
+        ]);
+
+        return redirect()->route('admin.topups.index')->with('success', 'Top up berhasil diverifikasi.');
+    }
+
+    public function reject(TopUp $topUp)
+    {
+        $this->authorize('reject', $topUp);
+
+        if ($topUp->status !== 'pending') {
+            return redirect()->back()->with('error', 'Top up sudah diproses sebelumnya.');
+        }
+
+        $topUp->status = 'rejected';
+        $topUp->save();
+
+        // Simpan log status
+        TopUpStatusLog::create([
+            'topup_id' => $topUp->id,
+            'changed_by' => Auth::id(),
+            'status' => 'rejected',
+        ]);
+
+        return redirect()->route('admin.topups.index')->with('success', 'Top up berhasil ditolak.');
+    }
+
+
+        public function exportTopUpLogsToCsv(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $query = TopUpStatusLog::with(['topUp.user', 'changedBy'])
+            ->when($request->start_date, fn($q) => $q->whereDate('created_at', '>=', $request->start_date))
+            ->when($request->end_date, fn($q) => $q->whereDate('created_at', '<=', $request->end_date))
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $filename = 'top_up_status_logs_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            "Content-Type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=\"$filename\"",
+        ];
+
+        $columns = [
+            'Log ID', 'TopUp ID', 'User ID', 'User Name', 'Amount', 'Changed By ID', 'Changed By Name',
+            'Status', 'Notes', 'Created At'
+        ];
+
+        $callback = function() use ($query, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($query as $log) {
+                fputcsv($file, [
+                    $log->id,
+                    $log->topup_id,
+                    $log->topUp->user->id ?? '',
+                    $log->topUp->user->name ?? '',
+                    $log->topUp->amount ?? '',
+                    $log->changed_by,
+                    $log->changedBy->name ?? '',
+                    $log->status,
+                    $log->notes,
+                    $log->created_at->toDateTimeString(),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return Response::stream($callback, 200, $headers);
     }
 }
