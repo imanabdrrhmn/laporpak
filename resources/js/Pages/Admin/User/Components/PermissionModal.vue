@@ -323,11 +323,11 @@ const updatePermissions = (permission) => {
   emit('update:selected-permissions', newPermissions)
 }
 
-const selectAll = () => {
+const selectAllPermissions = () => {
   emit('update:selected-permissions', [...props.allPermissions])
 }
 
-const clearAll = () => {
+const clearAllPermissions = () => {
   emit('update:selected-permissions', [])
 }
 
@@ -408,6 +408,7 @@ const clearAllRegions = () => {
   selectedRegions.value = []
   emit('update:allowed-regions', selectedRegions.value)
 }
+
 
 </script>
 
