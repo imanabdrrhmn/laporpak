@@ -69,18 +69,28 @@ class UserManagementController extends Controller
 
         return redirect()->back()->with('success', 'Role berhasil dihapus.');
     }
-
+        
     public function editPermissions(User $user)
     {
         $permissions = Permission::all();
+
+        // Ambil daftar region unik dari tabel reports
+        $allRegions = \DB::table('reports')
+            ->select('region')
+            ->distinct()
+            ->whereNotNull('region')
+            ->pluck('region')
+            ->toArray();
 
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'permissions' => $user->permissions->pluck('name'),
+                'allowed_regions' => $user->allowed_regions ?? [],
             ],
             'allPermissions' => $permissions->pluck('name'),
+            'allRegions' => $allRegions,
         ]);
     }
 
@@ -89,9 +99,13 @@ class UserManagementController extends Controller
         $request->validate([
             'permissions' => ['array'],
             'permissions.*' => ['string', 'exists:permissions,name'],
+            'allowed_regions' => ['array'],
+            'allowed_regions.*' => ['string'], 
         ]);
 
         $user->syncPermissions($request->input('permissions', []));
+        $user->allowed_regions = $request->input('allowed_regions', []);
+        $user->save();
 
         return response()->json(['success' => true]);
     }

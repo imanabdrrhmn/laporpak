@@ -58,20 +58,21 @@
           <div v-if="errorMessage" class="error-message">
             {{ errorMessage }}
           </div>
+          <!-- Permissions Section -->
           <div class="permission-header">
             <h3 class="permission-title">Pilih Izin</h3>
             <div class="permission-actions">
               <button 
                 type="button" 
                 class="btn btn--text btn--small"
-                @click="selectAll"
+                @click="selectAllPermissions"
               >
                 Pilih Semua
               </button>
               <button 
                 type="button" 
                 class="btn btn--text btn--small"
-                @click="clearAll"
+                @click="clearAllPermissions"
               >
                 Hapus Semua
               </button>
@@ -99,6 +100,7 @@
               </div>
             </div>
 
+            <!-- Permissions Grid -->
             <div class="permission-grid" :class="{ 'permission-grid--loading': isSubmitting }">
               <div 
                 v-for="perm in allPermissions" 
@@ -135,11 +137,47 @@
                 </label>
               </div>
             </div>
-            
+
+            <!-- Region Section -->
+            <div class="region-header" style="margin-top: 1.5rem;">
+              <h3 class="region-title">Pilih Region</h3>
+              <div class="region-actions">
+                <button type="button" class="btn btn--text btn--small" @click="selectAllRegions">Pilih Semua</button>
+                <button type="button" class="btn btn--text btn--small" @click="clearAllRegions">Hapus Semua</button>
+              </div>
+            </div>
+
+            <div class="region-grid" :class="{ 'region-grid--loading': isSubmitting }" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem;">
+              <div 
+                v-for="region in allRegions"
+                :key="region"
+                class="region-item"
+                :class="{ 'region-item--selected': selectedRegions.includes(region) }"
+                style="padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;"
+              >
+                <input
+                  type="checkbox"
+                  :checked="selectedRegions.includes(region)"
+                  @change="updateRegions(region)"
+                  :id="`region-${region}`"
+                  class="region-checkbox"
+                  style="display:none;"
+                />
+                <label 
+                  :for="`region-${region}`" 
+                  class="region-label"
+                  style="user-select:none;"
+                >
+                  {{ region }}
+                </label>
+              </div>
+            </div>
+
             <!-- Footer -->
-            <div class="modal-footer">
+            <div class="modal-footer" style="margin-top: 1.5rem; display:flex; justify-content: space-between; align-items: center;">
               <div class="selected-count">
-                {{ selectedPermissions.length }} dari {{ allPermissions.length }} izin dipilih
+                {{ selectedPermissions.length }} dari {{ allPermissions.length }} izin dipilih — 
+                {{ selectedRegions.length }} dari {{ allRegions.length }} region dipilih
               </div>
               <div class="modal-actions">
                 <button 
@@ -194,8 +232,10 @@
   </Teleport>
 </template>
 
+
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
+
 
 const props = defineProps({
   user: {
@@ -209,10 +249,13 @@ const props = defineProps({
   selectedPermissions: {
     type: Array,
     default: () => []
-  }
+  },
+  allowedRegions: { type: Array, default: () => [] },
+  allRegions: { type: Array, default: () => [] },   
+
 })
 
-const emit = defineEmits(['close', 'submit', 'update:selected-permissions'])
+const emit = defineEmits(['close', 'submit', 'update:selected-permissions', 'update:allowed-regions'])
 
 const isVisible = ref(false)
 const isSubmitting = ref(false)
@@ -220,6 +263,7 @@ const showFallback = ref(false)
 const submitSuccess = ref(false)
 const errorMessage = ref('')
 const isRotating = ref(false)
+
 
 // Animasi saat modal dibuka
 onMounted(async () => {
@@ -315,10 +359,11 @@ const handleSubmit = async () => {
   submitSuccess.value = false
 
   try {
-    // Panggil emit untuk submit izin
+    // Panggil emit untuk submit izin, termasuk allowed regions
     await emit('submit', {
       userId: props.user.id,
-      permissions: props.selectedPermissions
+      permissions: props.selectedPermissions,
+      allowed_regions: selectedRegions.value, 
     })
     // Tampilkan animasi sukses
     submitSuccess.value = true
@@ -334,6 +379,36 @@ const handleSubmit = async () => {
     submitSuccess.value = false
   }
 }
+
+const selectedRegions = ref([...props.allowedRegions])
+watch(() => props.allowedRegions, (newVal) => {
+  selectedRegions.value = [...newVal]
+})
+
+const updateRegions = (region) => {
+  const index = selectedRegions.value.indexOf(region)
+  const updated = [...selectedRegions.value]
+
+  if (index === -1) {
+    updated.push(region)
+  } else {
+    updated.splice(index, 1)
+  }
+
+  selectedRegions.value = updated
+  emit('update:allowed-regions', updated)
+}
+
+const selectAllRegions = () => {
+  selectedRegions.value = [...props.allRegions]
+  emit('update:allowed-regions', selectedRegions.value)
+}
+
+const clearAllRegions = () => {
+  selectedRegions.value = []
+  emit('update:allowed-regions', selectedRegions.value)
+}
+
 </script>
 
 <style scoped>
@@ -894,4 +969,52 @@ const handleSubmit = async () => {
 .selected-count {
   color: #6b7280 !important;
 }
+.region-item {
+  padding: 0.5rem;
+  border: 1px solid #ccc; /* Default border */
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #fff; /* Explicit default background */
+  color: #374151; /* Default text color for the region name */
+  transition: border-color 0.2s ease, background-color 0.2s ease, outline 0.2s ease, color 0.2s ease;
+  text-align: center; /* Center region name */
+  position: relative; /* Good for potential outline rendering consistency */
+  display: flex; /* To center label content if needed, or for better control */
+  align-items: center;
+  justify-content: center;
+}
+
+.region-item:hover:not(.region-item--selected) { /* Hover effect only for non-selected items */
+  border-color: #999; /* Darker border on hover */
+  background-color: #f7f7f7; /* Slight background change on hover */
+}
+
+.region-item--selected {
+  background-color: #eff6ff; /* Light blue background, consistent with permission-item--selected */
+  border-color: #3b82f6;    /* Border color changes to primary theme color */
+  color: #1e40af;           /* Darker blue text for better contrast on light blue bg */
+  outline: 1px solid #3b82f6; /* Add 1px outline of the same primary color */
+  outline-offset: 0px;         /* Outline sits immediately outside the border, making it look like a 2px border */
+}
+
+.region-label {
+  display: block; /* Make label fill the item (optional, depends on desired click area) */
+  /* color is inherited from .region-item by default */
+  font-weight: normal; /* Default font weight */
+  transition: color 0.2s ease, font-weight 0.2s ease; /* Smooth transition for text changes */
+}
+
+.region-item--selected .region-label {
+  /* color: #1e40af; /* Text color is already set by .region-item--selected */
+  font-weight: 500; /* Make text slightly bolder for selected item */
+}
+
+/* Styling for when the region grid is in a loading state */
+.region-grid--loading .region-item {
+  filter: blur(2px);
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none; /* Prevent text selection during loading */
+}
+
 </style>

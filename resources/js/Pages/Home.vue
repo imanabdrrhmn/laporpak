@@ -78,7 +78,6 @@ watch(
         @open-login="() => switchModal('login')"
       />
     <Notification v-if="status" type="success" :message="status" />
-    <!-- Notification untuk error -->
     <Notification v-if="error" type="error" :message="error" />
     </div>
   </AppLayout>

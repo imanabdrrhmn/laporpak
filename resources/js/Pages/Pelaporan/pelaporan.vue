@@ -207,6 +207,7 @@ const submitReport = () => {
   dataToSubmit.append('location[lng]', formData.value.location.lng);
   dataToSubmit.append('address', formData.value.address);
   dataToSubmit.append('service', selectedService.value);
+  dataToSubmit.append('region', formData.value.region || '');
 
   Inertia.post('/pelaporan/create', dataToSubmit, {
     onSuccess: () => {
@@ -216,7 +217,7 @@ const submitReport = () => {
         evidence: null,
         location: null,
         address: '',
-        source: ''
+        source: '',
       };
       showSuccessModal.value = true;
     },
@@ -237,8 +238,13 @@ const getCurrentLocation = () => {
           lng: position.coords.longitude
         };
         formData.value.location = userLocation;
-        const address = await reverseGeocode(userLocation.lat, userLocation.lng);
-        formData.value.address = address;
+
+        // Ambil alamat dan region sekaligus
+        const { fullAddress, region } = await reverseGeocode(userLocation.lat, userLocation.lng);
+
+        formData.value.address = fullAddress;
+        formData.value.region = region || '';  // simpan region ke formData
+
         validationErrors.location = false;
       },
       (error) => {
@@ -258,6 +264,7 @@ const getCurrentLocation = () => {
         }
         alert(message);
         formData.value.address = '';
+        formData.value.region = '';  // kosongkan region jika gagal
       },
       { enableHighAccuracy: true }
     );
@@ -265,6 +272,7 @@ const getCurrentLocation = () => {
     alert("Browser Anda tidak mendukung Geolocation.");
   }
 };
+
 
 // Reverse geocoding using Nominatim API
 async function reverseGeocode(lat, lng) {
@@ -274,12 +282,19 @@ async function reverseGeocode(lat, lng) {
       throw new Error('Gagal mendapatkan alamat');
     }
     const data = await response.json();
-    return data.display_name || 'Alamat tidak ditemukan';
+
+    const fullAddress = data.display_name || 'Alamat tidak ditemukan';
+
+    // region bisa diambil dari beberapa kemungkinan, contoh:
+    const region = data.address?.state || data.address?.city || data.address?.county || null;
+
+    return { fullAddress, region };
   } catch (error) {
     console.error('Error saat reverse geocoding:', error);
-    return 'Alamat tidak tersedia';
+    return { fullAddress: 'Alamat tidak tersedia', region: null };
   }
 }
+
 
 // Description validation
 const validateDescription = () => {
