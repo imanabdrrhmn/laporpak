@@ -1,15 +1,16 @@
 <template>
-  <div class="results-stats mb-3">
+  <div v-if="!loading && filteredReports.length > 0" class="results-stats mb-3">
     <div class="d-flex justify-content-between align-items-center">
       <p class="mb-0">
-        Menampilkan {{ displayedResults }} dari {{ totalResults }} hasil
+        Menampilkan {{ paginatedReports.length }} dari {{ filteredReports.length }} hasil
       </p>
       <div class="d-flex align-items-center">
         <label for="itemsPerPage" class="me-2 mb-0">Tampilkan:</label>
         <select
           id="itemsPerPage"
           class="form-select form-select-sm"
-          v-model="itemsPerPage"
+          :value="itemsPerPage"
+          @change="$emit('update:itemsPerPage', $event.target.value)"
           style="width: auto"
           aria-label="Jumlah item per halaman"
         >
@@ -23,13 +24,17 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  totalResults: Number,
-  displayedResults: Number
-});
-
-defineEmits(['update:items-per-page']);
+<script>
+export default {
+  name: 'ResultsStats',
+  props: {
+    loading: Boolean,
+    filteredReports: Array,
+    paginatedReports: Array,
+    itemsPerPage: [Number, String],
+  },
+  emits: ['update:itemsPerPage'],
+};
 </script>
 
 <style scoped>

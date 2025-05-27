@@ -79,8 +79,7 @@ const infrastructureCategories = [
 const serviceInfo = {
   Penipuan: {
     badge: 'Platform Pelaporan',
-    title: 'Pelaporan Akun',
-    titleIcon: 'bi bi-exclamation-triangle-fill',
+    title: 'Pelaporan Penipuan',
     description: 'Laporkan nomor HP, email, atau akun yang terindikasi mencurigakan untuk verifikasi lebih lanjut.',
     icon: 'bi bi-shield-check',
     formTitle: 'Form Pelaporan',
@@ -89,7 +88,6 @@ const serviceInfo = {
   Infrastruktur: {
     badge: 'Lapor Infrastruktur',
     title: 'Pelaporan Infrastruktur',
-    titleIcon: 'bi bi-wrench',
     description: 'Laporkan fasilitas umum dan infrastruktur yang rusak untuk perbaikan yang lebih cepat.',
     icon: 'bi bi-building-gear',
     formTitle: 'Form Infrastruktur',
