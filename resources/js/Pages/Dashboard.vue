@@ -88,7 +88,7 @@
         </div>
       </div>
       <RecentReports :laporan-terbaru="laporanTerbaru" @show-modal="showModal" />
-      <DashboardFooter />
+
     </div>
   </AppLayout>
 </template>
@@ -104,7 +104,7 @@ import QuickActions from '@/Components/Dashboard/QuickActions.vue';
 import RecentActivity from '@/Components/Dashboard/RecentActivity.vue';
 import FeedbackCard from '@/Components/Dashboard/FeedbackCard.vue';
 import RecentReports from '@/Components/Dashboard/RecentReports.vue';
-import DashboardFooter from '@/Components/Dashboard/DashboardFooter.vue';
+
 import { Modal } from 'bootstrap';
 
 const props = defineProps({

@@ -25,7 +25,7 @@
 
         <!-- Judul & Status -->
         <div class="modal-header">
-          <h2 class="modal-title">{{ report.service }} Report</h2>
+          <h2 class="modal-title">Pelaporan {{ report.service }}</h2>
           <span :class="['status-badge', report.status]">
             {{ capitalize(report.status) }}
           </span>

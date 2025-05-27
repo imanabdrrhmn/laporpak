@@ -1,90 +1,93 @@
-    <template>
+<template>
     <Teleport to="body">
         <transition name="modal-fade">
             <div v-if="show" class="modal-backdrop" @click.self="closeModal">
                 <div class="modal-content" @click.stop>
                     <div class="modal-header">
-                        <h5 class="modal-title">Detail {{ item.jenis }}</h5>
+                        <h5 class="modal-title">
+                            Detail {{ getModalTitle(item) }}
+                        </h5>
                         <button type="button" class="btn-close" @click="closeModal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped">
                                 <tbody>
-                                    <!-- Dynamic rendering of data based on query type -->
-                                    <template v-if="item.jenis === 'NPWP Check V2'">
+                                    <!-- Penipuan Report -->
+                                    <template v-if="isPenipuanReport">
                                         <tr>
-                                            <th width="30%">Nama</th>
-                                            <td>{{ item.detailData.nama }}</td>
+                                            <th width="30%">Tanggal</th>
+                                            <td>{{ formatDate(item.created_at) }}</td>
                                         </tr>
                                         <tr>
-                                            <th>NIK</th>
-                                            <td>{{ item.detailData.nik }}</td>
+                                            <th>Kategori</th>
+                                            <td><span class="badge bg-light text-dark border">{{ item.category }}</span></td>
                                         </tr>
                                         <tr>
-                                            <th>NPWP</th>
-                                            <td>{{ item.detailData.npwp }}</td>
+                                            <th>Sumber Penipuan</th>
+                                            <td>{{ item.source || 'SMS' }}</td>
                                         </tr>
                                         <tr>
-                                            <th>Status</th>
-                                            <td>
-                                                <span class="badge bg-success">{{ item.detailData.status }}</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Keterangan</th>
-                                            <td>{{ item.detailData.keterangan }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Tanggal Pemeriksaan</th>
-                                            <td>{{ item.detailData.tanggalPemeriksa }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Pemeriksa</th>
-                                            <td>{{ item.detailData.pemeriksa }}</td>
-                                        </tr>
-                                    </template>
-
-                                    <template v-else-if="item.jenis === 'Income Tax Grade'">
-                                        <tr>
-                                            <th width="30%">Nama</th>
-                                            <td>{{ item.detailData.nama }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>NIK</th>
-                                            <td>{{ item.detailData.nik }}</td>
+                                            <th>Deskripsi</th>
+                                            <td>{{ item.description }}</td>
                                         </tr>
                                         <tr>
                                             <th>Status</th>
                                             <td>
-                                                <span class="badge bg-success">{{ item.detailData.status }}</span>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="status-indicator" :class="getStatusClass(item.status)"></div>
+                                                    <span :class="getStatusTextClass(item.status)">{{ item.status }}</span>
+                                                </div>
                                             </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Tax Grade</th>
-                                            <td>{{ item.detailData.taxGrade }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Keterangan</th>
-                                            <td>{{ item.detailData.keterangan }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Tanggal Pemeriksaan</th>
-                                            <td>{{ item.detailData.tanggalPemeriksa }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Pemeriksa</th>
-                                            <td>{{ item.detailData.pemeriksa }}</td>
                                         </tr>
                                     </template>
 
-                                    <!-- Default template for other query types -->
+                                    <!-- Infrastruktur Report -->
+                                    <template v-else-if="isInfrastrukturReport">
+                                        <tr>
+                                            <th width="30%">Tanggal</th>
+                                            <td>{{ formatDate(item.created_at) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Kategori</th>
+                                            <td><span class="badge bg-light text-dark border">{{ item.category }}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Deskripsi</th>
+                                            <td>{{ item.description }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status</th>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="status-indicator" :class="getStatusClass(item.status)"></div>
+                                                    <span :class="getStatusTextClass(item.status)">{{ item.status }}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+
+                                    <!-- Verification Report -->
                                     <template v-else>
-                                        <tr v-for="(value, key) in item.detailData" :key="key">
-                                            <th width="30%">{{ formatLabel(key) }}</th>
+                                        <tr>
+                                            <th width="30%">Tanggal</th>
+                                            <td>{{ formatDate(item.tanggal) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Data</th>
+                                            <td>{{ item.data }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Query</th>
+                                            <td>{{ item.query }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status</th>
                                             <td>
-                                                <span v-if="key === 'status'" class="badge bg-success">{{ value }}</span>
-                                                <span v-else>{{ value }}</span>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="status-indicator" :class="getStatusClass(item.hasil)"></div>
+                                                    <span :class="getStatusTextClass(item.hasil)">{{ item.hasil }}</span>
+                                                </div>
                                             </td>
                                         </tr>
                                     </template>
@@ -103,17 +106,14 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
 const props = defineProps({
-    show: {
-        type: Boolean,
-        default: false
-    },
-    item: {
-        type: Object,
-        default: () => ({})
-    }
+    show: Boolean,
+    item: Object,
+    formatDate: Function,
+    getStatusClass: Function,
+    getStatusTextClass: Function,
 });
 
 const emit = defineEmits(['close']);
@@ -122,10 +122,18 @@ const closeModal = () => {
     emit('close');
 };
 
-const formatLabel = (key) => {
-    // Format camelCase keys to Title Case words
-    const result = key.replace(/([A-Z])/g, ' $1');
-    return result.charAt(0).toUpperCase() + result.slice(1);
+const isPenipuanReport = computed(() => {
+    return props.item && 'source' in props.item;
+});
+
+const isInfrastrukturReport = computed(() => {
+    return props.item && 'category' in props.item && !('source' in props.item);
+});
+
+const getModalTitle = (item) => {
+    if (isPenipuanReport.value) return 'Laporan Penipuan';
+    if (isInfrastrukturReport.value) return 'Laporan Infrastruktur';
+    return 'Verifikasi';
 };
 </script>
 

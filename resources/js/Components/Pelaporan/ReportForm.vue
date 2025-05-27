@@ -1,5 +1,8 @@
+```vue
 <template>
   <div class="col-lg-6 d-flex align-items-center justify-content-end p-3 p-md-2 bg-light">
+    <!-- Flag Icons CSS Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css" />
     <div class="form-container p-3 p-sm-4 p-lg-5 w-100">
       <h5 class="text-start fw-bold mb-3">
         <i class="bi bi-exclamation-triangle text-warning me-2"></i>
@@ -68,19 +71,32 @@
           <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category !== 'Email' && formData.category">
             <label for="source" class="form-label mb-2">Nomer Telepon</label>
             <div class="input-group">
-              <select 
-                v-model="selectedCountry" 
-                class="form-select country-select"
-                @change="onCountryChange"
-              >
-                <option 
-                  v-for="country in sortedCountries" 
-                  :key="country.iso2"
-                  :value="country"
-                >
-                  {{ getFlagEmoji(country.iso2) }} +{{ country.dialCode }}
-                </option>
-              </select>
+              <div class="country-select-wrapper">
+                <div class="dropdown">
+                  <button
+                    class="btn btn-outline-secondary dropdown-toggle custom-country-select"
+                    type="button"
+                    id="countryDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <span :class="`fi fi-${selectedCountry.iso2.toLowerCase()} me-2`" class="flag-icon"></span>
+                    +{{ selectedCountry.dialCode }}
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="countryDropdown">
+                    <li v-for="country in sortedCountries" :key="country.iso2">
+                      <a
+                        class="dropdown-item"
+                        href="#"
+                        @click.prevent="selectCountry(country)"
+                      >
+                        <span :class="`fi fi-${country.iso2.toLowerCase()} me-2`" class="flag-icon"></span>
+                        +{{ country.dialCode }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
               <input
                 id="source"
                 v-model="localPhoneNumber"
@@ -192,14 +208,6 @@ defineExpose({
 const selectedCountry = ref(allCountries.find(c => c.iso2 === 'id'));
 const localPhoneNumber = ref('');
 
-const getFlagEmoji = (countryCode) => {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt());
-  return String.fromCodePoint(...codePoints);
-};
-
 const sortedCountries = computed(() => {
   return allCountries.sort((a, b) => {
     if (a.iso2 === 'id') return -1;
@@ -208,7 +216,8 @@ const sortedCountries = computed(() => {
   });
 });
 
-const onCountryChange = () => {
+const selectCountry = (country) => {
+  selectedCountry.value = country;
   validatePhoneNumber();
 };
 
@@ -235,7 +244,6 @@ const validateEmail = () => {
     props.validationErrors.email = true;
   }
 };
-
 
 const onPhoneKeypress = (e) => {
   // Allow only numeric input
@@ -286,6 +294,91 @@ const onPhoneInput = (e) => {
   max-width: 100%;
   overflow-x: hidden;
   word-wrap: break-word;
+}
+
+.country-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.flag-icon {
+  width: 18px;
+  height: 14px;
+  border-radius: 2px;
+  display: inline-block;
+  background-size: cover;
+  background-position: center;
+}
+
+.custom-country-select {
+  border: 1px solid #ced4da;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: system-ui, -apple-system, sans-serif;
+  padding-left: 10px !important;
+  padding-right: 25px !important;
+  font-size: 0.85rem;
+  min-width: 80px;
+  max-width: 100px;
+  display: flex;
+  align-items: center;
+}
+
+.custom-country-select:hover {
+  background-color: #9c9c9c;
+  border-color: #ced4da;
+}
+
+.custom-country-select:active,
+.custom-country-select[aria-expanded="true"] {
+  background-color: #9c9c9c !important;
+  border-color: #ced4da !important;
+}
+
+.dropdown-menu {
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100px;
+  border-radius: 6px;
+  padding: 0.25rem 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: inherit;
+}
+
+/* Custom Scrollbar for Webkit browsers (Chrome, Safari) */
+.dropdown-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Custom Scrollbar for Firefox */
+.dropdown-menu {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
 }
 
 .custom-textarea {
@@ -357,15 +450,11 @@ const onPhoneInput = (e) => {
   padding-bottom: 1rem;
 }
 
-.country-select {
-  min-width: 140px;
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.input-group .country-select-wrapper {
+  flex: 0 0 auto;
 }
 
-.input-group .country-select {
+.input-group .country-select-wrapper .custom-country-select {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -450,11 +539,24 @@ const onPhoneInput = (e) => {
   .form-container {
     max-width: 620px;
   }
+  .custom-country-select, .dropdown-menu {
+    min-width: 90px;
+    max-width: 110px;
+  }
 }
 
 @media (min-width: 1400px) {
   .form-container {
     max-width: 680px;
+  }
+  .custom-select, .custom-country-select {
+    font-size: 1.05rem;
+    padding: 0.7rem;
+    height: auto;
+  }
+  .custom-country-select, .dropdown-menu {
+    min-width: 100px;
+    max-width: 120px;
   }
 }
 
@@ -471,10 +573,18 @@ const onPhoneInput = (e) => {
   .form-container {
     padding: 1rem !important;
   }
-  .custom-select {
-    font-size: 0.9rem;
-    padding: 0.5rem;
+  .custom-select, .custom-country-select {
+    font-size: 0.75rem;
+    padding: 0.2rem;
     height: auto;
+  }
+  .custom-country-select, .dropdown-menu {
+    min-width: 60px;
+    max-width: 80px;
+  }
+  .flag-icon {
+    width: 16px;
+    height: 12px;
   }
 }
 
@@ -482,10 +592,18 @@ const onPhoneInput = (e) => {
   .form-container {
     padding: 1.5rem !important;
   }
-  .custom-select {
-    font-size: 0.95rem;
-    padding: 0.6rem;
+  .custom-select, .custom-country-select {
+    font-size: 0.8rem;
+    padding: 0.3rem;
     height: auto;
+  }
+  .custom-country-select, .dropdown-menu {
+    min-width: 70px;
+    max-width: 90px;
+  }
+  .flag-icon {
+    width: 17px;
+    height: 13px;
   }
 }
 
@@ -493,10 +611,14 @@ const onPhoneInput = (e) => {
   .form-container {
     padding: 1.5rem !important;
   }
-  .custom-select {
-    font-size: 0.95rem;
-    padding: 0.6rem;
+  .custom-select, .custom-country-select {
+    font-size: 0.8rem;
+    padding: 0.3rem;
     height: auto;
+  }
+  .custom-country-select, .dropdown-menu {
+    min-width: 70px;
+    max-width: 90px;
   }
 }
 
@@ -505,10 +627,14 @@ const onPhoneInput = (e) => {
     max-width: 90%;
     padding: 2rem !important;
   }
-  .custom-select {
-    font-size: 1rem;
-    padding: 0.75rem;
+  .custom-select, .custom-country-select {
+    font-size: 0.85rem;
+    padding: 0.5rem;
     height: auto;
+  }
+  .custom-country-select, .dropdown-menu {
+    min-width: 80px;
+    max-width: 100px;
   }
 }
 
@@ -517,26 +643,14 @@ const onPhoneInput = (e) => {
     max-width: 85%;
     padding: 2.5rem !important;
   }
-  .custom-select {
-    font-size: 1.05rem;
-    padding: 0.8rem;
+  .custom-select, .custom-country-select {
+    font-size: 0.9rem;
+    padding: 0.55rem;
     height: auto;
   }
-}
-
-@media (min-width: 1200px) {
-  .custom-select {
-    font-size: 1.15rem;
-    padding: 0.9rem;
-    height: auto;
-  }
-}
-
-@media (min-width: 1400px) {
-  .custom-select {
-    font-size: 1.2rem;
-    padding: 1rem;
-    height: auto;
+  .custom-country-select, .dropdown-menu {
+    min-width: 90px;
+    max-width: 110px;
   }
 }
 
@@ -544,10 +658,14 @@ const onPhoneInput = (e) => {
   .form-container {
     padding: 2rem !important;
   }
-  .custom-select {
-    font-size: 0.9rem;
-    padding: 0.5rem;
+  .custom-select, .custom-country-select {
+    font-size: 0.75rem;
+    padding: 0.2rem;
     height: auto;
+  }
+  .custom-country-select, .dropdown-menu {
+    min-width: 70px;
+    max-width: 90px;
   }
 }
 
@@ -555,10 +673,11 @@ const onPhoneInput = (e) => {
   .form-container {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   }
-  .custom-select {
-    font-size: 1.05rem;
-    padding: 0.8rem;
+  .custom-select, .custom-country-select {
+    font-size: 0.9rem;
+    padding: 0.55rem;
     height: auto;
   }
 }
 </style>
+```
