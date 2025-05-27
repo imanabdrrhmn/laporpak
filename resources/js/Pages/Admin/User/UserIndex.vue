@@ -86,8 +86,11 @@
       v-if="showModal" 
       :user="selectedUser" 
       :all-permissions="allPermissions" 
+      :all-regions="allRegions"
       :selected-permissions="selectedPermissions"
+      :allowed-regions="selectedUser.allowed_regions"  
       @update:selected-permissions="selectedPermissions = $event"
+      @update:allowed-regions="selectedUser.allowed_regions = $event"
       @close="showModal = false"
       @submit="submitPermissions"
     />
@@ -107,6 +110,9 @@ import Swal from 'sweetalert2'
 const { props } = usePage()
 const users = props.users
 const roles = props.roles
+
+const allRegions = ref([])
+const selectedRegions = ref([])
 
 const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 const showModal = ref(false)
@@ -138,7 +144,9 @@ function openPermissionModal(user) {
   axios.get(`/admin/users/${user.id}/permissions`).then((res) => {
     selectedUser.value = res.data.user
     allPermissions.value = res.data.allPermissions
+    allRegions.value = res.data.allRegions
     selectedPermissions.value = res.data.user.permissions
+    selectedRegions.value = res.data.user.allowed_regions || []
     showModal.value = true
   }).catch((error) => {
     console.error('Error fetching permissions:', error)
@@ -146,16 +154,18 @@ function openPermissionModal(user) {
   })
 }
 
-function submitPermissions({ userId, permissions }) {
+function submitPermissions({ userId, permissions, allowed_regions }) {
   axios
     .patch(`/admin/users/${userId}/permissions`, {
       permissions,
+      allowed_regions,
       _token: csrf
     })
     .then((response) => {
       const user = users.find(u => u.id === userId)
       if (user) {
-        user.permissions = permissions
+        user.permissions = permissions,
+        user.allowed_regions = allowed_regions
       }
     })
     .catch((error) => {

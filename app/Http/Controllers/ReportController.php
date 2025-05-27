@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Policies\ReportPolicy;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Http;
 
 class ReportController
 {
@@ -44,7 +45,11 @@ class ReportController
             'source' => 'nullable|string',  
             'address' => 'nullable|string', 
         ]);
+        
+        $lat = $request->input('location.lat');
+        $lng = $request->input('location.lng');
 
+        $region = $this->getRegionFromLatLng($lat, $lng);
         $evidencePath = $request->file('evidence')->store('evidence', 'public');
 
         Report::create([
@@ -54,10 +59,12 @@ class ReportController
             'evidence' => $evidencePath,
             'latitude' => $request->input('location.lat'),
             'longitude' => $request->input('location.lng'),
+            'region' => $region,
             'service' => $request->service,
             'status' => 'pending',
             'source' => $request->source,  
             'address' => $request->address,
+
         ]);
 
         return back()->with('success', true);
@@ -130,5 +137,28 @@ class ReportController
             'reports' => $reports,
             'feedbacks' => $feedbacks,
         ]);
+    }
+      private function getRegionFromLatLng($lat, $lng)
+    {
+        $response = Http::withHeaders([
+            'User-Agent' => 'YourAppName/1.0' // wajib ada user-agent yang jelas
+        ])->get('https://nominatim.openstreetmap.org/reverse', [
+            'lat' => $lat,
+            'lon' => $lng,
+            'format' => 'json',
+            'addressdetails' => 1,
+        ]);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        $data = $response->json();
+
+        if (!empty($data['address'])) {
+            return $data['address']['state'] ?? $data['address']['county'] ?? $data['address']['region'] ?? null;
+        }
+
+        return null;
     }
 }

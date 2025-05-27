@@ -13,6 +13,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.20",
         "laravel/tinker": "^2.10.1",
+        "spatie/geocoder": "^3.16",
         "spatie/laravel-permission": "^6.17",
         "tightenco/ziggy": "^2.0"
     },

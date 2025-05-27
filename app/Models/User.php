@@ -50,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'no_hp_verified_at' => 'datetime',
             'password' => 'hashed',
+            'allowed_regions' => 'array',
         ];
     }
         public function hasVerifiedPhone()

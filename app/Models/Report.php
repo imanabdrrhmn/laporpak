@@ -19,6 +19,7 @@ class Report extends Model
         'evidence',
         'latitude',
         'longitude',
+        'region',
         'status',
         'service',
         'source', 
@@ -30,6 +31,9 @@ class Report extends Model
      */
     protected $attributes = [
         'status' => 'pending',
+        'latitude' => 'float',
+        'longitude' => 'float',
+        'region' => 'string',
     ];
 
     /**
@@ -46,5 +50,16 @@ class Report extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+        public function scopeAllowedRegions($query, $user)
+    {
+        $allowedRegions = $user->allowed_regions ?? [];
+
+        if (empty($allowedRegions)) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        return $query->whereIn('region', $allowedRegions);
     }
 }

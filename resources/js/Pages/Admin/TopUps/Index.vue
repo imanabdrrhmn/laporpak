@@ -294,9 +294,6 @@
                 <img :src="proofModalUrl" alt="Bukti Pembayaran" class="img-fluid w-100" />
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @click="closeProofModal">
-                  Tutup
-                </button>
               </div>
             </div>
           </div>
