@@ -8,7 +8,7 @@
         <th>Kategori</th>
         <th>Layanan</th>
         <th>Status</th>
-        <th>Deskripsi</th>
+        <th>Lokasi</th>
         <th>Tanggal</th>
         <th>Aksi</th>
       </tr>
@@ -29,7 +29,7 @@
             {{ capitalize(report.status) }}
           </span>
         </td>
-        <td class="description-cell">{{ truncate(report.description, 60) }}</td>
+        <td>{{ report.location }}</td>
         <td>{{ formatDateShort(report.created_at) }}</td>
         <td>
           <div class="table-actions">
@@ -88,10 +88,6 @@ const formatDateShort = (iso) => {
     day: 'numeric', month: 'short',
     hour: '2-digit', minute: '2-digit'
   });
-};
-
-const truncate = (text, max) => {
-  return text && text.length > max ? text.substring(0, max) + '…' : text || '';
 };
 
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);

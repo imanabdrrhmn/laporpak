@@ -37,12 +37,12 @@
                                 placeholder="Nomor/Email" 
                                 v-model="searchQuery"
                                 aria-label="Search for reports">
-                            <button 
+                            <a 
                                 class="btn btn-primary px-4 py-2 mt-2" 
-                                type="button" 
-                                @click="checkReport">
+                                :href="`/CariLaporan?query=${encodeURIComponent(searchQuery)}`"
+                            >
                                 Telusuri
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
