@@ -67,6 +67,9 @@
       v-if="selectedItem"
       :item="selectedItem"
       :show="showModal"
+      :formatDate="formatDate"
+      :getStatusClass="getStatusClass"
+      :getStatusTextClass="getStatusTextClass"
       @close="closeModal"
     />
   </AppLayout>
