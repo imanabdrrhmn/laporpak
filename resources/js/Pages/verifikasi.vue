@@ -50,7 +50,6 @@ onMounted(() => {
 const fetchFeedbacks = () => {
   const page = usePage();
   feedbacks.value = page.props.feedbacks;
-  console.log(feedbacks.value);
 };
 </script>
 

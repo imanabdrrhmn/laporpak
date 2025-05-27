@@ -86,31 +86,51 @@ class AuthenticatedSessionController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
 
-            // Coba unduh avatar Google
             $avatarUrl = $googleUser->getAvatar();
-            $avatarPath = null;
+            $newAvatarPath = null;
 
             try {
                 $avatarContents = Http::get($avatarUrl)->body();
-                $avatarPath = 'avatars/' . Str::uuid() . '.jpg';
-                Storage::disk('public')->put($avatarPath, $avatarContents);
+                $newAvatarPath = 'avatars/' . Str::uuid() . '.jpg';
+                Storage::disk('public')->put($newAvatarPath, $avatarContents);
             } catch (\Exception $e) {
                 \Log::warning('Gagal download avatar dari Google: ' . $e->getMessage());
+                $newAvatarPath = null;
             }
 
-            // Buat atau ambil user
-            $user = User::firstOrCreate([
-                'email' => $googleUser->getEmail(),
-            ], [
-                'name' => $googleUser->getName(),
-                'google_id' => $googleUser->getId(),
-                'avatar' => $avatarPath,
-                'password' => bcrypt(uniqid())
-            ]);
+            $user = User::where('email', $googleUser->getEmail())->first();
 
-            $currentRoles = $user->roles->pluck('name')->toArray();
+            if ($user) {
+                $updated = false;
 
-            if (empty($currentRoles)) {
+                if (!$user->google_id) {
+                    $user->google_id = $googleUser->getId();
+                    $updated = true;
+                }
+
+                if ($newAvatarPath && $newAvatarPath !== $user->avatar) {
+                    if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                        Storage::disk('public')->delete($user->avatar);
+                    }
+
+                    $user->avatar = $newAvatarPath;
+                    $updated = true;
+                }
+
+                if ($updated) {
+                    $user->save();
+                }
+            } else {
+                $user = User::create([
+                    'email' => $googleUser->getEmail(),
+                    'name' => $googleUser->getName(),
+                    'google_id' => $googleUser->getId(),
+                    'avatar' => $newAvatarPath,
+                    'password' => bcrypt(Str::random(12)),
+                ]);
+            }
+
+            if ($user->roles->isEmpty()) {
                 $user->assignRole('user');
             }
 
@@ -118,10 +138,11 @@ class AuthenticatedSessionController extends Controller
             session()->regenerate();
 
             return redirect()->to(session()->pull('url.intended', '/'));
-
         } catch (\Exception $e) {
+            \Log::error('Error saat login Google: ' . $e->getMessage());
             return redirect('/login')->with('error', 'Login dengan Google gagal.');
         }
     }
+
 
 }

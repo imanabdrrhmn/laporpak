@@ -137,7 +137,6 @@ export default {
     methods: {
         checkReport() {
             // Here you would implement the logic to check if a report exists
-            console.log('Checking report for:', this.searchQuery);
         },
         // Method to update statistics from an API or other data source
         fetchStatistics() {
