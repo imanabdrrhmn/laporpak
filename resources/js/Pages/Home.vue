@@ -4,7 +4,7 @@ import { usePage, Head } from '@inertiajs/vue3'
 
 import AppLayout from '@/Layouts/AppLayout.vue'
 import Beranda from '@/Components/HeroSectionBeranda.vue'
-import Section from '@/Components/Section.vue'
+import Section from '@/Components/Section.vue'  // Asumsikan Section menerima props statistik
 import Feedback from '@/Components/Feedback.vue'
 
 import LoginModal from '@/Components/modals/LoginModal.vue'
@@ -15,12 +15,16 @@ import Notification from '@/Components/Notification.vue'
 const page = usePage()
 const feedbacks = page.props.feedbacks
 
+// Statistik laporan yang dikirim dari backend
+const verifiedReports = page.props.verifiedReports || 0
+const totalReports = page.props.totalReports || 0
+const fraudReports = page.props.fraudReports || 0
+
 const showLogin = ref(false)
 const showRegister = ref(false)
 const showForgotPassword = ref(false)
 const status = ref(page.props.flash.status || '')
 const error = ref(page.props.flash.error || '')
-
 
 watch(
   () => page.props.auth.user,
@@ -58,7 +62,11 @@ watch(
   <AppLayout>
     <div class="main-container">
       <Beranda @show-login-modal="openLoginModal" />
-      <Section />
+      <Section 
+        :verifiedReports="verifiedReports"
+        :totalReports="totalReports"
+        :fraudReports="fraudReports"
+        />
       <Feedback :feedbacks="feedbacks" />
 
       <LoginModal 
