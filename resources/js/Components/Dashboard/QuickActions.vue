@@ -10,10 +10,13 @@
           @click="handleAction(aksi)"
           :disabled="aksi.disabled"
           :title="aksi.tooltip"
+          role="button"
+          tabindex="0"
+          @keydown.enter="handleAction(aksi)"
         >
           <div class="action-icon" :class="aksi.iconVariant">
             <i :class="aksi.iconClass"></i>
-            <span v-if="aksi.badge" class="action-badge">{{ aksi.badge }}</span>
+            <span v-if="aksi.badge && props.showBadges" class="action-badge">{{ aksi.badge }}</span>
           </div>
           <span class="action-label">{{ aksi.label }}</span>
           <span v-if="aksi.description" class="action-description">{{ aksi.description }}</span>
@@ -26,50 +29,35 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-// Props untuk customization
 const props = defineProps({
-  title: {
-    type: String,
-    default: 'Aksi Cepat'
-  },
-  customActions: {
-    type: Array,
-    default: () => []
-  },
+  title: { type: String, default: 'Aksi Cepat' },
+  customActions: { type: Array, default: () => [] },
   variant: {
     type: String,
-    default: 'default', // 'default', 'modern', 'minimal', 'colorful'
+    default: 'default',
     validator: (value) => ['default', 'modern', 'minimal', 'colorful'].includes(value)
   },
   layout: {
     type: String,
-    default: 'grid', // 'grid', 'horizontal', 'vertical'
+    default: 'grid',
     validator: (value) => ['grid', 'horizontal', 'vertical'].includes(value)
   },
   itemSize: {
     type: String,
-    default: 'medium', // 'small', 'medium', 'large'
+    default: 'medium',
     validator: (value) => ['small', 'medium', 'large'].includes(value)
   },
-  maxItems: {
-    type: Number,
-    default: null
-  },
-  showBadges: {
-    type: Boolean,
-    default: false
-  },
+  maxItems: { type: Number, default: null },
+  showBadges: { type: Boolean, default: false },
   animationStyle: {
     type: String,
-    default: 'hover', 
+    default: 'hover',
     validator: (value) => ['hover', 'pulse', 'bounce', 'none'].includes(value)
   }
 })
 
-// Emit events
 const emit = defineEmits(['action-click', 'action-hover'])
 
-// Data default
 const defaultActions = ref([
   {
     label: 'Membuat Laporan',
@@ -124,21 +112,14 @@ const defaultActions = ref([
   }
 ])
 
-// Computed properties
 const displayActions = computed(() => {
   const actions = props.customActions.length > 0 ? props.customActions : defaultActions.value
   return props.maxItems ? actions.slice(0, props.maxItems) : actions
 })
 
-const wrapperVariant = computed(() => {
-  return `wrapper-${props.variant}`
-})
+const wrapperVariant = computed(() => `wrapper-${props.variant}`)
+const gridLayout = computed(() => `layout-${props.layout} size-${props.itemSize}`)
 
-const gridLayout = computed(() => {
-  return `layout-${props.layout} size-${props.itemSize}`
-})
-
-// Methods
 const getActionClasses = (aksi) => {
   return [
     'action-item',
@@ -154,9 +135,7 @@ const getActionClasses = (aksi) => {
 
 const handleAction = (aksi) => {
   if (aksi.disabled) return
-  
   emit('action-click', aksi)
-  
   if (aksi.url) {
     if (aksi.newTab) {
       window.open(aksi.url, '_blank')
@@ -164,42 +143,36 @@ const handleAction = (aksi) => {
       window.location.href = aksi.url
     }
   }
-  
   if (aksi.callback && typeof aksi.callback === 'function') {
     aksi.callback(aksi)
   }
-  
-  console.log('Action clicked:', aksi.label)
-}
-
-const handleHover = (aksi) => {
-  emit('action-hover', aksi)
 }
 </script>
 
 <style scoped>
 .aksi-cepat-container {
-  padding: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .section-title {
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 1.5rem;
   padding-left: 0.5rem;
 }
 
-/* Wrapper Variants */
 .quick-actions-wrapper {
   background: #ffffff;
   border-radius: 12px;
-  padding: 1.5rem;
-  margin-right: -65rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   border: 1px solid #e9ecef;
   transition: all 0.3s ease;
+  width: 100%; /* Mengganti nilai tetap dengan 100% */
+  max-width: 100%; /* Membatasi lebar maksimum */
 }
 
 .wrapper-modern {
@@ -220,20 +193,21 @@ const handleHover = (aksi) => {
   border: none;
 }
 
-/* Grid Layouts */
 .quick-actions-grid {
   display: grid;
-  gap: 1rem;
+  gap: clamp(0.5rem, 2vw, 1rem);
 }
 
 .layout-grid {
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
 
 .layout-horizontal {
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   grid-auto-flow: column;
   overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 .layout-vertical {
@@ -242,23 +216,21 @@ const handleHover = (aksi) => {
   margin: 0 auto;
 }
 
-/* Size Variants */
 .size-small .action-item {
   min-height: 80px;
-  padding: 1rem 0.75rem;
+  padding: clamp(0.5rem, 2vw, 1rem) 0.75rem;
 }
 
 .size-medium .action-item {
-  min-height: 120px;
-  padding: 1.5rem 1rem;
+  min-height: 100px;
+  padding: clamp(1rem, 2.5vw, 1.5rem) 1rem;
 }
 
 .size-large .action-item {
-  min-height: 160px;
-  padding: 2rem 1.5rem;
+  min-height: 140px;
+  padding: clamp(1.5rem, 3vw, 2rem) 1.5rem;
 }
 
-/* Action Item Base Styles */
 .action-item {
   display: flex;
   flex-direction: column;
@@ -275,44 +247,28 @@ const handleHover = (aksi) => {
   overflow: hidden;
 }
 
-.action-item::before {
+.action-item:hover::before {
   content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s;
-}
-
-.action-item:hover::before {
   left: 100%;
 }
 
-/* Variant Styles */
-.variant-default {
-  background: #f8f9fa;
-}
-
+.variant-default { background: #f8f9fa; }
 .variant-modern {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
 }
+.variant-minimal { background: transparent; border: 1px solid #dee2e6; }
+.variant-colorful { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px); }
 
-.variant-minimal {
-  background: transparent;
-  border: 1px solid #dee2e6;
-}
-
-.variant-colorful {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(5px);
-}
-
-/* Active States */
 .action-item.active {
   background: linear-gradient(135deg, #4285f4 0%, #1976d2 100%);
   color: white;
@@ -320,12 +276,6 @@ const handleHover = (aksi) => {
   box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
 }
 
-.variant-modern.active {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Color Variants */
 .color-success { --item-color: #28a745; }
 .color-info { --item-color: #17a2b8; }
 .color-warning { --item-color: #ffc107; }
@@ -341,7 +291,6 @@ const handleHover = (aksi) => {
   color: white;
 }
 
-/* Animation Variants */
 .animation-hover:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -368,14 +317,12 @@ const handleHover = (aksi) => {
   90% { transform: translateY(-2px); }
 }
 
-/* Disabled State */
 .action-item.disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-/* Icon Styles */
 .action-icon {
   margin-bottom: 0.75rem;
   position: relative;
@@ -385,7 +332,7 @@ const handleHover = (aksi) => {
 }
 
 .action-icon i {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   transition: all 0.3s ease;
 }
 
@@ -393,7 +340,6 @@ const handleHover = (aksi) => {
   transform: scale(1.1);
 }
 
-/* Badge */
 .action-badge {
   position: absolute;
   top: -8px;
@@ -410,9 +356,8 @@ const handleHover = (aksi) => {
   font-weight: bold;
 }
 
-/* Label and Description */
 .action-label {
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   font-weight: 500;
   text-align: center;
   line-height: 1.3;
@@ -421,7 +366,7 @@ const handleHover = (aksi) => {
 }
 
 .action-description {
-  font-size: 0.75rem;
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
   opacity: 0.7;
   text-align: center;
   line-height: 1.2;
@@ -430,58 +375,61 @@ const handleHover = (aksi) => {
 /* Responsive Design */
 @media (max-width: 1200px) {
   .layout-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
+  .quick-actions-wrapper {
+    padding: 1rem;
+  }
+
   .layout-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   }
-  
+
   .size-medium .action-item {
-    min-height: 100px;
-    padding: 1.25rem 0.75rem;
+    min-height: 90px;
+    padding: 1rem 0.75rem;
   }
-  
+
   .action-icon i {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
   }
-  
+
   .action-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 }
 
 @media (max-width: 576px) {
   .quick-actions-wrapper {
-    padding: 1rem;
+    padding: 0.75rem;
   }
-  
+
   .layout-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .action-item {
     flex-direction: row;
     text-align: left;
     justify-content: flex-start;
     min-height: auto;
+    padding: 0.75rem;
   }
-  
+
   .action-icon {
     margin-bottom: 0;
     margin-right: 1rem;
   }
-  
-  .action-icon i {
-    font-size: 1.5rem;
-  }
-}
 
-/* Focus styles for accessibility */
-.action-item:focus {
-  outline: 2px solid #4285f4;
-  outline-offset: 2px;
+  .action-icon i {
+    font-size: 1.25rem;
+  }
+
+  .action-label {
+    font-size: 0.7rem;
+  }
 }
 </style>

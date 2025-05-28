@@ -24,16 +24,24 @@ defineProps({
 </script>
 
 <style scoped>
+:root {
+  --card-bg: #ffffff;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  --text-color: #2c3e50;
+  --text-muted: #6c757d;
+  --transition: all 0.3s ease;
+}
+
 .summary-card {
   background: var(--card-bg);
   border-radius: var(--border-radius);
-  padding: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   box-shadow: var(--box-shadow);
-  height: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.02);
   transition: var(--transition);
-  border: 1px solid rgba(0,0,0,0.02);
-  display: flex;
-  flex-direction: column;
+  width: 100%; /* Mengganti nilai tetap dengan 100% */
+  max-width: 100%; /* Membatasi lebar maksimum */
 }
 
 .card-content {
@@ -42,34 +50,34 @@ defineProps({
 }
 
 .summary-card:hover {
-  transform: translateY(-7px);
-  box-shadow: 0 15px 20px rgba(0,0,0,0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .card-icon {
-  width: 50px;
-  height: 50px;
+  width: clamp(40px, 10vw, 50px);
+  height: clamp(40px, 10vw, 50px);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 1rem;
-  font-size: 1.5rem;
+  margin-right: clamp(0.75rem, 2vw, 1rem);
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
   transition: var(--transition);
 }
 
 .summary-card:hover .card-icon {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .card-title {
-  font-size: 0.9rem;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
   color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 
 .card-value {
-  font-size: 1.75rem;
+  font-size: clamp(1.5rem, 4vw, 1.75rem);
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: var(--text-color);
@@ -96,12 +104,12 @@ defineProps({
   flex: 1;
   height: 6px;
   border-radius: 3px;
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .verification-progress span {
   font-weight: 600;
-  color: var(--success-color);
+  color: #28a745;
 }
 
 .reports-stats {
@@ -115,28 +123,49 @@ defineProps({
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
   .summary-card {
     padding: 1rem;
   }
-  
+
   .card-content {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .card-icon {
     margin-right: 0;
     margin-bottom: 1rem;
     margin-left: auto;
     margin-right: auto;
   }
-  
+
   .card-value {
     font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .summary-card {
+    padding: 0.75rem;
+  }
+
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 0.75rem;
+  }
+
+  .card-value {
+    font-size: 1.25rem;
   }
 }
 </style>

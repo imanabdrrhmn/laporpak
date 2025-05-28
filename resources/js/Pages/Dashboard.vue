@@ -10,32 +10,29 @@
         :proses-selesai="7"
         :saldo-kredit="saldoKredit"
       />
-      <div class="row g-4 mb-4">
-        <div class="col-lg-3 col-md-4 animate__animated animate__fadeInLeft" style="animation-delay: 0.2s">
+      <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-4">
           <QuickActions :aksi-cepat="aksiCepat" />
         </div>
-        <div class="col-lg-10 col animate__animated animate__fadeIn" style="animation-delay: 0.3s">
+        <div class="col-12 col-md-6 col-lg-8">
           <RecentActivity :aktivitas="aktivitas" />
         </div>
-        <div class="col-lg-12 animate__animated animate__fadeInRight" style="animation-delay: 0.4s">
+        <div class="col-12">
           <FeedbackCard :feedbacks="props.feedbacks" />
         </div>
       </div>
-      </div>
+    </div>
   </AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, usePage, Link} from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import WelcomeHeader from '@/Components/Dashboard/WelcomeHeader.vue';
 import QuickActions from '@/Components/Dashboard/QuickActions.vue';
 import RecentActivity from '@/Components/Dashboard/RecentActivity.vue';
 import FeedbackCard from '@/Components/Dashboard/FeedbackCard.vue';
-
-
-import { Modal } from 'bootstrap';
 
 const props = defineProps({
   feedbacks: Array,
@@ -44,16 +41,9 @@ const props = defineProps({
   reports: Array
 })
 
-// Setup layout halaman
 const page = usePage();
-page.layout = AppLayout;
-const { reports, selected, in_process } = props.stats
-
-// Model data
 const saldoKredit = computed(() => page.props.user?.balance ?? 0);
 const namaUser = computed(() => page.props.auth?.user?.name || 'User');
-
-// Status verifikasi
 const statusVerifikasi = ref(page.props.statusVerifikasi ?? {
   npwp: true,
   identitas: true,
@@ -61,34 +51,18 @@ const statusVerifikasi = ref(page.props.statusVerifikasi ?? {
   email: true,
   rekening: false
 });
-
-// Data laporan dari backend
 const laporanTerbaru = ref(page.props.reports ?? []);
-
-
-
-// Feedback dinamis
 const userAvatar = ref(page.props.auth?.user?.avatar ?? '/Default-Profile.png');
 
-
-// Format rupiah
 const formatRupiah = (jumlah) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(jumlah);
 };
 
-// Persentase verifikasi
 const progresVerifikasi = computed(() => {
   const total = Object.keys(statusVerifikasi.value).length;
   const terverifikasi = Object.values(statusVerifikasi.value).filter(status => status).length;
   return Math.round((terverifikasi / total) * 100);
 });
-
-// Modal logic
-const showModal = (laporanId) => {
-  const modalElement = document.getElementById('laporanModal');
-  const modal = new Modal(modalElement);
-  modal.show();
-};
 </script>
 
 <style scoped>
@@ -107,20 +81,28 @@ const showModal = (laporanId) => {
   --text-color: #2c3e50;
   --text-muted: #6c757d;
   --border-radius: 12px;
-  --box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   --transition: all 0.3s ease;
+  --max-width: 1400px; /* Batas lebar maksimum yang fleksibel */
 }
 
 .dashboard-container {
-  padding: 2rem;
-  max-width: 1400px;
+  padding: clamp(1rem, 3vw, 2rem);
   margin: 0 auto;
   background-color: var(--body-bg);
   color: var(--text-color);
   min-height: 100vh;
-  transition: var(--transition);
+  width: 100%;
+  max-width: var(--max-width); /* Membatasi lebar maksimum */
+  overflow-x: hidden; /* Mencegah overflow horizontal */
 }
 
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Responsive Design */
 @media (max-width: 992px) {
   .dashboard-container {
     padding: 1.5rem;
@@ -130,6 +112,12 @@ const showModal = (laporanId) => {
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-container {
+    padding: 0.75rem;
   }
 }
 </style>

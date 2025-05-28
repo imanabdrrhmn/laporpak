@@ -29,7 +29,7 @@
       
       <div v-if="aktivitasList.length === 0" class="empty-state">
         <div class="empty-icon">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
             <circle cx="32" cy="32" r="30" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="4 4"/>
             <path d="M32 20v24M20 32h24" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round"/>
           </svg>
@@ -79,22 +79,21 @@ if (props.aktivitas && props.aktivitas.length > 0) {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid #f0f0f0;
   overflow: hidden;
-  margin-left: 24px;
-  padding: 16px;
-  width: 81.5rem;
-  
+  padding: clamp(0.75rem, 2vw, 1rem);
+  width: 100%; /* Mengganti nilai tetap dengan 100% */
+  max-width: 100%; /* Membatasi lebar maksimum */
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px 16px 24px;
+  padding: clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 1.5rem);
   background: #ffffff;
 }
 
 .card-title {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
@@ -103,14 +102,13 @@ if (props.aktivitas && props.aktivitas.length > 0) {
 .lihat-semua {
   color: #4285f4;
   text-decoration: none;
-  font-size: 14px;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   font-weight: 500;
   transition: color 0.2s ease;
 }
 
 .lihat-semua:hover {
   color: #3367d6;
-  text-decoration: none;
 }
 
 .card-body {
@@ -125,7 +123,7 @@ if (props.aktivitas && props.aktivitas.length > 0) {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 16px 24px;
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.5rem);
   transition: background-color 0.2s ease;
 }
 
@@ -134,19 +132,19 @@ if (props.aktivitas && props.aktivitas.length > 0) {
 }
 
 .activity-icon {
-  margin-right: 16px;
+  margin-right: clamp(0.5rem, 2vw, 1rem);
   position: relative;
   z-index: 2;
 }
 
 .icon-circle {
-  width: 40px;
-  height: 40px;
+  width: clamp(32px, 8vw, 40px);
+  height: clamp(32px, 8vw, 40px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: clamp(12px, 3vw, 16px);
   font-weight: 600;
   color: white;
 }
@@ -164,22 +162,20 @@ if (props.aktivitas && props.aktivitas.length > 0) {
 }
 
 .activity-title {
-  font-size: 15px;
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
   font-weight: 500;
   color: #333333;
-  margin-bottom: 4px;
-  line-height: 1.4;
+  margin-bottom: 0.25rem;
 }
 
 .activity-time {
-  font-size: 13px;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   color: #999999;
-  line-height: 1.3;
 }
 
 .activity-border {
   position: absolute;
-  left: 44px;
+  left: clamp(32px, 8vw, 40px);
   top: 0;
   bottom: 0;
   width: 2px;
@@ -193,83 +189,61 @@ if (props.aktivitas && props.aktivitas.length > 0) {
 
 .empty-state {
   text-align: center;
-  padding: 60px 24px;
+  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1.5rem);
 }
 
-.empty-icon {
-  margin-bottom: 16px;
+.empty-icon svg {
+  width: clamp(32px, 8vw, 48px);
+  height: clamp(32px, 8vw, 48px);
   opacity: 0.6;
 }
 
 .empty-text {
-  font-size: 14px;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   color: #999999;
   margin: 0;
-  font-weight: 400;
 }
 
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
   .aktivitas-card {
-    border-radius: 8px;
+    padding: 0.75rem;
   }
-  
-  .card-header {
-    padding: 16px 20px 12px 20px;
-  }
-  
 
-  
-  .lihat-semua {
-    font-size: 13px;
+  .card-header {
+    padding: 0.75rem 1rem;
   }
-  
+
   .aktivitas-item {
-    padding: 14px 20px;
+    padding: 0.75rem 1rem;
   }
-  
-  .activity-icon {
-    margin-right: 14px;
-  }
-  
+
   .icon-circle {
     width: 36px;
     height: 36px;
     font-size: 14px;
   }
-  
+
   .activity-border {
-    left: 38px;
-  }
-  
-  .activity-title {
-    font-size: 14px;
-  }
-  
-  .activity-time {
-    font-size: 12px;
+    left: 36px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 576px) {
   .aktivitas-item {
-    padding: 12px 16px;
+    padding: 0.5rem 0.75rem;
   }
-  
+
   .card-header {
-    padding: 14px 16px 10px 16px;
+    padding: 0.5rem 0.75rem;
   }
-  
-  .activity-icon {
-    margin-right: 12px;
-  }
-  
+
   .icon-circle {
     width: 32px;
     height: 32px;
     font-size: 12px;
   }
-  
+
   .activity-border {
     left: 32px;
   }
