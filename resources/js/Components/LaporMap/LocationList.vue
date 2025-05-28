@@ -1,38 +1,22 @@
 <template>
   <div class="card mb-4 shadow">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-      <h5 class="mb-0"><i class="bi bi-pin-map-fill me-2"></i>Lokasi Pelaporan</h5>
-      <span class="badge bg-light text-dark">{{ locationItems.length }}</span>
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="bi bi-pin-map-fill me-2"></i>Region Pelaporan</h5>
     </div>
     <div class="card-body p-0">
       <div class="list-group list-group-flush location-list">
         <a
           href="#"
-          v-for="(location, index) in locationItems"
+          v-for="(region, index) in regionsWithCount"
           :key="index"
           class="list-group-item list-group-item-action"
-          @click.prevent="$emit('focus-location', location)"
+          @click.prevent="$emit('focus-region', region.name)"
         >
           <div class="d-flex w-100 justify-content-between">
             <div>
-              <span class="location-marker" :class="'marker-' + location.type"></span>
-              <h6 class="mb-1">{{ location.name }}</h6>
+              <h6 class="mb-1">{{ region.name }}</h6>
             </div>
-            <small class="text-muted">{{ location.reports }} laporan</small>
-          </div>
-          <small class="d-block text-muted mb-1">
-            <i class="bi bi-calendar3 me-1"></i> Terbaru: {{ location.lastReport }}
-          </small>
-          <div class="progress" style="height: 5px;">
-            <div
-              class="progress-bar"
-              :class="'bg-' + getProgressColor(location.type)"
-              role="progressbar"
-              :style="{ width: (location.reports / maxReports * 100) + '%' }"
-              :aria-valuenow="location.reports"
-              aria-valuemin="0"
-              :aria-valuemax="maxReports"
-            ></div>
+            <small class="text-muted">{{ region.count }} lokasi</small>
           </div>
         </a>
       </div>
@@ -46,17 +30,28 @@
 </template>
 
 <script setup>
-defineProps({
-  locationItems: Array,
-  maxReports: Number
+import { computed } from 'vue';
+
+
+const props = defineProps({
+  locationItems: {
+    type: Array,
+    required: true,
+  }
 });
 
-defineEmits(['focus-location', 'show-all-locations']);
+defineEmits(['focus-region', 'show-all-locations']);
 
-const getProgressColor = (type) => {
-  const colors = { high: 'danger', medium: 'warning', low: 'success' };
-  return colors[type] || 'primary';
-};
+const regionsWithCount = computed(() => {
+  const map = {};
+  for (const loc of props.locationItems) {
+    const region = loc.region ;
+    if (!map[region]) map[region] = 0;
+    map[region]++;
+  }
+  return Object.entries(map).map(([name, count]) => ({ name, count }));
+});
+
 </script>
 
 <style scoped>
@@ -64,18 +59,6 @@ const getProgressColor = (type) => {
   max-height: 250px;
   overflow-y: auto;
 }
-
-.location-marker {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 6px;
-}
-
-.marker-high { background-color: #dc3545; }
-.marker-medium { background-color: #ffc107; }
-.marker-low { background-color: #28a745; }
 
 .location-list::-webkit-scrollbar { width: 6px; }
 .location-list::-webkit-scrollbar-track { background: #f1f1f1; }

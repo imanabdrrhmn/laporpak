@@ -15,17 +15,18 @@
               ref="mapArea"
               :loading="loading"
               :last-updated="lastUpdated"
-              :location-items="locationItems"
+              :location-items="filteredLocations"
               @open-location-detail="openLocationDetail"
             />
           </div>
           <div class="col-lg-3">
             <LegendCard :legend-items="legendItems" />
             <LocationList
-              :location-items="locationItems"
+              :location-items="filteredLocations"
               :max-reports="maxReports"
               @focus-location="focusLocation"
               @show-all-locations="showAllLocations"
+              @focus-region="focusRegion"
             />
           </div>
         </div>
@@ -41,8 +42,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Feedback from '@/Components/Feedback.vue';
 import HeroSection from '@/Components/LaporMap/HeroSection.vue';
@@ -50,34 +51,36 @@ import MapArea from '@/Components/LaporMap/MapArea.vue';
 import LegendCard from '@/Components/LaporMap/LegendCard.vue';
 import LocationList from '@/Components/LaporMap/LocationList.vue';
 import ReportDetailModal from '@/Components/LaporMap/ReportDetailModal.vue';
-import L from 'leaflet';
-import 'leaflet.markercluster/dist/leaflet.markercluster.js';
-import 'leaflet.markercluster/dist/MarkerCluster.css';
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
-const props = defineProps({
-  feedbacks: {
-    type: Array,
-    default: () => []
-  }
+const page = usePage();
+
+const reportCount = ref(page.props.reportCount ?? 0);
+const locationCount = ref(page.props.locationCount ?? 0);
+const userCount = ref(page.props.userCount ?? 0);
+const allLocations = ref(page.props.locationItems ?? []);
+const maxReports = ref(page.props.maxReports ?? 0);
+const feedbacks = ref(page.props.feedbacks ?? []);
+
+const selectedRegion = ref(null);
+
+const filteredLocations = computed(() => {
+  if (!selectedRegion.value) return allLocations.value;
+  return allLocations.value.filter(loc => loc.region === selectedRegion.value);
 });
 
 const mapArea = ref(null);
 const loading = ref(true);
-const lastUpdated = new Date().toLocaleString('id-ID', {
+const showModal = ref(false);
+const selectedLocation = ref(null);
+const animatePins = ref(true);
+const lastUpdated = ref(new Date().toLocaleString('id-ID', {
   day: 'numeric',
   month: 'long',
   year: 'numeric',
   hour: '2-digit',
   minute: '2-digit'
-});
-const showModal = ref(false);
-const selectedLocation = ref(null);
-const maxReports = ref(843);
-const reportCount = ref(1458);
-const locationCount = ref(237);
-const userCount = ref(3672);
-const animatePins = ref(true);
+}));
+
 const legendItems = ref([
   {
     color: '#dc3545',
@@ -95,93 +98,6 @@ const legendItems = ref([
     description: 'Area dengan kurang dari 100 laporan penipuan.'
   }
 ]);
-const locationItems = ref([
-  {
-    id: 1,
-    name: 'Jakarta Pusat',
-    coordinates: [-6.1753942, 106.8271832],
-    reports: 843,
-    type: 'high',
-    lastReport: '23 Apr 2025',
-    address: 'Jakarta Pusat, DKI Jakarta, Indonesia',
-    fraudTypes: ['Penipuan Online', 'Investasi Palsu', 'Penipuan Telepon'],
-    victims: 1230,
-    totalLoss: 3500000000,
-    status: 'Area Waspada Tinggi',
-    recentReports: [
-      { date: '23 Apr 2025', type: 'Investasi Palsu', reporter: 'Anonym', status: 'Diproses' },
-      { date: '22 Apr 2025', type: 'Penipuan Online', reporter: 'Anonym', status: 'Selesai' },
-      { date: '21 Apr 2025', type: 'Penipuan Telepon', reporter: 'Anonym', status: 'Diverifikasi' }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Semarang',
-    coordinates: [-7.0051453, 110.4381254],
-    reports: 450,
-    type: 'medium',
-    lastReport: '22 Apr 2025',
-    address: 'Semarang, Jawa Tengah, Indonesia',
-    fraudTypes: ['Penipuan Online', 'Skema Ponzi'],
-    victims: 672,
-    totalLoss: 1800000000,
-    status: 'Area Waspada Menengah',
-    recentReports: [
-      { date: '22 Apr 2025', type: 'Skema Ponzi', reporter: 'Anonym', status: 'Diproses' },
-      { date: '20 Apr 2025', type: 'Penipuan Online', reporter: 'Anonym', status: 'Selesai' }
-    ]
-  },
-  {
-    id: 3,
-    name: 'Jakarta Barat',
-    coordinates: [-6.1683295, 106.7588465],
-    reports: 95,
-    type: 'low',
-    lastReport: '21 Apr 2025',
-    address: 'Jakarta Barat, DKI Jakarta, Indonesia',
-    fraudTypes: ['Penipuan Email', 'Penipuan Telepon'],
-    victims: 120,
-    totalLoss: 450000000,
-    status: 'Area Waspada Rendah',
-    recentReports: [
-      { date: '21 Apr 2025', type: 'Penipuan Email', reporter: 'Anonym', status: 'Diproses' }
-    ]
-  },
-  {
-    id: 4,
-    name: 'Surabaya',
-    coordinates: [-7.2574719, 112.7520883],
-    reports: 367,
-    type: 'medium',
-    lastReport: '20 Apr 2025',
-    address: 'Surabaya, Jawa Timur, Indonesia',
-    fraudTypes: ['Penipuan Kartu Kredit', 'Investasi Palsu', 'Penipuan Online'],
-    victims: 520,
-    totalLoss: 2100000000,
-    status: 'Area Waspada Menengah',
-    recentReports: [
-      { date: '20 Apr 2025', type: 'Penipuan Kartu Kredit', reporter: 'Anonym', status: 'Diproses' },
-      { date: '19 Apr 2025', type: 'Investasi Palsu', reporter: 'Anonym', status: 'Selesai' }
-    ]
-  },
-  {
-    id: 5,
-    name: 'Bandung',
-    coordinates: [-6.9174639, 107.6191228],
-    reports: 215,
-    type: 'medium',
-    lastReport: '19 Apr 2025',
-    address: 'Bandung, Jawa Barat, Indonesia',
-    fraudTypes: ['Penipuan SMS', 'Skema Ponzi', 'Penipuan Media Sosial'],
-    victims: 310,
-    totalLoss: 950000000,
-    status: 'Area Waspada Menengah',
-    recentReports: [
-      { date: '19 Apr 2025', type: 'Penipuan Media Sosial', reporter: 'Anonym', status: 'Diproses' },
-      { date: '18 Apr 2025', type: 'Penipuan SMS', reporter: 'Anonym', status: 'Diverifikasi' }
-    ]
-  }
-]);
 
 onMounted(() => {
   setTimeout(() => {
@@ -196,12 +112,29 @@ onMounted(() => {
   }, 5000);
 });
 
+watch(filteredLocations, async (newLocations) => {
+  if (mapArea.value && newLocations.length) {
+    await nextTick();
+    mapArea.value.showAllLocations(newLocations);
+  }
+});
+
+watch(() => page.props, (newProps) => {
+  reportCount.value = newProps.reportCount ?? 0;
+  locationCount.value = newProps.locationCount ?? 0;
+  userCount.value = newProps.userCount ?? 0;
+  allLocations.value = newProps.locationItems ?? [];
+  maxReports.value = newProps.maxReports ?? 0;
+  feedbacks.value = newProps.feedbacks ?? [];
+});
+
 const focusLocation = (location) => {
-  mapArea.value.focusLocation(location);
+  mapArea.value?.focusLocation(location);
 };
 
 const showAllLocations = () => {
-  mapArea.value.showAllLocations(locationItems.value);
+  selectedRegion.value = null;
+  mapArea.value?.showAllLocations(allLocations.value);
 };
 
 const openLocationDetail = (location) => {
@@ -213,7 +146,13 @@ const closeModal = () => {
   showModal.value = false;
   selectedLocation.value = null;
 };
+
+const focusRegion = (region) => {
+  selectedRegion.value = region;
+};
 </script>
+
+
 
 <style scoped>
 @import 'leaflet/dist/leaflet.css';

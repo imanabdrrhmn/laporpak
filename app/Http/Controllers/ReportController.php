@@ -141,7 +141,7 @@ class ReportController
       private function getRegionFromLatLng($lat, $lng)
     {
         $response = Http::withHeaders([
-            'User-Agent' => 'YourAppName/1.0' // wajib ada user-agent yang jelas
+            'User-Agent' => 'YourAppName/1.0' 
         ])->get('https://nominatim.openstreetmap.org/reverse', [
             'lat' => $lat,
             'lon' => $lng,
