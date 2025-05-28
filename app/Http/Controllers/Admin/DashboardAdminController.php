@@ -62,7 +62,6 @@ class DashboardAdminController extends Controller
         ->pluck('total', 'status')
         ->toArray();
 
-        // Ambil 5 laporan terbaru
         $user = Auth::user();
         $recentReports = Report::with('user')->latest()->get();
 

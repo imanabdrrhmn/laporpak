@@ -378,30 +378,7 @@
       </template>
 
       <template v-else>
-        <div class="access-denied-container text-center py-5 px-3">
-          <div class="icon-wrapper mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="1.5"
-              aria-hidden="true"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 9v3m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <h3 class="mb-3 fw-bold text-danger">Akses Ditolak</h3>
-          <p class="text-muted fs-5 mx-auto" style="max-width: 400px;">
-            Anda tidak memiliki akses untuk halaman ini.<br />
-            Silakan hubungi admin untuk mendapatkan akses.
-          </p>
-        </div>
+        <AccessDenied/>
       </template>
     </div>
   </AppLayout>
@@ -413,6 +390,9 @@ import { Inertia } from "@inertiajs/inertia";
 import { usePage, Head } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Modal } from "bootstrap";
+import AccessDenied from '@/Components/AccessDenied.vue';
+
+
 
 const page = usePage();
 
@@ -956,22 +936,6 @@ watch(
 
 .modal-body .btn:last-child {
   margin-bottom: 0;
-}
-
-.access-denied-container {
-  user-select: none;
-}
-
-.icon-wrapper {
-  width: 80px;
-  height: 80px;
-  color: #dc3545; /* Bootstrap danger color */
-  margin: 0 auto;
-}
-
-.icon {
-  width: 100%;
-  height: 100%;
 }
 
 </style>

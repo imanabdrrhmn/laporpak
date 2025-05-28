@@ -2,54 +2,59 @@
   <AppLayout>
     <Head title="Dashboard Admin" />
     <div class="dashboard-container">
-      <h2 class="dashboard-title">Dashboard Admin</h2>
+      <template v-if="canViewDashboard">
+        <h2 class="dashboard-title">Dashboard Admin</h2>
 
-      <!-- Stat Cards -->
-      <div class="stats-grid">
-        <StatCard
-          title="Laporan Masuk"
-          :count="dashboardStats.laporanMasuk.count"
-          :percentage="dashboardStats.laporanMasuk.percentage"
-          icon="bi-file-earmark-arrow-down"
-          bgClass="bg-primary"
-        />
-        <StatCard
-          title="Laporan Terverifikasi"
-          :count="dashboardStats.laporanTerverifikasi.count"
-          :percentage="dashboardStats.laporanTerverifikasi.percentage"
-          icon="bi-check-circle"
-          bgClass="bg-success"
-        />
-        <StatCard
-          title="Total Pengguna"
-          :count="dashboardStats.totalPengguna.count"
-          :percentage="dashboardStats.totalPengguna.percentage"
-          icon="bi-people-fill"
-          bgClass="bg-info"
-        />
-        <StatCard
-          title="Saldo Top-Up Masuk"
-          :count="`Rp ${formatNumber(dashboardStats.saldoTopUp.amount)}`"
-          :percentage="dashboardStats.saldoTopUp.percentage"
-          icon="bi-wallet2"
-          bgClass="bg-secondary"
-          isCurrency
-        />
-      </div>
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+          <StatCard
+            title="Laporan Masuk"
+            :count="dashboardStats.laporanMasuk.count"
+            :percentage="dashboardStats.laporanMasuk.percentage"
+            icon="bi-file-earmark-arrow-down"
+            bgClass="bg-primary"
+          />
+          <StatCard
+            title="Laporan Terverifikasi"
+            :count="dashboardStats.laporanTerverifikasi.count"
+            :percentage="dashboardStats.laporanTerverifikasi.percentage"
+            icon="bi-check-circle"
+            bgClass="bg-success"
+          />
+          <StatCard
+            title="Total Pengguna"
+            :count="dashboardStats.totalPengguna.count"
+            :percentage="dashboardStats.totalPengguna.percentage"
+            icon="bi-people-fill"
+            bgClass="bg-info"
+          />
+          <StatCard
+            title="Saldo Top-Up Masuk"
+            :count="`Rp ${formatNumber(dashboardStats.saldoTopUp.amount)}`"
+            :percentage="dashboardStats.saldoTopUp.percentage"
+            icon="bi-wallet2"
+            bgClass="bg-secondary"
+            isCurrency
+          />
+        </div>
 
-      <!-- Charts -->
-      <div class="charts-grid">
-        <StatusChart @export="exportStatusData" :reportData="reportData" />
-        <!-- <TrendChart @export="exportTrenData" /> -->
-      </div>
+        <!-- Charts -->
+        <div class="charts-grid">
+          <StatusChart @export="exportStatusData" :reportData="reportData" />
+        </div>
 
-      <!-- Recent Reports -->
-      <RecentReports
-        :reports="reports"
-        @filter="showFilterModal"
-        @export="exportSummaryData"
-        :getStatusClass="getStatusClass"
-      />
+        <!-- Recent Reports -->
+        <RecentReports
+          :reports="reports"
+          @filter="showFilterModal"
+          @export="exportSummaryData"
+          :getStatusClass="getStatusClass"
+        />
+      </template>
+
+      <template v-else>
+        <AccessDenied />
+      </template>
     </div>
   </AppLayout>
 </template>
@@ -61,6 +66,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import StatCard from './Components/StatCard.vue';
 import StatusChart from './Components/StatusChart.vue';
 import RecentReports from './Components/RecentReports.vue';
+import AccessDenied from '@/Components/AccessDenied.vue';
 
 export default {
   components: {
@@ -69,12 +75,15 @@ export default {
     StatCard,
     StatusChart,
     RecentReports,
+    AccessDenied,
   },
   setup() {
     const page = usePage();
     const dashboardStats = computed(() => page.props.dashboardStats || {});
     const reports = computed(() => page.props.reports || []);
     const reportData = computed(() => page.props.reportData || {});
+    const userPermissions = computed(() => page.props.auth?.user?.permissions || []);
+    const canViewDashboard = computed(() => userPermissions.value.includes('view_dashboard'));
 
     const formatNumber = (number) => {
       if (number === undefined || number === null) return '-';
@@ -105,6 +114,7 @@ export default {
       exportStatusData,
       exportSummaryData,
       showFilterModal,
+      canViewDashboard,
     };
   },
 };
