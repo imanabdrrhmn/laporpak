@@ -14,14 +14,22 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Feedback;
+use App\Models\Report;
 
 
 Route::get('/', function () {
     $feedbacks = Feedback::with('user')->where('kategori', 'Umum')->latest()->take(10)->get();
+    $verifiedReports = Report::whereIn('status', ['published', 'approved'])->count();
+    $totalReports = Report::count();
+    $fraudReports = Report::where('service', 'Penipuan')->count();
+
     return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'feedbacks' => $feedbacks,
+        'verifiedReports' => $verifiedReports,
+        'totalReports' => $totalReports,
+        'fraudReports' => $fraudReports,
         'flash' => [
             'status' => session('status'),
             'error' => session('error'),

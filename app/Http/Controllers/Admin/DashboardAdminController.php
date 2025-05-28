@@ -19,16 +19,13 @@ class DashboardAdminController extends Controller
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
         $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
 
-        // Laporan masuk total
         $laporanMasukCount = Report::count();
 
-        // Laporan masuk bulan ini dan bulan lalu
         $laporanMasukThisMonth = Report::where('created_at', '>=', $startOfThisMonth)->count();
         $laporanMasukLastMonth = Report::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();
 
         $laporanMasukPercentage = $this->calcPercentageChange($laporanMasukThisMonth, $laporanMasukLastMonth);
 
-        // Laporan terverifikasi total (misal status )
         $laporanTerverifikasiCount = Report::whereIn('status', ['published', 'approved'])->count();
 
         $laporanTerverifikasiThisMonth = Report::whereIn('status', ['published', 'approved'])

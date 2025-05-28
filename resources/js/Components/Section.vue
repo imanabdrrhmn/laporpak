@@ -36,7 +36,8 @@
                                 class="form-control py-2 rounded-pill mb-3" 
                                 placeholder="Nomor/Email" 
                                 v-model="searchQuery"
-                                aria-label="Search for reports">
+                                aria-label="Search for reports"
+                            />
                             <a 
                                 class="btn btn-primary px-4 py-2 mt-2" 
                                 :href="`/CariLaporan?query=${encodeURIComponent(searchQuery)}`"
@@ -124,34 +125,24 @@ export default {
         showSearch: {
             type: Boolean,
             default: true
+        },
+        verifiedReports: {
+            type: Number,
+            default: 0
+        },
+        totalReports: {
+            type: Number,
+            default: 0
+        },
+        fraudReports: {
+            type: Number,
+            default: 0
         }
     },
     data() {
         return {
-            searchQuery: '',
-            verifiedReports: 5000,
-            totalReports: 3232,
-            fraudReports: 5000
+            searchQuery: ''
         }
-    },
-    methods: {
-        checkReport() {
-            // Here you would implement the logic to check if a report exists
-        },
-        // Method to update statistics from an API or other data source
-        fetchStatistics() {
-            // This would be replaced with an actual API call
-            // For example:
-            // axios.get('/api/statistics').then(response => {
-            //     this.verifiedReports = response.data.verified;
-            //     this.totalReports = response.data.total;
-            //     this.fraudReports = response.data.fraud;
-            // });
-        }
-    },
-    mounted() {
-        // Fetch statistics when component is mounted
-        this.fetchStatistics();
     }
 }
 </script>
