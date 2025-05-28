@@ -37,10 +37,68 @@ defineProps({
 }
 
 .highlight-bar {
-  width: 60px;
   height: 4px;
   background-color: #ffc107;
   border-radius: 2px;
+  width: 80vw; /* Base width using viewport units for responsiveness */
+  max-width: 450px; /* Maximum width to prevent it from getting too wide */
+  min-width: 150px; /* Minimum width for very small screens */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ensure highlight-bar is responsive across all devices */
+@media (max-width: 320px) {
+  .highlight-bar {
+    width: 90vw; /* Slightly wider on very small screens */
+    min-width: 120px;
+  }
+}
+
+@media (min-width: 321px) and (max-width: 375px) {
+  .highlight-bar {
+    width: 85vw;
+    min-width: 140px;
+  }
+}
+
+@media (min-width: 376px) and (max-width: 576px) {
+  .highlight-bar {
+    width: 80vw;
+    min-width: 160px;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .highlight-bar {
+    width: 75vw;
+    max-width: 350px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .highlight-bar {
+    width: 70vw;
+    max-width: 400px;
+  }
+}
+
+@media (min-width: 992px) {
+  .highlight-bar {
+    width: 60vw;
+    max-width: 450px;
+  }
+  .hero-content {
+    padding: 4rem !important;
+    text-align: left;
+  }
+}
+
+@media (min-width: 1200px) {
+  .highlight-bar {
+    width: 50vw;
+    max-width: 450px;
+  }
 }
 
 .responsive-title {
@@ -58,13 +116,6 @@ defineProps({
   .text-section {
     padding: 2rem 3rem !important;
     margin-bottom: 1rem;
-  }
-}
-
-@media (min-width: 992px) {
-  .hero-content {
-    padding: 4rem !important;
-    text-align: left;
   }
 }
 

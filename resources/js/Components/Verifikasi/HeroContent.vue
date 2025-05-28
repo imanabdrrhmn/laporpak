@@ -1,7 +1,6 @@
 <template>
   <div class="col-lg-6 d-flex flex-column justify-content-center text-white hero-content p-4 p-sm-5">
-    <h1 class="display-4 fw-bold mb-3">
-      <i class="bi bi-check-circle me-2"></i> Verifikasi Data
+    <h1 class="display-4 fw-bold mb-3"> Verifikasi Data
     </h1>
     <div class="highlight-bar mb-4"></div>
     <p class="lead mb-4">
@@ -71,7 +70,7 @@
 
 .highlight-bar {
   height: 4px;
-  width: 100px;
+  width: 450px;
   background-color: #ffc107;
   border-radius: 2px;
   margin-top: 0.5rem;
@@ -150,7 +149,7 @@
   }
   
   .display-4 {
-    font-size: 2.5rem;
+    font-size: 2.5rem !;
   }
 }
 
