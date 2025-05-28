@@ -7,7 +7,7 @@
       </h5>
     </div>
     <div class="card-body">
-      <form @submit.prevent="form.patch(route('profile.update'))" class="space-y-6">
+      <form @submit.prevent="validateAndShowModal" class="space-y-6">
         <div class="row g-3">
           <div class="col-md-6">
             <label for="name" class="form-label small fw-medium">Nama Lengkap</label>
@@ -18,6 +18,7 @@
               <input
                 type="text"
                 class="form-control"
+                :class="{ 'is-invalid': validationErrors.name }"
                 id="name"
                 v-model="form.name"
                 required
@@ -26,6 +27,9 @@
             </div>
             <div v-if="form.errors.name" class="mt-2 text-sm text-red-600">
               {{ form.errors.name }}
+            </div>
+            <div v-if="validationErrors.name" class="invalid-feedback">
+              {{ validationErrors.name }}
             </div>
           </div>
           <div class="col-md-6">
@@ -37,15 +41,26 @@
               <input
                 type="email"
                 class="form-control"
+                :class="{ 'is-invalid': validationErrors.email }"
                 id="email"
                 v-model="form.email"
-                required
+                :disabled="user.email && user.email.length > 0"
+                :required="!user.email || user.email.length === 0"
                 autocomplete="username"
               />
+              <span v-if="user.email && user.email.length > 0" class="input-group-text bg-secondary">
+                <i class="bi bi-lock-fill text-white"></i>
+              </span>
             </div>
             <div v-if="form.errors.email" class="mt-2 text-sm text-red-600">
               {{ form.errors.email }}
             </div>
+            <div v-if="validationErrors.email" class="invalid-feedback">
+              {{ validationErrors.email }}
+            </div>
+            <small v-if="user.email && user.email.length > 0" class="text-muted">
+              Email tidak dapat diubah setelah diverifikasi
+            </small>
           </div>
           <div class="col-md-6">
             <label for="phone" class="form-label small fw-medium">No. Telp</label>
@@ -56,14 +71,25 @@
               <input
                 type="tel"
                 class="form-control"
+                :class="{ 'is-invalid': validationErrors.no_hp }"
                 id="no_hp"
                 v-model="form.no_hp"
+                :disabled="user.no_hp && user.no_hp.length > 0"
                 autocomplete="tel"
               />
+              <span v-if="user.no_hp && user.no_hp.length > 0" class="input-group-text bg-secondary">
+                <i class="bi bi-lock-fill text-white"></i>
+              </span>
             </div>
             <div v-if="form.errors.phone" class="mt-2 text-sm text-red-600">
               {{ form.errors.phone }}
             </div>
+            <div v-if="validationErrors.no_hp" class="invalid-feedback">
+              {{ validationErrors.no_hp }}
+            </div>
+            <small v-if="user.no_hp && user.no_hp.length > 0" class="text-muted">
+              Nomor telepon tidak dapat diubah setelah diverifikasi
+            </small>
           </div>
           <div class="col-md-6">
             <label class="form-label small fw-medium">Jenis Kelamin</label>
@@ -71,6 +97,7 @@
               <div class="form-check">
                 <input
                   class="form-check-input"
+                  :class="{ 'is-invalid': validationErrors.gender }"
                   type="radio"
                   name="gender"
                   id="male"
@@ -82,6 +109,7 @@
               <div class="form-check">
                 <input
                   class="form-check-input"
+                  :class="{ 'is-invalid': validationErrors.gender }"
                   type="radio"
                   name="gender"
                   id="female"
@@ -94,41 +122,8 @@
             <div v-if="form.errors.gender" class="mt-2 text-sm text-red-600">
               {{ form.errors.gender }}
             </div>
-          </div>
-          <div class="col-md-6">
-            <label for="location" class="form-label small fw-medium">Lokasi</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light">
-                <i class="bi bi-geo-alt"></i>
-              </span>
-              <input
-                type="text"
-                class="form-control"
-                id="location"
-                v-model="form.location"
-                autocomplete="address-level1"
-              />
-            </div>
-            <div v-if="form.errors.location" class="mt-2 text-sm text-red-600">
-              {{ form.errors.location }}
-            </div>
-          </div>
-          <div class="col-12">
-            <label for="biography" class="form-label small fw-medium">Cerpen (Cerita Singkat Pengalaman Hidup)</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light">
-                <i class="bi bi-journal-text"></i>
-              </span>
-              <textarea
-                class="form-control"
-                id="biography"
-                rows="4"
-                v-model="form.biography"
-                placeholder="Ceritakan pengalaman hidup Anda secara singkat"
-              ></textarea>
-            </div>
-            <div v-if="form.errors.biography" class="mt-2 text-sm text-red-600">
-              {{ form.errors.biography }}
+            <div v-if="validationErrors.gender" class="invalid-feedback d-block">
+              {{ validationErrors.gender }}
             </div>
           </div>
         </div>
@@ -173,10 +168,83 @@
       </form>
     </div>
   </div>
+
+  <!-- Modal Konfirmasi -->
+  <div 
+    class="modal fade" 
+    :class="{ show: showModal }" 
+    :style="{ display: showModal ? 'block' : 'none' }"
+    tabindex="-1" 
+    role="dialog"
+    v-if="showModal"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title d-flex align-items-center">
+            <i class="bi bi-question-circle-fill me-2 text-warning"></i>
+            Konfirmasi Perubahan
+          </h5>
+          <button 
+            type="button" 
+            class="btn-close" 
+            @click="closeModal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3">Apakah Anda yakin ingin menyimpan perubahan data profil?</p>
+          <div class="bg-light p-3 rounded">
+            <h6 class="mb-2 fw-semibold">Data yang akan disimpan:</h6>
+            <ul class="mb-0 list-unstyled">
+              <li><strong>Nama:</strong> {{ form.name }}</li>
+              <li><strong>Email:</strong> {{ form.email }}</li>
+              <li v-if="form.no_hp"><strong>No. Telp:</strong> {{ form.no_hp }}</li>
+              <li><strong>Jenis Kelamin:</strong> {{ form.gender === 'male' ? 'Laki-laki' : 'Perempuan' }}</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button 
+            type="button" 
+            class="btn btn-secondary" 
+            @click="closeModal"
+            :disabled="form.processing"
+          >
+            <i class="bi bi-x-circle me-2"></i>
+            Batal
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            @click="submitForm"
+            :disabled="form.processing"
+          >
+            <span v-if="form.processing">
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              Menyimpan...
+            </span>
+            <span v-else>
+              <i class="bi bi-check-circle me-2"></i>
+              Ya, Simpan
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Backdrop -->
+  <div 
+    v-if="showModal" 
+    class="modal-backdrop fade show"
+    @click="closeModal"
+  ></div>
 </template>
 
 <script setup>
 import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { ref, reactive } from 'vue';
 
 defineProps({
   mustVerifyEmail: {
@@ -188,15 +256,84 @@ defineProps({
 });
 
 const user = usePage().props.auth.user;
+const showModal = ref(false);
+const validationErrors = reactive({});
 
 const form = useForm({
   name: user.name || '',
-  email: user.email,
+  email: user.email || '',
   no_hp: user.no_hp || '',
   gender: user.gender || 'male',
-  location: user.location || '',
-  biography: user.biography || ''
 });
+
+const validateForm = () => {
+  // Reset validation errors
+  Object.keys(validationErrors).forEach(key => {
+    delete validationErrors[key];
+  });
+
+  let isValid = true;
+
+  // Validasi nama
+  if (!form.name || form.name.trim().length === 0) {
+    validationErrors.name = 'Nama lengkap harus diisi';
+    isValid = false;
+  }
+
+  // Validasi email (hanya jika email kosong dan user belum punya email)
+  if ((!user.email || user.email.length === 0) && (!form.email || form.email.trim().length === 0)) {
+    validationErrors.email = 'Email harus diisi';
+    isValid = false;
+  } else if (form.email && form.email.trim().length > 0) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      validationErrors.email = 'Format email tidak valid';
+      isValid = false;
+    }
+  }
+
+  // Validasi nomor telepon (format dasar)
+  if (form.no_hp && form.no_hp.trim().length > 0) {
+    const phoneRegex = /^[0-9+\-\s()]+$/;
+    if (!phoneRegex.test(form.no_hp)) {
+      validationErrors.no_hp = 'Format nomor telepon tidak valid';
+      isValid = false;
+    }
+  }
+
+  // Validasi jenis kelamin
+  if (!form.gender) {
+    validationErrors.gender = 'Jenis kelamin harus dipilih';
+    isValid = false;
+  }
+
+  return isValid;
+};
+
+const validateAndShowModal = () => {
+  if (validateForm()) {
+    showModal.value = true;
+    // Disable body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+  }
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  // Re-enable body scroll when modal is closed
+  document.body.style.overflow = 'auto';
+};
+
+const submitForm = () => {
+  form.patch(route('profile.update'), {
+    onSuccess: () => {
+      closeModal();
+    },
+    onError: () => {
+      closeModal();
+    }
+  });
+};
 </script>
 
 <style scoped>
@@ -224,6 +361,11 @@ const form = useForm({
   border-color: #5a67d8;
   outline: none;
 }
+.form-control:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
 .text-red-600 {
   color: #e53e3e;
 }
@@ -238,5 +380,90 @@ const form = useForm({
 }
 .text-green-600 {
   color: #059669;
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1055;
+  width: 100%;
+  height: 100%;
+}
+
+.modal.show {
+  display: block !important;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1050;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 1rem);
+}
+
+.modal-content {
+  position: relative;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.375rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  padding: 1rem 1rem 0.5rem;
+}
+
+.modal-body {
+  padding: 0.5rem 1rem;
+}
+
+.modal-footer {
+  padding: 0.5rem 1rem 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #000;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.btn-close:hover {
+  opacity: 0.75;
+}
+
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
 }
 </style>

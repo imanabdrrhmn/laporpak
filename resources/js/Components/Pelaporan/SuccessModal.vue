@@ -52,7 +52,7 @@
                 Lihat Riwayat Laporan
               </button>
               <button 
-                @click="close"
+                @click="navigateToFeedback"
                 class="btn btn-light py-2 rounded-3 shadow-sm hover-scale"
               >
                 <i class="bi bi-star me-2"></i>
@@ -96,6 +96,11 @@ const close = () => {
 // Method to navigate to the specified path
 const navigate = () => {
   router.visit(props.redirectPath);
+};
+
+// Method to navigate to feedback page
+const navigateToFeedback = () => {
+  router.visit('/feedback');
 };
 
 // Watch for show property changes to handle escape key
