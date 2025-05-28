@@ -16,7 +16,7 @@ use App\Models\Feedback;
 
 
 Route::get('/', function () {
-    $feedbacks = Feedback::with('user')->latest()->take(10)->get();
+    $feedbacks = Feedback::with('user')->where('kategori', 'Umum')->latest()->take(10)->get();
     return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -42,7 +42,10 @@ Route::get('/verifikasi', function () {
 });
 
 Route::get('/LaporMap', function (){
-    return Inertia::render('LaporMap');
+    $feedbacks = Feedback::with('user')->where('kategori', 'Lapor Map')->latest()->take(10)->get();
+    return Inertia::render('LaporMap', [
+        'feedbacks' => $feedbacks
+    ]);
 })->name('LaporMap');
 
 Route::get('/CariLaporan', [ReportController::class, 'search'])->name('CariLaporan');

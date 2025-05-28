@@ -42,7 +42,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Feedback from '@/Components/Feedback.vue';
 import HeroSection from '@/Components/LaporMap/HeroSection.vue';
@@ -55,12 +55,8 @@ import 'leaflet.markercluster/dist/leaflet.markercluster.js';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
-const props = defineProps({
-  feedbacks: {
-    type: Array,
-    default: () => []
-  }
-});
+const page = usePage();
+const feedbacks = page.props.feedbacks;
 
 const mapArea = ref(null);
 const loading = ref(true);

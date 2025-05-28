@@ -106,7 +106,6 @@ class FeedbackController extends Controller
 
     public function edit(Request $request, Feedback $feedback): Response
     {
-        // Use the policy to check if the user can update the feedback
         $this->authorize('update', $feedback);
 
         return Inertia::render('Feedback/Edit', [
@@ -116,7 +115,6 @@ class FeedbackController extends Controller
 
     public function update(Request $request, Feedback $feedback)
     {
-        // Use the policy to check if the user can update the feedback
         $this->authorize('update', $feedback);
 
         $request->validate([
@@ -136,7 +134,6 @@ class FeedbackController extends Controller
 
     public function destroy(Request $request, Feedback $feedback)
     {
-        // Use the policy to check if the user can delete the feedback
         $this->authorize('delete', $feedback);
 
         $feedback->delete();
