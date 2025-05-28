@@ -166,13 +166,13 @@ const handleAction = (aksi) => {
 
 .quick-actions-wrapper {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 1rem;
   padding: clamp(1rem, 3vw, 1.5rem);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
-  width: 100%; /* Mengganti nilai tetap dengan 100% */
-  max-width: 100%; /* Membatasi lebar maksimum */
+  width: 100%;
+  max-width: 100%;
 }
 
 .wrapper-modern {
@@ -196,14 +196,15 @@ const handleAction = (aksi) => {
 .quick-actions-grid {
   display: grid;
   gap: clamp(0.5rem, 2vw, 1rem);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Menyesuaikan untuk memanjang */
 }
 
 .layout-grid {
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Memanjang dengan distribusi yang lebih baik */
 }
 
 .layout-horizontal {
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   grid-auto-flow: column;
   overflow-x: auto;
   scroll-behavior: smooth;
@@ -375,7 +376,7 @@ const handleAction = (aksi) => {
 /* Responsive Design */
 @media (max-width: 1200px) {
   .layout-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
 }
 
@@ -385,7 +386,7 @@ const handleAction = (aksi) => {
   }
 
   .layout-grid {
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   }
 
   .size-medium .action-item {
@@ -408,7 +409,7 @@ const handleAction = (aksi) => {
   }
 
   .layout-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   }
 
   .action-item {

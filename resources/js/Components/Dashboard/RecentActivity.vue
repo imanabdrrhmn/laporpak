@@ -75,13 +75,13 @@ if (props.aktivitas && props.aktivitas.length > 0) {
 <style scoped>
 .aktivitas-card {
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f0f0f0;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  padding: clamp(0.75rem, 2vw, 1rem);
-  width: 100%; /* Mengganti nilai tetap dengan 100% */
-  max-width: 100%; /* Membatasi lebar maksimum */
+  padding: clamp(1rem, 3vw, 1.5rem);
+  width: 100%;
+  max-width: 100%;
 }
 
 .card-header {
@@ -90,6 +90,7 @@ if (props.aktivitas && props.aktivitas.length > 0) {
   align-items: center;
   padding: clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 1.5rem);
   background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .card-title {
@@ -125,6 +126,7 @@ if (props.aktivitas && props.aktivitas.length > 0) {
   align-items: center;
   padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.5rem);
   transition: background-color 0.2s ease;
+  width: 100%; /* Memastikan item memanjang penuh */
 }
 
 .aktivitas-item:hover {

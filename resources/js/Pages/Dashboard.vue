@@ -11,10 +11,10 @@
         :saldo-kredit="saldoKredit"
       />
       <div class="row g-3">
-        <div class="col-12 col-md-6 col-lg-4">
+        <div class="col-12"> <!-- Memanjang penuh -->
           <QuickActions :aksi-cepat="aksiCepat" />
         </div>
-        <div class="col-12 col-md-6 col-lg-8">
+        <div class="col-12"> <!-- Memanjang penuh -->
           <RecentActivity :aktivitas="aktivitas" />
         </div>
         <div class="col-12">
@@ -83,7 +83,7 @@ const progresVerifikasi = computed(() => {
   --border-radius: 12px;
   --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   --transition: all 0.3s ease;
-  --max-width: 1400px; /* Batas lebar maksimum yang fleksibel */
+  --max-width: 1400px;
 }
 
 .dashboard-container {
@@ -93,8 +93,8 @@ const progresVerifikasi = computed(() => {
   color: var(--text-color);
   min-height: 100vh;
   width: 100%;
-  max-width: var(--max-width); /* Membatasi lebar maksimum */
-  overflow-x: hidden; /* Mencegah overflow horizontal */
+  max-width: var(--max-width);
+  overflow-x: hidden;
 }
 
 .row {
