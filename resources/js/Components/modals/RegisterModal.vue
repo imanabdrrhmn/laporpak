@@ -501,7 +501,7 @@ function handleRegister() {
   padding: 0 15px;
 }
 
-/* ✅ Hilangkan icon (!) dari input saat error */
+
 .form-control.is-invalid {
   background-image: none !important;
   padding-right: 1rem !important;
@@ -622,7 +622,7 @@ function handleRegister() {
 }
 
 .btn-primary:hover {
-  background-color: #1e40af;
+  background-color: #2563EB;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
 }

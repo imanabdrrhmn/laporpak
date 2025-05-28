@@ -1,31 +1,31 @@
 <template>
   <div class="table-responsive ">
     <table class="table table-hover align-middle mb-0">
-      <thead class="bg-light">
+      <thead>
         <tr v-if="selectedTab === 'penipuan'">
-          <th scope="col" class="ps-4" width="5%">No</th>
-          <th scope="col" width="12%">Tanggal</th>
-          <th scope="col" width="12%">Kategori</th>
-          <th scope="col" width="15%">Sumber Penipuan</th>
-          <th scope="col">Deskripsi</th>
-          <th scope="col" width="10%">Status</th>
-          <th scope="col" width="8%" class="text-center">Detail</th>
+          <th scope="col" class="ps-4 table-header" width="5%">No</th>
+          <th scope="col" class="table-header" width="12%">Tanggal</th>
+          <th scope="col" class="table-header" width="12%">Kategori</th>
+          <th scope="col" class="table-header" width="15%">Sumber Penipuan</th>
+          <th scope="col" class="table-header">Deskripsi</th>
+          <th scope="col" class="table-header" width="10%">Status</th>
+          <th scope="col" class="table-header text-center" width="8%">Detail</th>
         </tr>
         <tr v-else-if="selectedTab === 'infrastruktur'">
-          <th scope="col" class="ps-4" width="5%">No</th>
-          <th scope="col" width="12%">Tanggal</th>
-          <th scope="col" width="12%">Kategori</th>
-          <th scope="col">Deskripsi</th>
-          <th scope="col" width="10%">Status</th>
-          <th scope="col" width="8%" class="text-center">Detail</th>
+          <th scope="col" class="ps-4 table-header" width="5%">No</th>
+          <th scope="col" class="table-header" width="12%">Tanggal</th>
+          <th scope="col" class="table-header" width="12%">Kategori</th>
+          <th scope="col" class="table-header">Deskripsi</th>
+          <th scope="col" class="table-header" width="10%">Status</th>
+          <th scope="col" class="table-header text-center" width="8%">Detail</th>
         </tr>
         <tr v-else>
-          <th scope="col" class="ps-4" width="5%">No</th>
-          <th scope="col" width="12%">Tanggal</th>
-          <th scope="col">Data</th>
-          <th scope="col">Query</th>
-          <th scope="col" width="10%">Status</th>
-          <th scope="col" width="8%" class="text-center">Detail</th>
+          <th scope="col" class="ps-4 table-header" width="5%">No</th>
+          <th scope="col" class="table-header" width="12%">Tanggal</th>
+          <th scope="col" class="table-header">Data</th>
+          <th scope="col" class="table-header">Query</th>
+          <th scope="col" class="table-header" width="10%">Status</th>
+          <th scope="col" class="table-header text-center" width="8%">Detail</th>
         </tr>
       </thead>
       <tbody v-if="selectedTab === 'penipuan'">
@@ -130,3 +130,34 @@ defineProps({
   getStatusTextClass: Function,
 });
 </script>
+
+<style scoped>
+.table-header {
+  background-color: #0D6EFD !important;
+  color: rgb(255, 255, 255);
+  font-weight: 500;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0 15px;
+}
+
+tbody tr {
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
+
+tbody td {
+  padding: 15px !important;
+}
+
+tbody td:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+tbody td:last-child {
+  border-radius: 0 8px 8px 0;
+}
+</style>

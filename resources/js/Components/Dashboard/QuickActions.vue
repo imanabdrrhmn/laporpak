@@ -1,102 +1,487 @@
 <template>
-  <div class="card main-card">
-    <div class="card-header">
-      <h5 class="fw-bold mb-0">Aksi Cepat</h5>
-    </div>
-    <div class="card-body">
-      <div class="quick-actions-grid">
-        <a
-          v-for="(aksi, index) in aksiCepat"
+  <div class="aksi-cepat-container">
+    <div class="quick-actions-wrapper" :class="wrapperVariant">
+      <h5 class="section-title">{{ title || 'Aksi Cepat' }}</h5>
+      <div class="quick-actions-grid" :class="gridLayout">
+        <div
+          v-for="(aksi, index) in displayActions"
           :key="index"
-          :href="aksi.url"
-          :class="`btn btn-${aksi.variant} btn-action`"
+          :class="getActionClasses(aksi)"
+          @click="handleAction(aksi)"
+          :disabled="aksi.disabled"
+          :title="aksi.tooltip"
         >
-          <span class="action-icon">{{ aksi.icon }}</span>
+          <div class="action-icon" :class="aksi.iconVariant">
+            <i :class="aksi.iconClass"></i>
+            <span v-if="aksi.badge" class="action-badge">{{ aksi.badge }}</span>
+          </div>
           <span class="action-label">{{ aksi.label }}</span>
-        </a>
+          <span v-if="aksi.description" class="action-description">{{ aksi.description }}</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
-  aksiCepat: Array
-});
+import { ref, computed } from 'vue'
+
+// Props untuk customization
+const props = defineProps({
+  title: {
+    type: String,
+    default: 'Aksi Cepat'
+  },
+  customActions: {
+    type: Array,
+    default: () => []
+  },
+  variant: {
+    type: String,
+    default: 'default', // 'default', 'modern', 'minimal', 'colorful'
+    validator: (value) => ['default', 'modern', 'minimal', 'colorful'].includes(value)
+  },
+  layout: {
+    type: String,
+    default: 'grid', // 'grid', 'horizontal', 'vertical'
+    validator: (value) => ['grid', 'horizontal', 'vertical'].includes(value)
+  },
+  itemSize: {
+    type: String,
+    default: 'medium', // 'small', 'medium', 'large'
+    validator: (value) => ['small', 'medium', 'large'].includes(value)
+  },
+  maxItems: {
+    type: Number,
+    default: null
+  },
+  showBadges: {
+    type: Boolean,
+    default: false
+  },
+  animationStyle: {
+    type: String,
+    default: 'hover', 
+    validator: (value) => ['hover', 'pulse', 'bounce', 'none'].includes(value)
+  }
+})
+
+// Emit events
+const emit = defineEmits(['action-click', 'action-hover'])
+
+// Data default
+const defaultActions = ref([
+  {
+    label: 'Membuat Laporan',
+    iconClass: 'bi bi-pencil-square',
+    active: false,
+    url: '/pelaporan',
+    color: '#28a745',
+    iconVariant: 'success',
+    description: 'Buat laporan baru',
+    tooltip: 'Klik untuk membuat laporan baru',
+  },
+  {
+    label: 'Cari Laporan',
+    iconClass: 'bi bi-search',
+    active: false,
+    url: '/CariLaporan',
+    color: '#17a2b8',
+    iconVariant: 'info',
+    description: 'Temukan laporan',
+    tooltip: 'Cari laporan yang sudah ada'
+  },
+  {
+    label: 'Laporan Saya',
+    iconClass: 'bi bi-file-text',
+    active: false,
+    url: '/laporan-saya',
+    color: '#6f42c1',
+    iconVariant: 'purple',
+    description: 'Daftar laporan Anda',
+    tooltip: 'Lihat semua laporan Anda'
+  },
+  {
+    label: 'Tambah Credit',
+    iconClass: 'bi bi-credit-card',
+    active: false,
+    url: '/top-ups',
+    color: '#fd7e14',
+    iconVariant: 'warning',
+    description: 'Top up credit',
+    tooltip: 'Tambahkan credit ke akun Anda',
+  },
+  {
+    label: 'Verifikasi Data',
+    iconClass: 'bi bi-check-circle',
+    active: false,
+    url: '/verifikasi',
+    color: '#dc3545',
+    iconVariant: 'danger',
+    description: 'Verifikasi informasi',
+    tooltip: 'Verifikasi data akun Anda',
+    disabled: false
+  }
+])
+
+// Computed properties
+const displayActions = computed(() => {
+  const actions = props.customActions.length > 0 ? props.customActions : defaultActions.value
+  return props.maxItems ? actions.slice(0, props.maxItems) : actions
+})
+
+const wrapperVariant = computed(() => {
+  return `wrapper-${props.variant}`
+})
+
+const gridLayout = computed(() => {
+  return `layout-${props.layout} size-${props.itemSize}`
+})
+
+// Methods
+const getActionClasses = (aksi) => {
+  return [
+    'action-item',
+    `variant-${props.variant}`,
+    `animation-${props.animationStyle}`,
+    {
+      'active': aksi.active,
+      'disabled': aksi.disabled,
+      [`color-${aksi.iconVariant}`]: aksi.iconVariant
+    }
+  ]
+}
+
+const handleAction = (aksi) => {
+  if (aksi.disabled) return
+  
+  emit('action-click', aksi)
+  
+  if (aksi.url) {
+    if (aksi.newTab) {
+      window.open(aksi.url, '_blank')
+    } else {
+      window.location.href = aksi.url
+    }
+  }
+  
+  if (aksi.callback && typeof aksi.callback === 'function') {
+    aksi.callback(aksi)
+  }
+  
+  console.log('Action clicked:', aksi.label)
+}
+
+const handleHover = (aksi) => {
+  emit('action-hover', aksi)
+}
 </script>
 
 <style scoped>
-.main-card {
+.aksi-cepat-container {
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  padding-left: 0.5rem;
+}
+
+/* Wrapper Variants */
+.quick-actions-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-right: -65rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.wrapper-modern {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  height: 100%;
-  transition: var(--transition);
-  background-color: var(--card-bg);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
 }
 
-.main-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+.wrapper-minimal {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 1rem;
 }
 
-.main-card .card-header {
-  background: var(--card-bg);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  align-items: center;
+.wrapper-colorful {
+  background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+  border: none;
 }
 
-.main-card .card-header h5 {
-  color: var(--text-color);
-}
-
+/* Grid Layouts */
 .quick-actions-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-.btn-action {
+.layout-grid {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.layout-horizontal {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-auto-flow: column;
+  overflow-x: auto;
+}
+
+.layout-vertical {
+  grid-template-columns: 1fr;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+/* Size Variants */
+.size-small .action-item {
+  min-height: 80px;
+  padding: 1rem 0.75rem;
+}
+
+.size-medium .action-item {
+  min-height: 120px;
+  padding: 1.5rem 1rem;
+}
+
+.size-large .action-item {
+  min-height: 160px;
+  padding: 2rem 1.5rem;
+}
+
+/* Action Item Base Styles */
+.action-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  padding: 1rem 0.5rem;
-  border-radius: 8px;
-  text-align: center;
-  white-space: normal;
-  transition: var(--transition);
+  border-radius: 12px;
+  background: #f8f9fa;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
   text-decoration: none;
+  color: #6c757d;
+  position: relative;
+  overflow: hidden;
 }
 
-.btn-action:hover {
+.action-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.action-item:hover::before {
+  left: 100%;
+}
+
+/* Variant Styles */
+.variant-default {
+  background: #f8f9fa;
+}
+
+.variant-modern {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.variant-minimal {
+  background: transparent;
+  border: 1px solid #dee2e6;
+}
+
+.variant-colorful {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+/* Active States */
+.action-item.active {
+  background: linear-gradient(135deg, #4285f4 0%, #1976d2 100%);
+  color: white;
+  border-color: #1976d2;
+  box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+}
+
+.variant-modern.active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Color Variants */
+.color-success { --item-color: #28a745; }
+.color-info { --item-color: #17a2b8; }
+.color-warning { --item-color: #ffc107; }
+.color-danger { --item-color: #dc3545; }
+.color-purple { --item-color: #6f42c1; }
+
+.action-item[class*="color-"]:not(.active) {
+  border-left: 4px solid var(--item-color);
+}
+
+.action-item[class*="color-"]:not(.active):hover {
+  background: var(--item-color);
+  color: white;
+}
+
+/* Animation Variants */
+.animation-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
+.animation-pulse {
+  animation: pulse 2s infinite;
+}
+
+.animation-bounce:hover {
+  animation: bounce 0.6s;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+  40%, 43% { transform: translateY(-8px); }
+  70% { transform: translateY(-4px); }
+  90% { transform: translateY(-2px); }
+}
+
+/* Disabled State */
+.action-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Icon Styles */
 .action-icon {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-  display: block;
+  margin-bottom: 0.75rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.action-icon i {
+  font-size: 2rem;
+  transition: all 0.3s ease;
+}
+
+.action-item:hover .action-icon i {
+  transform: scale(1.1);
+}
+
+/* Badge */
+.action-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Label and Description */
 .action-label {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.3;
+  word-wrap: break-word;
+  margin-bottom: 0.25rem;
 }
 
-@media (max-width: 992px) {
-  .quick-actions-grid {
+.action-description {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .layout-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .layout-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .size-medium .action-item {
+    min-height: 100px;
+    padding: 1.25rem 0.75rem;
+  }
+  
+  .action-icon i {
+    font-size: 1.75rem;
+  }
+  
+  .action-label {
+    font-size: 0.8rem;
   }
 }
 
 @media (max-width: 576px) {
-  .quick-actions-grid {
+  .quick-actions-wrapper {
+    padding: 1rem;
+  }
+  
+  .layout-grid {
     grid-template-columns: 1fr;
   }
+  
+  .action-item {
+    flex-direction: row;
+    text-align: left;
+    justify-content: flex-start;
+    min-height: auto;
+  }
+  
+  .action-icon {
+    margin-bottom: 0;
+    margin-right: 1rem;
+  }
+  
+  .action-icon i {
+    font-size: 1.5rem;
+  }
+}
+
+/* Focus styles for accessibility */
+.action-item:focus {
+  outline: 2px solid #4285f4;
+  outline-offset: 2px;
 }
 </style>
