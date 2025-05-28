@@ -58,9 +58,6 @@
   </div>
 </template>
 
-<script setup>
-// No script logic needed, as this is a presentational component
-</script>
 
 <style scoped>
 .hero-content {
@@ -70,14 +67,15 @@
 
 .highlight-bar {
   height: 4px;
-  width: 450px;
+  width: 100%; /* Scale with container */
+  max-width: 450px; /* Maximum width for larger screens */
   background-color: #ffc107;
   border-radius: 2px;
-  margin-top: 0.5rem;
+  margin: 0.5rem auto; /* Center horizontally on all devices */
 }
 
 .feature-box {
-   background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   backdrop-filter: blur(10px);
   transition: transform 0.3s ease;
@@ -118,7 +116,8 @@
   }
   
   .highlight-bar {
-    margin: 0.5rem auto;
+    width: 90%; /* Slightly smaller for small screens */
+    max-width: 300px; /* Reduced max-width */
   }
   
   .display-4 {
@@ -136,6 +135,11 @@
     word-break: break-word;
     hyphens: auto;
   }
+  
+  .highlight-bar {
+    width: 85%; /* Further reduced for very small screens */
+    max-width: 250px;
+  }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
@@ -145,11 +149,8 @@
   }
   
   .highlight-bar {
-    margin: 0.5rem auto;
-  }
-  
-  .display-4 {
-    font-size: 2.5rem !;
+    width: 90%;
+    max-width: 350px;
   }
 }
 
@@ -160,13 +161,19 @@
   }
   
   .highlight-bar {
-    margin: 0.5rem auto;
+    width: 80%;
+    max-width: 400px;
   }
 }
 
 @media (min-width: 992px) {
   .hero-content {
     padding-left: 4rem !important;
+  }
+  
+  .highlight-bar {
+    width: 75%; /* Balanced width for large screens */
+    max-width: 450px;
   }
 }
 </style>

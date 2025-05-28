@@ -40,64 +40,125 @@ defineProps({
   height: 4px;
   background-color: #ffc107;
   border-radius: 2px;
-  width: 80vw; /* Base width using viewport units for responsiveness */
-  max-width: 450px; /* Maximum width to prevent it from getting too wide */
-  min-width: 150px; /* Minimum width for very small screens */
+  width: clamp(120px, 60vw, 400px); /* Responsive width with clamp */
   margin-left: auto;
   margin-right: auto;
 }
 
-/* Ensure highlight-bar is responsive across all devices */
+/* Ensure FeatureCards content is contained */
+.feature-cards-container {
+  overflow: hidden; /* Prevent content overflow */
+  word-break: break-word; /* Break long words */
+  hyphens: auto;
+  box-sizing: border-box; /* Ensure padding/margins are included in width */
+}
+
+/* Responsive media queries */
 @media (max-width: 320px) {
   .highlight-bar {
-    width: 90vw; /* Slightly wider on very small screens */
-    min-width: 120px;
+    width: clamp(100px, 80vw, 300px);
+  }
+  .responsive-title {
+    font-size: clamp(1.4rem, 4vw, 1.6rem) !important;
+    line-height: 1.3;
+  }
+  .responsive-title i {
+    font-size: clamp(1.2rem, 3.5vw, 1.4rem);
+  }
+  .hero-content {
+    padding: 1rem !important;
+  }
+  .display-4 {
+    font-size: clamp(1.6rem, 5vw, 1.8rem) !important;
+  }
+  .lead {
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
   }
 }
 
 @media (min-width: 321px) and (max-width: 375px) {
   .highlight-bar {
-    width: 85vw;
-    min-width: 140px;
+    width: clamp(120px, 75vw, 320px);
+  }
+  .responsive-title {
+    font-size: clamp(1.6rem, 4.5vw, 1.8rem) !important;
+    line-height: 1.3;
+  }
+  .responsive-title i {
+    font-size: clamp(1.3rem, 4vw, 1.5rem);
+  }
+  .hero-content {
+    padding: 1.5rem !important;
+  }
+  .display-4 {
+    font-size: clamp(1.8rem, 5.5vw, 2.2rem) !important;
+  }
+  .lead {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
   }
 }
 
 @media (min-width: 376px) and (max-width: 576px) {
   .highlight-bar {
-    width: 80vw;
-    min-width: 160px;
+    width: clamp(140px, 70vw, 340px);
+  }
+  .responsive-title {
+    font-size: clamp(1.8rem, 4.5vw, 2rem) !important;
+  }
+  .hero-content {
+    padding: 1.5rem !important;
+  }
+  .display-4 {
+    font-size: clamp(2rem, 5.5vw, 2.4rem) !important;
+  }
+  .lead {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
   }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
   .highlight-bar {
-    width: 75vw;
-    max-width: 350px;
+    width: clamp(160px, 65vw, 360px);
+  }
+  .hero-content {
+    padding: 2rem !important;
+  }
+  .display-4 {
+    font-size: clamp(2.2rem, 5.5vw, 2.6rem) !important;
   }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
   .highlight-bar {
-    width: 70vw;
-    max-width: 400px;
+    width: clamp(180px, 60vw, 380px);
+  }
+  .hero-content {
+    padding: 2.5rem !important;
+  }
+  .display-4 {
+    font-size: clamp(2.6rem, 5vw, 3rem) !important;
   }
 }
 
 @media (min-width: 992px) {
   .highlight-bar {
-    width: 60vw;
-    max-width: 450px;
+    width: clamp(200px, 55vw, 400px);
   }
   .hero-content {
-    padding: 4rem !important;
+    padding: 3rem !important;
     text-align: left;
+  }
+  .display-4 {
+    font-size: clamp(2.4rem, 4.5vw, 2.8rem) !important;
   }
 }
 
 @media (min-width: 1200px) {
   .highlight-bar {
-    width: 50vw;
-    max-width: 450px;
+    width: clamp(220px, 50vw, 420px);
+  }
+  .display-4 {
+    font-size: clamp(2.3rem, 4vw, 2.7rem) !important;
   }
 }
 
@@ -114,85 +175,45 @@ defineProps({
 
 @media (min-width: 600px) and (max-width: 1199px) {
   .text-section {
-    padding: 2rem 3rem !important;
+    padding: 2rem 2.5rem !important;
     margin-bottom: 1rem;
   }
 }
 
-@media (max-width: 320px) {
+/* Zoom-specific adjustments */
+@media (min--moz-device-pixel-ratio: 1.5),
+(-webkit-min-device-pixel-ratio: 1.5),
+(min-resolution: 1.5dppx) {
+  .highlight-bar {
+    width: clamp(110px, 50vw, 360px); /* Adjusted for 150% zoom */
+  }
   .responsive-title {
-    font-size: 1.5rem !important;
-    line-height: 1.3;
-  }
-  .responsive-title i {
-    font-size: 1.3rem;
-  }
-  .hero-content {
-    padding: 1rem !important;
+    font-size: clamp(1.8rem, 4vw, 2.2rem) !important;
   }
   .display-4 {
-    font-size: 1.8rem !important;
+    font-size: clamp(2rem, 4.5vw, 2.5rem) !important;
   }
   .lead {
-    font-size: 0.9rem;
+    font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  }
+  .feature-cards-container {
+    font-size: clamp(0.9rem, 2vw, 1rem); /* Ensure card content scales */
+    padding: clamp(0.8rem, 2vw, 1rem);
   }
 }
 
-@media (min-width: 321px) and (max-width: 375px) {
-  .responsive-title {
-    font-size: 1.7rem !important;
-    line-height: 1.3;
-  }
-  .responsive-title i {
-    font-size: 1.5rem;
-  }
-  .hero-content {
-    padding: 2rem 1.5rem !important;
-  }
-  .display-4 {
-    font-size: 2.2rem !important;
-  }
-  .lead {
-    font-size: 1rem;
+/* Ensure FeatureCards content is responsive */
+@media (max-width: 767.98px) {
+  .feature-cards-container {
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+    padding: clamp(0.5rem, 2vw, 0.8rem);
   }
 }
 
-@media (min-width: 376px) and (max-width: 576px) {
-  .responsive-title {
-    font-size: 1.9rem !important;
-  }
-  .hero-content {
-    padding: 2rem 1.5rem !important;
-  }
-  .display-4 {
-    font-size: 2.2rem !important;
-  }
-  .lead {
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 576px) and (max-width: 767.98px) {
-  .hero-content {
-    padding: 2.5rem 2rem !important;
-  }
-  .display-4 {
-    font-size: 2.5rem !important;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 991.98px) {
-  .hero-content {
-    padding: 3rem 2.5rem !important;
-  }
-  .display-4 {
-    font-size: 3rem !important;
-  }
-}
-
-@media (min-width: 1200px) {
-  .display-4 {
-    font-size: 2.5rem !important;
+@media (min-width: 768px) {
+  .feature-cards-container {
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    padding: clamp(0.8rem, 2vw, 1.2rem);
   }
 }
 </style>
