@@ -5,16 +5,16 @@
       <WelcomeHeader 
         :nama-user="namaUser" 
         :level-user="levelUser"
-        :total-laporan="16"
-        :sedang-diproses="9"
-        :proses-selesai="7"
+        :total-laporan="stats.reports"
+        :sedang-diproses="stats.in_process"
+        :proses-selesai="stats.selected"
         :saldo-kredit="saldoKredit"
       />
       <div class="row g-3">
-        <div class="col-12"> <!-- Memanjang penuh -->
+        <div class="col-12"> 
           <QuickActions :aksi-cepat="aksiCepat" />
         </div>
-        <div class="col-12"> <!-- Memanjang penuh -->
+        <div class="col-12"> 
           <RecentActivity :aktivitas="aktivitas" />
         </div>
         <div class="col-12">
@@ -44,13 +44,7 @@ const props = defineProps({
 const page = usePage();
 const saldoKredit = computed(() => page.props.user?.balance ?? 0);
 const namaUser = computed(() => page.props.auth?.user?.name || 'User');
-const statusVerifikasi = ref(page.props.statusVerifikasi ?? {
-  npwp: true,
-  identitas: true,
-  noHp: false,
-  email: true,
-  rekening: false
-});
+
 const laporanTerbaru = ref(page.props.reports ?? []);
 const userAvatar = ref(page.props.auth?.user?.avatar ?? '/Default-Profile.png');
 
@@ -58,11 +52,6 @@ const formatRupiah = (jumlah) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(jumlah);
 };
 
-const progresVerifikasi = computed(() => {
-  const total = Object.keys(statusVerifikasi.value).length;
-  const terverifikasi = Object.values(statusVerifikasi.value).filter(status => status).length;
-  return Math.round((terverifikasi / total) * 100);
-});
 </script>
 
 <style scoped>
