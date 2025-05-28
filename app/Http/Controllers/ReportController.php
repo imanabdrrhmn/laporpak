@@ -6,14 +6,13 @@ use App\Models\Report;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
-use App\Policies\ReportPolicy;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Http;
 
-class ReportController
+class ReportController extends Controller
 {
     use AuthorizesRequests;
+
     public function create(Request $request)
     {
         $feedbacks = Feedback::where('kategori', 'Pelaporan')->with('user')->latest()->take(10)->get();
@@ -57,19 +56,18 @@ class ReportController
             'category' => $request->category,
             'description' => $request->description,
             'evidence' => $evidencePath,
-            'latitude' => $request->input('location.lat'),
-            'longitude' => $request->input('location.lng'),
+            'latitude' => $lat,
+            'longitude' => $lng,
             'region' => $region,
             'service' => $request->service,
             'status' => 'pending',
             'source' => $request->source,  
             'address' => $request->address,
-
         ]);
 
         return back()->with('success', true);
     }
-    // Menyunting laporan
+
     public function edit(Request $request, Report $report)
     {
         $this->authorize('update', $report);
@@ -79,12 +77,10 @@ class ReportController
         ]);
     }
 
-    // Memperbarui laporan
     public function update(Request $request, Report $report)
     {
         $this->authorize('update', $report);
 
-        // Validasi data laporan
         $request->validate([
             'category' => 'required|string',
             'description' => 'required|string|max:1500',
@@ -103,42 +99,61 @@ class ReportController
 
         return redirect()->route('laporan.index')->with('success', 'Laporan berhasil diperbarui.');
     }
-    
+
     public function search(Request $request)
     {
-        $reports = Report::with('user')->where('status', 'published')->latest()->get()->map(function ($report) {
-            return [
-                'id' => $report->id,
-                'user_id' => $report->user_id,
-                'user' => [
-                    'id' => $report->user->id,
-                    'name' => $report->user->name,
-                    'avatar_url' => $report->user->avatar 
-                        ? asset('storage/' . $report->user->avatar) 
-                        : asset('/Default-Profile.png'),
-                ],
-                'category' => $report->category,
-                'description' => $report->description,
-                'status' => $report->status,
-                'latitude' => $report->latitude,
-                'longitude' => $report->longitude,
-                'address' => $report->address,
-                'service' => $report->service,
-                'source' => $report->source,
-                'created_at' => $report->created_at->toDateTimeString(),
-                'evidence' => $report->evidence 
-                    ? asset('storage/' . $report->evidence) 
-                    : null,
-            ];
-        });
+        $request->validate([
+            'query' => 'nullable|string|max:255',
+        ]);
+
+        $query = $request->input('query', '');
+
+        $reports = Report::with('user')
+            ->where('status', 'published')
+            ->when($query, function ($q) use ($query) {
+                $q->where(function ($q2) use ($query) {
+                    $q2->where('description', 'like', "%{$query}%")
+                    ->orWhere('source', 'like', "%{$query}%");  // Cari juga di kolom source
+                });
+            })
+            ->latest()
+            ->get()
+            ->map(function ($report) {
+                return [
+                    'id' => $report->id,
+                    'user_id' => $report->user_id,
+                    'user' => [
+                        'id' => $report->user->id,
+                        'name' => $report->user->name,
+                        'avatar_url' => $report->user->avatar 
+                            ? asset('storage/' . $report->user->avatar) 
+                            : asset('/Default-Profile.png'),
+                    ],
+                    'category' => $report->category,
+                    'description' => $report->description,
+                    'status' => $report->status,
+                    'latitude' => $report->latitude,
+                    'longitude' => $report->longitude,
+                    'address' => $report->address,
+                    'service' => $report->service,
+                    'source' => $report->source,
+                    'created_at' => $report->created_at->toDateTimeString(),
+                    'evidence' => $report->evidence 
+                        ? asset('storage/' . $report->evidence) 
+                        : null,
+                ];
+            });
+
         $feedbacks = Feedback::where('kategori', 'Cari Laporan')->with('user')->latest()->take(10)->get();
 
         return Inertia::render('Pelaporan/CariLaporan', [
             'reports' => $reports,
             'feedbacks' => $feedbacks,
+            'query' => $query,
         ]);
     }
-      private function getRegionFromLatLng($lat, $lng)
+
+    private function getRegionFromLatLng($lat, $lng)
     {
         $response = Http::withHeaders([
             'User-Agent' => 'YourAppName/1.0' 
