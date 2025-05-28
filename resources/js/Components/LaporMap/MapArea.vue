@@ -175,8 +175,12 @@ const focusLocation = (location) => {
 };
 
 const showAllLocations = (locations) => {
-  const bounds = locations.map(loc => loc.coordinates).filter(Boolean);
-  if (bounds.length > 0) map?.fitBounds(bounds);
+  const bounds = locations
+    .map(loc => loc.coordinates)
+    .filter(coord => coord && coord.length === 2);
+  if (bounds.length) {
+    map.fitBounds(bounds);
+  }
 };
 
 defineExpose({

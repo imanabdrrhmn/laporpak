@@ -102,15 +102,4 @@ class ReportManagementController
 
         return redirect()->route('laporan.index')->with('success', 'Laporan dipublikasikan');
     }
-
-    public function search(Request $request)
-    {
-        $reports = Report::where('status', 'published')->get();
-        $feedbacks = Feedback::where('kategori', 'Cari Laporan')->with('user')->latest()->take(10)->get();
-
-        return Inertia::render('Pelaporan/CariLaporan', [
-            'reports' => $reports,
-            'feedbacks' => $feedbacks,
-        ]);
-    }
 }

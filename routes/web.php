@@ -6,6 +6,7 @@ use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\Admin\ReportManagementController;
 use App\Http\Controllers\Admin\DashboardAdminController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\LaporMapController;
 use App\Http\Controllers\UserHistoryReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TopUpController;
@@ -41,12 +42,7 @@ Route::get('/verifikasi', function () {
     ]);
 });
 
-Route::get('/LaporMap', function (){
-    $feedbacks = Feedback::with('user')->where('kategori', 'Lapor Map')->latest()->take(10)->get();
-    return Inertia::render('LaporMap', [
-        'feedbacks' => $feedbacks
-    ]);
-})->name('LaporMap');
+Route::get('/LaporMap', [LaporMapController::class, 'index'])->name('LaporMap');
 
 Route::get('/CariLaporan', [ReportController::class, 'search'])->name('CariLaporan');
 
