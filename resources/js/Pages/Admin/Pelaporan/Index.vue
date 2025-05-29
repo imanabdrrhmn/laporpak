@@ -265,7 +265,6 @@ const patchStatus = (reportId, action, url, extraData = {}) => {
 const closeUnpublishModal = () => {
   showUnpublishModal.value = false
   unpublishTargetReport = null
-  unpublishReason.value = ''
 }
 
 const confirmUnpublish = (reason) => {

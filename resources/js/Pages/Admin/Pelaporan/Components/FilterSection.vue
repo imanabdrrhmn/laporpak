@@ -1,4 +1,3 @@
-<!-- resources/js/Components/Pelaporan/FilterSection.vue -->
 <template>
   <div class="filter-section">
     <div class="section-header">
@@ -77,6 +76,8 @@
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
           <option value="published">Published</option>
+          <option value="solved">Solved</option>
+          <option value="unpublished">Unpublished</option>
         </select>
         <i class="fas fa-chevron-down dropdown-icon"></i>
       </div>

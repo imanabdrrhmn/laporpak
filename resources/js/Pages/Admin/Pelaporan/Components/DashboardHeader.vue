@@ -1,4 +1,3 @@
-<!-- resources/js/Components/Pelaporan/DashboardHeader.vue -->
 <template>
   <div class="dashboard-header">
     <div class="header-content">
@@ -24,6 +23,14 @@
           <span class="stat-value">{{ reportStats.published }}</span>
           <span class="stat-label">Published</span>
         </div>
+        <div class="stat-item solved">
+          <span class="stat-value">{{ reportStats.solved }}</span>
+          <span class="stat-label">Solved</span>
+        </div>
+        <div class="stat-item unpublished">
+          <span class="stat-value">{{ reportStats.unpublished }}</span>
+          <span class="stat-label">Unpublished</span>
+        </div>
       </div>
     </div>
   </div>
@@ -39,9 +46,11 @@ defineProps({
       pending: 0,
       approved: 0,
       rejected: 0,
-      published: 0
-    })
-  }
+      published: 0,
+      solved: 0,
+      unpublished: 0,
+    }),
+  },
 });
 </script>
 
@@ -63,51 +72,63 @@ defineProps({
 
 .stats-bar {
   display: flex;
-  gap: 24px;
+  gap: 16px; /* dikurangi sedikit supaya lebih rapih */
   flex-wrap: wrap;
+  justify-content: center; /* supaya rapi di mobile */
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 12px 20px;
+  padding: 12px 16px; 
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  min-width: 100px;
+  min-width: 120px;
+  width: 120px; 
   text-align: center;
+  box-sizing: border-box;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.4rem; 
   font-weight: 700;
   margin-bottom: 4px;
 }
 
 .stat-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem; 
   text-transform: uppercase;
   letter-spacing: 0.5px;
   opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .stats-bar {
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .stat-item {
+    min-width: 90px;
+    width: 90px;
+    padding: 8px 10px;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+  }
 }
 
 .stat-item.pending { background-color: rgba(255, 193, 7, 0.2); }
 .stat-item.approved { background-color: rgba(40, 167, 69, 0.2); }
 .stat-item.rejected { background-color: rgba(220, 53, 69, 0.2); }
 .stat-item.published { background-color: rgba(13, 110, 253, 0.2); }
+.stat-item.solved { background-color: rgba(23, 162, 184, 0.2); }
+.stat-item.unpublished { background-color: rgba(108, 117, 125, 0.2); } 
 
-@media (max-width: 768px) {
-  .stats-bar {
-    gap: 12px;
-  }
-  
-  .stat-item {
-    padding: 8px 12px;
-    min-width: 80px;
-  }
-  
-  .stat-value {
-    font-size: 1.2rem;
-  }
-}
 </style>
