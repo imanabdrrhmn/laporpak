@@ -8,11 +8,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TopUpVerifiedMail;
+use App\Mail\TopUpRejectedMail;
 use Inertia\Inertia;
 use App\Policies\TopUpPolicy;
 use App\Services\ActivityLoggerService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-
+    
 class TopUpController extends Controller
 {
     use AuthorizesRequests;
@@ -131,16 +134,23 @@ class TopUpController extends Controller
         $topUp->status = 'verified';
         $topUp->save();
 
+        $user = $topUp->user;
+        $user->balance += $topUp->amount;  
+        $user->save();
+
         TopUpStatusLog::create([
             'topup_id' => $topUp->id,
             'changed_by' => Auth::id(),
             'status' => 'verified',
         ]);
 
+        Mail::to($user->email)->send(new TopUpVerifiedMail($user, $topUp));
+
         $this->logger->log('Verifikasi Top Up', 'Admin memverifikasi top up ID #' . $topUp->id);
 
         return redirect()->route('admin.topups.index')->with('success', 'Top up berhasil diverifikasi.');
     }
+
 
     public function reject(TopUp $topUp)
     {
@@ -158,6 +168,8 @@ class TopUpController extends Controller
             'changed_by' => Auth::id(),
             'status' => 'rejected',
         ]);
+
+        Mail::to($topUp->user->email)->send(new TopUpRejectedMail($topUp->user, $topUp));
 
         $this->logger->log('Tolak Top Up', 'Admin menolak top up ID #' . $topUp->id);
 
