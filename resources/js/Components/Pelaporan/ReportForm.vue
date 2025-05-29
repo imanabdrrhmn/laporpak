@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="col-lg-6 d-flex align-items-center justify-content-end p-3 p-md-2 bg-light">
     <!-- Flag Icons CSS Library -->
@@ -72,29 +71,42 @@
             <label for="source" class="form-label mb-2">Nomer Telepon</label>
             <div class="input-group">
               <div class="country-select-wrapper">
-                <div class="dropdown">
-                  <button
-                    class="btn btn-outline-secondary dropdown-toggle custom-country-select"
-                    type="button"
-                    id="countryDropdown"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <span :class="`fi fi-${selectedCountry.iso2.toLowerCase()} me-2`" class="flag-icon"></span>
-                    +{{ selectedCountry.dialCode }}
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="countryDropdown">
-                    <li v-for="country in sortedCountries" :key="country.iso2">
-                      <a
-                        class="dropdown-item"
-                        href="#"
-                        @click.prevent="selectCountry(country)"
-                      >
-                        <span :class="`fi fi-${country.iso2.toLowerCase()} me-2`" class="flag-icon"></span>
-                        +{{ country.dialCode }}
-                      </a>
-                    </li>
-                  </ul>
+                <div class="dropdown" ref="countryDropdown">
+                  <div class="searchable-country-select">
+                    <div class="selected-country" @click="toggleDropdown">
+                      <span :class="`fi fi-${selectedCountry.iso2.toLowerCase()} me-2`" class="flag-icon"></span>
+                      +{{ selectedCountry.dialCode }}
+                      <i class="bi bi-chevron-down ms-1"></i>
+                    </div>
+                    <div class="dropdown-menu-custom" v-show="showDropdown">
+                      <div class="search-input-wrapper">
+                        <input
+                          type="text"
+                          class="form-control search-input"
+                          placeholder="Cari kode negara... (contoh: 62)"
+                          v-model="countrySearch"
+                          @input="filterCountries"
+                          ref="searchInput"
+                        />
+                        <i class="bi bi-search search-icon"></i>
+                      </div>
+                      <ul class="country-list">
+                        <li v-for="country in filteredCountries" :key="country.iso2">
+                          <a
+                            class="country-item"
+                            href="#"
+                            @click.prevent="selectCountry(country)"
+                          >
+                            <span :class="`fi fi-${country.iso2.toLowerCase()} me-2`" class="flag-icon"></span>
+                            <span class="country-code">+{{ country.dialCode }}</span>
+                          </a>
+                        </li>
+                        <li v-if="filteredCountries.length === 0" class="no-results">
+                          Kode negara tidak ditemukan
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
               <input
@@ -210,7 +222,7 @@
 
 <script setup>
 import MapContainer from './MapContainer.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { allCountries } from 'country-telephone-data';
 
 const props = defineProps({
@@ -232,6 +244,11 @@ defineExpose({
 
 const selectedCountry = ref(allCountries.find(c => c.iso2 === 'id'));
 const localPhoneNumber = ref('');
+const showDropdown = ref(false);
+const countrySearch = ref('');
+const filteredCountries = ref([]);
+const searchInput = ref(null);
+const countryDropdown = ref(null);
 
 const sortedCountries = computed(() => {
   return allCountries.sort((a, b) => {
@@ -241,13 +258,71 @@ const sortedCountries = computed(() => {
   });
 });
 
+const filterCountries = () => {
+  const search = countrySearch.value.toLowerCase();
+  if (!search) {
+    filteredCountries.value = sortedCountries.value;
+    return;
+  }
+  
+  filteredCountries.value = sortedCountries.value.filter(country => 
+    country.dialCode.includes(search)
+  );
+};
+
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value;
+  if (showDropdown.value) {
+    countrySearch.value = '';
+    filteredCountries.value = sortedCountries.value;
+    // Focus search input after dropdown opens
+    setTimeout(() => {
+      if (searchInput.value) {
+        searchInput.value.focus();
+      }
+    }, 100);
+  }
+};
+
 const selectCountry = (country) => {
   selectedCountry.value = country;
-  validatePhoneNumber();
+  showDropdown.value = false;
+  countrySearch.value = '';
+  
+  // Clear validation error when changing country if phone number is empty
+  if (!localPhoneNumber.value.trim()) {
+    props.validationErrors.source = false;
+  } else {
+    // Only validate if there's already a phone number entered
+    validatePhoneNumber();
+  }
 };
+
+const handleClickOutside = (event) => {
+  if (countryDropdown.value && !countryDropdown.value.contains(event.target)) {
+    showDropdown.value = false;
+  }
+};
+
+onMounted(() => {
+  filteredCountries.value = sortedCountries.value;
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 
 const validatePhoneNumber = () => {
   const phoneNumber = localPhoneNumber.value.replace(/\D/g, '');
+  
+  // Don't validate if phone number is empty
+  if (!phoneNumber) {
+    props.validationErrors.source = false;
+    props.formData.source = '';
+    return;
+  }
+  
   const isValid = phoneNumber.length >= 8 && phoneNumber.length <= 15;
   
   if (isValid) {
@@ -331,7 +406,7 @@ const onPhoneInput = (e) => {
 }
 
 .flag-icon {
-  width: clamp(16px, 2vw, 18px); /* Responsive flag size */
+  width: clamp(16px, 2vw, 18px);
   height: clamp(12px, 1.5vw, 14px);
   border-radius: 2px;
   display: inline-block;
@@ -339,75 +414,113 @@ const onPhoneInput = (e) => {
   background-position: center;
 }
 
-.custom-country-select {
+.searchable-country-select {
+  position: relative;
+  min-width: clamp(80px, 10vw, 100px);
+  max-width: clamp(100px, 15vw, 120px);
+}
+
+.selected-country {
   border: 1px solid #ced4da;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: system-ui, -apple-system, sans-serif;
-  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.5rem, 2vw, 1rem); /* Responsive padding */
-  font-size: clamp(0.8rem, 2vw, 0.9rem); /* Responsive font size */
-  min-width: clamp(80px, 10vw, 100px); /* Responsive min-width */
-  max-width: clamp(100px, 15vw, 120px); /* Responsive max-width */
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.5rem, 2vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+  background-color: white;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
 
-.custom-country-select:hover {
-  background-color: #9c9c9c;
-  border-color: #ced4da;
+.selected-country:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
 }
 
-.custom-country-select:active,
-.custom-country-select[aria-expanded="true"] {
-  background-color: #9c9c9c !important;
-  border-color: #ced4da !important;
+.dropdown-menu-custom {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 280px;
+  overflow: hidden;
 }
 
-.dropdown-menu {
+.search-input-wrapper {
+  position: relative;
+  padding: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.search-input {
+  width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.search-input:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  outline: none;
+}
+
+.search-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.country-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   max-height: 200px;
   overflow-y: auto;
-  width: clamp(80px, 10vw, 100px); /* Match custom-country-select width */
-  border-radius: 6px;
-  padding: 0.25rem 0;
 }
 
-.dropdown-item {
+.country-item {
   display: flex;
   align-items: center;
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
-  padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(0.6rem, 2vw, 0.75rem);
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  color: #212529;
+  font-size: 0.875rem;
+  gap: 0.5rem;
+  transition: background-color 0.15s ease;
+  justify-content: flex-start;
 }
 
-.dropdown-item:hover {
+.country-item:hover {
   background-color: #f8f9fa;
-  color: inherit;
+  color: #212529;
 }
 
-/* Custom Scrollbar for Webkit browsers */
-.dropdown-menu::-webkit-scrollbar {
-  width: 8px;
+.country-code {
+  color: #212529;
+  font-weight: 500;
 }
 
-.dropdown-menu::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.dropdown-menu::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-.dropdown-menu::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Custom Scrollbar for Firefox */
-.dropdown-menu {
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1;
+.no-results {
+  padding: 1rem 0.75rem;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.875rem;
 }
 
 .custom-textarea {
@@ -488,6 +601,30 @@ const onPhoneInput = (e) => {
   border-bottom-left-radius: 0;
 }
 
+/* Custom Scrollbar for country list */
+.country-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.country-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.country-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.country-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.country-list {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
 @keyframes shake {
   0% { transform: translateX(0); }
   20% { transform: translateX(-5px); }
@@ -513,18 +650,18 @@ const onPhoneInput = (e) => {
   animation: btn-wave 2s infinite;
 }
 
-/* Simplified and responsive media queries */
+/* Responsive media queries */
 @media (min-width: 576px) {
   .form-container {
     max-width: 90%;
     padding: 2rem;
     margin: 0 auto;
   }
-  .custom-select, .custom-country-select {
+  .selected-country {
     font-size: clamp(0.85rem, 2.2vw, 0.95rem);
     padding: clamp(0.5rem, 2vw, 0.75rem);
   }
-  .custom-country-select, .dropdown-menu {
+  .searchable-country-select {
     min-width: clamp(80px, 10vw, 100px);
     max-width: clamp(100px, 15vw, 120px);
   }
@@ -535,7 +672,7 @@ const onPhoneInput = (e) => {
     max-width: 85%;
     padding: 2.5rem;
   }
-  .custom-select, .custom-country-select {
+  .selected-country {
     font-size: clamp(0.9rem, 2.2vw, 1rem);
     padding: clamp(0.6rem, 2vw, 0.8rem);
   }
@@ -546,7 +683,7 @@ const onPhoneInput = (e) => {
     max-width: 580px;
     padding: 3rem;
   }
-  .custom-select, .custom-country-select {
+  .selected-country {
     font-size: clamp(0.95rem, 2.2vw, 1.05rem);
     padding: clamp(0.65rem, 2vw, 0.85rem);
   }
@@ -556,11 +693,11 @@ const onPhoneInput = (e) => {
   .form-container {
     max-width: 620px;
   }
-  .custom-select, .custom-country-select {
+  .selected-country {
     font-size: clamp(1rem, 2.2vw, 1.1rem);
     padding: clamp(0.7rem, 2vw, 0.9rem);
   }
-  .custom-country-select, .dropdown-menu {
+  .searchable-country-select {
     min-width: clamp(90px, 10vw, 110px);
     max-width: clamp(110px, 15vw, 130px);
   }
@@ -570,11 +707,11 @@ const onPhoneInput = (e) => {
   .form-container {
     max-width: 680px;
   }
-  .custom-select, .custom-country-select {
+  .selected-country {
     font-size: clamp(1.05rem, 2.2vw, 1.15rem);
     padding: clamp(0.75rem, 2vw, 1rem);
   }
-  .custom-country-select, .dropdown-menu {
+  .searchable-country-select {
     min-width: clamp(100px, 10vw, 120px);
     max-width: clamp(120px, 15vw, 140px);
   }
@@ -584,61 +721,17 @@ const onPhoneInput = (e) => {
   .form-container {
     padding: 1.5rem;
   }
-  .custom-select, .custom-country-select {
+  .selected-country {
     font-size: clamp(0.75rem, 2.5vw, 0.85rem);
     padding: clamp(0.3rem, 2vw, 0.5rem);
   }
-  .custom-country-select, .dropdown-menu {
+  .searchable-country-select {
     min-width: clamp(60px, 10vw, 80px);
     max-width: clamp(80px, 15vw, 100px);
   }
   .flag-icon {
     width: clamp(14px, 2vw, 16px);
     height: clamp(10px, 1.5vw, 12px);
-  }
-}
-
-/* Handle zoom levels explicitly */
-@media (min--moz-device-pixel-ratio: 1.25), /* Firefox */
-(-webkit-min-device-pixel-ratio: 1.25), /* Chrome, Safari */
-(min-resolution: 1.25dppx) { /* Standard */
-  .custom-select, .custom-country-select {
-    font-size: clamp(0.9rem, 2.2vw, 1rem);
-    padding: clamp(0.5rem, 2vw, 0.75rem);
-  }
-  .custom-country-select, .dropdown-menu {
-    min-width: clamp(80px, 10vw, 100px);
-    max-width: clamp(100px, 15vw, 120px);
-  }
-  .flag-icon {
-    width: clamp(16px, 2vw, 18px);
-    height: clamp(12px, 1.5vw, 14px);
-  }
-}
-
-@media (min--moz-device-pixel-ratio: 1.5),
-(-webkit-min-device-pixel-ratio: 1.5),
-(min-resolution: 1.5dppx) {
-  .custom-select, .custom-country-select {
-    font-size: clamp(0.95rem, 2.2vw, 1.05rem);
-    padding: clamp(0.55rem, 2vw, 0.8rem);
-  }
-  .custom-country-select, .dropdown-menu {
-    min-width: clamp(85px, 10vw, 105px);
-    max-width: clamp(105px, 15vw, 125px);
-  }
-}
-
-@media (min--moz-device-pixel-ratio: 2),
-(-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 2dppx) {
-  .custom-select, .custom-country-select {
-    font-size: clamp(1rem, 2.2vw, 1.1rem);
-    padding: clamp(0.6rem, 2vw, 0.85rem);
-  }
-  .custom-country-select, .dropdown-menu {
-    min-width: clamp(90px, 10vw, 110px);
-    max-width: clamp(110px, 15vw, 130px);
   }
 }
 </style>
