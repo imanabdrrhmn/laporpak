@@ -1,8 +1,8 @@
 <template>
   <div>
     <!-- Loading skeleton -->
-    <div v-if="loading" class="row">
-      <div v-for="n in 6" :key="n" class="col-md-6 col-lg-4">
+    <div v-if="loading" class="report-grid">
+      <div v-for="n in 6" :key="n" class="skeleton-wrapper">
         <div class="card skeleton-card">
           <div class="skeleton-type-indicator"></div>
           <div class="card-header skeleton-header"></div>
@@ -36,11 +36,11 @@
     </div>
 
     <!-- Grid hasil laporan -->
-    <transition-group name="reports-fade" tag="div" class="row">
+    <transition-group name="reports-fade" tag="div" class="report-grid">
       <div
         v-for="report in paginatedReports"
         :key="report.id"
-        class="col-md-6 col-lg-4"
+        class="report-card-wrapper"
       >
         <ReportCard :report="report" @open-detail="$emit('open-detail', $event)" />
       </div>
@@ -66,10 +66,30 @@ export default {
 </script>
 
 <style scoped>
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px; /* Consistent spacing between cards, including between rows */
+  padding: 16px;
+  max-width: 1200px; /* Optional: Limit total width for larger screens */
+  margin: 0 auto;
+}
+
+.report-card-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.skeleton-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
 .skeleton-card {
-  height: 200px;
+  height: 550px; /* Match ReportCard height for consistency */
   background: #f8f9fa;
   animation: pulse 1.5s infinite;
+  width: 350px; /* Match ReportCard width */
 }
 
 .skeleton-type-indicator,
@@ -90,23 +110,26 @@ export default {
 }
 
 .skeleton-header {
-  height: 20px;
-  width: 60%;
+  height: 250px; /* Match ReportCard image height */
+  width: 100%;
 }
 
 .skeleton-title {
   height: 24px;
   width: 80%;
+  margin: 16px;
 }
 
 .skeleton-text {
   height: 16px;
-  width: 100%;
+  width: 90%;
+  margin: 8px 16px;
 }
 
 .skeleton-footer {
-  height: 20px;
+  height: 40px; /* Approximate button height */
   width: 40%;
+  margin: 16px auto;
 }
 
 @keyframes pulse {
@@ -135,5 +158,21 @@ export default {
 .reports-fade-leave-to {
   opacity: 0;
   transform: translateY(20px);
+}
+
+@media (max-width: 768px) {
+  .report-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px; /* Slightly smaller gap for mobile */
+  }
+
+  .skeleton-card {
+    height: 500px; /* Match ReportCard mobile height */
+    width: 300px; /* Match ReportCard mobile width */
+  }
+
+  .skeleton-header {
+    height: 200px; /* Match ReportCard mobile image height */
+  }
 }
 </style>

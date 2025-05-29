@@ -132,7 +132,7 @@ const initStatusChart = () => {
       labels: ['Pelaporan', 'Verifikasi'],
       datasets: [{
         data: [70, 30],
-        backgroundColor: ['#4e73df', '#1cc88a'],
+        backgroundColor: ['#4e73df', '#4CAF50'],
         borderWidth: 0
       }]
     },
@@ -160,7 +160,7 @@ const initReportChart = () => {
           reportStats.value.rejected,
           reportStats.value.published
         ],
-        backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8'],
+        backgroundColor: ['#4CAF50', '#ffc107', '#dc3545', '#17a2b8'],
         borderWidth: 0,
         borderRadius: 4
       }]
@@ -189,7 +189,7 @@ const initVerificationChart = () => {
           props.verificationData.success ?? 0,
           props.verificationData.failed ?? 0
         ],
-        backgroundColor: ['#28a745', '#dc3545'],
+        backgroundColor: ['#4CAF50', '#dc3545'],
         borderWidth: 2,
         borderColor: '#ffffff'
       }]
@@ -222,8 +222,8 @@ const initTrendChart = () => {
         {
           label: 'Verifikasi',
           data: props.monthlyData.map(item => item.verifications),
-          borderColor: '#1cc88a',
-          backgroundColor: 'rgba(28, 200, 138, 0.1)',
+          borderColor: '#4CAF50',
+          backgroundColor: 'rgba(76, 175, 80, 0.1)',
           borderWidth: 3,
           fill: true,
           tension: 0.4

@@ -15,26 +15,97 @@
         </span>
       </div>
     </div>
+    
+    <!-- CUSTOMIZED MIDDLE SECTION -->
     <div class="report-content">
-      <div class="report-meta">
-        <div class="meta-item">
-          <i class="fas fa-tag meta-icon"></i>
-          <span>{{ report.category }}</span>
+      <div class="report-meta-enhanced">
+        <div class="meta-row">
+          <div class="meta-item-enhanced">
+            <div class="meta-icon-wrapper category">
+              <i class="bi bi-tag-fill"></i>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Kategori</span>
+              <span class="meta-value">{{ report.category }}</span>
+            </div>
+          </div>
         </div>
-        <div class="meta-item">
-          <i class="fas fa-cog meta-icon"></i>
-          <span>{{ report.service }}</span>
+        
+        <div class="meta-row">
+          <div class="meta-item-enhanced">
+            <div class="meta-icon-wrapper service">
+              <i class="bi bi-gear-fill"></i>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Layanan</span>
+              <span class="meta-value">{{ report.service }}</span>
+            </div>
+          </div>
         </div>
-        <div v-if="report.service === 'Penipuan'" class="meta-item">
-          <i class="fas fa-exclamation-triangle meta-icon"></i>
-          <span>{{ report.source || 'Tidak Ada Sumber' }}</span>
+        
+        <div v-if="report.service === 'Penipuan'" class="meta-row">
+          <div class="meta-item-enhanced">
+            <div class="meta-icon-wrapper source">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Sumber</span>
+              <span class="meta-value">{{ report.source || 'Tidak Ada Sumber' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- NEW: Phone Number Display -->
+        <div v-if="report.phone_number" class="meta-row">
+          <div class="meta-item-enhanced">
+            <div class="meta-icon-wrapper phone">
+              <i class="bi bi-telephone-fill"></i>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Nomor HP</span>
+              <span class="meta-value phone-number">{{ report.phone_number }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- NEW: Location Display -->
+        <div v-if="report.location" class="meta-row">
+          <div class="meta-item-enhanced">
+            <div class="meta-icon-wrapper location">
+              <i class="bi bi-geo-alt-fill"></i>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Lokasi</span>
+              <span class="meta-value">{{ report.location }}</span>
+            </div>
+          </div>
         </div>
       </div>
-      <p class="description">{{ truncate(report.description, 120) }}</p>
+      
+      <!-- Enhanced Description Section -->
+      <div class="description-section">
+        <div class="description-header">
+          <i class="bi bi-file-text"></i>
+          <span>Deskripsi Laporan</span>
+        </div>
+        <p class="description-enhanced">{{ truncate(report.description, 150) }}</p>
+        <div v-if="report.description && report.description.length > 150" class="read-more-hint">
+          <i class="bi bi-three-dots"></i>
+          <span>Klik "Lihat Detail" untuk membaca selengkapnya</span>
+        </div>
+      </div>
     </div>
-    <div class="flag-info">
-      <strong>Laporan :</strong> {{ flagCount }}
+    
+    <div class="flag-info-enhanced">
+      <div class="flag-icon-wrapper">
+        <i class="bi bi-flag-fill"></i>
+      </div>
+      <div class="flag-content">
+        <span class="flag-label">Total Laporan</span>
+        <span class="flag-count">{{ flagCount }}</span>
+      </div>
     </div>
+    
     <div class="report-actions">
       <button @click="$emit('viewReport', report)" class="view-button">
         <i class="fas fa-eye"></i> Lihat Detail
@@ -236,56 +307,186 @@ const flagCount = computed(() => {
   color: #1565c0;
 }
 
+/* ENHANCED MIDDLE SECTION STYLES */
 .report-content {
   padding: 16px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: linear-gradient(135deg, #f8f9fb 0%, #ffffff 100%);
 }
 
-.report-meta {
+.report-meta-enhanced {
+  margin-bottom: 16px;
+}
+
+.meta-row {
   margin-bottom: 12px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
-.meta-item {
+.meta-item-enhanced {
   display: flex;
   align-items: center;
-  margin-bottom: 6px;
-  font-size: 13px;
-  color: #555;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
 }
 
-.meta-icon {
-  width: 16px;
-  margin-right: 8px;
-  color: #777;
+.meta-item-enhanced:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateX(2px);
 }
 
-.description {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #444;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.meta-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.flag-info {
-  padding: 0 16px;
+.meta-icon-wrapper.category {
+  background: #6c5ce7;
+  color: white;
+}
+
+.meta-icon-wrapper.service {
+  background: #fd79a8;
+  color: white;
+}
+
+.meta-icon-wrapper.source {
+  background: #fdcb6e;
+  color: #2d3436;
+}
+
+.meta-icon-wrapper.phone {
+  background: #00b894;
+  color: white;
+}
+
+.meta-icon-wrapper.location {
+  background: #e17055;
+  color: white;
+}
+
+.meta-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.meta-label {
+  font-size: 11px;
   font-weight: 600;
-  color: #444;
-  margin-top: 12px;
-  margin-bottom: 12px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.meta-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.meta-value.phone-number {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #00b894;
+}
+
+.description-section {
+  background: white;
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.description-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #495057;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.description-header i {
+  color: #6c757d;
+}
+
+.description-enhanced {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #343a40;
+  margin: 0;
+  text-align: justify;
+}
+
+.read-more-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.read-more-hint i {
+  color: #adb5bd;
+}
+
+.flag-info-enhanced {
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0f0;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  background: white;
+}
+
+.flag-icon-wrapper {
+  width: 28px;
+  height: 28px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+}
+
+.flag-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.flag-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.flag-count {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
 }
 
 .report-actions {

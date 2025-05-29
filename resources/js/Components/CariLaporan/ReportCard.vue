@@ -1,108 +1,53 @@
 <template>
-  <div
-    class="report-card"
-    :class="[
-      getCategoryClass(report.category),
-      { 'report-card--featured': report.priority === 'high' },
-      { 'report-card--resolved': report.status === 'resolved' },
-      { 'report-card--compact': compact }
-    ]"
-    @click="$emit('open-detail', report)"
-    @keyup.enter="$emit('open-detail', report)"
-    role="button"
-    tabindex="0"
-    :aria-label="`Lihat detail laporan ${report.category} - ${report.description}`"
-  >
-    <!-- Card Header -->
-    <div class="report-card__header">
-      <div class="report-card__type">
-        <div class="report-card__icon-wrapper" :class="getCategoryClass(report.category)">
-          <i :class="getCategoryIcon(report.category)" aria-hidden="true"></i>
-        </div>
-        <div class="report-card__type-info">
-          <span class="report-card__category">{{ report.category }}</span>
-          <span v-if="report.subcategory && !compact" class="report-card__subcategory">{{ report.subcategory }}</span>
-        </div>
-      </div>
-      <div v-if="report.urgency" class="report-card__urgency" :class="getUrgencyClass(report.urgency)">
-        {{ report.urgency }}
+  <div class="report-card" @click="$emit('open-detail', report)" role="button" tabindex="0" :aria-label="`Lihat detail laporan ${report.category} - ${report.description}`">
+    <!-- Card Image (Clickable for Evidence) -->
+    <div class="report-card__image" @click.stop="report.image && $emit('view-evidence', report.image)">
+      <img v-if="report.image" :src="report.image" :alt="`Gambar laporan ${report.category}`" class="card-image" />
+      <div v-else class="card-image-placeholder">
+        <i :class="getCategoryIcon(report.category)"></i>
       </div>
     </div>
 
-    <!-- Card Body -->
-    <div class="report-card__body">
-      <!-- Source/Location -->
-      <h5
-        v-if="report.category !== 'Infrastruktur' && report.source && !compact"
-        class="report-card__title"
-        :title="report.source"
-      >
-        <i class="fas fa-map-marker-alt me-2 text-muted"></i>
-        <span class="text-truncate">{{ report.source }}</span>
-      </h5>
+    <!-- User Profile -->
+    <div class="user-profile">
+      <div class="category-badge" :class="getCategoryClass(report.category)">
+        {{ report.category }}
+      </div>
+      <div class="user-details">
+        <div class="user-avatar">
+          <img v-if="report.user && report.user.avatar" :src="report.user.avatar" :alt="`Avatar ${report.user.name || report.reporter}`" class="avatar-image" />
+          <div v-else class="avatar-placeholder">
+            {{ getUserInitial(report.user?.name || report.reporter) }}
+          </div>
+        </div>
+        <div class="user-info">
+          <div class="user-name">{{ report.user?.name || report.reporter || 'Anonymous' }}</div>
+        </div>
+      </div>
+      <div v-if="report.location" class="location-badge">
+        <i class="fas fa-map-marker-alt"></i>
+        {{ report.location }}
+      </div>
+    </div>
+
+    <!-- Card Content -->
+    <div class="report-card__content">
+      <!-- Title -->
+      <h2 class="report-card__title">
+        {{ report.title || 'Laporan ' + report.category }}
+      </h2>
 
       <!-- Description -->
       <p class="report-card__description">
-        {{ truncateText(report.description, compact ? 80 : 120) }}
+        {{ truncateText(report.description, 150) }}
       </p>
-
-      <!-- Evidence -->
-      <div v-if="report.evidence && !compact" class="report-card__evidence">
-        <a
-          :href="report.evidence"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="report-card__evidence-link"
-          :aria-label="`Lihat bukti untuk laporan ${report.category}`"
-          @click.stop
-        >
-          <i class="fas fa-paperclip me-2"></i>
-          Lihat Bukti
-        </a>
-      </div>
-
-      <!-- Tags -->
-      <div v-if="report.tags && report.tags.length && !compact" class="report-card__tags">
-        <span
-          v-for="tag in report.tags.slice(0, compact ? 2 : 3)"
-          :key="tag"
-          class="report-card__tag"
-          :style="{ backgroundColor: getTagColor(tag) }"
-        >
-          {{ tag }}
-        </span>
-        <span v-if="report.tags.length > (compact ? 2 : 3)" class="report-card__tag-more">
-          +{{ report.tags.length - (compact ? 2 : 3) }} more
-        </span>
-      </div>
-
-      <!-- Progress Bar -->
-      <div v-if="report.progress !== undefined" class="report-card__progress">
-        <div class="progress-bar-wrapper">
-          <div class="progress-bar" :style="{ width: `${report.progress}%` }"></div>
-        </div>
-        <small class="progress-text">{{ report.progress }}% selesai</small>
-      </div>
     </div>
 
     <!-- Card Footer -->
     <div class="report-card__footer">
-      <div class="report-card__meta">
-        <small class="report-card__date">
-          <i class="far fa-calendar-alt me-1" aria-hidden="true"></i>
-          {{ formatDate(report.created_at) }}
-        </small>
-        <small v-if="report.reporter && !compact" class="report-card__reporter">
-          <i class="far fa-user me-1" aria-hidden="true"></i>
-          {{ report.reporter }}
-        </small>
-      </div>
-      <div v-if="report.views && !compact" class="report-card__stats">
-        <small class="report-card__views">
-          <i class="far fa-eye me-1" aria-hidden="true"></i>
-          {{ report.views }}
-        </small>
-      </div>
+      <button @click.stop="$emit('open-detail', report)" class="detail-button">
+        Lihat Detail
+      </button>
     </div>
   </div>
 </template>
@@ -116,79 +61,30 @@ export default {
       required: true,
       default: () => ({}),
     },
-    compact: {
-      type: Boolean,
-      default: false,
-    },
   },
-  emits: ['open-detail'],
+  emits: ['open-detail', 'view-evidence'],
   methods: {
     getCategoryClass(category) {
       const CATEGORY_CLASSES = {
-        'Nomor Hp': 'report-card--phone',
-        Email: 'report-card--email',
-        Infrastruktur: 'report-card--infra',
-        Keamanan: 'report-card--security',
-        Lingkungan: 'report-card--environment',
-        Layanan: 'report-card--service',
+        'Nomor Hp': 'category--phone',
+        'Penipuan': 'category--fraud',
       };
-      return CATEGORY_CLASSES[category] || 'report-card--default';
+      return CATEGORY_CLASSES[category] || 'category--default';
     },
     getCategoryIcon(category) {
       const CATEGORY_ICONS = {
         'Nomor Hp': 'fas fa-phone',
-        Email: 'fas fa-envelope',
-        Infrastruktur: 'fas fa-network-wired',
-        Keamanan: 'fas fa-shield-alt',
-        Lingkungan: 'fas fa-leaf',
-        Layanan: 'fas fa-cogs',
+        'Penipuan': 'fas fa-exclamation-triangle',
       };
       return CATEGORY_ICONS[category] || 'fas fa-question-circle';
     },
-    getUrgencyClass(urgency) {
-      const URGENCY_CLASSES = {
-        low: 'urgency--low',
-        medium: 'urgency--medium',
-        high: 'urgency--high',
-        critical: 'urgency--critical',
-      };
-      return URGENCY_CLASSES[urgency] || '';
-    },
-    getTagColor(tag) {
-      // Simple hash function to generate consistent colors
-      let hash = 0;
-      for (let i = 0; i < tag.length; i++) {
-        hash = tag.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const hue = hash % 360;
-      return `hsl(${hue}, 70%, 90%)`;
+    getUserInitial(name) {
+      if (!name) return 'A';
+      return name.charAt(0).toUpperCase();
     },
     truncateText(text, length) {
       if (!text) return '';
       return text.length <= length ? text : text.substring(0, length) + '...';
-    },
-    formatDate(dateStr) {
-      if (!dateStr) return '';
-      const date = new Date(dateStr);
-      const now = new Date();
-      const diffTime = Math.abs(now - date);
-      const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffHours <= 24) {
-        return `Hari ini, ${date.toLocaleTimeString('id-ID', {
-          hour: '2-digit',
-          minute: '2-digit',
-        })}`;
-      }
-      if (diffDays === 1) return 'Kemarin';
-      if (diffDays < 7) return `${diffDays} hari lalu`;
-
-      return date.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      });
     },
   },
 };
@@ -196,238 +92,196 @@ export default {
 
 <style scoped>
 .report-card {
-  position: relative;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-  border: 1px solid #e9ecef !important;
-  border-radius: 16px;
-  padding: 0;
-  margin-bottom: 24px;
-  width: 100%;
-  height: 300px; /* Slightly taller for better content fit */
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  width: 350px; /* Fixed width for consistency */
+  height: 550px; /* Fixed height for consistency */
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
 }
 
-.report-card--compact {
-  height: 180px; /* Compact height */
+.report-card__image {
+  height: 250px; /* Fixed height for image */
+  overflow: hidden;
 }
 
-.report-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
 }
 
-.report-card:focus {
-  outline: 3px solid #007bff;
-  outline-offset: 2px;
-}
-
-.report-card--featured {
-  background: linear-gradient(135deg, #fff8e1 0%, #ffffff 100%) !important;
-  border-color: #ffb300 !important;
-}
-
-.report-card--resolved {
-  background: linear-gradient(135deg, #e6ffed 0%, #ffffff 100%) !important;
-  border-color: #00c853 !important;
-}
-
-/* Header */
-.report-card__header {
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #f5f5f5;
-}
-
-/* Icon Wrapper */
-.report-card__icon-wrapper {
-  width: 36px;
-  height: 36px;
-  background: #f5f5f5;
-  border-radius: 10px;
+.card-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  color: #37474f;
+  font-size: 3rem;
+  color: #6c757d;
 }
 
-/* Body */
-.report-card__body {
-  flex: 1;
-  padding: 0 16px;
-  overflow: hidden;
+.user-profile {
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  position: relative;
+  border-bottom: 1px solid #f8f9fa;
+  flex-shrink: 0;
+}
+
+.category-badge {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+  text-transform: capitalize;
+  z-index: 1;
+}
+
+.category--phone {
+  background: #007bff;
+}
+
+.category--fraud {
+  background: #dc3545;
+}
+
+.category--default {
+  background: #6c757d;
+}
+
+.user-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #007bff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #212529;
+  font-size: 0.9rem;
+}
+
+.location-badge {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.location-badge i {
+  font-size: 0.7rem;
+}
+
+.report-card__content {
+  padding: 16px;
+  flex: 1;
+  overflow: hidden;
 }
 
 .report-card__title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #263238;
-  margin: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
 }
 
 .report-card__description {
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.5;
   margin: 0;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
   display: -webkit-box;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.5;
-  height: 4.5em;
-  color: #546e7a !important;
 }
 
-.report-card--compact .report-card__description {
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  height: 3em;
-}
-
-/* Tags */
-.report-card__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.report-card__tag {
-  color: #37474f;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.report-card__tag-more {
-  background-color: #eceff1;
-  color: #546e7a;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-}
-
-/* Evidence */
-.report-card__evidence-link {
-  display: inline-flex;
-  align-items: center;
-  color: #0288d1;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.report-card__evidence-link:hover {
-  color: #01579b;
-  text-decoration: underline;
-}
-
-/* Progress */
-.report-card__progress {
-  margin-bottom: 12px;
-}
-
-.progress-bar-wrapper {
-  width: 100%;
-  height: 8px;
-  background-color: #eceff1;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #0288d1, #4fc3f7);
-  transition: width 0.4s ease;
-}
-
-.progress-text {
-  color: #546e7a;
-  font-size: 0.8rem;
-}
-
-/* Footer */
 .report-card__footer {
-  padding: 12px 16px;
-  border-top: 1px solid #f5f5f5;
-  background: #ffffff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 12px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
-.report-card--compact .report-card__footer {
+.detail-button {
+  background: #007bff;
+  color: white;
+  border: none;
   padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
 }
 
-.report-card__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.detail-button:hover {
+  background: #0056b3;
 }
 
-.report-card__date,
-.report-card__reporter,
-.report-card__views {
-  font-size: 0.85rem;
-  color: #546e7a !important;
-  display: flex;
-  align-items: center;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   .report-card {
-    height: 260px;
+    width: 300px;
+    height: 500px;
+  }
+  
+  .report-card__image {
+    height: 200px;
   }
 
-  .report-card--compact {
-    height: 160px;
+  .report-card__title {
+    font-size: 1.3rem;
   }
 
-  .report-card__header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .report-card__footer {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .report-card__meta {
-    flex-direction: row;
-    gap: 20px;
-  }
-}
-
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .report-card,
-  .report-card__overlay,
-  .progress-bar {
-    transition: none;
-  }
-
-  .report-card:hover {
-    transform: none;
+  .report-card__description {
+    -webkit-line-clamp: 2;
   }
 }
 </style>
