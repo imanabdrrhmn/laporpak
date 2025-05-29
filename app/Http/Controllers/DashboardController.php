@@ -8,6 +8,7 @@ use Inertia\Response;
 use Inertia\Inertia;
 use App\Models\Feedback;
 use App\Models\Report;
+use App\Models\ActivityLog;
 
 class DashboardController extends Controller
 {
@@ -68,12 +69,26 @@ class DashboardController extends Controller
                     'status' => $report->status,
                 ];
             });
+            $activityLogs = ActivityLog::where('user_id', $user->id)
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'activity' => $log->activity,
+                    'description' => $log->description,
+                    'created_at' => $log->created_at->diffForHumans(),
+                ];
+            });
+
 
         return Inertia::render('Dashboard', [
             'user' => $user,
             'feedbacks' => $feedbacks,
             'stats' => $stats,
             'reports' => $reports,
+            'activityLogs' => $activityLogs,
         ]);
     }
 }

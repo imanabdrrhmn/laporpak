@@ -12,21 +12,19 @@
           class="aktivitas-item"
         >
           <div class="activity-icon">
-            <div 
-              class="icon-circle"
-              :class="item.iconClass"
-            >
-              <i :class="item.icon"></i>
+            <div class="icon-circle" :class="item.iconClass">
+              {{ item.icon }}
             </div>
           </div>
           <div class="activity-content">
             <div class="activity-title">{{ item.title }}</div>
+            <div v-if="item.description" class="activity-description">{{ item.description }}</div>
             <div class="activity-time">{{ item.time }}</div>
           </div>
           <div class="activity-border"></div>
         </div>
       </div>
-      
+
       <div v-if="aktivitasList.length === 0" class="empty-state">
         <div class="empty-icon">
           <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
@@ -41,24 +39,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-
-const aktivitasList = ref([
-  {
-    id: 1,
-    title: 'Verifikasi data berhasil',
-    time: '2 jam yang lalu',
-    icon: '✓',
-    iconClass: 'success'
-  },
-  {
-    id: 2,
-    title: 'Isi Saldo Rp 50.000',
-    time: '2 jam yang lalu',
-    icon: '💳',
-    iconClass: 'primary'
-  }
-])
+import { computed } from 'vue'
 
 const props = defineProps({
   aktivitas: {
@@ -67,9 +48,22 @@ const props = defineProps({
   }
 })
 
-if (props.aktivitas && props.aktivitas.length > 0) {
-  aktivitasList.value = props.aktivitas
-}
+// Format data untuk tampilan
+const aktivitasList = computed(() =>
+  props.aktivitas.map((item) => ({
+    id: item.id,
+    title: item.activity ?? item.title ?? 'Aktivitas',
+    description: item.description ?? '', // Deskripsi ditambahkan di sini
+    time: item.created_at ?? item.time ?? '-',
+    icon: item.activity === 'Kirim Laporan' ? '📤' :
+          item.activity === 'Update Laporan' ? '✏️' :
+          item.activity === 'Melaporkan Laporan' || item.activity === 'Tandai Laporan' ? '🚩' :
+          '📌',
+    iconClass: item.activity === 'Kirim Laporan' ? 'primary' :
+               item.activity === 'Update Laporan' ? 'success' :
+               'default',
+  }))
+)
 </script>
 
 <style scoped>
@@ -126,7 +120,7 @@ if (props.aktivitas && props.aktivitas.length > 0) {
   align-items: center;
   padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.5rem);
   transition: background-color 0.2s ease;
-  width: 100%; /* Memastikan item memanjang penuh */
+  width: 100%;
 }
 
 .aktivitas-item:hover {
@@ -159,6 +153,10 @@ if (props.aktivitas && props.aktivitas.length > 0) {
   background: linear-gradient(135deg, #2196F3, #1976D2);
 }
 
+.icon-circle.default {
+  background: linear-gradient(135deg, #cccccc, #aaaaaa);
+}
+
 .activity-content {
   flex: 1;
 }
@@ -168,6 +166,13 @@ if (props.aktivitas && props.aktivitas.length > 0) {
   font-weight: 500;
   color: #333333;
   margin-bottom: 0.25rem;
+}
+
+.activity-description {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  color: #666666;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
 }
 
 .activity-time {
@@ -206,7 +211,6 @@ if (props.aktivitas && props.aktivitas.length > 0) {
   margin: 0;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .aktivitas-card {
     padding: 0.75rem;

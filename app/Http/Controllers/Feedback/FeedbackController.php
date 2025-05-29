@@ -8,17 +8,25 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Http\Controllers\Controller;
 use App\Policies\FeedbackPolicy;
+use App\Services\ActivityLoggerService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-
 
 class FeedbackController extends Controller
 {
     use AuthorizesRequests;
 
+    protected $logger;
+
+    public function __construct(ActivityLoggerService $logger)
+    {
+        $this->logger = $logger;
+    }
+
     public function index(Request $request): Response
     {
         $user = $request->user();
         $contactVerified = $user && ($user->email_verified_at || $user->no_hp_verified_at);
+
         $feedbacks = Feedback::with('user')->latest()->get()->map(function ($feedback) {
             $isUpdated = $feedback->updated_at->gt($feedback->created_at);
             return [
@@ -30,7 +38,7 @@ class FeedbackController extends Controller
                     'avatar_url' => $feedback->user->avatar 
                         ? asset('storage/' . $feedback->user->avatar) 
                         : asset('/Default-Profile.png'),
-                    ],
+                ],
                 'message' => $feedback->message,
                 'rating' => $feedback->rating,
                 'kategori' => $feedback->kategori,
@@ -39,7 +47,8 @@ class FeedbackController extends Controller
                 'is_updated' => $isUpdated,
             ];
         });
-                $canGiveFeedback = $user ? !Feedback::where('user_id', $user->id)->exists() : false;
+
+        $canGiveFeedback = $user ? !Feedback::where('user_id', $user->id)->exists() : false;
 
         return Inertia::render('Feedback/FeedbackPage', [
             'feedbacks' => $feedbacks,
@@ -79,7 +88,6 @@ class FeedbackController extends Controller
             return redirect()->route('feedback.index')->with('error', 'Akun kamu belum diverifikasi. Silakan verifikasi email atau nomor HP terlebih dahulu.');
         }
 
-        // Check if feedback for the category already exists for this user
         $existingFeedback = Feedback::where('user_id', $user->id)
                                     ->where('kategori', $request->kategori)
                                     ->first();
@@ -94,12 +102,14 @@ class FeedbackController extends Controller
             'kategori' => 'required|string|max:255',
         ]);
 
-        Feedback::create([
+        $feedback = Feedback::create([
             'user_id' => $user->id,
             'message' => $request->message,
             'rating' => $request->rating,
             'kategori' => $request->kategori,
         ]);
+
+        $this->logger->log('Kirim Feedback', 'Pengguna mengirim feedback kategori ' . $request->kategori);
 
         return redirect()->route('feedback.index')->with('success', 'Feedback berhasil dikirim.');
     }
@@ -129,12 +139,16 @@ class FeedbackController extends Controller
             'kategori' => $request->kategori,
         ]);
 
+        $this->logger->log('Update Feedback', 'Pengguna memperbarui feedback ID #' . $feedback->id);
+
         return redirect()->route('feedback.index')->with('success', 'Feedback berhasil diperbarui.');
     }
 
     public function destroy(Request $request, Feedback $feedback)
     {
         $this->authorize('delete', $feedback);
+
+        $this->logger->log('Hapus Feedback', 'Pengguna menghapus feedback ID #' . $feedback->id);
 
         $feedback->delete();
 

@@ -4,7 +4,7 @@ import { usePage, Head } from '@inertiajs/vue3'
 
 import AppLayout from '@/Layouts/AppLayout.vue'
 import Beranda from '@/Components/HeroSectionBeranda.vue'
-import Section from '@/Components/Section.vue'  // Asumsikan Section menerima props statistik
+import Section from '@/Components/Section.vue' 
 import Feedback from '@/Components/Feedback.vue'
 
 import LoginModal from '@/Components/modals/LoginModal.vue'

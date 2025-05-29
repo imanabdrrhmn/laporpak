@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\TopUp;
@@ -9,12 +10,19 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Policies\TopUpPolicy;
-
+use App\Services\ActivityLoggerService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class TopUpController extends Controller
 {
     use AuthorizesRequests;
+
+    protected $logger;
+
+    public function __construct(ActivityLoggerService $logger)
+    {
+        $this->logger = $logger;
+    }
 
     public function index()
     {
@@ -49,6 +57,8 @@ class TopUpController extends Controller
             'status' => 'pending',
         ]);
 
+        $this->logger->log('Ajukan Top Up', 'Pengguna mengajukan top up sebesar Rp ' . number_format($request->amount));
+
         return redirect()->route('top-ups.index')->with('success', 'Top up request submitted');
     }
 
@@ -57,7 +67,6 @@ class TopUpController extends Controller
         $canViewTopUp = $request->user()->can('view_topup');
 
         if (!$canViewTopUp) {
-            // Kirim ke frontend flag tidak punya akses
             return Inertia::render('Admin/TopUps/Index', [
                 'canViewTopUp' => false,
             ]);
@@ -73,7 +82,7 @@ class TopUpController extends Controller
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
-                ->orWhere('email', 'like', "%$search%");
+                  ->orWhere('email', 'like', "%$search%");
             });
         }
 
@@ -111,7 +120,7 @@ class TopUpController extends Controller
         ]);
     }
 
-        public function verify(TopUp $topUp)
+    public function verify(TopUp $topUp)
     {
         $this->authorize('verify', $topUp);
 
@@ -122,12 +131,13 @@ class TopUpController extends Controller
         $topUp->status = 'verified';
         $topUp->save();
 
-        // Simpan log status
         TopUpStatusLog::create([
             'topup_id' => $topUp->id,
             'changed_by' => Auth::id(),
             'status' => 'verified',
         ]);
+
+        $this->logger->log('Verifikasi Top Up', 'Admin memverifikasi top up ID #' . $topUp->id);
 
         return redirect()->route('admin.topups.index')->with('success', 'Top up berhasil diverifikasi.');
     }
@@ -143,18 +153,18 @@ class TopUpController extends Controller
         $topUp->status = 'rejected';
         $topUp->save();
 
-        // Simpan log status
         TopUpStatusLog::create([
             'topup_id' => $topUp->id,
             'changed_by' => Auth::id(),
             'status' => 'rejected',
         ]);
 
+        $this->logger->log('Tolak Top Up', 'Admin menolak top up ID #' . $topUp->id);
+
         return redirect()->route('admin.topups.index')->with('success', 'Top up berhasil ditolak.');
     }
 
-
-        public function exportTopUpLogsToCsv(Request $request)
+    public function exportTopUpLogsToCsv(Request $request)
     {
         $request->validate([
             'start_date' => 'nullable|date',
@@ -200,6 +210,8 @@ class TopUpController extends Controller
 
             fclose($file);
         };
+
+        $this->logger->log('Ekspor Log Top Up', 'Admin mengekspor log top up ke CSV');
 
         return Response::stream($callback, 200, $headers);
     }

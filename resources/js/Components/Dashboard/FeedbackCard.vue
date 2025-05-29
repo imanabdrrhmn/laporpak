@@ -10,10 +10,10 @@
           <i class="bi bi-chat-text text-muted"></i>
         </div>
         <p class="text-muted mb-4">Belum ada ulasan</p>
-        <button class="btn btn-primary btn-sm px-4">
+        <Link href="/feedback" class="btn btn-primary btn-sm px-4">
           <i class="bi bi-plus-circle me-2"></i>
           Buat Ulasan
-        </button>
+        </Link>
       </div>
 
       <div v-else>
@@ -44,6 +44,7 @@
 </template>
 
 <script setup>
+import { Link } from '@inertiajs/vue3'
 defineProps({
   feedbacks: Array,
 });

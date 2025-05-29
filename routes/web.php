@@ -18,7 +18,7 @@ use App\Models\Report;
 
 
 Route::get('/', function () {
-    $feedbacks = Feedback::with('user')->where('kategori', 'Umum')->latest()->take(10)->get();
+    $feedbacks = Feedback::with('user')->latest()->take(10)->get();
     $verifiedReports = Report::whereIn('status', ['published', 'approved'])->count();
     $totalReports = Report::count();
     $fraudReports = Report::where('service', 'Penipuan')->count();

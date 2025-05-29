@@ -9,47 +9,28 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Http;
+use App\Services\ActivityLoggerService;
 
 class ReportController extends Controller
 {   
-        protected $provinces = [
-        'Aceh',
-        'Bali',
-        'Banten',
-        'Bengkulu',
-        'Gorontalo',
-        'Jakarta',
-        'Jambi',
-        'Jawa Barat',
-        'Jawa Tengah',
-        'Jawa Timur',
-        'Kalimantan Barat',
-        'Kalimantan Selatan',
-        'Kalimantan Tengah',
-        'Kalimantan Timur',
-        'Kalimantan Utara',
-        'Kepulauan Bangka Belitung',
-        'Kepulauan Riau',
-        'Lampung',
-        'Maluku',
-        'Maluku Utara',
-        'Nusa Tenggara Barat',
-        'Nusa Tenggara Timur',
-        'Papua',
-        'Papua Barat',
-        'Riau',
-        'Sulawesi Barat',
-        'Sulawesi Selatan',
-        'Sulawesi Tengah',
-        'Sulawesi Tenggara',
-        'Sulawesi Utara',
-        'Sumatera Barat',
-        'Sumatera Selatan',
-        'Sumatera Utara',
-        'Yogyakarta',
+    protected $provinces = [
+        'Aceh', 'Bali', 'Banten', 'Bengkulu', 'Gorontalo', 'Jakarta', 'Jambi',
+        'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Kalimantan Barat', 'Kalimantan Selatan',
+        'Kalimantan Tengah', 'Kalimantan Timur', 'Kalimantan Utara', 'Kepulauan Bangka Belitung',
+        'Kepulauan Riau', 'Lampung', 'Maluku', 'Maluku Utara', 'Nusa Tenggara Barat',
+        'Nusa Tenggara Timur', 'Papua', 'Papua Barat', 'Riau', 'Sulawesi Barat',
+        'Sulawesi Selatan', 'Sulawesi Tengah', 'Sulawesi Tenggara', 'Sulawesi Utara',
+        'Sumatera Barat', 'Sumatera Selatan', 'Sumatera Utara', 'Yogyakarta',
     ];
 
     use AuthorizesRequests;
+
+    protected $logger;
+
+    public function __construct(ActivityLoggerService $logger)
+    {
+        $this->logger = $logger;
+    }
 
     public function create(Request $request)
     {
@@ -91,7 +72,7 @@ class ReportController extends Controller
 
         $evidencePath = $request->file('evidence')->store('evidence', 'public');
 
-        Report::create([
+        $report = Report::create([
             'user_id' => auth()->id(),
             'category' => $request->category,
             'description' => $request->description,
@@ -105,9 +86,10 @@ class ReportController extends Controller
             'address' => $request->address,
         ]);
 
+        $this->logger->log('Kirim Laporan', 'Pengguna mengirim laporan baru di wilayah ' . $region);
+
         return back()->with('success', true);
     }
-
 
     public function edit(Request $request, Report $report)
     {
@@ -137,6 +119,8 @@ class ReportController extends Controller
             'source' => $request->source, 
             'address' => $request->address,  
         ]);
+
+        $this->logger->log('Update Laporan', 'Pengguna memperbarui laporan ID #' . $report->id);
 
         return redirect()->route('laporan.index')->with('success', 'Laporan berhasil diperbarui.');
     }
@@ -193,6 +177,7 @@ class ReportController extends Controller
             'query' => $query,
         ]);
     }
+
     public function flagReport(Request $request)
     {
         $request->validate([
@@ -219,6 +204,8 @@ class ReportController extends Controller
             'reason' => $request->reason,
         ]);
 
-        return back()->with('success', 'Laporan berhasil ditandai sebagai hoax/misinformasi.');
+        $this->logger->log('Melaporkan Laporan', 'Pengguna melaporkan laporan ID #' . $request->report_id);
+
+        return back()->with('success', 'Laporan berhasil dilaporkan.');
     }
 }
