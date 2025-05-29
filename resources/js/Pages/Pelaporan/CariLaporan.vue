@@ -42,10 +42,18 @@
         @change-page="changePage"
       />
 
+      <!-- Modal pelaporan -->
       <ReportDetailModal
         :isOpen="detailModalOpen"
         :report="selectedReport"
         @close="closeDetailModal"
+      />
+
+        <ReportFlagModal
+        :isOpen="flagModalOpen"
+        :reportId="selectedReport.id"
+        @close="flagModalOpen = false"
+        @flag-submitted="handleFlagSubmitted"
       />
 
       <Section :showSearch="false" />
@@ -56,6 +64,7 @@
 
 <script>
 import { debounce } from 'lodash';
+import { Inertia } from '@inertiajs/inertia';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Feedback from '@/Components/Feedback.vue';
 import { usePage, Head } from '@inertiajs/vue3';
@@ -65,6 +74,7 @@ import ResultsStats from '@/Components/CariLaporan/ResultsStats.vue';
 import ReportList from '@/Components/CariLaporan/ReportList.vue';
 import Pagination from '@/Components/CariLaporan/Pagination.vue';
 import ReportDetailModal from '@/Components/CariLaporan/ReportDetailModal.vue';
+import ReportFlagModal from '@/Components/CariLaporan/ReportFlagModal.vue';
 
 export default {
   name: 'FraudReportSearch',
@@ -78,6 +88,7 @@ export default {
     ReportList,
     Pagination,
     ReportDetailModal,
+    ReportFlagModal,
   },
   data() {
     return {
@@ -90,7 +101,9 @@ export default {
       itemsPerPage: 6,
       currentPage: 1,
       detailModalOpen: false,
+      flagModalOpen: false,
       selectedReport: {},
+      isFlagLoading: false,
     };
   },
   computed: {
@@ -201,6 +214,44 @@ export default {
       this.selectedReport = {};
       document.body.style.overflow = '';
     },
+    openFlagModal(report) {
+      this.selectedReport = report;
+      this.flagModalOpen = true;
+      this.isFlagLoading = false;
+      document.body.style.overflow = 'hidden';
+    },
+    closeFlagModal() {
+      this.flagModalOpen = false;
+      this.selectedReport = {};
+      this.isFlagLoading = false;
+      document.body.style.overflow = '';
+    },
+    submitFlag(reason, reportId) {
+      if (!reportId) {
+        alert('Laporan tidak valid.');
+        return;
+      }
+      this.isFlagLoading = true;
+      Inertia.post(
+        route('reports.flag'),
+        {
+          report_id: reportId,
+          reason: reason,
+        },
+        {
+          onSuccess: () => {
+            alert('Terima kasih, laporan berhasil dikirim.');
+            this.closeFlagModal();
+          },
+          onError: (errors) => {
+            alert(errors.reason || 'Terjadi kesalahan saat mengirim laporan.');
+          },
+          onFinish: () => {
+            this.isFlagLoading = false;
+          },
+        }
+      );
+    },
   },
   mounted() {
     this.reports = usePage().props.reports || [];
@@ -213,6 +264,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .search-container {

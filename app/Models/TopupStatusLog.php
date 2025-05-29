@@ -13,13 +13,11 @@ class TopUpStatusLog extends Model
         'status',
     ];
 
-    // Relasi ke TopUp
     public function topUp()
     {
         return $this->belongsTo(TopUp::class, 'topup_id');
     }
 
-    // Relasi ke User yang mengubah status
     public function changedBy()
     {
         return $this->belongsTo(User::class, 'changed_by');

@@ -3,12 +3,12 @@
     class="modal-overlay"
     :class="{ active: isOpen }"
     v-if="isOpen"
-    @click.self="$emit('close')"
+    @click.self="handleClose"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modalTitle"
   >
-    <div class="modal-container" :class="{ active: isOpen }">
+    <div class="modal-container" :class="{ active: isOpen }" role="document">
       <div class="modal-content">
         <!-- Header -->
         <div class="modal-header">
@@ -31,7 +31,8 @@
             type="button"
             class="close-button"
             aria-label="Close"
-            @click="$emit('close')"
+            @click="handleClose"
+            :disabled="isLoading || flagModalOpen"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <line x1="18" y1="6" x2="6" y2="18"/>
@@ -42,7 +43,7 @@
 
         <!-- Body -->
         <div class="modal-body">
-          <!-- Main Info Cards -->
+          <!-- Info Grid -->
           <div class="info-grid">
             <div class="info-card">
               <div class="info-header">
@@ -149,12 +150,19 @@
               </div>
             </div>
           </div>
+
+          <!-- Tombol buka modal laporan hoax -->
+          <div style="margin-top: 1rem;">
+            <button class="btn btn-primary" @click="flagModalOpen = true" :disabled="isLoading">
+              Laporkan
+            </button>
+          </div>
         </div>
 
         <!-- Footer -->
         <div class="modal-footer">
           <div class="footer-actions">
-            <button class="btn btn-secondary" @click="$emit('close')">
+            <button class="btn btn-secondary" @click="handleClose" :disabled="isLoading || flagModalOpen">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M9 11l3-3 3 3"/>
                 <path d="M22 12h-20"/>
@@ -165,6 +173,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal laporkan hoax terpisah -->
+    <ReportFlagModal
+      :isOpen="flagModalOpen"
+      :reportId="report.id"
+      @close="flagModalOpen = false"
+      @reported="onFlagReported"
+    />
 
     <!-- Image Modal -->
     <div v-if="imageModalOpen" class="image-modal-overlay" @click="closeImageModal">
@@ -182,20 +198,25 @@
 </template>
 
 <script>
+import ReportFlagModal from './ReportFlagModal.vue';
+
 export default {
-  name: 'EnhancedReportDetailModal',
+  name: 'ReportDetailModal',
+  components: { ReportFlagModal },
   props: {
     isOpen: Boolean,
     report: {
       type: Object,
-      default: () => ({})
+      default: () => ({}),
     },
   },
   emits: ['close'],
   data() {
     return {
       imageModalOpen: false,
-    }
+      flagModalOpen: false,
+      isLoading: false,
+    };
   },
   methods: {
     formatDate(dateStr) {
@@ -207,7 +228,7 @@ export default {
         month: 'long',
         year: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     },
     openImageModal() {
@@ -218,22 +239,35 @@ export default {
       this.imageModalOpen = false;
       document.body.style.overflow = 'auto';
     },
+    handleClose() {
+      if (this.isLoading || this.flagModalOpen) return;
+      this.flagModalOpen = false;
+      this.$emit('close');
+      document.body.style.overflow = 'auto';
+    },
+    onFlagReported() {
+      alert('Terima kasih, laporan berhasil dikirim.');
+      this.flagModalOpen = false;
+      this.handleClose();
+    }
   },
   watch: {
     isOpen(newVal) {
       if (newVal) {
         document.body.style.overflow = 'hidden';
       } else {
-        document.body.style.overflow = 'auto';
+        this.flagModalOpen = false;
         this.closeImageModal();
+        document.body.style.overflow = 'auto';
       }
-    }
+    },
   },
   beforeUnmount() {
     document.body.style.overflow = 'auto';
-  }
+  },
 };
 </script>
+
 
 <style scoped>
 .modal-overlay {

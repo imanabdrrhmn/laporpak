@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\ReportFlag;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -10,7 +11,44 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Http;
 
 class ReportController extends Controller
-{
+{   
+        protected $provinces = [
+        'Aceh',
+        'Bali',
+        'Banten',
+        'Bengkulu',
+        'Gorontalo',
+        'Jakarta',
+        'Jambi',
+        'Jawa Barat',
+        'Jawa Tengah',
+        'Jawa Timur',
+        'Kalimantan Barat',
+        'Kalimantan Selatan',
+        'Kalimantan Tengah',
+        'Kalimantan Timur',
+        'Kalimantan Utara',
+        'Kepulauan Bangka Belitung',
+        'Kepulauan Riau',
+        'Lampung',
+        'Maluku',
+        'Maluku Utara',
+        'Nusa Tenggara Barat',
+        'Nusa Tenggara Timur',
+        'Papua',
+        'Papua Barat',
+        'Riau',
+        'Sulawesi Barat',
+        'Sulawesi Selatan',
+        'Sulawesi Tengah',
+        'Sulawesi Tenggara',
+        'Sulawesi Utara',
+        'Sumatera Barat',
+        'Sumatera Selatan',
+        'Sumatera Utara',
+        'Yogyakarta',
+    ];
+
     use AuthorizesRequests;
 
     public function create(Request $request)
@@ -19,6 +57,7 @@ class ReportController extends Controller
 
         return Inertia::render('Pelaporan/pelaporan', [
             'feedbacks' => $feedbacks,
+            'provinces' => $this->provinces,
         ]);
     }
 
@@ -41,14 +80,15 @@ class ReportController extends Controller
             'location.lat' => 'required|numeric',
             'location.lng' => 'required|numeric',
             'service' => 'required|string',
-            'source' => 'nullable|string',  
-            'address' => 'nullable|string', 
+            'source' => 'nullable|string',
+            'address' => 'nullable|string',
+            'region' => 'required|string|in:' . implode(',', $this->provinces),
         ]);
         
         $lat = $request->input('location.lat');
         $lng = $request->input('location.lng');
+        $region = $request->input('region');
 
-        $region = $this->getRegionFromLatLng($lat, $lng);
         $evidencePath = $request->file('evidence')->store('evidence', 'public');
 
         Report::create([
@@ -61,12 +101,13 @@ class ReportController extends Controller
             'region' => $region,
             'service' => $request->service,
             'status' => 'pending',
-            'source' => $request->source,  
+            'source' => $request->source,
             'address' => $request->address,
         ]);
 
         return back()->with('success', true);
     }
+
 
     public function edit(Request $request, Report $report)
     {
@@ -113,7 +154,7 @@ class ReportController extends Controller
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($q2) use ($query) {
                     $q2->where('description', 'like', "%{$query}%")
-                    ->orWhere('source', 'like', "%{$query}%");  // Cari juga di kolom source
+                    ->orWhere('source', 'like', "%{$query}%");  
                 });
             })
             ->latest()
@@ -152,28 +193,32 @@ class ReportController extends Controller
             'query' => $query,
         ]);
     }
-
-    private function getRegionFromLatLng($lat, $lng)
+    public function flagReport(Request $request)
     {
-        $response = Http::withHeaders([
-            'User-Agent' => 'YourAppName/1.0' 
-        ])->get('https://nominatim.openstreetmap.org/reverse', [
-            'lat' => $lat,
-            'lon' => $lng,
-            'format' => 'json',
-            'addressdetails' => 1,
+        $request->validate([
+            'report_id' => 'required|exists:reports,id',
+            'reason' => 'nullable|string|max:1000',
         ]);
 
-        if ($response->failed()) {
-            return null;
+        $user = $request->user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Silakan login untuk melaporkan laporan.');
         }
 
-        $data = $response->json();
+        $exists = ReportFlag::where('report_id', $request->report_id)
+            ->where('user_id', $user->id)
+            ->exists();
 
-        if (!empty($data['address'])) {
-            return $data['address']['state'] ?? $data['address']['county'] ?? $data['address']['region'] ?? null;
+        if ($exists) {
+            return back()->with('error', 'Kamu sudah pernah melaporkan laporan ini.');
         }
 
-        return null;
+        ReportFlag::create([
+            'report_id' => $request->report_id,
+            'user_id' => $user->id,
+            'reason' => $request->reason,
+        ]);
+
+        return back()->with('success', 'Laporan berhasil ditandai sebagai hoax/misinformasi.');
     }
 }
