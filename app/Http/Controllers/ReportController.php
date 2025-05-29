@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\ReportFlag;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -191,5 +192,33 @@ class ReportController extends Controller
             'feedbacks' => $feedbacks,
             'query' => $query,
         ]);
+    }
+    public function flagReport(Request $request)
+    {
+        $request->validate([
+            'report_id' => 'required|exists:reports,id',
+            'reason' => 'nullable|string|max:1000',
+        ]);
+
+        $user = $request->user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Silakan login untuk melaporkan laporan.');
+        }
+
+        $exists = ReportFlag::where('report_id', $request->report_id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Kamu sudah pernah melaporkan laporan ini.');
+        }
+
+        ReportFlag::create([
+            'report_id' => $request->report_id,
+            'user_id' => $user->id,
+            'reason' => $request->reason,
+        ]);
+
+        return back()->with('success', 'Laporan berhasil ditandai sebagai hoax/misinformasi.');
     }
 }

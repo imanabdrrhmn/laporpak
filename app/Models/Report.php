@@ -62,4 +62,9 @@ class Report extends Model
 
         return $query->whereIn('region', $allowedRegions);
     }
+        public function flags()
+    {
+        return $this->hasMany(ReportFlag::class);
+    }
+
 }

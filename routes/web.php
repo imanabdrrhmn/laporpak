@@ -54,21 +54,22 @@ Route::get('/LaporMap', [LaporMapController::class, 'index'])->name('LaporMap');
 
 Route::get('/CariLaporan', [ReportController::class, 'search'])->name('CariLaporan');
 
+
 Route::get('/tentang-kami', function () {
     return Inertia::render('TentangKami');
 })->name('tentang-kami');
+
+Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+
+Route::middleware(['auth', 'contact.verified'])->group(function () {
+    Route::resource('feedback', FeedbackController::class)->except(['index', 'show']);
+});
 
 Route::middleware('auth','contact.verified')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
-});
-
-Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
-
-Route::middleware(['auth', 'contact.verified'])->group(function () {
-    Route::resource('feedback', FeedbackController::class)->except(['index', 'show']);
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -85,6 +86,7 @@ Route::middleware('auth','contact.verified')->group(function () {
     });
 
     Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
+    Route::post('/laporan/flag', [ReportController::class, 'flagReport'])->name('laporan.flag');
 
 });
 
