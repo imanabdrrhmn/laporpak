@@ -352,33 +352,17 @@
           </div>
         </div>
 
-        <!-- Toast Notification -->
-        <div
-          v-if="toast.show"
-          :class="['toast-notification', 'toast-' + toast.type]"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
-          <div class="toast-icon">
-            <i :class="toastIcon"></i>
-          </div>
-          <div class="toast-content">
-            {{ toast.message }}
-          </div>
-          <button
-            type="button"
-            class="toast-close"
-            aria-label="Close"
-            @click="toast.show = false"
-          >
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
+        <!-- Notification Component -->
+        <Notification
+          :show="toast.show"
+          :message="toast.message"
+          :type="toast.type"
+          @close="toast.show = false"
+        />
       </template>
 
       <template v-else>
-        <AccessDenied/>
+        <AccessDenied />
       </template>
     </div>
   </AppLayout>
@@ -390,9 +374,8 @@ import { Inertia } from "@inertiajs/inertia";
 import { usePage, Head } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Modal } from "bootstrap";
-import AccessDenied from '@/Components/AccessDenied.vue';
-
-
+import AccessDenied from "@/Components/AccessDenied.vue";
+import Notification from "@/Components/Notification.vue";
 
 const page = usePage();
 
@@ -411,10 +394,9 @@ const filters = ref({
   search: props.filters?.search || "",
 });
 
-
 const exportFilters = ref({
-  start_date: '',
-  end_date: '',
+  start_date: "",
+  end_date: "",
 });
 
 const loadingIds = ref([]);
@@ -422,14 +404,11 @@ const proofModalRef = ref(null);
 const proofModalInstance = ref(null);
 const proofModalUrl = ref("");
 
-const exportModalRef = ref(null);
-const exportModalInstance = ref(null);
-
 const actionModalRef = ref(null);
 let actionModalInstance = null;
 const selectedTopUp = ref(null);
 
-// Flag untuk pause polling saat modal dibuka
+// Flag pause polling saat modal terbuka
 const isModalOpen = ref(false);
 
 // Modal Aksi
@@ -438,8 +417,7 @@ const openActionModal = (topUp) => {
   isModalOpen.value = true;
   if (!actionModalInstance && actionModalRef.value) {
     actionModalInstance = new Modal(actionModalRef.value);
-    // Deteksi saat modal ditutup untuk resume polling
-    actionModalInstance._element.addEventListener('hidden.bs.modal', () => {
+    actionModalInstance._element.addEventListener("hidden.bs.modal", () => {
       isModalOpen.value = false;
       selectedTopUp.value = null;
     });
@@ -457,7 +435,7 @@ const showProofModal = (path) => {
   isModalOpen.value = true;
   if (!proofModalInstance.value && proofModalRef.value) {
     proofModalInstance.value = new Modal(proofModalRef.value);
-    proofModalInstance.value._element.addEventListener('hidden.bs.modal', () => {
+    proofModalInstance.value._element.addEventListener("hidden.bs.modal", () => {
       isModalOpen.value = false;
       proofModalUrl.value = "";
     });
@@ -472,10 +450,10 @@ const closeProofModal = () => {
 // Polling data topUps, skip kalau modal terbuka
 const fetchTopUps = () => {
   if (isModalOpen.value) return;
-  Inertia.get('/admin/top-ups', filters.value, {
+  Inertia.get("/admin/top-ups", filters.value, {
     preserveState: true,
     replace: true,
-    only: ['topUps'],
+    only: ["topUps"],
   });
 };
 
@@ -497,21 +475,25 @@ const confirmVerify = () => {
   loadingIds.value.push(selectedTopUp.value.id);
   Inertia.post(`/admin/top-ups/${selectedTopUp.value.id}/verify`, {}, {
     onFinish: () => {
-      loadingIds.value = loadingIds.value.filter(id => id !== selectedTopUp.value.id);
+      loadingIds.value = loadingIds.value.filter((id) => id !== selectedTopUp.value.id);
       closeActionModal();
-    }
+    },
   });
 };
 
 const confirmSetPending = () => {
   if (!selectedTopUp.value) return;
   loadingIds.value.push(selectedTopUp.value.id);
-  Inertia.post(`/admin/top-ups/${selectedTopUp.value.id}/update-status`, { status: 'pending' }, {
-    onFinish: () => {
-      loadingIds.value = loadingIds.value.filter(id => id !== selectedTopUp.value.id);
-      closeActionModal();
+  Inertia.post(
+    `/admin/top-ups/${selectedTopUp.value.id}/update-status`,
+    { status: "pending" },
+    {
+      onFinish: () => {
+        loadingIds.value = loadingIds.value.filter((id) => id !== selectedTopUp.value.id);
+        closeActionModal();
+      },
     }
-  });
+  );
 };
 
 const confirmReject = () => {
@@ -519,22 +501,16 @@ const confirmReject = () => {
   loadingIds.value.push(selectedTopUp.value.id);
   Inertia.post(`/admin/top-ups/${selectedTopUp.value.id}/reject`, {}, {
     onFinish: () => {
-      loadingIds.value = loadingIds.value.filter(id => id !== selectedTopUp.value.id);
+      loadingIds.value = loadingIds.value.filter((id) => id !== selectedTopUp.value.id);
       closeActionModal();
-    }
+    },
   });
 };
 
 // Hitung jumlah status
-const pendingCount = computed(() =>
-  props.statusCounts?.pending ?? 0
-);
-const verifiedCount = computed(() =>
-  props.statusCounts?.verified ?? 0
-);
-const rejectedCount = computed(() =>
-  props.statusCounts?.rejected ?? 0
-);
+const pendingCount = computed(() => props.statusCounts?.pending ?? 0);
+const verifiedCount = computed(() => props.statusCounts?.verified ?? 0);
+const rejectedCount = computed(() => props.statusCounts?.rejected ?? 0);
 
 // Update filter pencarian/status
 const updateFilters = () => {
@@ -562,12 +538,11 @@ const formatDate = (date) => {
     time: new Intl.DateTimeFormat("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
-    }).format(dateObj)
+    }).format(dateObj),
   };
 };
 
-const capitalize = (str) =>
-  str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const statusBadgeClass = (status) => {
   switch (status.toLowerCase()) {
@@ -600,6 +575,9 @@ const totalPages = computed(() => {
 });
 
 // Modal Export Logs
+const exportModalRef = ref(null);
+const exportModalInstance = ref(null);
+
 const showExportModal = () => {
   if (!exportModalInstance.value && exportModalRef.value) {
     exportModalInstance.value = new Modal(exportModalRef.value);
@@ -622,24 +600,11 @@ const exportLogs = () => {
   closeExportModal();
 };
 
-// Toast notification
+// Toast notification (integrasi Notification.vue)
 const toast = ref({
   show: false,
   message: "",
   type: "success",
-});
-
-const toastIcon = computed(() => {
-  switch (toast.value.type) {
-    case "success":
-      return "fas fa-check-circle";
-    case "danger":
-      return "fas fa-exclamation-circle";
-    case "warning":
-      return "fas fa-exclamation-triangle";
-    default:
-      return "fas fa-info-circle";
-  }
 });
 
 watch(
@@ -660,7 +625,6 @@ watch(
   { immediate: true }
 );
 </script>
-
 
 <style scoped>
 .container {
@@ -811,72 +775,6 @@ watch(
 .empty-state p {
   margin-bottom: 0;
   color: #6c757d;
-}
-
-/* Toast Notification */
-.toast-notification {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  display: flex;
-  align-items: center;
-  min-width: 300px;
-  max-width: 400px;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-  z-index: 1200;
-  animation: slideIn 0.3s ease-out;
-}
-
-.toast-success {
-  background-color: #d4edda;
-  border-left: 4px solid #28a745;
-}
-
-.toast-danger {
-  background-color: #f8d7da;
-  border-left: 4px solid #dc3545;
-}
-
-.toast-icon {
-  margin-right: 0.75rem;
-  font-size: 1.25rem;
-}
-
-.toast-success .toast-icon {
-  color: #28a745;
-}
-
-.toast-danger .toast-icon {
-  color: #dc3545;
-}
-
-.toast-content {
-  flex-grow: 1;
-}
-
-.toast-close {
-  background: none;
-  border: none;
-  font-size: 0.9rem;
-  opacity: 0.5;
-  transition: opacity 0.2s;
-}
-
-.toast-close:hover {
-  opacity: 1;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
 }
 
 /* Responsive Styles */

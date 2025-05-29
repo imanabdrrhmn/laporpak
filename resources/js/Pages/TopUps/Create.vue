@@ -128,39 +128,13 @@
         </div>
       </div>
 
-      <!-- Toast Notifikasi Sukses -->
-      <div
-        class="toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-        ref="successToast"
-        style="z-index: 1100;"
-      >
-        <div class="d-flex">
-          <div class="toast-body">
-            Top up berhasil dikirim!
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      </div>
-
-      <!-- Toast Notifikasi Error -->
-      <div
-        class="toast align-items-center text-bg-danger border-0 position-fixed bottom-0 end-0 m-3"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-        ref="errorToast"
-        style="z-index: 1100;"
-      >
-        <div class="d-flex">
-          <div class="toast-body" ref="errorToastMessage">
-            <!-- error message akan diset dinamis -->
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      </div>
+      <!-- Notification Component -->
+      <Notification
+        :show="notification.show"
+        :type="notification.type"
+        :message="notification.message"
+        @close="notification.show = false"
+      />
     </div>
   </AppLayout>
 </template>
@@ -171,7 +145,9 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import axios from 'axios';
 import { Head } from '@inertiajs/vue3';
 import { useRouter } from 'vue-router';
-import { Modal, Toast } from 'bootstrap';
+import { Modal } from 'bootstrap';
+
+import Notification from '@/Components/Notification.vue';
 
 const router = useRouter();
 const depositAmount = ref(100000);
@@ -182,13 +158,15 @@ const proofFile = ref(null);
 const proofPreview = ref(null);
 const isLoading = ref(false);
 const modalRef = ref(null);
-const successToast = ref(null);
-const errorToast = ref(null);
-const errorToastMessage = ref(null);
 
 let modalInstance = null;
-let toastSuccessInstance = null;
-let toastErrorInstance = null;
+
+// Notification state
+const notification = ref({
+  show: false,
+  message: '',
+  type: 'success', // 'success' | 'danger' | 'warning' etc
+});
 
 // Format ke mata uang IDR
 const formatCurrency = (value) =>
@@ -231,7 +209,7 @@ const isFormValid = computed(() =>
 
 const showPaymentSummary = () => {
   if (!isFormValid.value) {
-    showErrorToast('Harap lengkapi semua kolom.');
+    showNotification('Harap lengkapi semua kolom.', 'danger');
     return;
   }
   if (!modalInstance) {
@@ -256,21 +234,20 @@ const resetForm = () => {
   if (inputFile) inputFile.value = '';
 };
 
-const showErrorToast = (message) => {
-  if (errorToastMessage.value) {
-    errorToastMessage.value.textContent = message;
-  }
-  toastErrorInstance?.show();
-};
+// Show notification helper
+function showNotification(message, type = 'success') {
+  notification.value.show = false;
+  setTimeout(() => {
+    notification.value.message = message;
+    notification.value.type = type;
+    notification.value.show = true;
 
-onMounted(() => {
-  if (successToast.value) {
-    toastSuccessInstance = new Toast(successToast.value);
-  }
-  if (errorToast.value) {
-    toastErrorInstance = new Toast(errorToast.value);
-  }
-});
+    // auto-hide setelah 5 detik
+    setTimeout(() => {
+      notification.value.show = false;
+    }, 5000);
+  }, 50);
+}
 
 const submitTopUp = async () => {
   isLoading.value = true;
@@ -283,7 +260,7 @@ const submitTopUp = async () => {
     await axios.post('/top-ups/create', formData);
 
     closeModal();
-    toastSuccessInstance?.show();
+    showNotification('Top up berhasil dikirim!', 'success');
     resetForm();
 
     setTimeout(() => {
@@ -291,12 +268,11 @@ const submitTopUp = async () => {
     }, 2000);
   } catch (error) {
     resetForm();
-    showErrorToast(error.response?.data?.message || 'Gagal mengirim top up');
+    showNotification(error.response?.data?.message || 'Gagal mengirim top up', 'danger');
   } finally {
     isLoading.value = false;
   }
 };
-
 
 const isZoomed = ref(false);
 
@@ -336,5 +312,4 @@ const toggleZoom = () => {
   border-radius: 0.5rem;
   user-select: none;
 }
-
 </style>

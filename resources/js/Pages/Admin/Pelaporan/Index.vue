@@ -49,7 +49,7 @@
     />
 
     <Notification
-      v-if="toast.visible"
+      :show="toast.visible"
       :type="toast.type"
       :message="toast.message"
       @close="toast.visible = false"
@@ -68,7 +68,7 @@ import ReportsContainer from './Components/ReportsContainer.vue'
 import Pagination from './Components/Pagination.vue'
 import Modal from './Components/LaporanDetailModal.vue'
 import UnpublishModal from './Components/UnpublishModal.vue'
-import Notification from '@/Components/Notification.vue' // pastikan path benar
+import Notification from '@/Components/Notification.vue'
 
 const props = defineProps({
   reports: {
@@ -162,8 +162,14 @@ function showToast(message, type = 'success') {
     toast.value.message = message;
     toast.value.type = type;
     toast.value.visible = true;
+
+
+    setTimeout(() => {
+      toast.value.visible = false;
+    }, 3000);
   }, 50);
 }
+
 
 
 const viewReport = (report) => {
@@ -197,13 +203,13 @@ const actionEndpoints = (report) => ({
 
 const onQuickAction = ({ report, action }) => {
   if (!report?.id) {
-    showToast('Laporan tidak valid. Silakan coba lagi.', 'error')
+    showToast('Laporan tidak valid. Silakan coba lagi.', 'danger')
     return
   }
 
   if (action === 'unpublish') {
     if (report.status !== 'published') {
-      showToast('Hanya laporan yang sudah dipublikasikan yang bisa dibatalkan publikasinya.', 'error')
+      showToast('Hanya laporan yang sudah dipublikasikan yang bisa dibatalkan publikasinya.', 'danger')
       return
     }
     unpublishTargetReport = report
@@ -213,14 +219,14 @@ const onQuickAction = ({ report, action }) => {
 
   if (action === 'solved') {
     if (report.status !== 'published') {
-      showToast('Hanya laporan yang sudah dipublikasikan yang bisa ditandai selesai.', 'error')
+      showToast('Hanya laporan yang sudah dipublikasikan yang bisa ditandai selesai.', 'danger')
       return
     }
   }
 
   const url = actionEndpoints(report)[action]
   if (!url) {
-    showToast('Aksi tidak dikenali.', 'error')
+    showToast('Aksi tidak dikenali.', 'danger')
     return
   }
 
@@ -254,7 +260,7 @@ const patchStatus = (reportId, action, url, extraData = {}) => {
       showToast('Status laporan berhasil diperbarui.', 'success')
     },
     onError: (errors) => {
-      showToast('Gagal memperbarui status: ' + (errors.error || 'Terjadi kesalahan'), 'error')
+      showToast('Gagal memperbarui status: ' + (errors.error || 'Terjadi kesalahan'), 'danger')
       loading.value[reportId] = false
       loadingUnpublish.value = false
       showUnpublishModal.value = false
@@ -270,7 +276,7 @@ const closeUnpublishModal = () => {
 const confirmUnpublish = (reason) => {
   if (!unpublishTargetReport) return
   if (!reason || !reason.trim()) {
-    showToast('Alasan harus diisi', 'error')
+    showToast('Alasan harus diisi', 'danger')
     return
   }
   loadingUnpublish.value = true
