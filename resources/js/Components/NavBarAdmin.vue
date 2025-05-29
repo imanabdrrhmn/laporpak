@@ -38,7 +38,7 @@
           </li>
           <li class="nav-item">
             <Link class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/top-ups' }" href="/admin/top-ups">
-              <i class introd="bi bi-wallet-fill"></i>
+              <i class ="bi bi-wallet-fill"></i>
               <span>Manajemen Top-up</span>
             </Link>
           </li>
