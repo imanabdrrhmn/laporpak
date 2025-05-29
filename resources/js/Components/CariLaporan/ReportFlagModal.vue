@@ -24,15 +24,19 @@
         </header>
 
         <section class="modal-body">
-          <label for="reasonInput" class="form-label">Alasan Pelaporan</label>
-          <textarea
-            id="reasonInput"
+          <label for="reasonSelect" class="form-label">Alasan Pelaporan</label>
+          <select
+            id="reasonSelect"
             v-model="reason"
-            placeholder="Masukkan alasan mengapa laporan ini hoax atau misinformasi"
-            rows="4"
             :disabled="isLoading"
             class="form-control"
-          ></textarea>
+          >
+            <option disabled value="">-- Pilih alasan --</option>
+            <option value="Hoax">Hoax</option>
+            <option value="Spam">Spam</option>
+            <option value="Konten Tidak Pantas">Konten Tidak Pantas</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
         </section>
 
         <footer class="modal-footer">
@@ -45,7 +49,7 @@
           <button
             class="btn btn-primary"
             @click="submitReport"
-            :disabled="isLoading"
+            :disabled="isLoading || !reason"
           >
             <span v-if="isLoading">Mengirim...</span>
             <span v-else>Laporkan</span>
@@ -86,11 +90,15 @@ export default {
         alert('Laporan tidak valid.');
         return;
       }
+      if (!this.reason) {
+        alert('Silakan pilih alasan pelaporan.');
+        return;
+      }
 
       this.isLoading = true;
 
       Inertia.post(
-        route('laporan.flag'), // Pastikan route ini sesuai dengan backend-mu
+        route('laporan.flag'), // Pastikan route backend sesuai
         {
           report_id: this.reportId,
           reason: this.reason,

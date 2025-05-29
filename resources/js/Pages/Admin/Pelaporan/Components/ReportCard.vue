@@ -1,4 +1,3 @@
-<!-- resources/js/Components/Pelaporan/ReportCard.vue -->
 <template>
   <div class="report-card">
     <div :class="['report-badge', report.status]"></div>
@@ -32,6 +31,9 @@
         </div>
       </div>
       <p class="description">{{ truncate(report.description, 120) }}</p>
+    </div>
+    <div class="flag-info">
+      <strong>Laporan :</strong> {{ flagCount }}
     </div>
     <div class="report-actions">
       <button @click="$emit('viewReport', report)" class="view-button">
@@ -105,6 +107,17 @@ const getPublishButtonClasses = computed(() => ({
   'loading': props.loading,
   'disabled': props.report.status === 'pending' || props.report.status === 'rejected'
 }));
+
+// Compute flag count based on report.flags array or flags_count number
+const flagCount = computed(() => {
+  if (props.report?.flags && Array.isArray(props.report.flags)) {
+    return props.report.flags.length;
+  }
+  if (typeof props.report?.flags_count === 'number') {
+    return props.report.flags_count;
+  }
+  return 0;
+});
 </script>
 
 <style scoped>
@@ -254,6 +267,14 @@ const getPublishButtonClasses = computed(() => ({
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.flag-info {
+  padding: 0 16px;
+  font-weight: 600;
+  color: #444;
+  margin-top: 12px;
+  margin-bottom: 12px;
 }
 
 .report-actions {

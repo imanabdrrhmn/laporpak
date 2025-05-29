@@ -4,7 +4,6 @@
       <button class="close-btn" @click="closeModal">×</button>
 
       <div v-if="report && report.id">
-        <!-- Gambar Bukti -->
         <p>
       <div>
         <strong>Bukti:</strong><br />
@@ -21,7 +20,6 @@
         </a>
       </div>
     </p>
-
 
         <!-- Judul & Status -->
         <div class="modal-header">
@@ -53,6 +51,12 @@
         <div class="modal-section">
           <strong>Deskripsi:</strong>
           <p class="description">{{ report.description }}</p>
+        </div>
+
+        <div class="flag-info">
+          <button class="btn btn-primary" @click="openFlagModal">
+            Lihat Laporan
+          </button>
         </div>
 
         <!-- Action Buttons -->
@@ -91,16 +95,23 @@
       @cancel="() => (confirmVisible = false)"
     />
   </div>
+
+  <ReportFlagModal
+    :isOpen="flagModalOpen"
+    :flags="reportFlags"
+    @close="flagModalOpen = false"
+  />
 </template>
 
 <script setup>
 import { router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue'
+import ReportFlagModal from './ReportFlagModal.vue'
 
-const { report, isVisible } = defineProps({
+const props = defineProps({
   report: Object,
-  isVisible: Boolean
+  isVisible: Boolean,
 })
 
 const emit = defineEmits(['close'])
@@ -109,7 +120,7 @@ const closeModal = () => emit('close')
 
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1)
 
-// Confirmation logic
+// Confirmation dialog state & logic
 const confirmVisible = ref(false)
 const confirmTitle = ref('')
 const confirmMessage = ref('')
@@ -129,7 +140,7 @@ const onConfirm = () => {
 
 const handleApprove = () => {
   confirmWithModal(() => {
-    router.patch(`/pelaporan/${report.id}/terima`, {}, {
+    router.patch(`/pelaporan/${props.report.id}/terima`, {}, {
       preserveScroll: true,
       onSuccess: () => emit('close'),
     })
@@ -138,7 +149,7 @@ const handleApprove = () => {
 
 const handleReject = () => {
   confirmWithModal(() => {
-    router.patch(`/pelaporan/${report.id}/tolak`, {}, {
+    router.patch(`/pelaporan/${props.report.id}/tolak`, {}, {
       preserveScroll: true,
       onSuccess: () => {
         router.reload({ only: ['reports'] })
@@ -150,19 +161,44 @@ const handleReject = () => {
 
 const handlePublish = () => {
   confirmWithModal(() => {
-    router.patch(`/pelaporan/${report.id}/publikasikan`, {}, {
+    router.patch(`/pelaporan/${props.report.id}/publikasikan`, {}, {
       preserveScroll: true,
       onSuccess: () => emit('close')
     })
   }, 'Publikasikan Laporan', 'Laporan akan dipublikasikan ke publik.')
 }
 
+// Image aspect ratio
 const isPortrait = ref(false)
-
 const onImageLoad = (event) => {
   const { naturalWidth, naturalHeight } = event.target
   isPortrait.value = naturalHeight > naturalWidth
 }
+
+// --- Modal Flag Related ---
+const flagModalOpen = ref(false)
+const reportFlags = ref([])
+
+const openFlagModal = async () => {
+  if (!props.report?.id) {
+    alert('Report ID tidak ditemukan');
+    return;
+  }
+  try {
+    const response = await fetch(`/pelaporan/${props.report.id}/flags`);
+    if (!response.ok) throw new Error('Gagal mengambil laporan flag');
+    const data = await response.json();
+    reportFlags.value = data.flags || [];
+    flagModalOpen.value = true;
+  } catch (error) {
+    alert(error.message || 'Gagal mengambil laporan flag');
+  }
+};
+
+const closeFlagModal = () => {
+  flagModalOpen.value = false
+}
+
 
 </script>
 

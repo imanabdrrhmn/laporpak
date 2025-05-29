@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Report;
 use App\Models\Feedback;
+use App\Models\ReportFlag;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -14,51 +15,55 @@ class ReportManagementController
 {
     use AuthorizesRequests;
 
-    // Menampilkan semua laporan
     public function index(Request $request)
     {
-    $user = $request->user();
+        $user = $request->user();
 
-    if (!$user || !($user->hasRole('admin') || $user->hasRole('verifier'))) {
-        abort(403, 'Unauthorized action.');
+        if (!$user || !($user->hasRole('admin') || $user->hasRole('verifier'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $reports = Report::with('user')
+            ->withCount('flags')
+            ->latest()
+            ->get()
+            ->filter(function ($report) use ($user) {
+                return $user->can('view', $report);
+            })
+            ->map(function ($report) {
+                return [
+                    'id' => $report->id,
+                    'user_id' => $report->user_id,
+                    'user' => [
+                        'id' => $report->user->id,
+                        'name' => $report->user->name,
+                        'avatar_url' => $report->user->avatar
+                            ? asset('storage/' . $report->user->avatar)
+                            : asset('/Default-Profile.png'),
+                    ],
+                    'category' => $report->category,
+                    'description' => $report->description,
+                    'status' => $report->status,
+                    'latitude' => $report->latitude,
+                    'longitude' => $report->longitude,
+                    'address' => $report->address,
+                    'service' => $report->service,
+                    'source' => $report->source,
+                    'created_at' => $report->created_at->toDateTimeString(),
+                    'evidence' => $report->evidence
+                        ? asset('storage/' . $report->evidence)
+                        : null,
+                    'flags_count' => $report->flags_count,
+                ];
+            });
+
+        return Inertia::render('Admin/Pelaporan/Index', [
+            'reports' => $reports->values()->all(),
+            'can' => [
+                'verifyReports' => $request->user()->can('verify_reports'),
+            ],
+        ]);
     }
-
-    $reports = Report::with('user')->latest()->get()->filter(function ($report) use ($user) {
-        return $user->can('view', $report); 
-    })->map(function ($report) {
-    return [
-        'id' => $report->id,
-        'user_id' => $report->user_id,
-        'user' => [
-            'id' => $report->user->id,
-            'name' => $report->user->name,
-            'avatar_url' => $report->user->avatar 
-                ? asset('storage/' . $report->user->avatar) 
-                : asset('/Default-Profile.png'),
-        ],
-        'category' => $report->category,
-        'description' => $report->description,
-        'status' => $report->status,
-        'latitude' => $report->latitude,
-        'longitude' => $report->longitude,
-        'address' => $report->address,
-        'service' => $report->service,
-        'source' => $report->source,
-        'created_at' => $report->created_at->toDateTimeString(),
-        'evidence' => $report->evidence 
-            ? asset('storage/' . $report->evidence) 
-            : null,
-    ];
-});
-
-
-    return Inertia::render('Admin/Pelaporan/Index', [
-        'reports' => $reports->values()->all(),
-        'can' => [
-            'verifyReports' => $request->user()->can('verify_reports'),
-        ],
-    ]);
-}
 
     public function destroy(Request $request, Report $report)
     {
@@ -102,4 +107,30 @@ class ReportManagementController
 
         return redirect()->route('laporan.index')->with('success', 'Laporan dipublikasikan');
     }
+
+
+    public function getFlags(Report $report)
+    {
+        $this->authorize('verify_reports', $report);
+
+        $flags = $report->flags()->with('user')->get()->map(function ($flag) {
+            return [
+                'id' => $flag->id,
+                'reason' => $flag->reason,
+                'created_at' => $flag->created_at->toDateTimeString(),
+                'user' => [
+                    'id' => $flag->user->id,
+                    'name' => $flag->user->name,
+                    'avatar_url' => $flag->user->avatar
+                        ? asset('storage/' . $flag->user->avatar)
+                        : asset('/Default-Profile.png'),
+                ],
+            ];
+        });
+
+        return response()->json([
+            'flags' => $flags,
+        ]);
+    }
+
 }

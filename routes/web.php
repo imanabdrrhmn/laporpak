@@ -83,6 +83,7 @@ Route::middleware('auth','contact.verified')->group(function () {
         Route::patch('/pelaporan/{report}/tolak', [ReportManagementController::class, 'reject'])->name('laporan.tolak');
         Route::patch('/pelaporan/{report}/publikasikan', [ReportManagementController::class, 'publish'])->name('laporan.publikasikan');
         Route::delete('/pelaporan/{report}/hapus', [ReportManagementController::class, 'destroy'])->name('laporan.hapus');
+        Route::get('/pelaporan/{report}/flags', [ReportManagementController::class, 'getFlags'])->name('laporan.flags');
     });
 
     Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
