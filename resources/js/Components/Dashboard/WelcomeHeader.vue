@@ -1,7 +1,7 @@
 <template>
   <div class="welcome-container">
-    <div class="welcome-header">
-      <div class="container-fluid">
+    <div class="container-fluid">
+      <div class="welcome-header-card">
         <div class="row align-items-center">
           <div class="col-md-8">
             <div class="welcome-content">
@@ -173,17 +173,27 @@ onUnmounted(() => {
   width: 100%;
 }
 
-.welcome-header {
-  background: linear-gradient(135deg, #2563EB 0%, #377CF4 100%);
-  color: white;
-  padding: clamp(1.5rem, 4vw, 2rem) 0;
-  border-radius: 1rem;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: clamp(1.5rem, 4vw, 2rem); /* Menambahkan jarak di bawah welcome-header */
+/* Card Container untuk memastikan semua card memiliki lebar yang sama */
+.welcome-header-card,
+.saldo-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.welcome-header::before {
+.welcome-header-card {
+  background: linear-gradient(135deg, #2563EB 0%, #377CF4 100%);
+  color: white;
+  padding: 1.5rem; /* Padding tetap sama */
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
+}
+
+.welcome-header-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -240,11 +250,9 @@ onUnmounted(() => {
 .saldo-card {
   background: white;
   border-radius: 1rem;
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: 1.5rem; /* Padding sama dengan welcome-header-card */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.05);
-  width: 100%;
-  max-width: 100%;
 }
 
 .saldo-header {
@@ -453,6 +461,7 @@ onUnmounted(() => {
     font-size: 2rem;
   }
 
+  .welcome-header-card,
   .saldo-card {
     padding: 1.25rem;
   }
@@ -480,6 +489,7 @@ onUnmounted(() => {
     margin-top: 1rem;
   }
 
+  .welcome-header-card,
   .saldo-card {
     padding: 1rem;
   }
@@ -504,16 +514,13 @@ onUnmounted(() => {
 }
 
 @media (max-width: 576px) {
-  .welcome-header {
-    padding: 1rem 0;
+  .welcome-header-card,
+  .saldo-card {
+    padding: 0.75rem;
   }
 
   .welcome-title {
     font-size: 1.5rem;
-  }
-
-  .saldo-card {
-    padding: 0.75rem;
   }
 
   .saldo-title {
@@ -535,13 +542,4 @@ onUnmounted(() => {
   }
 }
 
-/* Animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.welcome-header, .saldo-card, .info-card {
-  animation: fadeIn 0.6s ease-out;
-}
 </style>
