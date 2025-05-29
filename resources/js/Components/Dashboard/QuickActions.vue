@@ -151,7 +151,6 @@ const handleAction = (aksi) => {
 
 <style scoped>
 .aksi-cepat-container {
-  padding: clamp(1rem, 3vw, 1.5rem);
   margin-bottom: 2rem;
   width: 100%;
 }
@@ -167,7 +166,7 @@ const handleAction = (aksi) => {
 .quick-actions-wrapper {
   background: #ffffff;
   border-radius: 1rem;
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(1rem, 3vw, 1.5rem); 
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
@@ -185,7 +184,7 @@ const handleAction = (aksi) => {
   background: transparent;
   border: none;
   box-shadow: none;
-  padding: 1rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
 }
 
 .wrapper-colorful {
@@ -195,12 +194,12 @@ const handleAction = (aksi) => {
 
 .quick-actions-grid {
   display: grid;
-  gap: clamp(0.5rem, 2vw, 1rem);
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Menyesuaikan untuk memanjang */
+  gap: clamp(1rem, 3vw, 2rem);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
 .layout-grid {
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Memanjang dengan distribusi yang lebih baik */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
 .layout-horizontal {
@@ -378,15 +377,22 @@ const handleAction = (aksi) => {
   .layout-grid {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
+  .quick-actions-grid {
+    gap: clamp(0.75rem, 2.5vw, 1.5rem);
+  }
 }
 
 @media (max-width: 768px) {
   .quick-actions-wrapper {
-    padding: 1rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
   }
 
   .layout-grid {
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+
+  .quick-actions-grid {
+    gap: clamp(0.5rem, 2vw, 1rem);
   }
 
   .size-medium .action-item {
@@ -405,11 +411,15 @@ const handleAction = (aksi) => {
 
 @media (max-width: 576px) {
   .quick-actions-wrapper {
-    padding: 0.75rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
   }
 
   .layout-grid {
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  }
+
+  .quick-actions-grid {
+    gap: clamp(0.5rem, 1.5vw, 0.75rem);
   }
 
   .action-item {

@@ -73,7 +73,7 @@ const aktivitasList = computed(() =>
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(1rem, 3vw, 1.5rem); 
   width: 100%;
   max-width: 100%;
 }
@@ -82,7 +82,7 @@ const aktivitasList = computed(() =>
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 1.5rem); 
   background: #ffffff;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
@@ -118,7 +118,7 @@ const aktivitasList = computed(() =>
   position: relative;
   display: flex;
   align-items: center;
-  padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.5rem); 
   transition: background-color 0.2s ease;
   width: 100%;
 }
@@ -196,7 +196,7 @@ const aktivitasList = computed(() =>
 
 .empty-state {
   text-align: center;
-  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1.5rem); 
 }
 
 .empty-icon svg {
@@ -213,7 +213,7 @@ const aktivitasList = computed(() =>
 
 @media (max-width: 768px) {
   .aktivitas-card {
-    padding: 0.75rem;
+    padding: 1rem; 
   }
 
   .card-header {
