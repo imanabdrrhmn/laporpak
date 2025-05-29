@@ -8,37 +8,47 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Report;
+use App\Services\ActivityLoggerService;
 
 class ProfileController extends Controller
 {
+    protected $logger;
+
+    public function __construct(ActivityLoggerService $logger)
+    {
+        $this->logger = $logger;
+    }
+
     /**
      * Display the user's profile form.
      */
     public function edit(Request $request): Response
     {
-    $user = $request->user();
-    $reportCounts = Report::selectRaw("
-            COUNT(*) as total,
-            SUM(CASE WHEN status = 'Published' THEN 1 ELSE 0 END) as selected,
-            SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as in_process
-        ")
-        ->where('user_id', $user->id)
-        ->first();
+        $user = $request->user();
 
-    $stats = [
-        'reports' => $reportCounts->total ?? 0,
-        'selected' => $reportCounts->selected ?? 0,
-        'in_process' => $reportCounts->in_process ?? 0,
-        'joined_at' => $user->created_at->translatedFormat('d F Y'),
-        'is_verified' => $user->hasVerifiedEmail(),
-        'is_active_reporter' => $reportCounts->total > 3,
-    ];
+        $reportCounts = Report::selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'Published' THEN 1 ELSE 0 END) as selected,
+                SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as in_process
+            ")
+            ->where('user_id', $user->id)
+            ->first();
+
+        $stats = [
+            'reports' => $reportCounts->total ?? 0,
+            'selected' => $reportCounts->selected ?? 0,
+            'in_process' => $reportCounts->in_process ?? 0,
+            'joined_at' => $user->created_at->translatedFormat('d F Y'),
+            'is_verified' => $user->hasVerifiedEmail(),
+            'is_active_reporter' => $reportCounts->total > 3,
+        ];
+
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
             'stats' => $stats,
         ]);
@@ -49,18 +59,23 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
+
+        $this->logger->log('Update Profil', 'Pengguna memperbarui data profil');
 
         return Redirect::route('profile.edit');
     }
 
-
+    /**
+     * Update the user's avatar/profile photo.
+     */
     public function updateAvatar(Request $request): RedirectResponse
     {
         $request->validate([
@@ -77,9 +92,10 @@ class ProfileController extends Controller
         $user->avatar = $path;
         $user->save();
 
+        $this->logger->log('Update Avatar', 'Pengguna mengganti foto profil');
+
         return redirect()->route('profile.edit')->with('status', 'Avatar updated.');
     }
-
 
     /**
      * Delete the user's account.
@@ -91,6 +107,8 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        $this->logger->log('Hapus Akun', 'Pengguna menghapus akun');
 
         Auth::logout();
 

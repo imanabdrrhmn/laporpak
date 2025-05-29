@@ -38,7 +38,8 @@ const props = defineProps({
   feedbacks: Array,
   auth: Object,
   stats: Object,
-  reports: Array
+  reports: Array,
+  activityLogs: Array
 })
 
 const page = usePage();
@@ -52,6 +53,14 @@ const formatRupiah = (jumlah) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(jumlah);
 };
 
+const aktivitas = computed(() =>
+  props.activityLogs?.map(item => ({
+    id: item.id,
+    activity: item.activity,
+    description : item.description,
+    created_at: item.created_at,
+  })) ?? []
+)
 </script>
 
 <style scoped>
