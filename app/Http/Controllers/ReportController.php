@@ -10,7 +10,44 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Http;
 
 class ReportController extends Controller
-{
+{   
+        protected $provinces = [
+        'Aceh',
+        'Bali',
+        'Banten',
+        'Bengkulu',
+        'Gorontalo',
+        'Jakarta',
+        'Jambi',
+        'Jawa Barat',
+        'Jawa Tengah',
+        'Jawa Timur',
+        'Kalimantan Barat',
+        'Kalimantan Selatan',
+        'Kalimantan Tengah',
+        'Kalimantan Timur',
+        'Kalimantan Utara',
+        'Kepulauan Bangka Belitung',
+        'Kepulauan Riau',
+        'Lampung',
+        'Maluku',
+        'Maluku Utara',
+        'Nusa Tenggara Barat',
+        'Nusa Tenggara Timur',
+        'Papua',
+        'Papua Barat',
+        'Riau',
+        'Sulawesi Barat',
+        'Sulawesi Selatan',
+        'Sulawesi Tengah',
+        'Sulawesi Tenggara',
+        'Sulawesi Utara',
+        'Sumatera Barat',
+        'Sumatera Selatan',
+        'Sumatera Utara',
+        'Yogyakarta',
+    ];
+
     use AuthorizesRequests;
 
     public function create(Request $request)
@@ -19,6 +56,7 @@ class ReportController extends Controller
 
         return Inertia::render('Pelaporan/pelaporan', [
             'feedbacks' => $feedbacks,
+            'provinces' => $this->provinces,
         ]);
     }
 
@@ -41,14 +79,15 @@ class ReportController extends Controller
             'location.lat' => 'required|numeric',
             'location.lng' => 'required|numeric',
             'service' => 'required|string',
-            'source' => 'nullable|string',  
-            'address' => 'nullable|string', 
+            'source' => 'nullable|string',
+            'address' => 'nullable|string',
+            'region' => 'required|string|in:' . implode(',', $this->provinces),
         ]);
         
         $lat = $request->input('location.lat');
         $lng = $request->input('location.lng');
+        $region = $request->input('region');
 
-        $region = $this->getRegionFromLatLng($lat, $lng);
         $evidencePath = $request->file('evidence')->store('evidence', 'public');
 
         Report::create([
@@ -61,12 +100,13 @@ class ReportController extends Controller
             'region' => $region,
             'service' => $request->service,
             'status' => 'pending',
-            'source' => $request->source,  
+            'source' => $request->source,
             'address' => $request->address,
         ]);
 
         return back()->with('success', true);
     }
+
 
     public function edit(Request $request, Report $report)
     {
@@ -113,7 +153,7 @@ class ReportController extends Controller
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($q2) use ($query) {
                     $q2->where('description', 'like', "%{$query}%")
-                    ->orWhere('source', 'like', "%{$query}%");  // Cari juga di kolom source
+                    ->orWhere('source', 'like', "%{$query}%");  
                 });
             })
             ->latest()
@@ -151,29 +191,5 @@ class ReportController extends Controller
             'feedbacks' => $feedbacks,
             'query' => $query,
         ]);
-    }
-
-    private function getRegionFromLatLng($lat, $lng)
-    {
-        $response = Http::withHeaders([
-            'User-Agent' => 'YourAppName/1.0' 
-        ])->get('https://nominatim.openstreetmap.org/reverse', [
-            'lat' => $lat,
-            'lon' => $lng,
-            'format' => 'json',
-            'addressdetails' => 1,
-        ]);
-
-        if ($response->failed()) {
-            return null;
-        }
-
-        $data = $response->json();
-
-        if (!empty($data['address'])) {
-            return $data['address']['state'] ?? $data['address']['county'] ?? $data['address']['region'] ?? null;
-        }
-
-        return null;
     }
 }

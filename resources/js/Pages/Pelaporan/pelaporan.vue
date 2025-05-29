@@ -6,6 +6,7 @@
         <div class="row g-0">
           <HeroContent :selected-service="selectedService" :service-info="serviceInfo" />
           <ReportForm
+            :provinces="provinces"
             :selected-service="selectedService"
             :services="services"
             :service-info="serviceInfo"
@@ -52,6 +53,7 @@ const feedbacks = page.props.feedbacks;
 const showSuccessModal = ref(false);
 const showLoginModal = ref(false);
 const showRegisterModal = ref(false);
+const provinces = page.props.provinces;
 
 const userIsLoggedIn = computed(() => !!page.props.auth.user);
 
@@ -103,7 +105,8 @@ const formData = ref({
   evidence: null,
   location: null,
   address: '',
-  source: ''
+  source: '',
+  region: '',
 });
 
 // Validation errors tracker
@@ -186,6 +189,13 @@ const submitReport = () => {
   if (!formData.value.location) {
     validationErrors.location = true;
     hasErrors = true;
+  }
+
+  if (!formData.value.region || formData.value.region.trim() === '') {
+  validationErrors.region = true;
+  hasErrors = true;
+  } else {
+    validationErrors.region = false;
   }
 
   if (hasErrors) {

@@ -157,6 +157,30 @@
             </div>
           </div>
           <div class="col-12">
+            <label for="region" class="form-label mb-2">Wilayah</label>
+            <select
+              id="region"
+              v-model="formData.region"
+              class="form-select custom-select"
+              required
+              :class="{ 'is-invalid': validationErrors.region }"
+              @change="validationErrors.region = false"
+              aria-label="Provinsi"
+            >
+              <option disabled value="">Pilih Wilayah</option>
+              <option
+                v-for="province in provinces"
+                :key="province"
+                :value="province"
+              >
+                {{ province }}
+              </option>
+            </select>
+            <div v-if="validationErrors.region" class="invalid-feedback">
+              Wilayah harus dipilih
+            </div>
+          </div>
+          <div class="col-12">
             <MapContainer
               :form-data="formData"
               :validation-errors="validationErrors"
@@ -196,7 +220,8 @@ const props = defineProps({
   currentCategories: Array,
   formData: Object,
   validationErrors: Object,
-  isFormValid: Boolean
+  isFormValid: Boolean,
+  provinces: Array,
 });
 
 defineEmits(['select-service', 'submit-report', 'file-upload', 'validate-description', 'get-current-location']);
@@ -291,9 +316,9 @@ const onPhoneInput = (e) => {
   border: 1px solid #ced4da;
   cursor: pointer;
   transition: all 0.2s ease;
-  width: 100%; /* Ensure full width for scalability */
-  font-size: clamp(0.9rem, 2.5vw, 1rem); /* Responsive font size */
-  padding: clamp(0.5rem, 2vw, 0.75rem); /* Responsive padding */
+  width: 100%;
+  font-size: clamp(0.9rem, 2.5vw, 1rem); 
+  padding: clamp(0.5rem, 2vw, 0.75rem);
   height: auto;
   overflow-x: hidden;
   word-wrap: break-word;

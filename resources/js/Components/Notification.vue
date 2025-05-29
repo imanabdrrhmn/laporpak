@@ -14,7 +14,7 @@ import { ref, watch, onMounted } from 'vue'
 const props = defineProps({
   type: {
     type: String,
-    default: 'success', // 'success' or 'error'
+    default: 'success', 
   },
   message: {
     type: String,

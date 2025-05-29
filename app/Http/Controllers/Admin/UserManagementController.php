@@ -74,8 +74,44 @@ class UserManagementController extends Controller
     {
         $permissions = Permission::all();
 
-        // Ambil daftar region unik dari tabel reports
-        $allRegions = \DB::table('reports')
+        $allProvinces = [
+            'Aceh',
+            'Bali',
+            'Banten',
+            'Bengkulu',
+            'Gorontalo',
+            'Jakarta',
+            'Jambi',
+            'Jawa Barat',
+            'Jawa Tengah',
+            'Jawa Timur',
+            'Kalimantan Barat',
+            'Kalimantan Selatan',
+            'Kalimantan Tengah',
+            'Kalimantan Timur',
+            'Kalimantan Utara',
+            'Kepulauan Bangka Belitung',
+            'Kepulauan Riau',
+            'Lampung',
+            'Maluku',
+            'Maluku Utara',
+            'Nusa Tenggara Barat',
+            'Nusa Tenggara Timur',
+            'Papua',
+            'Papua Barat',
+            'Riau',
+            'Sulawesi Barat',
+            'Sulawesi Selatan',
+            'Sulawesi Tengah',
+            'Sulawesi Tenggara',
+            'Sulawesi Utara',
+            'Sumatera Barat',
+            'Sumatera Selatan',
+            'Sumatera Utara',
+            'Yogyakarta',
+        ];
+
+        $allRegionsFromReports = \DB::table('reports')
             ->select('region')
             ->distinct()
             ->whereNotNull('region')
@@ -90,9 +126,11 @@ class UserManagementController extends Controller
                 'allowed_regions' => $user->allowed_regions ?? [],
             ],
             'allPermissions' => $permissions->pluck('name'),
-            'allRegions' => $allRegions,
+            'allRegions' => $allProvinces,
+            'allRegionsFromReports' => $allRegionsFromReports,
         ]);
     }
+
 
     public function updatePermissions(Request $request, User $user)
     {
