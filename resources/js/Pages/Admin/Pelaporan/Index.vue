@@ -25,7 +25,7 @@
           :loading="loading"
           :can="props.can"
           @view-report="viewReport"
-          @quick-action="quickAction"
+          @quick-action="onQuickAction"
         />
         <Pagination
           v-if="filteredReports.length > 0"
@@ -40,101 +40,104 @@
         />
       </div>
     </div>
+
+    <UnpublishModal
+      :is-visible="showUnpublishModal"
+      :loading="loadingUnpublish"
+      @close="closeUnpublishModal"
+      @confirm="confirmUnpublish"
+    />
+
+    <Notification
+      v-if="toast.visible"
+      :type="toast.type"
+      :message="toast.message"
+      @close="toast.visible = false"
+    />
   </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { usePage, Head, router } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
-import DashboardHeader from './Components/DashboardHeader.vue';
-import FilterSection from './Components/FilterSection.vue';
-import ReportsContainer from './Components/ReportsContainer.vue';
-import Pagination from './Components/Pagination.vue';
-import Modal from './Components/LaporanDetailModal.vue';
+import { ref, computed } from 'vue'
+import { usePage, Head, router } from '@inertiajs/vue3'
+
+import AppLayout from '@/Layouts/AppLayout.vue'
+import DashboardHeader from './Components/DashboardHeader.vue'
+import FilterSection from './Components/FilterSection.vue'
+import ReportsContainer from './Components/ReportsContainer.vue'
+import Pagination from './Components/Pagination.vue'
+import Modal from './Components/LaporanDetailModal.vue'
+import UnpublishModal from './Components/UnpublishModal.vue'
+import Notification from '@/Components/Notification.vue' // pastikan path benar
 
 const props = defineProps({
   reports: {
     type: Array,
     default: () => [],
-    validator: (reports) => {
-      return reports.every(report => {
-        const isValid = report && typeof report.id !== 'undefined' && report.user && typeof report.user.name !== 'undefined';
-        if (!isValid) {
-          console.warn('Invalid report data:', report);
-        }
-        return isValid;
-      });
-    }
   },
   can: {
     type: Object,
-    default: () => ({})
-  }
-});
+    default: () => ({}),
+  },
+})
 
-// Core state
-const page = usePage();
-const user = computed(() => page.props.auth?.user || {});
-const searchQuery = ref('');
-const selectedCategory = ref('');
-const selectedService = ref('');
-const selectedStatus = ref('');
-const sortDirection = ref('desc');
-const viewMode = ref('grid');
-const currentPage = ref(1);
-const itemsPerPage = ref(20);
-const loading = ref({});
-const showModal = ref(false);
-const currentReport = ref({});
+const searchQuery = ref('')
+const selectedCategory = ref('')
+const selectedService = ref('')
+const selectedStatus = ref('')
+const sortDirection = ref('desc')
+const viewMode = ref('grid')
+const currentPage = ref(1)
+const itemsPerPage = ref(20)
+const loading = ref({})
+const showModal = ref(false)
+const currentReport = ref({})
 
-// Computed properties
-const categories = computed(() => {
-  return [...new Set(props.reports.map(report => report.category))].filter(Boolean);
-});
+const showUnpublishModal = ref(false)
+const loadingUnpublish = ref(false)
+let unpublishTargetReport = null
 
-const services = computed(() => {
-  return [...new Set(props.reports.map(report => report.service))].filter(Boolean);
-});
+const toast = ref({
+  visible: false,
+  message: '',
+  type: 'success',
+})
 
-const hasActiveFilters = computed(() => {
-  return searchQuery.value || selectedCategory.value || selectedService.value || selectedStatus.value;
-});
+const categories = computed(() => [...new Set(props.reports.map(r => r.category))].filter(Boolean))
+const services = computed(() => [...new Set(props.reports.map(r => r.service))].filter(Boolean))
+const hasActiveFilters = computed(() =>
+  searchQuery.value || selectedCategory.value || selectedService.value || selectedStatus.value
+)
 
 const filteredReports = computed(() => {
-  const filtered = props.reports
-    .filter(report => {
-      const matchesCategory = selectedCategory.value ? report.category === selectedCategory.value : true;
-      const matchesService = selectedService.value ? report.service === selectedService.value : true;
-      const matchesStatus = selectedStatus.value ? report.status === selectedStatus.value : true;
+  return props.reports
+    .filter((report) => {
+      const matchesCategory = selectedCategory.value ? report.category === selectedCategory.value : true
+      const matchesService = selectedService.value ? report.service === selectedService.value : true
+      const matchesStatus = selectedStatus.value ? report.status === selectedStatus.value : true
       const matchesSearch = searchQuery.value
-        ? (
-            report.description?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            report.category?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            report.service?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            report.user?.name?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            (report.source && report.source.toLowerCase().includes(searchQuery.value.toLowerCase()))
-          )
-        : true;
-      return matchesCategory && matchesService && matchesStatus && matchesSearch;
+        ? report.description?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          report.category?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          report.service?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          report.user?.name?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          (report.source && report.source.toLowerCase().includes(searchQuery.value.toLowerCase()))
+        : true
+      return matchesCategory && matchesService && matchesStatus && matchesSearch
     })
-    .sort((a, b) => {
-      return sortDirection.value === 'desc'
+    .sort((a, b) =>
+      sortDirection.value === 'desc'
         ? new Date(b.created_at) - new Date(a.created_at)
-        : new Date(a.created_at) - new Date(b.created_at);
-    });
-  return filtered;
-});
+        : new Date(a.created_at) - new Date(b.created_at)
+    )
+})
 
 const paginatedReports = computed(() => {
-  const startIndex = (currentPage.value - 1) * itemsPerPage.value;
-  const endIndex = startIndex + itemsPerPage.value;
-  return filteredReports.value.slice(startIndex, endIndex);
-});
+  const startIndex = (currentPage.value - 1) * itemsPerPage.value
+  const endIndex = startIndex + itemsPerPage.value
+  return filteredReports.value.slice(startIndex, endIndex)
+})
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredReports.value.length / itemsPerPage.value) || 1;
-});
+const totalPages = computed(() => Math.ceil(filteredReports.value.length / itemsPerPage.value) || 1)
 
 const reportStats = computed(() => {
   const stats = {
@@ -142,125 +145,145 @@ const reportStats = computed(() => {
     pending: 0,
     approved: 0,
     rejected: 0,
-    published: 0
-  };
-  props.reports.forEach(report => {
-    if (report.status in stats) {
-      stats[report.status]++;
-    }
-  });
-  return stats;
-});
-
-// Methods
-const viewReport = (report) => {
-  if (!report) {
-    console.error('Attempted to view undefined report');
-    return;
+    published: 0,
+    solved: 0,
+    unpublished: 0,
   }
-  currentReport.value = { ...report };
-  showModal.value = true;
-};
+  props.reports.forEach((report) => {
+    if (report.status in stats) stats[report.status]++
+  })
+  return stats
+})
+
+function showToast(message, type = 'success') {
+  toast.value.visible = false;
+
+  setTimeout(() => {
+    toast.value.message = message;
+    toast.value.type = type;
+    toast.value.visible = true;
+  }, 50);
+}
+
+
+const viewReport = (report) => {
+  if (!report) return
+  currentReport.value = { ...report }
+  showModal.value = true
+}
 
 const closeModal = () => {
-  showModal.value = false;
+  showModal.value = false
   setTimeout(() => {
-    currentReport.value = {};
-  }, 300);
-};
+    currentReport.value = {}
+  }, 300)
+}
 
 const resetFilters = () => {
-  searchQuery.value = '';
-  selectedCategory.value = '';
-  selectedService.value = '';
-  selectedStatus.value = '';
-  currentPage.value = 1;
-};
+  searchQuery.value = ''
+  selectedCategory.value = ''
+  selectedService.value = ''
+  selectedStatus.value = ''
+  currentPage.value = 1
+}
 
-const quickAction = ({ report, action }) => {
-  if (!report || !report.id) {
-    console.error('Invalid report in quickAction:', report);
-    alert('Laporan tidak valid. Silakan coba lagi.');
-    return;
+const actionEndpoints = (report) => ({
+  approved: `/pelaporan/${report.id}/terima`,
+  rejected: `/pelaporan/${report.id}/tolak`,
+  publish: `/pelaporan/${report.id}/publikasikan`,
+  solved: `/pelaporan/${report.id}/selesai`,
+  unpublish: `/pelaporan/${report.id}/batalkan-publikasi`,
+})
+
+const onQuickAction = ({ report, action }) => {
+  if (!report?.id) {
+    showToast('Laporan tidak valid. Silakan coba lagi.', 'error')
+    return
   }
 
-  const reportId = report.id;
-  let endpoint, newStatus;
-
-  if (action === 'approved') {
-    endpoint = `/pelaporan/${reportId}/terima`;
-    newStatus = report.status === 'approved' ? 'pending' : 'approved';
-  } else if (action === 'rejected') {
-    endpoint = `/pelaporan/${reportId}/tolak`;
-    newStatus = report.status === 'rejected' ? 'pending' : 'rejected';
-  } else if (action === 'published') {
-    endpoint = `/pelaporan/${reportId}/publikasikan`;
-    newStatus = report.status === 'published' ? 'pending' : 'published';
-  } else {
-    console.error('Invalid action:', action);
-    return;
+  if (action === 'unpublish') {
+    if (report.status !== 'published') {
+      showToast('Hanya laporan yang sudah dipublikasikan yang bisa dibatalkan publikasinya.', 'error')
+      return
+    }
+    unpublishTargetReport = report
+    showUnpublishModal.value = true
+    return
   }
 
-  loading.value[reportId] = true;
+  if (action === 'solved') {
+    if (report.status !== 'published') {
+      showToast('Hanya laporan yang sudah dipublikasikan yang bisa ditandai selesai.', 'error')
+      return
+    }
+  }
 
-  router.patch(endpoint, {}, {
+  const url = actionEndpoints(report)[action]
+  if (!url) {
+    showToast('Aksi tidak dikenali.', 'error')
+    return
+  }
+
+  patchStatus(report.id, action, url)
+}
+
+const patchStatus = (reportId, action, url, extraData = {}) => {
+  loading.value[reportId] = true
+
+  router.patch(url, extraData, {
     preserveState: true,
     preserveScroll: true,
     onSuccess: () => {
-      updateReportStatus(reportId, newStatus);
-      loading.value[reportId] = false;
+      const idx = props.reports.findIndex((r) => r.id === reportId)
+      if (idx !== -1) {
+        if (action === 'approved') props.reports[idx].status = 'approved'
+        else if (action === 'rejected') props.reports[idx].status = 'rejected'
+        else if (action === 'publish') props.reports[idx].status = 'published'
+        else if (action === 'solved') props.reports[idx].status = 'solved'
+        else if (action === 'unpublish') props.reports[idx].status = 'unpublished'
+
+        if (extraData.reason) props.reports[idx].reason = extraData.reason
+      }
+      if (currentReport.value.id === reportId) {
+        currentReport.value.status = props.reports[idx].status
+        if (extraData.reason) currentReport.value.reason = extraData.reason
+      }
+      loading.value[reportId] = false
+      loadingUnpublish.value = false
+      showUnpublishModal.value = false
+      showToast('Status laporan berhasil diperbarui.', 'success')
     },
     onError: (errors) => {
-      alert('Gagal memperbarui status: ' + (errors.error || 'Terjadi kesalahan'));
-      loading.value[reportId] = false;
+      showToast('Gagal memperbarui status: ' + (errors.error || 'Terjadi kesalahan'), 'error')
+      loading.value[reportId] = false
+      loadingUnpublish.value = false
+      showUnpublishModal.value = false
     },
-  });
-};
+  })
+}
 
-const updateReportStatus = (reportId, newStatus) => {
-  const reportIndex = props.reports.findIndex(r => r.id === reportId);
-  if (reportIndex !== -1) {
-    props.reports[reportIndex].status = newStatus;
-    if (currentReport.value.id === reportId) {
-      currentReport.value.status = newStatus;
-    }
+const closeUnpublishModal = () => {
+  showUnpublishModal.value = false
+  unpublishTargetReport = null
+  unpublishReason.value = ''
+}
+
+const confirmUnpublish = (reason) => {
+  if (!unpublishTargetReport) return
+  if (!reason || !reason.trim()) {
+    showToast('Alasan harus diisi', 'error')
+    return
   }
-};
+  loadingUnpublish.value = true
 
-const formatDate = (iso) => {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return d.toLocaleString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
-};
-
-const formatDateShort = (iso) => {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return d.toLocaleString('id-ID', {
-    day: 'numeric', month: 'short',
-    hour: '2-digit', minute: '2-digit'
-  });
-};
-
-const truncate = (text, max) => {
-  return text && text.length > max ? text.substring(0, max) + '…' : text || '';
-};
-
-const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
-
-watch([searchQuery, selectedCategory, selectedService, selectedStatus], () => {
-  currentPage.value = 1;
-});
+  patchStatus(unpublishTargetReport.id, 'unpublish', `/pelaporan/${unpublishTargetReport.id}/batalkan-publikasi`, { reason })
+}
 </script>
 
 <style scoped>
 .wrapper {
   padding: 20px;
 }
-
 .container {
   max-width: 1400px;
   margin: 0 auto;

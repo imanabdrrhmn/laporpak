@@ -39,21 +39,23 @@
       <button @click="$emit('viewReport', report)" class="view-button">
         <i class="fas fa-eye"></i> Lihat Detail
       </button>
+
       <button
         v-if="can.verifyReports"
         :class="['publish-button', getPublishButtonClasses]"
         :disabled="loading || report.status === 'pending' || report.status === 'rejected'"
-        @click="$emit('quickAction', { report, action: 'published' })"
+        @click="$emit('quickAction', { report, action: report.status === 'published' ? 'unpublish' : 'publish' })"
       >
         <span v-if="loading" class="spinner"></span>
-        <span v-if="report.status === 'pending'">Perlu Disetujui</span>
-        <span v-else-if="report.status === 'rejected'">Ditolak</span>
-        <span v-else>{{ report.status === 'published' ? 'Published' : 'Unpublished' }}</span>
+        <span v-else>
+          {{ report.status === 'published' ? 'Batalkan Publikasi' : 'Publikasikan' }}
+        </span>
       </button>
+
       <div class="action-buttons" v-if="can.verifyReports">
         <button
           @click="$emit('quickAction', { report, action: 'approved' })"
-          :class="['quick-action', 'approve', report.status === 'approved' ? 'active' : '', { 'loading': loading }]"
+          :class="['quick-action', 'approve', report.status === 'approved' ? 'active' : '', { loading: loading }]"
           title="Approve"
           :disabled="loading"
         >
@@ -62,12 +64,22 @@
         </button>
         <button
           @click="$emit('quickAction', { report, action: 'rejected' })"
-          :class="['quick-action', 'reject', report.status === 'rejected' ? 'active' : '', { 'loading': loading }]"
+          :class="['quick-action', 'reject', report.status === 'rejected' ? 'active' : '', { loading: loading }]"
           title="Reject"
           :disabled="loading"
         >
           <span v-if="loading" class="spinner"></span>
           Reject
+        </button>
+        <button
+          v-if="report.status === 'published'"
+          @click="$emit('quickAction', { report, action: 'solved' })"
+          class="quick-action solve"
+          :disabled="loading"
+          title="Mark as Solved"
+        >
+          <span v-if="loading" class="spinner"></span>
+          Tandai Selesai
         </button>
       </div>
     </div>
@@ -82,8 +94,8 @@ const props = defineProps({
   loading: Boolean,
   can: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 });
 
 const emit = defineEmits(['viewReport', 'quickAction']);
@@ -92,7 +104,7 @@ const formatDate = (iso) => {
   const d = new Date(iso);
   return d.toLocaleString('id-ID', {
     day: 'numeric', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
+    hour: '2-digit', minute: '2-digit',
   });
 };
 
@@ -103,12 +115,11 @@ const truncate = (text, max) => {
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const getPublishButtonClasses = computed(() => ({
-  'published': props.report.status === 'published',
-  'loading': props.loading,
-  'disabled': props.report.status === 'pending' || props.report.status === 'rejected'
+  published: props.report.status === 'published',
+  loading: props.loading,
+  disabled: props.report.status === 'pending' || props.report.status === 'rejected',
 }));
 
-// Compute flag count based on report.flags array or flags_count number
 const flagCount = computed(() => {
   if (props.report?.flags && Array.isArray(props.report.flags)) {
     return props.report.flags.length;
@@ -419,5 +430,25 @@ const flagCount = computed(() => {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.quick-action.solve {
+  background-color: #17a2b8;
+  color: white;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: 1;
+}
+
+.quick-action.solve:hover:not(:disabled) {
+  background-color: #138496;
+}
+
+.quick-action.solve:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

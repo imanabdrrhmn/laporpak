@@ -108,6 +108,38 @@ class ReportManagementController
         return redirect()->route('laporan.index')->with('success', 'Laporan dipublikasikan');
     }
 
+    public function solved(Report $report)
+    {
+        $this->authorize('verify_reports', $report);
+
+        if ($report->status !== 'published') {
+            return redirect()->route('laporan.index')->with('error', 'Hanya laporan yang dipublikasikan yang bisa ditandai sebagai selesai.');
+        }
+
+        $report->status = 'solved';
+        $report->save();
+
+        return redirect()->route('laporan.index')->with('success', 'Laporan telah ditandai sebagai selesai');
+    }
+
+    public function unpublish(Request $request, Report $report)
+    {
+        $this->authorize('verify_reports', $report);
+
+        if ($report->status !== 'published') {
+            return redirect()->route('laporan.index')->with('error', 'Hanya laporan yang dipublikasikan yang bisa dibatalkan publikasinya.');
+        }
+
+        $request->validate([
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        $report->status = 'unpublished'; 
+        $report->reason = $request->input('reason');
+        $report->save();
+
+        return redirect()->route('laporan.index')->with('success', 'Publikasi laporan dibatalkan dengan alasan.');
+    }
 
     public function getFlags(Report $report)
     {
@@ -132,5 +164,4 @@ class ReportManagementController
             'flags' => $flags,
         ]);
     }
-
 }

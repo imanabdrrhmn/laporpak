@@ -21,6 +21,7 @@ class Report extends Model
         'longitude',
         'region',
         'status',
+        'reason', 
         'service',
         'source', 
         'address'

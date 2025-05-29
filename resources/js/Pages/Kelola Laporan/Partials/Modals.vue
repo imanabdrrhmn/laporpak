@@ -40,6 +40,10 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <th>Alasan</th>
+                                            <td>{{ item.reason || '-' }}</td>
+                                        </tr>
                                     </template>
 
                                     <!-- Infrastruktur Report -->
@@ -64,6 +68,10 @@
                                                     <span :class="getStatusTextClass(item.status)">{{ item.status }}</span>
                                                 </div>
                                             </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Alasan</th>
+                                            <td>{{ item.reason || '-' }}</td>
                                         </tr>
                                     </template>
 
@@ -112,8 +120,6 @@ const props = defineProps({
     show: Boolean,
     item: Object,
     formatDate: Function,
-    getStatusClass: Function,
-    getStatusTextClass: Function,
 });
 
 const emit = defineEmits(['close']);
@@ -134,6 +140,18 @@ const getModalTitle = (item) => {
     if (isPenipuanReport.value) return 'Laporan Penipuan';
     if (isInfrastrukturReport.value) return 'Laporan Infrastruktur';
     return 'Verifikasi';
+};
+
+// Fungsi untuk memberikan kelas status indicator berdasarkan status
+const getStatusClass = (status) => {
+    if (!status) return '';
+    return status.toLowerCase();
+};
+
+// Fungsi untuk memberikan kelas teks status sesuai status
+const getStatusTextClass = (status) => {
+    if (!status) return '';
+    return 'text-status ' + status.toLowerCase();
 };
 </script>
 
@@ -197,5 +215,57 @@ const getModalTitle = (item) => {
     font-size: 0.8rem;
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
+}
+
+/* Status Indicator Bulat */
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+/* Warna untuk tiap status */
+.status-indicator.pending {
+    background-color: #ffc107; /* kuning */
+}
+.status-indicator.approved {
+    background-color: #28a745; /* hijau */
+}
+.status-indicator.rejected {
+    background-color: #dc3545; /* merah */
+}
+.status-indicator.published {
+    background-color: #0d6efd; /* biru */
+}
+.status-indicator.solved {
+    background-color: #198754; /* hijau gelap */
+}
+.status-indicator.unpublished {
+    background-color: #fd7e14; /* oranye */
+}
+
+/* Warna teks status */
+.text-status {
+    font-weight: 600;
+    text-transform: capitalize;
+}
+.text-status.pending {
+    color: #ffc107;
+}
+.text-status.approved {
+    color: #28a745;
+}
+.text-status.rejected {
+    color: #dc3545;
+}
+.text-status.published {
+    color: #0d6efd;
+}
+.text-status.solved {
+    color: #198754;
+}
+.text-status.unpublished {
+    color: #fd7e14;
 }
 </style>
