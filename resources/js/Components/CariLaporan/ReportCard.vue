@@ -2,7 +2,7 @@
   <div class="report-card" @click="$emit('open-detail', report)" role="button" tabindex="0" :aria-label="`Lihat detail laporan ${report.category} - ${report.description}`">
     <!-- Card Image (Clickable for Evidence) -->
     <div class="report-card__image" @click.stop="report.image && $emit('view-evidence', report.image)">
-      <img v-if="report.image" :src="report.image" :alt="`Gambar laporan ${report.category}`" class="card-image" />
+      <img v-if="report.evidence" :src="report.evidence" :alt="`Gambar laporan ${report.category}`" class="card-image" />
       <div v-else class="card-image-placeholder">
         <i :class="getCategoryIcon(report.category)"></i>
       </div>
@@ -15,10 +15,12 @@
       </div>
       <div class="user-details">
         <div class="user-avatar">
-          <img v-if="report.user && report.user.avatar" :src="report.user.avatar" :alt="`Avatar ${report.user.name || report.reporter}`" class="avatar-image" />
-          <div v-else class="avatar-placeholder">
-            {{ getUserInitial(report.user?.name || report.reporter) }}
-          </div>
+          <img
+            v-if="report.user && report.user.avatar_url"
+            :src="report.user.avatar_url"
+            :alt="`Avatar ${report.user.name || report.reporter}`"
+            class="avatar-image"
+          />
         </div>
         <div class="user-info">
           <div class="user-name">{{ report.user?.name || report.reporter || 'Anonymous' }}</div>
