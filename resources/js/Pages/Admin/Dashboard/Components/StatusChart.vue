@@ -116,6 +116,18 @@ let reportChartInstance = null
 let verificationChartInstance = null
 let trendChartInstance = null
 
+// Definisi palet warna yang konsisten
+const colors = {
+  primary: '#4e73df',      // Biru utama
+  success: '#28a745',      // Hijau sukses
+  warning: '#ffc107',      // Kuning warning
+  danger: '#dc3545',       // Merah bahaya
+  info: '#17a2b8',         // Biru info
+  purple: '#6f42c1',       // Ungu
+  orange: '#fd7e14',       // Orange
+  teal: '#20c997'          // Teal
+}
+
 // Safe access to reportData
 const reportStats = computed(() => ({
   approved: props.reportData?.approved ?? 0,
@@ -132,7 +144,7 @@ const initStatusChart = () => {
       labels: ['Pelaporan', 'Verifikasi'],
       datasets: [{
         data: [70, 30],
-        backgroundColor: ['#4e73df', '#4CAF50'],
+        backgroundColor: [colors.primary, colors.success],
         borderWidth: 0
       }]
     },
@@ -160,7 +172,7 @@ const initReportChart = () => {
           reportStats.value.rejected,
           reportStats.value.published
         ],
-        backgroundColor: ['#4CAF50', '#ffc107', '#dc3545', '#17a2b8'],
+        backgroundColor: [colors.success, colors.warning, colors.danger, colors.primary],
         borderWidth: 0,
         borderRadius: 4
       }]
@@ -189,7 +201,7 @@ const initVerificationChart = () => {
           props.verificationData.success ?? 0,
           props.verificationData.failed ?? 0
         ],
-        backgroundColor: ['#4CAF50', '#dc3545'],
+        backgroundColor: [colors.success, colors.danger],
         borderWidth: 2,
         borderColor: '#ffffff'
       }]
@@ -213,8 +225,8 @@ const initTrendChart = () => {
         {
           label: 'Laporan',
           data: props.monthlyData.map(item => item.reports),
-          borderColor: '#4e73df',
-          backgroundColor: 'rgba(78, 115, 223, 0.1)',
+          borderColor: colors.primary,
+          backgroundColor: colors.primary + '1A', // 10% opacity
           borderWidth: 3,
           fill: true,
           tension: 0.4
@@ -222,8 +234,8 @@ const initTrendChart = () => {
         {
           label: 'Verifikasi',
           data: props.monthlyData.map(item => item.verifications),
-          borderColor: '#4CAF50',
-          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+          borderColor: colors.success,
+          backgroundColor: colors.success + '1A', // 10% opacity
           borderWidth: 3,
           fill: true,
           tension: 0.4
@@ -263,7 +275,6 @@ onUnmounted(() => {
   destroyCharts()
 })
 </script>
-
 
 <style scoped>
 .card {

@@ -121,7 +121,8 @@ export default {
 }
 
 .badge-info {
-  background-color: #36b9cc;
+  background-color: #e3f2fd;
+  color: #1565c0;
 }
 
 .badge-secondary {

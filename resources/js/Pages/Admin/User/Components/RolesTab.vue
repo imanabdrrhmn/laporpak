@@ -1,77 +1,46 @@
 <template>
-  <div class="row">
-    <!-- Role List Desktop (Tabel) -->
-    <div class="col-12 col-md-7 mb-4 d-none d-md-block">
-      <div class="card h-100 border-0 shadow-sm">
-        <div class="card-header role-card-header">
-          <h5 class="card-title mb-0">
-            <i class="bi bi-list-check me-2"></i>Role List
-          </h5>
-        </div>
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table custom-role-table mb-0">
-              <thead>
-                <tr>
-                  <th>Role Name</th>
-                  <th>Users</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="role in roles" :key="role">
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="role-icon me-2">
-                        <i class="bi bi-shield-fill"></i>
-                      </div>
-                      <span class="fw-medium">{{ role }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="badge users-count-badge">
-                      {{ getUserCountByRole(role) }}
-                    </span>
-                  </td>
-                </tr>
-                <tr v-if="roles.length === 0">
-                  <td colspan="3" class="text-center py-5">
-                    <div class="empty-state">
-                      <div class="empty-icon mb-3">
-                        <i class="bi bi-shield-slash"></i>
-                      </div>
-                      <h5>No roles available</h5>
-                      <p class="text-muted">Create your first role to get started</p>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+  <div class="role-container">
+    <div class="role-header">
+      <h4>Role List</h4>
+    </div>
+    
+    <!-- Desktop Table -->
+    <div class="desktop-view">
+      <table class="role-table">
+        <thead>
+          <tr>
+            <th>Role Name</th>
+            <th>Users</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="role in roles" :key="role">
+            <td>
+              <span class="role-name">{{ role }}</span>
+            </td>
+            <td>
+              <span class="user-count">{{ getUserCountByRole(role) }}</span>
+            </td>
+          </tr>
+          <tr v-if="roles.length === 0">
+            <td colspan="2" class="empty-message">
+              No roles available
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Role List Mobile (Card/List) -->
-    <div class="col-12 d-md-none">
-      <div v-if="roles.length" class="list-group">
-        <div v-for="role in roles" :key="role" class="list-group-item d-flex justify-content-between align-items-center flex-column flex-sm-row">
-          <div class="d-flex align-items-center mb-2 mb-sm-0 w-100">
-            <div class="role-icon me-3">
-              <i class="bi bi-shield-fill"></i>
-            </div>
-            <div>
-              <div class="fw-medium">{{ role }}</div>
-              <small class="text-muted">Users: <span class="users-count-badge">{{ getUserCountByRole(role) }}</span></small>
-            </div>
-          </div>
+    <!-- Mobile List -->
+    <div class="mobile-view">
+      <div v-if="roles.length" class="role-list">
+        <div v-for="role in roles" :key="role" class="role-item">
+          <span class="role-name">{{ role }}</span>
+          <span class="user-count">{{ getUserCountByRole(role) }} users</span>
         </div>
       </div>
-      <div v-else class="empty-state text-center py-5">
-        <div class="empty-icon mb-3">
-          <i class="bi bi-shield-slash"></i>
-        </div>
-        <h5>No roles available</h5>
-        <p class="text-muted">Create your first role to get started</p>
+      <div v-else class="empty-message">
+        No roles available
       </div>
     </div>
   </div>
@@ -89,68 +58,108 @@ function getUserCountByRole(roleName) {
     user.roles.length && user.roles === roleName
   ).length
 }
-
 </script>
 
 <style scoped>
-.role-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: rgba(78, 115, 223, 0.15);
-  color: #4e73df;
+.role-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
 }
 
-.users-count-badge {
-  background-color: rgba(13, 202, 240, 0.15);
-  color: #0dcaf0;
-  font-weight: 500;
-  padding: 0.4rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-}
-
-/* List group item responsive */
-.list-group-item {
-  border-radius: 0.5rem;
-  margin-bottom: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  padding: 1rem 1.25rem;
-}
-
-.role-card-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+.role-header {
+  background: #f8f9fa;
   padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
 }
 
-.custom-role-table thead th {
-  background-color: #f8f9fa;
+.role-header h4 {
+  margin: 0;
+  color: #333;
   font-weight: 600;
-  color: #495057;
+}
+
+/* Desktop Table */
+.desktop-view {
+  display: block;
+}
+
+.role-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.role-table th {
+  background: #f8f9fa;
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
   border-bottom: 2px solid #e9ecef;
-  padding: 1rem 1.5rem;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.5px;
 }
 
-.custom-role-table tbody td {
+.role-table td {
   padding: 1rem 1.5rem;
-  border-color: #f8f9fa;
+  border-bottom: 1px solid #f1f1f1;
 }
 
-.empty-state {
-  padding: 2rem;
+.role-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.user-count {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.empty-message {
   text-align: center;
-  color: #6c757d;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
 }
 
-.empty-icon {
-  font-size: 2.5rem;
-  opacity: 0.5;
+/* Mobile List */
+.mobile-view {
+  display: none;
+}
+
+.role-list {
+  padding: 1rem;
+}
+
+.role-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .desktop-view {
+    display: none;
+  }
+  
+  .mobile-view {
+    display: block;
+  }
+  
+  .role-header {
+    padding: 1rem;
+  }
+  
+  .empty-message {
+    padding: 2rem 1rem;
+  }
 }
 </style>

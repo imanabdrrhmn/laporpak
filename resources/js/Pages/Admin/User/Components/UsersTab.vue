@@ -28,98 +28,98 @@
     </div>
 
     <!-- Desktop: tabel (≥1025px) -->
-  <div class="d-none d-custom-table-block table-responsive custom-table-container">
-    <table class="table custom-table align-middle mb-0">
-      <thead>
-        <tr>
-          <th style="width: 30px;">#</th>
-          <th style="min-width: 120px;">Nama</th>
-          <th style="min-width: 160px;">Email</th>
-          <th style="width: 100px;">Role</th>
-          <th style="width: 130px;">Ubah Role</th>
-          <th style="width: 80px;">Izin</th>
-          <th class="text-center" style="width: 70px;">Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(user, index) in filteredUsers" :key="user.id" class="align-middle">
-          <td>{{ index + 1 }}</td>
-          <td>
-            <div class="d-flex align-items-center">
-              <img :src="user.avatar_url" alt="Avatar" class="user-avatar rounded-circle me-2" />
-              <span class="fw-medium user-name-text">{{ user.name }}</span>
-            </div>
-          </td>
-          <td>{{ user.email }}</td>
-          <td>
-            <span v-if="user.roles.length" class="badge role-badge text-primary">{{ user.roles }}</span>
-            <span v-else class="badge no-role-badge">Tidak Ada Role</span>
-          </td>
-          <td class="position-relative">
-            <div 
-              v-if="userStates[user.id]?.isSubmitting" 
-              class="loading-overlay-cell"
-            >
-              <div class="loading-content">
-                <div v-if="userStates[user.id]?.submitSuccess" class="success-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="3">
-                    <polyline points="20,6 9,17 4,12"></polyline>
-                  </svg>
-                </div>
-                <div v-else class="loading-spinner-container">
-                  <div class="loading-spinner-small"></div>
-                  <div class="loading-spinner-glow"></div>
+    <div class="d-none d-custom-table-block table-responsive custom-table-container">
+      <table class="table custom-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width: 70px;">No </th>
+            <th style="min-width: 120px;">Nama</th>
+            <th style="min-width: 160px;">Email</th>
+            <th style="min-width: 120px;">Nomor </th>
+            <th style="width: 100px;">Role</th>
+            <th style="width: 130px;">Ubah Role</th>
+            <th style="width: 80px;">Izin</th>
+            <th class="text-center" style="width: 70px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(user, index) in filteredUsers" :key="user.id" class="align-middle">
+            <td>{{ index + 1 }}</td>
+            <td>
+              <div class="d-flex align-items-center">
+                <img :src="user.avatar_url" alt="Avatar" class="user-avatar rounded-circle me-2" />
+                <span class="fw-medium user-name-text">{{ user.name }}</span>
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.phone || '-' }}</td>
+            <td>
+              <span v-if="user.roles.length" class="badge role-badge text-primary">{{ user.roles }}</span>
+              <span v-else class="badge no-role-badge">Tidak Ada Role</span>
+            </td>
+            <td class="position-relative">
+              <div 
+                v-if="userStates[user.id]?.isSubmitting" 
+                class="loading-overlay-cell"
+              >
+                <div class="loading-content">
+                  <div v-if="userStates[user.id]?.submitSuccess" class="success-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="3">
+                      <polyline points="20,6 9,17 4,12"></polyline>
+                    </svg>
+                  </div>
+                  <div v-else class="loading-spinner-container">
+                    <div class="loading-spinner-small"></div>
+                    <div class="loading-spinner-glow"></div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <select
-              name="role"
-              class="form-select form-select-sm custom-role-select"
-              @change="(e) => submitRoleChange(e, user.id, user.name)"
-              :disabled="userStates[user.id]?.isSubmitting"
-              style="max-width: 120px;"
-            >
-              <option disabled selected>Pilih role</option>
-              <option
-                v-for="role in roles"
-                :key="role"
-                :value="role"
-                :selected="user.roles === role"
+              <select
+                name="role"
+                class="form-select form-select-sm custom-role-select"
+                @change="(e) => submitRoleChange(e, user.id, user.name)"
+                :disabled="userStates[user.id]?.isSubmitting"
+                style="max-width: 120px;"
               >
-                {{ role }}
-              </option>
-            </select>
-          </td>
-          <td class="text-center">
-            <button
-              class="btn btn-sm btn-icon btn-primary"
-              type="button"
-              @click="$emit('open-permission-modal', user)"
-              title="Edit Izin"
-            >
-              <i class="bi bi-pencil-square"></i>
-            </button>
-          </td>
-          <td class="text-center">
-            <form :action="route('admin.users.delete', user.id)" method="POST">
-              <input type="hidden" name="_method" value="DELETE" />
-              <input type="hidden" name="_token" :value="csrf" />
+                <option disabled selected>Pilih role</option>
+                <option
+                  v-for="role in roles"
+                  :key="role"
+                  :value="role"
+                  :selected="user.roles === role"
+                >
+                  {{ role }}
+                </option>
+              </select>
+            </td>
+            <td class="text-center">
               <button
-                class="btn btn-sm btn-icon btn-danger"
-                type="submit"
-                @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
-                title="Hapus Pengguna"
+                class="btn btn-sm btn-icon btn-primary"
+                type="button"
+                @click="$emit('open-permission-modal', user)"
+                title="Edit Izin"
               >
-                <i class="bi bi-trash"></i>
+                <i class="bi bi-pencil-square"></i>
               </button>
-            </form>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
+            </td>
+            <td class="text-center">
+              <form :action="route('admin.users.delete', user.id)" method="POST">
+                <input type="hidden" name="_method" value="DELETE" />
+                <input type="hidden" name="_token" :value="csrf" />
+                <button
+                  class="btn btn-sm btn-icon btn-danger"
+                  type="submit"
+                  @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
+                  title="Hapus Pengguna"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Mobile & tablet: card list (≤1024px) -->
     <div class="d-block d-custom-table-none">
@@ -129,6 +129,7 @@
           <div>
             <div class="fw-semibold">{{ user.name }}</div>
             <div class="text-muted small">{{ user.email }}</div>
+            <div class="text-muted small">{{ user.phone || '-' }}</div>
           </div>
         </div>
         <div class="mb-2">
@@ -159,7 +160,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, computed, reactive } from 'vue'
 import Swal from 'sweetalert2'
@@ -182,7 +182,8 @@ const filteredUsers = computed(() => {
   return props.users.filter(user => {
     const matchesSearch = searchQuery.value === '' || 
       user.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+      user.email.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (user.phone && user.phone.toLowerCase().includes(searchQuery.value.toLowerCase()))
     
     const matchesRole = filterRole.value === '' || 
       (user.roles.length && user.roles === filterRole.value)
@@ -419,7 +420,6 @@ function confirmDelete(userName, form) {
   }
 }
 
-
 .search-container {
   max-width: 400px;
 }
@@ -531,7 +531,7 @@ function confirmDelete(userName, form) {
   }
 }
 
-/* Styling responsive untuk avatar dan font */
+/* Styling responsive untuk avatar, font, dan nomor HP */
 .user-avatar {
   width: 40px;
   height: 40px;
@@ -636,5 +636,4 @@ function confirmDelete(userName, form) {
     font-size: 1rem !important;
   }
 }
-
 </style>

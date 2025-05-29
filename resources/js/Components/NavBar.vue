@@ -559,7 +559,7 @@ export default {
 
 .user-dropdown .dropdown-item:hover {
   background-color: #e9ecef;
-  color: #008cdb;
+  color: #0d6efd;
   transform: translateX(4px); /* Slight slide on hover */
 }
 

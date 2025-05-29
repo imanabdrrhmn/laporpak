@@ -1,8 +1,8 @@
 <template>
   <div class="report-card" @click="$emit('open-detail', report)" role="button" tabindex="0" :aria-label="`Lihat detail laporan ${report.category} - ${report.description}`">
     <!-- Card Image (Clickable for Evidence) -->
-    <div class="report-card__image" @click.stop="report.image && $emit('view-evidence', report.image)">
-      <img v-if="report.evidence" :src="report.evidence" :alt="`Gambar laporan ${report.category}`" class="card-image" />
+    <div class="report-card__image" @click.stop="openImageModal(report.evidence || report.image)">
+      <img v-if="report.evidence || report.image" :src="report.evidence || report.image" :alt="`Gambar laporan ${report.category}`" class="card-image" />
       <div v-else class="card-image-placeholder">
         <i :class="getCategoryIcon(report.category)"></i>
       </div>
@@ -10,8 +10,8 @@
 
     <!-- User Profile -->
     <div class="user-profile">
-      <div class="category-badge" :class="getCategoryClass(report.category)">
-        {{ report.category }}
+      <div class="category-badge" :class="getCategoryClass(report.service)">
+        {{ report.service }}
       </div>
       <div class="user-details">
         <div class="user-avatar">
@@ -24,6 +24,7 @@
         </div>
         <div class="user-info">
           <div class="user-name">{{ report.user?.name || report.reporter || 'Anonymous' }}</div>
+          <div class="user-date">{{ formatDate(report.created_at) }}</div>
         </div>
       </div>
       <div v-if="report.location" class="location-badge">
@@ -36,7 +37,7 @@
     <div class="report-card__content">
       <!-- Title -->
       <h2 class="report-card__title">
-        {{ report.title || 'Laporan ' + report.category }}
+        {{ report.title || 'Pelaporan ' + report.category }}
       </h2>
 
       <!-- Description -->
@@ -50,6 +51,32 @@
       <button @click.stop="$emit('open-detail', report)" class="detail-button">
         Lihat Detail
       </button>
+    </div>
+
+    <!-- Image Modal for Zoom -->
+    <div v-if="showImageModal" class="image-modal" @click="closeImageModal">
+      <div class="image-modal__backdrop"></div>
+      <div class="image-modal__container" @click.stop>
+        <button class="image-modal__close" @click="closeImageModal">
+          <i class="bi bi-x-square-fill"></i>
+        </button>
+        <div class="image-modal__content">
+          <img 
+            :src="modalImageSrc" 
+            :alt="'Gambar laporan ' + report.category"
+            class="image-modal__image"
+            :class="{ 'zoomed': isZoomed }"
+            @click="toggleZoom"
+            ref="modalImage"
+          />
+        </div>
+        <div class="image-modal__controls">
+          <button @click="toggleZoom" class="zoom-button">
+            <i :class="isZoomed ? 'fas fa-search-minus' : 'fas fa-search-plus'"></i>
+            {{ isZoomed ? 'Zoom Out' : 'Zoom In' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -65,6 +92,13 @@ export default {
     },
   },
   emits: ['open-detail', 'view-evidence'],
+  data() {
+    return {
+      showImageModal: false,
+      modalImageSrc: '',
+      isZoomed: false,
+    };
+  },
   methods: {
     getCategoryClass(category) {
       const CATEGORY_CLASSES = {
@@ -88,6 +122,39 @@ export default {
       if (!text) return '';
       return text.length <= length ? text : text.substring(0, length) + '...';
     },
+    formatDate(date) {
+      if (!date) return 'Tanggal tidak tersedia';
+      const d = new Date(date);
+      return d.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    },
+    openImageModal(imageSrc) {
+      if (imageSrc) {
+        this.modalImageSrc = imageSrc;
+        this.showImageModal = true;
+        this.isZoomed = false;
+        // Prevent body scroll when modal is open
+        document.body.style.overflow = 'hidden';
+      }
+    },
+    closeImageModal() {
+      this.showImageModal = false;
+      this.isZoomed = false;
+      // Restore body scroll
+      document.body.style.overflow = '';
+    },
+    toggleZoom() {
+      this.isZoomed = !this.isZoomed;
+    },
+  },
+  beforeUnmount() {
+    // Cleanup: restore body scroll if component is destroyed while modal is open
+    if (this.showImageModal) {
+      document.body.style.overflow = '';
+    }
   },
 };
 </script>
@@ -104,11 +171,13 @@ export default {
   display: flex;
   flex-direction: column;
   margin: 0 auto;
+  position: relative;
 }
 
 .report-card__image {
   height: 250px; /* Fixed height for image */
   overflow: hidden;
+  position: relative;
 }
 
 .card-image {
@@ -116,6 +185,11 @@ export default {
   height: 100%;
   object-fit: cover;
   cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.card-image:hover {
+  transform: scale(1.05);
 }
 
 .card-image-placeholder {
@@ -151,16 +225,13 @@ export default {
   z-index: 1;
 }
 
-.category--phone {
-  background: #007bff;
-}
-
 .category--fraud {
-  background: #dc3545;
+  background: rgba(1, 128, 255, 1);
 }
 
 .category--default {
-  background: #6c757d;
+  background: rgba(92, 111, 123, 1);
+  
 }
 
 .user-details {
@@ -205,6 +276,12 @@ export default {
   font-size: 0.9rem;
 }
 
+.user-date {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
 .location-badge {
   position: absolute;
   top: 12px;
@@ -244,6 +321,7 @@ export default {
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -255,16 +333,132 @@ export default {
 }
 
 .detail-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
+  background: #ffffff;
+  color: #007bff;
+  border: 2px solid #007bff;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 200px;
 }
 
 .detail-button:hover {
+  background: #007bff;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Image Modal Styles */
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-modal__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.image-modal__container {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.image-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: none;
+
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  z-index: 10;
+  transition: background 0.3s ease;
+}
+
+
+
+.image-modal__content {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  max-height: 70vh;
+}
+
+.image-modal__image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  border-radius: 8px;
+}
+
+.image-modal__image.zoomed {
+  transform: scale(2);
+  cursor: grab;
+}
+
+.image-modal__image.zoomed:active {
+  cursor: grabbing;
+}
+
+.image-modal__controls {
+  padding: 16px;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.zoom-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s ease;
+}
+
+.zoom-button:hover {
   background: #0056b3;
 }
 
@@ -284,6 +478,16 @@ export default {
 
   .report-card__description {
     -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .image-modal__container {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .image-modal__content {
+    max-height: 60vh;
   }
 }
 </style>

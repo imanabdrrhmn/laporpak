@@ -437,7 +437,7 @@ export default {
 }
 
 .category-tag {
-  background: #667eea;
+  background: rgba(1, 128, 255, 0.8);
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 16px;

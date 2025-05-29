@@ -2,7 +2,7 @@
   <AppLayout>
     <Head title="Cari Laporan" />
     <div class="search-container">
-      <h2 class="mb-4">Pencarian Laporan Penipuan</h2>
+      <h2 class="mb-4">Pencarian Laporan</h2>
 
       <SearchBar
         v-model:searchQuery="searchQuery"
