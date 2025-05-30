@@ -56,7 +56,12 @@
         @flag-submitted="handleFlagSubmitted"
       />
 
-      <Section :showSearch="false" />
+      <Section 
+        :verifiedReports="verifiedReports"
+        :totalReports="totalReports"
+        :fraudReports="fraudReports"
+        :showSearch="false"
+      />
       <Feedback :feedbacks="feedbacks" />
     </div>
   </AppLayout>
@@ -89,6 +94,20 @@ export default {
     Pagination,
     ReportDetailModal,
     ReportFlagModal,
+  },
+  props: {
+    verifiedReports: {
+      type: Number,
+      default: 0,
+    },
+    totalReports: {
+      type: Number,
+      default: 0,
+    },
+    fraudReports: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -264,7 +283,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .search-container {

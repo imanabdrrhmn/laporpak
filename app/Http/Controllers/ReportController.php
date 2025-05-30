@@ -35,10 +35,15 @@ class ReportController extends Controller
     public function create(Request $request)
     {
         $feedbacks = Feedback::where('kategori', 'Pelaporan')->with('user')->latest()->take(10)->get();
-
+        $verifiedReports = Report::whereIn('status', ['published', 'approved'])->count();
+        $totalReports = Report::count();
+        $fraudReports = Report::where('service', 'Penipuan')->count();
         return Inertia::render('Pelaporan/pelaporan', [
             'feedbacks' => $feedbacks,
             'provinces' => $this->provinces,
+            'verifiedReports' => $verifiedReports,
+            'totalReports' => $totalReports,
+            'fraudReports' => $fraudReports,
         ]);
     }
 
@@ -170,11 +175,17 @@ class ReportController extends Controller
             });
 
         $feedbacks = Feedback::where('kategori', 'Cari Laporan')->with('user')->latest()->take(10)->get();
+        $verifiedReports = Report::whereIn('status', ['published', 'approved'])->count();
+        $totalReports = Report::count();
+        $fraudReports = Report::where('service', 'Penipuan')->count();
 
         return Inertia::render('Pelaporan/CariLaporan', [
             'reports' => $reports,
             'feedbacks' => $feedbacks,
             'query' => $query,
+            'verifiedReports' => $verifiedReports,
+            'totalReports' => $totalReports,
+            'fraudReports' => $fraudReports,
         ]);
     }
 

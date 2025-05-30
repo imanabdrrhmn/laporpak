@@ -46,13 +46,22 @@ class DashboardAdminController extends Controller
 
         $totalPenggunaPercentage = $this->calcPercentageChange($totalPenggunaThisMonth, $totalPenggunaLastMonth);
 
-        // Saldo Top-Up total & bulan ini vs bulan lalu
-        $saldoTopUpAmount = DB::table('top_ups')->sum('amount');
+        $saldoTopUpAmount = DB::table('top_ups')
+            ->where('status', 'verified')
+            ->sum('amount');
 
-        $saldoTopUpThisMonth = DB::table('top_ups')->where('created_at', '>=', $startOfThisMonth)->sum('amount');
-        $saldoTopUpLastMonth = DB::table('top_ups')->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->sum('amount');
+        $saldoTopUpThisMonth = DB::table('top_ups')
+            ->where('status', 'verified')
+            ->where('created_at', '>=', $startOfThisMonth)
+            ->sum('amount');
+
+        $saldoTopUpLastMonth = DB::table('top_ups')
+            ->where('status', 'verified')
+            ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+            ->sum('amount');
 
         $saldoTopUpPercentage = $this->calcPercentageChange($saldoTopUpThisMonth, $saldoTopUpLastMonth);
+
 
         $reportData = Report::select('status', DB::raw('count(*) as total'))
         ->groupBy('status')
