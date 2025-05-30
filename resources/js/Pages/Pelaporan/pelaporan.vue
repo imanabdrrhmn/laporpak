@@ -24,7 +24,11 @@
       </div>
     </section>
     <Alur />
-    <Section />
+      <Section 
+        :verifiedReports="verifiedReports"
+        :totalReports="totalReports"
+        :fraudReports="fraudReports"
+        />
     <Feedback :feedbacks="feedbacks" />
     <SuccessModal
       :show="showSuccessModal"
@@ -54,6 +58,9 @@ const showSuccessModal = ref(false);
 const showLoginModal = ref(false);
 const showRegisterModal = ref(false);
 const provinces = page.props.provinces;
+const verifiedReports = page.props.verifiedReports || 0
+const totalReports = page.props.totalReports || 0
+const fraudReports = page.props.fraudReports || 0
 
 const userIsLoggedIn = computed(() => !!page.props.auth.user);
 
