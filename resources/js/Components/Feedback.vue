@@ -530,6 +530,11 @@ export default {
   }
 }
 
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
 @media (min-width: 992px) {
   .testimonial-card {
     width: 380px;

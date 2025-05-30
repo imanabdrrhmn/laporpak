@@ -158,11 +158,6 @@
                 </div>
               </div>
 
-              <!-- Pesan Error tanpa Alert box -->
-              <div v-if="showErrorAlert" class="error-message-summary mb-3 p-2 bg-danger-subtle border border-danger rounded">
-                <p class="text-danger mb-0 fw-medium"><i class="bi bi-exclamation-circle me-2"></i>Mohon lengkapi semua data yang diperlukan.</p>
-              </div>
-
               <button 
                 type="submit" 
                 class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3"
@@ -198,7 +193,6 @@ const passwordVisible = ref(false)
 const isSubmitting = ref(false)
 const phoneNumber = ref('')
 const passwordMismatch = ref(false)
-const showErrorAlert = ref(false)
 
 const form = useForm({
   name: '',
@@ -269,26 +263,21 @@ function resetForm() {
   phoneNumber.value = ''
   passwordVisible.value = false
   passwordMismatch.value = false
-  showErrorAlert.value = false
   Object.keys(errors.value).forEach(key => {
     errors.value[key] = ''
   })
 }
 
 function switchMode(newMode) {
-  // Jangan lakukan apa-apa jika mode yang sama dipilih
   if (mode.value === newMode) return
   
   mode.value = newMode
   
-  // Clear all errors and reset alert when switching modes
   Object.keys(errors.value).forEach(key => {
     errors.value[key] = ''
   })
-  showErrorAlert.value = false
   passwordMismatch.value = false
   
-  // Reset fields that might cause validation errors
   if (newMode === 'email') {
     form.no_hp = ''
     phoneNumber.value = ''
@@ -298,10 +287,7 @@ function switchMode(newMode) {
 }
 
 function validatePhoneNumber() {
-  // Hanya menerima angka
   phoneNumber.value = phoneNumber.value.replace(/\D/g, '')
-  
-  // Update form.no_hp dengan format yang benar untuk backend
   form.no_hp = phoneNumber.value ? `+62${phoneNumber.value}` : ''
 }
 
@@ -318,7 +304,6 @@ function goToLogin() {
   emit('open-login')
 }
 
-// Validasi input saat field kehilangan fokus
 function validateField(field) {
   if (field === 'name' && !form.name) {
     errors.value.name = 'Nama lengkap harus diisi'
@@ -349,13 +334,11 @@ function validateField(field) {
   }
 }
 
-// Validasi email
 function isValidEmail(email) {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   return re.test(String(email).toLowerCase())
 }
 
-// Check password match
 watch(() => form.password_confirmation, (val) => {
   if (val && form.password !== val) {
     passwordMismatch.value = true
@@ -364,17 +347,14 @@ watch(() => form.password_confirmation, (val) => {
   }
 })
 
-// Validasi form sebelum submit
 function validateForm() {
   let isValid = true
   
-  // Validasi nama
   if (!form.name) {
     errors.value.name = 'Nama lengkap harus diisi'
     isValid = false
   }
   
-  // Validasi email/no_hp berdasarkan mode
   if (mode.value === 'email') {
     if (!form.email) {
       errors.value.email = 'Email harus diisi'
@@ -393,7 +373,6 @@ function validateForm() {
     }
   }
   
-  // Validasi password
   if (!form.password) {
     errors.value.password = 'Kata sandi harus diisi'
     isValid = false
@@ -402,7 +381,6 @@ function validateForm() {
     isValid = false
   }
   
-  // Validasi konfirmasi password
   if (!form.password_confirmation) {
     errors.value.password_confirmation = 'Konfirmasi kata sandi harus diisi'
     isValid = false
@@ -415,15 +393,9 @@ function validateForm() {
 }
 
 function handleRegister() {
-  // Reset alert
-  showErrorAlert.value = false
-  
-  // Validasi form
   if (!validateForm()) {
-    showErrorAlert.value = true
     return
   }
-  
   const url = mode.value === 'email' ? 'register.email' : 'register.no_hp'
   
   isSubmitting.value = true
@@ -436,13 +408,24 @@ function handleRegister() {
     onError: (serverErrors) => {
       isSubmitting.value = false
       
-      // Handle server errors
-      if (serverErrors.name) errors.value.name = serverErrors.name
-      if (serverErrors.email) errors.value.email = serverErrors.email
-      if (serverErrors.no_hp) errors.value.no_hp = serverErrors.no_hp
-      if (serverErrors.password) errors.value.password = serverErrors.password
-      
-      showErrorAlert.value = true
+      // Handle server errors with custom messages
+      if (serverErrors.name) {
+        errors.value.name = serverErrors.name
+      }
+      if (serverErrors.email) {
+        if (serverErrors.email.includes('validation.unique') || 
+            serverErrors.email.toLowerCase().includes('already been taken')) {
+          errors.value.email = 'Email sudah terdaftar'
+        } else {
+          errors.value.email = serverErrors.email
+        }
+      }
+      if (serverErrors.no_hp) {
+        errors.value.no_hp = serverErrors.no_hp
+      }
+      if (serverErrors.password) {
+        errors.value.password = serverErrors.password
+      }
     }
   })
 }
@@ -501,7 +484,6 @@ function handleRegister() {
   padding: 0 15px;
 }
 
-
 .form-control.is-invalid {
   background-image: none !important;
   padding-right: 1rem !important;
@@ -521,10 +503,6 @@ function handleRegister() {
   font-size: 0.8rem;
   font-weight: 500;
   margin-top: 0.25rem;
-}
-
-.error-message-summary {
-  border-radius: 8px;
 }
 
 /* ✅ Jaga ukuran modal tetap saat error muncul */

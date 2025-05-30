@@ -539,6 +539,30 @@ const clearAllRegions = () => {
   padding: 0 24px 24px;
   max-height: calc(90vh - 140px);
   overflow-y: auto;
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #3b82f6 #e5e7eb; /* Thumb and track colors for Firefox */
+}
+
+/* Custom Scrollbar for WebKit browsers */
+.modal-body::-webkit-scrollbar {
+  width: 8px; /* Slimmer scrollbar */
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #e5e7eb; /* Light gray track */
+  border-radius: 4px; /* Rounded track */
+  margin: 4px 0; /* Add some margin to avoid touching edges */
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #3b82f6; /* Primary color for thumb */
+  border-radius: 4px; /* Rounded thumb */
+  border: 2px solid #e5e7eb; /* Border to blend with track */
+  transition: background 0.2s ease; /* Smooth hover transition */
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #2563eb; /* Darker shade on hover */
 }
 
 .error-message {
@@ -970,52 +994,49 @@ const clearAllRegions = () => {
 .selected-count {
   color: #6b7280 !important;
 }
+
 .region-item {
   padding: 0.5rem;
-  border: 1px solid #ccc; /* Default border */
+  border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
-  background-color: #fff; /* Explicit default background */
-  color: #374151; /* Default text color for the region name */
+  background-color: #fff;
+  color: #374151;
   transition: border-color 0.2s ease, background-color 0.2s ease, outline 0.2s ease, color 0.2s ease;
-  text-align: center; /* Center region name */
-  position: relative; /* Good for potential outline rendering consistency */
-  display: flex; /* To center label content if needed, or for better control */
+  text-align: center;
+  position: relative;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.region-item:hover:not(.region-item--selected) { /* Hover effect only for non-selected items */
-  border-color: #999; /* Darker border on hover */
-  background-color: #f7f7f7; /* Slight background change on hover */
+.region-item:hover:not(.region-item--selected) {
+  border-color: #999;
+  background-color: #f7f7f7;
 }
 
 .region-item--selected {
-  background-color: #eff6ff; /* Light blue background, consistent with permission-item--selected */
-  border-color: #3b82f6;    /* Border color changes to primary theme color */
-  color: #1e40af;           /* Darker blue text for better contrast on light blue bg */
-  outline: 1px solid #3b82f6; /* Add 1px outline of the same primary color */
-  outline-offset: 0px;         /* Outline sits immediately outside the border, making it look like a 2px border */
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+  color: #1e40af;
+  outline: 1px solid #3b82f6;
+  outline-offset: 0px;
 }
 
 .region-label {
-  display: block; /* Make label fill the item (optional, depends on desired click area) */
-  /* color is inherited from .region-item by default */
-  font-weight: normal; /* Default font weight */
-  transition: color 0.2s ease, font-weight 0.2s ease; /* Smooth transition for text changes */
+  display: block;
+  font-weight: normal;
+  transition: color 0.2s ease, font-weight 0.2s ease;
 }
 
 .region-item--selected .region-label {
-  /* color: #1e40af; /* Text color is already set by .region-item--selected */
-  font-weight: 500; /* Make text slightly bolder for selected item */
+  font-weight: 500;
 }
 
-/* Styling for when the region grid is in a loading state */
 .region-grid--loading .region-item {
   filter: blur(2px);
   opacity: 0.5;
   pointer-events: none;
-  user-select: none; /* Prevent text selection during loading */
+  user-select: none;
 }
-
 </style>

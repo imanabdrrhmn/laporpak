@@ -50,7 +50,7 @@
             </div>
 
             <!-- Statistics Section in Triangular Layout -->
-            <div class="statistics-triangular mt-5 pt-4">
+            <div class="statistics-triangular mt-5 pt-4" ref="statsSection">
                 <div class="row">
                     <!-- Left Side: Mission Statement -->
                     <div class="col-lg-6 col-md-12 mb-4 mb-lg-0">
@@ -67,14 +67,14 @@
                         <div class="stats-triangle">
                             <!-- Top Stat -->
                             <div class="stat-row justify-content-center">
-                                <div class="stat-item text-center">
+                                <div class="stat-item text-center" :class="{ 'animate-stat': animateStats }">
                                     <div class="d-flex justify-content-center align-items-center">
                                         <div class="stat-icon text-primary me-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
                                                 <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm10.03 4.97a.75.75 0 0 1 .011 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.75.75 0 0 1 1.08-.022z"/>
                                             </svg>
                                         </div>
-                                        <h3 class="fw-bold fs-2 mb-0">{{ verifiedReports }}</h3>
+                                        <h3 class="fw-bold fs-2 mb-0 counter-number">{{ displayVerifiedReports }}</h3>
                                     </div>
                                     <p class="text-muted mt-2">Laporan yang telah diverifikasi</p>
                                 </div>
@@ -83,29 +83,29 @@
                             <!-- Bottom Stats (Side by Side) -->
                             <div class="stat-row justify-content-between mt-4">
                                 <!-- Bottom Left Stat -->
-                                <div class="stat-item text-center">
+                                <div class="stat-item text-center" :class="{ 'animate-stat': animateStats }">
                                     <div class="d-flex justify-content-center align-items-center">
                                         <div class="stat-icon text-primary me-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clipboard-data" viewBox="0 0 16 16">
-                                                <path d="M4 11a1 1 0 1 1 2 0v1a1 1 0 1 1-2 0v-1zm6-4a1 1 0 1 1 2 0v5a1 1 0 1 1-2 0V7zM7 9a1 1 0 0 1 2 0v3a1 1 0 1 1-2 0V9z"/>
+                                                <path d="M4 11a1 1 0 1 1 2 0v1a1 1 0 1 1-2 0v-1zm6-4a1 1 0 1 1 2 0v5a1 1 0 1 1-2 0V7zM7 9a1 1 0 1 1 2 0v3a1 1 0 1 1-2 0V9z"/>
                                                 <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
                                                 <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
                                             </svg>
                                         </div>
-                                        <h3 class="fw-bold fs-2 mb-0">{{ totalReports }}</h3>
+                                        <h3 class="fw-bold fs-2 mb-0 counter-number">{{ displayTotalReports }}</h3>
                                     </div>
                                     <p class="text-muted mt-2">Total laporan yang diterima hingga saat ini</p>
                                 </div>
                                 
                                 <!-- Bottom Right Stat -->
-                                <div class="stat-item text-center">
+                                <div class="stat-item text-center" :class="{ 'animate-stat': animateStats }">
                                     <div class="d-flex justify-content-center align-items-center">
                                         <div class="stat-icon text-primary me-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
                                                 <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
                                             </svg>
                                         </div>
-                                        <h3 class="fw-bold fs-2 mb-0">{{ fraudReports }}</h3>
+                                        <h3 class="fw-bold fs-2 mb-0 counter-number">{{ displayFraudReports }}</h3>
                                     </div>
                                     <p class="text-muted mt-2">Pelaporan penipuan yang dilakukan oleh pengguna</p>
                                 </div>
@@ -141,7 +141,150 @@ export default {
     },
     data() {
         return {
-            searchQuery: ''
+            searchQuery: '',
+            displayVerifiedReports: 0,
+            displayTotalReports: 0,
+            displayFraudReports: 0,
+            animateStats: false,
+            observer: null,
+            hasAnimated: false
+        }
+    },
+    mounted() {
+        this.setupIntersectionObserver();
+        // Trigger animation immediately if already in viewport
+        this.$nextTick(() => {
+            if (this.isElementInViewport(this.$refs.statsSection)) {
+                this.startCountingAnimation();
+            }
+        });
+    },
+    beforeUnmount() {
+        if (this.observer) {
+            this.observer.disconnect();
+        }
+    },
+    methods: {
+        setupIntersectionObserver() {
+            // Setup Intersection Observer to detect when stats section comes into view
+            const options = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.3 // Trigger when 30% of element is visible
+            };
+
+            this.observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !this.hasAnimated) {
+                        this.startCountingAnimation();
+                    }
+                });
+            }, options);
+
+            if (this.$refs.statsSection) {
+                this.observer.observe(this.$refs.statsSection);
+            }
+        },
+
+        isElementInViewport(el) {
+            if (!el) return false;
+            const rect = el.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        },
+
+        startCountingAnimation() {
+            if (this.hasAnimated) return;
+            
+            this.hasAnimated = true;
+            this.animateStats = true;
+
+            // Animate each counter with different durations for variety
+            this.animateCounter('displayVerifiedReports', this.verifiedReports, 2000);
+            
+            // Start total reports animation after a short delay
+            setTimeout(() => {
+                this.animateCounter('displayTotalReports', this.totalReports, 2500);
+            }, 300);
+            
+            // Start fraud reports animation after another delay
+            setTimeout(() => {
+                this.animateCounter('displayFraudReports', this.fraudReports, 2200);
+            }, 600);
+        },
+
+        animateCounter(property, targetValue, duration) {
+            // Adjust duration based on target value (max 5 seconds)
+            const adjustedDuration = Math.min(5000, duration + Math.log10(Math.max(1, targetValue)) * 1000);
+            const startTime = Date.now();
+            const startValue = 0;
+            const difference = targetValue - startValue;
+
+            const updateCounter = () => {
+                const currentTime = Date.now();
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / adjustedDuration, 1);
+                const easedProgress = this.easeOutQuart(progress);
+                let currentValue = Math.floor(startValue + (difference * easedProgress));
+                
+                // Format singkat untuk angka besar selama animasi
+                if (currentValue >= 1000000) {
+                    this[property] = (currentValue / 1000000).toFixed(1) + 'M';
+                } else if (currentValue >= 10000) {
+                    this[property] = (currentValue / 1000).toFixed(1) + 'K';
+                } else {
+                    this[property] = currentValue;
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    this[property] = targetValue; // Tampilkan angka penuh di akhir
+                }
+            };
+
+            requestAnimationFrame(updateCounter);
+        },
+
+        // Easing function for smoother animation
+        easeOutQuart(t) {
+            return 1 - Math.pow(1 - t, 4);
+        },
+
+        // Method to reset and replay animation (useful for testing)
+        replayAnimation() {
+            this.hasAnimated = false;
+            this.animateStats = false;
+            this.displayVerifiedReports = 0;
+            this.displayTotalReports = 0;
+            this.displayFraudReports = 0;
+            
+            setTimeout(() => {
+                this.startCountingAnimation();
+            }, 100);
+        }
+    },
+
+    watch: {
+        // Watch for prop changes and restart animation
+        verifiedReports(newVal, oldVal) {
+            if (newVal !== oldVal && this.hasAnimated) {
+                this.replayAnimation();
+            }
+        },
+        totalReports(newVal, oldVal) {
+            if (newVal !== oldVal && this.hasAnimated) {
+                this.replayAnimation();
+            }
+        },
+        fraudReports(newVal, oldVal) {
+            if (newVal !== oldVal && this.hasAnimated) {
+                this.replayAnimation();
+            }
         }
     }
 }
@@ -217,10 +360,75 @@ blockquote {
     padding: 1.5rem;
     transition: all 0.3s ease;
     flex: 1;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+/* Animation for statistics */
+.stat-item.animate-stat {
+    animation: slideInUp 0.8s ease-out forwards;
+}
+
+.stat-item:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.stat-item:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.stat-item:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Counter number styling with subtle animation */
+.counter-number {
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.animate-stat .counter-number {
+    animation: numberGlow 0.5s ease-in-out;
+}
+
+@keyframes numberGlow {
+    0% { 
+        transform: scale(1); 
+        color: #333;
+    }
+    50% { 
+        transform: scale(1.05); 
+        color: #0d6efd;
+        text-shadow: 0 0 10px rgba(13, 110, 253, 0.3);
+    }
+    100% { 
+        transform: scale(1); 
+        color: #333;
+    }
 }
 
 .stat-item:hover {
     transform: translateY(-5px);
+}
+
+.stat-item:hover .counter-number {
+    color: #0d6efd;
+    transform: scale(1.05);
+}
+
+.stat-item:hover .stat-icon {
+    transform: scale(1.1);
 }
 
 /* Button sizing in search container */
@@ -231,6 +439,21 @@ blockquote {
 /* Mission statement adjustment */
 .mission-statement {
     padding-top: 10px;
+}
+
+/* Pulse animation for icons when stats animate */
+.animate-stat .stat-icon {
+    animation: iconPulse 1.5s ease-in-out;
+}
+
+@keyframes iconPulse {
+    0%, 100% { 
+        transform: scale(1); 
+    }
+    50% { 
+        transform: scale(1.2);
+        filter: drop-shadow(0 0 8px rgba(13, 110, 253, 0.4));
+    }
 }
 
 /* Responsive adjustments */

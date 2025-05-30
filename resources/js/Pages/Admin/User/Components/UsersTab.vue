@@ -19,10 +19,13 @@
       </div>
       <div class="col-12 col-md-6 text-md-end">
         <div class="custom-select-container mx-auto mx-md-0">
-          <select v-model="filterRole" class="form-select form-select-lg custom-select w-100 w-md-auto">
-            <option value="">Semua Role</option>
-            <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
-          </select>
+          <div class="select-wrapper">
+            <i class="bi bi-shield-check select-icon"></i>
+            <select v-model="filterRole" class="form-select form-select-lg custom-select">
+              <option value="">Semua Role</option>
+              <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -32,10 +35,10 @@
       <table class="table custom-table align-middle mb-0">
         <thead>
           <tr>
-            <th style="width: 70px;">No </th>
+            <th style="width: 70px;">No</th>
             <th style="min-width: 120px;">Nama</th>
             <th style="min-width: 160px;">Email</th>
-            <th style="min-width: 120px;">Nomor </th>
+            <th style="min-width: 120px;">Nomor</th>
             <th style="width: 100px;">Role</th>
             <th style="width: 130px;">Ubah Role</th>
             <th style="width: 80px;">Izin</th>
@@ -121,7 +124,7 @@
       </table>
     </div>
 
-    <!-- Mobile & tablet: card list (≤1024px) -->
+    <!-- Mobile: card layout (≤1024px) -->
     <div class="d-block d-custom-table-none">
       <div v-for="(user, index) in filteredUsers" :key="user.id" class="card mb-3 p-3 shadow-sm">
         <div class="d-flex align-items-center mb-2">
@@ -137,7 +140,7 @@
           <span v-if="user.roles.length" class="badge role-badge text-primary">{{ user.roles }}</span>
           <span v-else class="badge no-role-badge">Tidak Ada Role</span>
         </div>
-        <div class="mb-2">
+        <div class="mb-3">
           <label class="form-label mb-1"><strong>Ubah Role</strong></label>
           <select
             class="form-select form-select-sm"
@@ -147,13 +150,27 @@
             <option disabled selected>Pilih role</option>
             <option v-for="role in roles" :key="role" :value="role" :selected="user.roles === role">{{ role }}</option>
           </select>
-          <!-- loading overlay bisa ditambahkan jika perlu -->
         </div>
-        <div class="mb-2 d-flex gap-2 flex-wrap">
-          <button class="btn btn-primary btn-sm flex-grow-1" @click="$emit('open-permission-modal', user)">Edit Izin</button>
-          <button class="btn btn-delete btn-sm flex-grow-1" @click.prevent="confirmDelete(user.name, $event.target.closest('form'))">
-            <i class="bi bi-trash me-1"></i> Hapus
+        <div class="action-buttons">
+          <button 
+            class="btn btn-primary btn-action" 
+            @click="$emit('open-permission-modal', user)"
+          >
+            <i class="bi bi-pencil-square me-1"></i>
+            Edit Izin
           </button>
+          <form :action="route('admin.users.delete', user.id)" method="POST" class="d-inline">
+            <input type="hidden" name="_method" value="DELETE" />
+            <input type="hidden" name="_token" :value="csrf" />
+            <button 
+              class="btn btn-danger btn-action" 
+              type="submit"
+              @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
+            >
+              <i class="bi bi-trash me-1"></i>
+              Hapus
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -196,6 +213,10 @@ async function submitRoleChange(e, userId, userName) {
   const selectedRole = e.target.value
   if (!selectedRole) return
 
+  // Store the current role or default to empty string for reset
+  const user = props.users.find(u => u.id === userId)
+  const originalRole = user?.roles || ''
+
   // Inisialisasi state untuk pengguna
   if (!userStates[userId]) {
     userStates[userId] = { isSubmitting: false, submitSuccess: false }
@@ -219,7 +240,8 @@ async function submitRoleChange(e, userId, userName) {
   })
 
   if (!result.isConfirmed) {
-    e.target.value = '' // Reset dropdown
+    // Reset to original role or default placeholder
+    e.target.value = originalRole || ''
     return
   }
 
@@ -234,14 +256,13 @@ async function submitRoleChange(e, userId, userName) {
     })
 
     // Perbarui data pengguna secara lokal
-    const user = props.users.find(u => u.id === userId)
     if (user) {
       user.roles = selectedRole
     }
 
     // Tampilkan animasi sukses
     userStates[userId].submitSuccess = true
-    await new Promise(resolve => setTimeout(resolve, 1000)) // Animasi sukses 1 detik
+    await new Promise(resolve => setTimeout(resolve, 1000))
 
     // Tampilkan flash message via SweetAlert
     Swal.fire({
@@ -262,9 +283,11 @@ async function submitRoleChange(e, userId, userName) {
       },
       buttonsStyling: false
     })
+    // Reset to original role on error
+    e.target.value = originalRole || ''
   } finally {
     userStates[userId].isSubmitting = false
-    await new Promise(resolve => setTimeout(resolve, 3000)) // Reset status setelah 3 detik
+    await new Promise(resolve => setTimeout(resolve, 3000))
     userStates[userId].submitSuccess = false
   }
 }
@@ -293,131 +316,12 @@ function confirmDelete(userName, form) {
 </script>
 
 <style scoped>
-/* Responsive adjustments */
+/* Base styles */
 .user-avatar {
   width: 40px;
   height: 40px;
   object-fit: cover;
   border: 2px solid #e5e7eb;
-}
-
-@media (max-width: 576px) {
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-  }
-  .user-name-text {
-    font-size: 0.9rem;
-  }
-  .user-email-text {
-    font-size: 0.85rem;
-  }
-  .custom-role-select {
-    max-width: 120px;
-    font-size: 0.85rem;
-  }
-  .btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
-  }
-  .btn-delete {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-  }
-  .custom-select-container {
-    max-width: 100%;
-  }
-  .search-container {
-    max-width: 100%;
-  }
-}
-
-/* Loading & success animations */
-.loading-overlay-cell {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  border-radius: 8px;
-}
-
-.loading-content {
-  text-align: center;
-}
-
-.loading-spinner-container {
-  position: relative;
-  width: 24px;
-  height: 24px;
-  margin: 0 auto;
-}
-
-.loading-spinner-small {
-  width: 24px;
-  height: 24px;
-  border: 3px solid #e5e7eb;
-  border-top: 3px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.loading-spinner-glow {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
-  animation: pulse 2s ease-in-out infinite;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.success-icon {
-  width: 24px;
-  height: 24px;
-  margin: 0 auto;
-  animation: scaleIn 0.3s ease;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.2;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    transform: scale(0);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 
 .search-container {
@@ -429,15 +333,39 @@ function confirmDelete(userName, form) {
   display: inline-block;
 }
 
+/* Select wrapper with icon */
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.select-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3b82f6;
+  font-size: 18px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.custom-select {
+  padding-left: 45px !important;
+  padding-right: 40px !important;
+  background-position: right 14px center !important;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.85rem; /* Smaller text for role filter select */
+}
+
+/* Table styles */
 .custom-table-container {
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-}
-
-.custom-table {
-  margin-bottom: 0;
 }
 
 .custom-table th {
@@ -456,37 +384,34 @@ function confirmDelete(userName, form) {
   white-space: nowrap;
 }
 
+/* Badge styles */
 .role-badge {
   background: #dbeafe;
   color: #1e40af;
   font-weight: 500;
-  padding: 6px 12px;
+  padding: 4px 10px; /* Reduced padding for smaller appearance */
   border-radius: 12px;
   white-space: nowrap;
+  font-size: 0.75rem; /* Smaller text for role badge */
 }
 
 .no-role-badge {
   background: #f3f4f6;
   color: #6b7280;
   font-weight: 500;
-  padding: 6px 12px;
+  padding: 4px 10px; /* Reduced padding for smaller appearance */
   border-radius: 12px;
   white-space: nowrap;
+  font-size: 0.75rem; /* Smaller text for no-role badge */
 }
 
+/* Role select in table */
 .custom-role-select {
-  max-width: 150px;
-  border-radius: 8px;
+  font-size: 0.75rem; /* Smaller text for role select dropdown */
+  padding: 4px 8px; /* Adjust padding for smaller appearance */
 }
 
-.swal-confirm {
-  margin-right: 0.5rem !important;
-}
-
-.swal-cancel {
-  margin-left: 0.5rem !important;
-}
-
+/* Button styles */
 .btn-primary {
   background: #3b82f6;
   border: none;
@@ -498,142 +423,221 @@ function confirmDelete(userName, form) {
   transform: translateY(-1px);
 }
 
-.btn-delete {
+.btn-danger {
   background: #e3342f;
-  color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
   transition: all 0.2s ease;
 }
 
-.btn-delete:hover {
+.btn-danger:hover {
   background: #c53030;
   transform: translateY(-1px);
 }
 
-/* Custom display classes for 1024px breakpoint */
+/* Action buttons for mobile */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Loading animations */
+.loading-overlay-cell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 8px;
+}
+
+.loading-spinner-container {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.loading-spinner-small {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.success-icon {
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.2; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* SweetAlert custom styles */
+.swal-confirm {
+  margin-right: 0.5rem !important;
+}
+
+.swal-cancel {
+  margin-left: 0.5rem !important;
+}
+
+/* Responsive breakpoints */
 @media (min-width: 1025px) {
-  .d-custom-table-block {
-    display: block !important;
-  }
-  .d-custom-table-none {
-    display: none !important;
-  }
+  .d-custom-table-block { display: block !important; }
+  .d-custom-table-none { display: none !important; }
 }
 
 @media (max-width: 1024px) {
-  .d-custom-table-block {
-    display: none !important;
-  }
-  .d-custom-table-none {
-    display: block !important;
-  }
+  .d-custom-table-block { display: none !important; }
+  .d-custom-table-none { display: block !important; }
 }
 
-/* Styling responsive untuk avatar, font, dan nomor HP */
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border: 2px solid #e5e7eb;
-}
-
+/* Mobile styles (≤576px) */
 @media (max-width: 576px) {
   .user-avatar {
-    width: 32px !important;
-    height: 32px !important;
+    width: 32px;
+    height: 32px;
   }
-  .fw-semibold, .fw-medium, .user-name-text {
-    font-size: 1rem !important;
+  
+  .fw-semibold, .fw-medium {
+    font-size: 0.95rem;
   }
+  
   .text-muted.small {
-    font-size: 0.75rem !important;
+    font-size: 0.8rem;
   }
+  
   .role-badge, .no-role-badge {
-    font-size: 0.75rem !important;
-    padding: 0.25rem 0.5rem !important;
+    font-size: 0.65rem; /* Smaller text for mobile */
+    padding: 3px 6px;
   }
-  select.form-select {
-    max-width: 100% !important;
-    font-size: 0.85rem !important;
-    padding: 0.25rem 0.5rem !important;
+  
+  .custom-select, .custom-role-select, .form-select {
+    font-size: 0.75rem; /* Smaller text for selects on mobile */
+    padding: 6px 8px;
   }
-  .d-flex.gap-2 {
-    flex-wrap: wrap;
+  
+  .btn-action {
+    min-width: 100px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
   }
-  .btn.btn-primary.btn-sm,
-  .btn.btn-delete.btn-sm {
-    flex: 1 1 48%;
-    padding: 0.375rem 0.75rem !important;
-    font-size: 0.85rem !important;
+  
+  .action-buttons {
+    gap: 6px;
   }
-  .btn.btn-primary.btn-sm {
-    margin-bottom: 0.5rem;
+  
+  .custom-select-container {
+    max-width: 100%;
+  }
+  
+  .search-container {
+    max-width: 100%;
   }
 }
 
-/* Tablet mini (≥ 600px) */
-@media (min-width: 600px) and (max-width: 767.98px) {
+/* Small tablet (577px - 767px) */
+@media (min-width: 577px) and (max-width: 767px) {
   .user-avatar {
-    width: 36px !important;
-    height: 36px !important;
+    width: 36px;
+    height: 36px;
   }
-  .fw-semibold, .fw-medium, .user-name-text {
-    font-size: 1.1rem !important;
+  
+  .fw-semibold, .fw-medium {
+    font-size: 1rem;
   }
+  
   .text-muted.small {
-    font-size: 0.85rem !important;
+    font-size: 0.85rem;
   }
+  
   .role-badge, .no-role-badge {
-    font-size: 0.8rem !important;
-    padding: 0.3rem 0.6rem !important;
+    font-size: 0.7rem; /* Slightly larger than mobile */
+    padding: 4px 8px;
   }
-  select.form-select {
-    max-width: 150px !important;
-    font-size: 0.9rem !important;
-    padding: 0.3rem 0.6rem !important;
+  
+  .custom-select, .custom-role-select, .form-select {
+    font-size: 0.8rem; /* Slightly larger than mobile */
+    padding: 6px 8px;
   }
-  .d-flex.gap-2 {
-    flex-wrap: nowrap;
-  }
-  .btn.btn-primary.btn-sm,
-  .btn.btn-delete.btn-sm {
-    flex: 0 0 auto;
-    padding: 0.4rem 1rem !important;
-    font-size: 0.9rem !important;
+  
+  .btn-action {
+    min-width: 110px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
   }
 }
 
-/* Tablet besar (≥ 768px dan ≤ 991.98px) */
-@media (min-width: 768px) and (max-width: 991.98px) {
+/* Large tablet (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
   .user-avatar {
-    width: 40px !important;
-    height: 40px !important;
+    width: 40px;
+    height: 40px;
   }
-  .fw-semibold, .fw-medium, .user-name-text {
-    font-size: 1.15rem !important;
+  
+  .fw-semibold, .fw-medium {
+    font-size: 1.1rem;
   }
+  
   .text-muted.small {
-    font-size: 0.9rem !important;
+    font-size: 0.9rem;
   }
+  
   .role-badge, .no-role-badge {
-    font-size: 0.85rem !important;
-    padding: 0.35rem 0.75rem !important;
+    font-size: 0.75rem; /* Consistent with desktop */
+    padding: 4px 10px;
   }
-  select.form-select {
-    max-width: 180px !important;
-    font-size: 1rem !important;
-    padding: 0.35rem 0.75rem !important;
+  
+  .custom-select, .custom-role-select, .form-select {
+    font-size: 0.85rem; /* Consistent with desktop */
+    padding: 6px 10px;
   }
-  .d-flex.gap-2 {
-    flex-wrap: nowrap;
-  }
-  .btn.btn-primary.btn-sm,
-  .btn.btn-delete.btn-sm {
-    flex: 0 0 auto;
-    padding: 0.5rem 1.25rem !important;
-    font-size: 1rem !important;
+  
+  .btn-action {
+    min-width: 120px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
   }
 }
 </style>

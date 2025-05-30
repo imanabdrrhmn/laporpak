@@ -106,7 +106,7 @@
           <!-- Right Column -->
           <div class="col-lg-8">
             <UpdateProfileInformationForm />
-            <UpdatePasswordForm />
+            <!-- <UpdatePasswordForm /> -->
           </div>
         </div>
       </div>
@@ -122,7 +122,7 @@
 
 <script setup>
 import DeleteUserForm from './Partials/DeleteUserForm.vue';
-import UpdatePasswordForm from './Partials/UpdatePasswordForm.vue';
+// import UpdatePasswordForm from './Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm.vue';
 import AvatarPreviewModal from './Partials/AvatarPreviewModal.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';

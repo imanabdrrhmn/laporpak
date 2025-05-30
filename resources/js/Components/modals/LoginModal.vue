@@ -289,13 +289,17 @@ function handleLogin() {
 /* Password toggle icon */
 .toggle-password-icon {
   position: absolute;
-  top: 50%;
+  top: 0;
   right: 12px;
-  transform: translateY(-50%);
+  bottom: 0;
   cursor: pointer;
   color: #6c757d;
   font-size: 16px;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  height: 56px; /* Sama dengan tinggi input */
+  margin: 0;
 }
 
 /* Toggle button styling */

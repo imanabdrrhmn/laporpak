@@ -1,16 +1,28 @@
 <x-mail::message>
 # Top Up Berhasil
 
-Halo {{ $user->name }},
+<div style="text-align: center; margin: 20px 0;">
+    <div style="width: 60px; height: 60px; background-color: #87CEEB; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+        <span style="color: white; font-size: 24px; font-weight: bold;">✓</span>
+    </div>
+</div>
 
-Top up sebesar **Rp {{ number_format($topUp->amount, 0, ',', '.') }}** telah berhasil diverifikasi.
+Halo {{ $user->name }}, Terimakasih telah melakukan pembayaran  
+Top up Sebesar
 
-<x-mail::button :url="route('top-ups.index')">
+<div style="text-align: center; margin: 30px 0;">
+    <h2 style="color: #00C896; font-size: 48px; margin: 0; font-weight: bold;">
+        Rp. {{ number_format($topUp->amount, 0, ',', '.') }}
+    </h2>
+</div>
+
+Untuk mengecek riwayat transaksi Anda, silakan klik  
+tombol di bawah ini:
+
+<x-mail::button :url="route('top-ups.index')" color="primary">
 Lihat Riwayat Top Up
 </x-mail::button>
 
-Terima kasih telah menggunakan layanan kami.
-
-Salam,<br>
-{{ config('app.name') }}
+salam hangat,  
+LaporPak.com
 </x-mail::message>

@@ -6,17 +6,22 @@
         <!-- Modern Page Header with gradient background -->
         <div class="card border-0 shadow-lg mb-5 overflow-hidden">
           <div class="card-body position-relative p-0">
-            <div class="gradient-header p-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-              <div class="mb-3 mb-md-0">
-                <h2 class="mb-1 fw-bold text-white">Manajemen Pengguna</h2>
-                <p class="text-white-50 mb-0">Kelola pengguna dan peran dalam aplikasi Anda</p>
-              </div>
-              <div class="badge bg-white text-primary fw-bold px-3 py-2 fs-6 shadow-sm flex-shrink-0">
-                Total Users: {{ users.length }}
+            <div class="gradient-header p-4">
+              <div class="header-content">
+                <div class="header-text">
+                  <h2 class="mb-1 fw-bold text-white">Manajemen Pengguna</h2>
+                  <p class="text-white-50 mb-0">Kelola pengguna dan peran dalam aplikasi Anda</p>
+                </div>
+                <div class="header-badge">
+                  <div class="badge bg-white text-primary fw-bold px-3 py-2 fs-6 shadow-sm">
+                    Total Users: {{ users.length }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        
         <!-- Success Alert -->
         <div v-if="flashMessage" class="alert custom-alert shadow-sm border-0 animate__animated animate__fadeInDown">
           <div class="d-flex align-items-center">
@@ -197,11 +202,21 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
   overflow: hidden;
   padding-top: 1.5rem; 
   padding-bottom: 1.5rem;
+}
 
+.header-content {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.header-text {
+  flex: 1;
+}
+
+.header-badge {
+  flex-shrink: 0;
 }
 
 .gradient-header h2 {
@@ -319,18 +334,16 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 
 /* Custom Table */
 .custom-table-container {
-  overflow-x: auto; /* buat scroll muncul kalau perlu */
+  overflow-x: auto;
   border-radius: 0.5rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
-
 
 .custom-table {
   width: 100%;
   table-layout: fixed; 
   margin-bottom: 0;
 }
-
 
 .custom-table th, .custom-table td {
   padding: 0.75rem 0.75rem;
@@ -382,7 +395,6 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 
 /* User Avatar */
 .user-avatar {
@@ -512,7 +524,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 }
 
 .swal-confirm:hover {
-  background-color: #2563eb !important; /* Hover warna lebih gelap */
+  background-color: #2563eb !important;
 }
 
 .swal-cancel {
@@ -524,14 +536,12 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 }
 
 .swal-cancel:hover {
-  background-color: #6c757d !important; /* Hover warna lebih gelap */
+  background-color: #6c757d !important;
 }
 
-/* Optional: Buat tombol Swal lebih lebar agar lebih mudah diklik */
 .swal2-actions button {
   min-width: 100px;
 }
-
 
 /* Animation Extras */
 @keyframes fadeIn {
@@ -543,21 +553,41 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
   animation: fadeIn 0.3s ease forwards;
 }
 
-/* Responsif umum */
+/* Responsive Styles */
+@media (max-width: 991.98px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .header-badge {
+    align-self: flex-end;
+  }
+}
+
 @media (max-width: 767.98px) {
-  /* Header teks dan badge */
   .gradient-header h2 {
     font-size: 1.4rem;
   }
+  
   .gradient-header p {
     font-size: 0.9rem;
   }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .header-badge {
+    align-self: center;
+  }
+  
   .badge.bg-white.text-primary {
     font-size: 0.85rem;
-    padding: 0.3rem 0.6rem;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+    padding: 0.4rem 0.8rem;
   }
 
   /* Tabs nav scroll horizontal */
@@ -565,6 +595,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+  
   .nav-tabs-modern .nav-item {
     flex: 0 0 auto;
   }
@@ -584,6 +615,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
   .custom-table-container {
     box-shadow: none;
   }
+  
   .custom-table thead th,
   .custom-table tbody td {
     padding: 0.5rem 0.75rem;
@@ -615,23 +647,20 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
   }
 }
 
-@media (max-width: 479.98px) {
+@media (max-width: 575.98px) {
   .gradient-header h2 {
     font-size: 1.2rem;
   }
+  
   .gradient-header p {
     font-size: 0.8rem;
   }
 
   .badge.bg-white.text-primary {
     font-size: 0.75rem;
-    top: 0.8rem;
-    right: 0.8rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0.3rem 0.6rem;
   }
-}
-
-@media (max-width: 575.98px) {
+  
   .search-container .form-control {
     font-size: 0.9rem;
     padding: 0.4rem 0.6rem;
@@ -658,5 +687,4 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
     padding: 0.6rem 1rem;
   }
 }
-
 </style>

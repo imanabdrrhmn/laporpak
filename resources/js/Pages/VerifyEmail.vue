@@ -1,9 +1,10 @@
 <template>
   <AppLayout>
     <Head title="Verifikasi Email" />
-    <div class="page-wrapper p-0">
+    <div class="page-wrapper">
       <div class="card-container">
         <div class="card">
+          <!-- Email Icon -->
           <div class="icon-container">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -15,79 +16,57 @@
               stroke-linejoin="round"
               class="email-icon"
             >
-              <path
-                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-              ></path>
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
               <polyline points="22,6 12,13 2,6"></polyline>
             </svg>
           </div>
 
+          <!-- Title -->
           <h1 class="title">Verifikasi Email</h1>
-          <div class="divider"></div>
 
-          <p class="subtitle" v-if="status !== 'verification-link-sent'">
-            Silakan klik tombol kirim di bawah untuk menerima email.
-          </p>
-          <p class="subtitle" v-else>
-            Kami telah mengirimkan link verifikasi ke email Anda. Silakan cek
-            inbox Anda dan klik tautan untuk memverifikasi akun.
-          </p>
-
-          <div v-if="isVerified" class="status-box success">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="status-icon"
-            >
+          <!-- Success State -->
+          <div v-if="isVerified" class="status-container success">
+            <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-            <p class="verified-text">Email Anda telah terverifikasi!</p>
+            <p class="status-text">Email Anda telah terverifikasi!</p>
           </div>
 
-          <div v-if="!isVerified" class="resend-wrapper">
-            <p class="muted-text">
-              Tidak menerima email? Anda dapat mengirim ulang link verifikasi.
+          <!-- Unverified State -->
+          <div v-if="!isVerified" class="content">
+            <!-- Description -->
+            <p class="description">
+              {{ status !== 'verification-link-sent' 
+                ? 'Silakan klik tombol di bawah untuk menerima email verifikasi.' 
+                : 'Link verifikasi telah dikirim ke email Anda. Periksa inbox dan klik tautan untuk memverifikasi akun.' }}
             </p>
 
+            <!-- Send Button -->
             <button
               @click="resendVerification"
               :disabled="processing || countdown > 0"
-              class="btn"
-              :class="{ 'btn-disabled': countdown > 0 }"
+              class="send-button"
             >
-              <span v-if="processing" class="loading-spinner"></span>
-              <span v-else-if="countdown > 0">Tunggu {{ countdown }} detik</span>
-              <span v-else>{{ hasSent ? 'Kirim Ulang' : 'Kirim' }}</span>
+              <span v-if="processing" class="spinner"></span>
+              <span v-else-if="countdown > 0">Tunggu {{ countdown }}s</span>
+              <span v-else>{{ hasSent ? 'Kirim Ulang' : 'Kirim Email' }}</span>
             </button>
 
-            <div v-if="status === 'verification-link-sent'" class="status-box info">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="status-icon"
-              >
+            <!-- Info Message -->
+            <div v-if="status === 'verification-link-sent'" class="info-box">
+              <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
-              <p class="info-text">Link verifikasi telah dikirim! Periksa email Anda.</p>
+              <span>Email verifikasi berhasil dikirim</span>
             </div>
-          </div>
 
-          <div class="help-section">
+            <!-- Help Text -->
             <p class="help-text">
-              Butuh bantuan? <a href="#" class="help-link">Hubungi support</a>
+              Tidak menerima email? Periksa folder spam atau 
+              <a href="#" class="help-link">hubungi support</a>
             </p>
           </div>
         </div>
@@ -113,7 +92,7 @@ const isVerified = ref(false)
 const hasSent = ref(false)
 let timer = null
 
-const COUNTDOWN_DURATION = 60 // detik
+const COUNTDOWN_DURATION = 60
 const STORAGE_KEY = 'emailVerificationCountdownEnd'
 
 function startCountdown(duration = COUNTDOWN_DURATION) {
@@ -177,220 +156,150 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Full page wrapper */
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Page wrapper - full height with centered content */
 .page-wrapper {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2563EB, #3B82F6);
-  padding: 2rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 }
 
+/* Card container - responsive width */
 .card-container {
   width: 100%;
-  max-width: 480px;
-  perspective: 1000px;
+  max-width: 400px;
 }
 
-/* Card style with improved design */
+/* Main card */
 .card {
   background: #ffffff;
-  border-radius: 24px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-  padding: 2.5rem;
-  margin: 1rem;
-  width: 100%;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  padding: 2rem;
   text-align: center;
-  transform-style: preserve-3d;
-  transition: transform 0.5s ease, box-shadow 0.5s ease;
-  animation: cardFadeIn 0.8s ease-out;
+  animation: slideUp 0.6s ease-out;
 }
 
-@keyframes cardFadeIn {
-  0% {
+@keyframes slideUp {
+  from {
     opacity: 0;
     transform: translateY(20px);
   }
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Icon container */
+/* Icon */
 .icon-container {
-  display: flex;
-  justify-content: center;
   margin-bottom: 1.5rem;
 }
 
 .email-icon {
-  width: 68px;
-  height: 68px;
-  color: #2563EB;
-  animation: pulse 2s infinite;
+  width: 3rem;
+  height: 3rem;
+  color: #3b82f6;
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Typography */
+/* Title */
 .title {
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #111827;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Success state */
+.status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 0.75rem;
   margin-bottom: 1rem;
 }
 
-.divider {
-  height: 3px;
-  width: 60px;
-  background: linear-gradient(90deg, #2563EB, #3B82F6);
-  margin: 0 auto 1.5rem auto;
-  border-radius: 3px;
-}
-
-.subtitle {
-  font-size: 1.1rem;
-  color: #4B5563;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-}
-
-/* Status boxes */
-.status-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  border-radius: 12px;
-  margin: 1.5rem 0;
-  animation: fadeIn 0.5s ease-out;
-}
-
-.status-box.success {
-  background-color: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.status-box.info {
-  background-color: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+.status-container.success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
 }
 
 .status-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 10px;
+  width: 2rem;
+  height: 2rem;
+  color: #16a34a;
+  margin-bottom: 0.5rem;
 }
 
-.status-box.success .status-icon {
-  color: #10B981;
-}
-
-.status-box.info .status-icon {
-  color: #3B82F6;
-}
-
-.verified-text {
-  color: #10B981;
-  font-weight: bold;
-  margin: 0;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.resend-wrapper {
-  margin-top: 1.5rem;
-}
-
-.muted-text {
-  color: #6B7280;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-}
-
-.info-text {
-  color: #3B82F6;
-  font-size: 0.95rem;
-  margin: 0;
-}
-
-/* Button style */
-.btn {
-  background: linear-gradient(135deg, #2563EB, #3B82F6);
-  color: white;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 12px;
+.status-text {
+  color: #16a34a;
   font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Content area */
+.content {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.btn:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
+/* Description text */
+.description {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Send button */
+.send-button {
   width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transform: translateX(-100%);
+  padding: 0.75rem 1rem;
+  background: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
 }
 
-.btn:hover:not(:disabled):before {
-  animation: shimmer 1.5s infinite;
+.send-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  background-color: #0b5ed7;
+    border-color: #0a58ca;
 }
 
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.btn-disabled {
-  background: linear-gradient(90deg, #2563EB, #3B82F6);
-}
-
-.btn:disabled {
+.send-button:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
-.btn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 7px 14px rgba(37, 99, 235, 0.3);
-}
-
-/* Loading spinner */
-.loading-spinner {
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  border: 3px solid rgba(255,255,255,0.3);
+/* Spinner */
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: #fff;
-  animation: spin 1s ease-in-out infinite;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -399,44 +308,101 @@ onMounted(() => {
   }
 }
 
-/* Help section */
-.help-section {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #E5E7EB;
+/* Info box */
+.info-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+  color: #1d4ed8;
+  font-size: 0.875rem;
 }
 
+.info-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* Help text */
 .help-text {
-  color: #6B7280;
-  font-size: 0.95rem;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .help-link {
-  color: #2563EB;
+  color: #3b82f6;
   text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
+  font-weight: 500;
 }
 
 .help-link:hover {
-  color: #1D4ED8;
   text-decoration: underline;
 }
 
-/* Modal styling */
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
+/* Responsive breakpoints */
+@media (max-width: 480px) {
+  .page-wrapper {
+    padding: 0.75rem;
+  }
+  
   .card {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem;
   }
-
+  
   .title {
-    font-size: 1.75rem;
+    font-size: 1.375rem;
   }
+  
+  .email-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .description {
+    font-size: 0.9rem;
+  }
+  
+  .send-button {
+    font-size: 0.9rem;
+    min-height: 2.5rem;
+  }
+}
 
-  .subtitle {
-    font-size: 1rem;
+@media (max-width: 360px) {
+  .card {
+    padding: 1.25rem;
   }
+  
+  .title {
+    font-size: 1.25rem;
+  }
+  
+  .description,
+  .help-text {
+    font-size: 0.85rem;
+  }
+}
+
+/* Large screens */
+@media (min-width: 768px) {
+  .card-container {
+    max-width: 420px;
+  }
+  
+  .card {
+    padding: 2.5rem;
+  }
+}
+
+/* Force white card background always */
+.card {
+  background: #ffffff !important;
 }
 </style>

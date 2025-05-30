@@ -1,14 +1,18 @@
 <x-mail::message>
-# Top Up Ditolak
+# Top Up Gagal
 
-Halo {{ $user->name }},
+Halo {{ $user->name }}, Maaf, pembayaran Anda tidak dapat diproses
 
-Maaf, top up sebesar **Rp {{ number_format($topUp->amount, 0, ',', '.') }}** Anda ditolak.
+## Rp. {{ number_format($topUp->amount, 0, ',', '.') }}
 
-Jika ada pertanyaan, silakan hubungi layanan pelanggan kami.
+**Saldo tidak mencukupi atau kartu ditolak**
 
-Terima kasih.
+Silakan coba lagi atau gunakan metode pembayaran lain.
 
-Salam,<br>
+<x-mail::button :url="$topUpHistoryUrl" color="error">
+Lihat Riwayat Top Up
+</x-mail::button>
+
+Salam hangat,<br>
 {{ config('app.name') }}
 </x-mail::message>

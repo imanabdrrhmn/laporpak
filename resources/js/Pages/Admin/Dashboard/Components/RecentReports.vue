@@ -1,17 +1,7 @@
 <template>
   <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="card-title mb-0">Ringkasan Laporan Terbaru</h5>
-        <div class="d-flex flex-wrap gap-2">
-          <button class="btn btn-sm btn-outline-secondary" @click="$emit('filter')">
-            <i class="bi bi-funnel me-1"></i> Filter
-          </button>
-          <button class="btn btn-sm btn-outline-secondary" @click="$emit('export')">
-            <i class="bi bi-download me-1"></i> Ekspor
-          </button>
-        </div>
-      </div>
+      <h5 class="card-title mb-3">Ringkasan Laporan Terbaru</h5>
       <div class="row">
         <div class="col-lg-4 col-sm-6 col-12 mb-3" v-for="report in reports.slice(0, 3)" :key="report.id">
           <div class="card h-100 border-0 shadow-sm report-card">
@@ -73,8 +63,8 @@ export default {
         case 'rejected': return 'danger';
         case 'published': return 'info';
         default: return 'secondary';
+      }
     }
-  }
   },
 };
 </script>
@@ -142,5 +132,4 @@ export default {
     margin-right: auto;
   }
 }
-
 </style>

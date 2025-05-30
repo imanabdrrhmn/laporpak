@@ -21,6 +21,7 @@
     "dependencies": {
         "@inertiajs/inertia": "^0.11.1",
         "@popperjs/core": "^2.11.8",
+        "@vuepic/vue-datepicker": "^11.0.2",
         "awesome-phonenumber": "^7.5.0",
         "axios": "^1.8.4",
         "bootstrap": "^5.3.5",

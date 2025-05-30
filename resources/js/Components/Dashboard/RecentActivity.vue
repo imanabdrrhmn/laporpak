@@ -2,7 +2,6 @@
   <div class="aktivitas-card">
     <div class="card-header">
       <h5 class="card-title">Aktivitas Terakhir</h5>
-      <a href="#" class="lihat-semua">Lihat Semua →</a>
     </div>
     <div class="card-body">
       <div class="aktivitas-list">
@@ -53,7 +52,7 @@ const aktivitasList = computed(() =>
   props.aktivitas.map((item) => ({
     id: item.id,
     title: item.activity ?? item.title ?? 'Aktivitas',
-    description: item.description ?? '', // Deskripsi ditambahkan di sini
+    description: item.description ?? '',
     time: item.created_at ?? item.time ?? '-',
     icon: item.activity === 'Kirim Laporan' ? '📤' :
           item.activity === 'Update Laporan' ? '✏️' :
@@ -92,18 +91,6 @@ const aktivitasList = computed(() =>
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
-}
-
-.lihat-semua {
-  color: #4285f4;
-  text-decoration: none;
-  font-size: clamp(0.75rem, 2vw, 0.875rem);
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.lihat-semua:hover {
-  color: #3367d6;
 }
 
 .card-body {

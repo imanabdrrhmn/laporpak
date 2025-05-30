@@ -10,9 +10,6 @@
 
     <!-- User Profile -->
     <div class="user-profile">
-      <div class="category-badge" :class="getCategoryClass(report.service)">
-        {{ report.service }}
-      </div>
       <div class="user-details">
         <div class="user-avatar">
           <img
@@ -25,6 +22,9 @@
         <div class="user-info">
           <div class="user-name">{{ report.user?.name || report.reporter || 'Anonymous' }}</div>
           <div class="user-date">{{ formatDate(report.created_at) }}</div>
+        </div>
+        <div class="category-badge" :class="getCategoryClass(report.service)">
+          {{ report.service }}
         </div>
       </div>
       <div v-if="report.location" class="location-badge">
@@ -204,7 +204,7 @@ export default {
 }
 
 .user-profile {
-  padding: 16px;
+  padding: 12px 16px; /* Reduced top/bottom padding */
   display: flex;
   flex-direction: column;
   position: relative;
@@ -213,16 +213,14 @@ export default {
 }
 
 .category-badge {
-  position: absolute;
-  top: 12px;
-  left: 16px;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
   color: white;
   text-transform: capitalize;
-  z-index: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .category--fraud {
@@ -231,14 +229,12 @@ export default {
 
 .category--default {
   background: rgba(92, 111, 123, 1);
-  
 }
 
 .user-details {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 40px;
 }
 
 .user-avatar {
@@ -246,6 +242,7 @@ export default {
   height: 40px;
   border-radius: 50%;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .avatar-image {
@@ -268,6 +265,7 @@ export default {
 
 .user-info {
   flex: 1;
+  min-width: 0; /* Allow text to truncate */
 }
 
 .user-name {
@@ -395,7 +393,6 @@ export default {
   width: 40px;
   height: 40px;
   border: none;
-
   color: white;
   border-radius: 50%;
   cursor: pointer;
@@ -406,8 +403,6 @@ export default {
   z-index: 10;
   transition: background 0.3s ease;
 }
-
-
 
 .image-modal__content {
   overflow: hidden;
@@ -488,6 +483,11 @@ export default {
 
   .image-modal__content {
     max-height: 60vh;
+  }
+
+  .category-badge {
+    font-size: 0.75rem;
+    padding: 4px 8px;
   }
 }
 </style>

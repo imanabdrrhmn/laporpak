@@ -301,56 +301,136 @@
 
         <!-- Modal Export Logs -->
         <div
-          class="modal fade"
-          id="exportModal"
-          tabindex="-1"
-          aria-labelledby="exportModalLabel"
-          aria-hidden="true"
-          ref="exportModalRef"
-        >
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exportModalLabel">
-                  <i class="fas fa-file-export me-2"></i> Ekspor Data
-                </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                  @click="closeExportModal"
-                ></button>
-              </div>
-              <div class="modal-body">
-                <div class="mb-3">
-                  <label for="startDate" class="form-label">Tanggal Mulai</label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    v-model="exportFilters.start_date"
-                    class="form-control"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="endDate" class="form-label">Tanggal Akhir</label>
-                  <input
-                    type="date"
-                    id="endDate"
-                    v-model="exportFilters.end_date"
-                    class="form-control"
-                  />
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @click="closeExportModal">Batal</button>
-                <button type="button" class="btn btn-success" @click="exportLogs">
-                  <i class="fas fa-download me-1"></i> Unduh CSV
-                </button>
+  class="modal fade"
+  id="exportModal"
+  tabindex="-1"
+  aria-labelledby="exportModalLabel"
+  aria-hidden="true"
+  ref="exportModalRef"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exportModalLabel">
+          <i class="fas fa-file-export me-2"></i> Ekspor Data
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          @click="closeExportModal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="startDate" class="form-label">
+              <i class="fas fa-calendar-alt me-1"></i>Tanggal Mulai
+            </label>
+            <div class="date-input-wrapper">
+              <input
+                type="date"
+                id="startDate"
+                v-model="exportFilters.start_date"
+                class="form-control date-picker"
+                :max="exportFilters.end_date || getCurrentDate()"
+              />
+              <div class="date-icon">
+                <i class="fas fa-calendar-alt"></i>
               </div>
             </div>
+            <small class="text-muted">Pilih tanggal mulai periode</small>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="endDate" class="form-label">
+              <i class="fas fa-calendar-alt me-1"></i>Tanggal Akhir
+            </label>
+            <div class="date-input-wrapper">
+              <input
+                type="date"
+                id="endDate"
+                v-model="exportFilters.end_date"
+                class="form-control date-picker"
+                :min="exportFilters.start_date"
+                :max="getCurrentDate()"
+              />
+              <div class="date-icon">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+            </div>
+            <small class="text-muted">Pilih tanggal akhir periode</small>
           </div>
         </div>
+        
+        <!-- Quick Date Range Buttons -->
+        <div class="mb-3">
+          <label class="form-label">
+            <i class="fas fa-clock me-1"></i>Periode Cepat
+          </label>
+          <div class="quick-date-buttons">
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              @click="setQuickDateRange('today')"
+            >
+              Hari Ini
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              @click="setQuickDateRange('yesterday')"
+            >
+              Kemarin
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              @click="setQuickDateRange('week')"
+            >
+              7 Hari Terakhir
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              @click="setQuickDateRange('month')"
+            >
+              30 Hari Terakhir
+            </button>
+          </div>
+        </div>
+
+        <!-- Date Range Preview -->
+        <div v-if="exportFilters.start_date || exportFilters.end_date" class="alert alert-info">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Periode yang dipilih:</strong>
+          <br>
+          <span v-if="exportFilters.start_date">
+            Dari: {{ formatDatePreview(exportFilters.start_date) }}
+          </span>
+          <span v-if="exportFilters.start_date && exportFilters.end_date"> - </span>
+          <span v-if="exportFilters.end_date">
+            Sampai: {{ formatDatePreview(exportFilters.end_date) }}
+          </span>
+          <span v-if="!exportFilters.start_date && !exportFilters.end_date">
+            Semua data
+          </span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" @click="closeExportModal">
+          <i class="fas fa-times me-1"></i> Batal
+        </button>
+        <button type="button" class="btn btn-outline-warning" @click="clearDateFilters">
+          <i class="fas fa-eraser me-1"></i> Reset
+        </button>
+        <button type="button" class="btn btn-success" @click="exportLogs">
+          <i class="fas fa-download me-1"></i> Unduh CSV
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
         <!-- Notification Component -->
         <Notification
@@ -589,6 +669,65 @@ const closeExportModal = () => {
   exportModalInstance.value?.hide();
 };
 
+// Fungsi untuk mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+const getCurrentDate = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
+// Fungsi untuk format preview tanggal
+const formatDatePreview = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+};
+
+// Fungsi untuk set quick date range
+const setQuickDateRange = (range) => {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  
+  switch (range) {
+    case 'today':
+      exportFilters.value.start_date = todayStr;
+      exportFilters.value.end_date = todayStr;
+      break;
+      
+    case 'yesterday':
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      exportFilters.value.start_date = yesterdayStr;
+      exportFilters.value.end_date = yesterdayStr;
+      break;
+      
+    case 'week':
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      exportFilters.value.start_date = weekAgo.toISOString().split('T')[0];
+      exportFilters.value.end_date = todayStr;
+      break;
+      
+    case 'month':
+      const monthAgo = new Date(today);
+      monthAgo.setDate(monthAgo.getDate() - 30);
+      exportFilters.value.start_date = monthAgo.toISOString().split('T')[0];
+      exportFilters.value.end_date = todayStr;
+      break;
+  }
+};
+
+// Fungsi untuk clear date filters
+const clearDateFilters = () => {
+  exportFilters.value.start_date = '';
+  exportFilters.value.end_date = '';
+};
+
 const exportLogs = () => {
   const params = new URLSearchParams();
   if (exportFilters.value.start_date) params.append("start_date", exportFilters.value.start_date);
@@ -777,6 +916,115 @@ watch(
   color: #6c757d;
 }
 
+/* Action Menu */
+.action-menu {
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+}
+
+.modal-body .btn {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.modal-body .btn:last-child {
+  margin-bottom: 0;
+}
+
+/* Date Input Styling */
+.date-input-wrapper {
+  position: relative;
+}
+
+.date-picker {
+  padding-right: 40px;
+  border: 2px solid #e9ecef;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.date-picker:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.date-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Quick Date Buttons */
+.quick-date-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.quick-date-buttons .btn {
+  border-radius: 20px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.quick-date-buttons .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Modal Enhancements */
+#exportModal .modal-content {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  background-color: #0d6efd;
+}
+
+#exportModal .modal-header {
+  background-color: #0d6efd;
+  color: white;
+  border-radius: 15px 15px 0 0;
+  border-bottom: none;
+}
+
+#exportModal .modal-header .btn-close {
+  filter: invert(1);
+}
+
+#exportModal .modal-body {
+  padding: 2rem;
+  background-color: white;
+  border-radius: 0 0 0 0; /* Hapus border-radius dari body agar sesuai */
+}
+
+#exportModal .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+/* Modal Footer */
+#exportModal .modal-footer {
+  background-color: white;
+  border-top: 1px solid #e9ecef;
+  border-radius: 0; /* Hapus border-radius untuk footer */
+}
+
+/* Alert Styling */
+#exportModal .alert-info {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border: 1px solid #b3e5fc;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+#exportModal .alert-info i {
+  color: #0288d1;
+}
+
 /* Responsive Styles */
 @media (max-width: 992px) {
   .filter-controls {
@@ -821,19 +1069,19 @@ watch(
     overflow-x: auto;
     white-space: nowrap;
   }
+  
+  /* Responsive untuk mobile - Date Picker */
+  .quick-date-buttons {
+    justify-content: center;
+  }
+  
+  .quick-date-buttons .btn {
+    flex: 1;
+    min-width: 80px;
+  }
+  
+  #exportModal .modal-body {
+    padding: 1rem;
+  }
 }
-
-.action-menu {
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
-}
-
-.modal-body .btn {
-  width: 100%;
-  margin-bottom: 0.5rem;
-}
-
-.modal-body .btn:last-child {
-  margin-bottom: 0;
-}
-
 </style>
