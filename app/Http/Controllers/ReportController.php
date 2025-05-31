@@ -62,7 +62,7 @@ class ReportController extends Controller
         $request->validate([
             'category' => 'required|string',
             'description' => 'required|string|max:1500',
-            'evidence' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'evidence' => 'required|file|mimes:jpg,jpeg,png,webp|max:5120',
             'location.lat' => 'required|numeric',
             'location.lng' => 'required|numeric',
             'service' => 'required|string',
