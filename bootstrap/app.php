@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'auth' => \App\Http\Middleware\Authenticate::class,
             'email.not.verified' => \App\Http\Middleware\EnsureEmailIsNotVerified::class,
+            'phone.not.verified' => \App\Http\Middleware\EnsurePhoneNumberIsNotVerified::class,
         ]);
 
         //
