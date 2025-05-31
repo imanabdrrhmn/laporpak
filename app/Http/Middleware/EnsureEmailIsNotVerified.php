@@ -11,7 +11,15 @@ class EnsureEmailIsNotVerified
     {
         $user = $request->user();
 
-        if (!$user || $user->hasVerifiedEmail()) {
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        if (empty($user->email)) {
+            return redirect()->route('dashboard'); 
+        }
+
+        if ($user->hasVerifiedEmail()) {
             return redirect()->route('dashboard');
         }
 

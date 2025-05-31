@@ -11,9 +11,18 @@ class EnsurePhoneNumberIsNotVerified
     {
         $user = $request->user();
 
-        if (!$user || ($user->no_hp && $user->hasVerifiedPhone())) {
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        if (empty($user->no_hp)) {
             return redirect()->route('dashboard');
         }
+
+        if ($user->hasVerifiedPhone()) {
+            return redirect()->route('dashboard');
+        }
+
         return $next($request);
     }
 }
