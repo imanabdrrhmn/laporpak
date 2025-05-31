@@ -71,7 +71,7 @@
   max-width: 450px; /* Maximum width for larger screens */
   background-color: #ffc107;
   border-radius: 2px;
-  margin: 0.5rem auto; /* Center horizontally on all devices */
+  margin: 0.5rem 0; /* Left aligned - removed auto centering */
 }
 
 .feature-box {
@@ -118,6 +118,7 @@
   .highlight-bar {
     width: 90%; /* Slightly smaller for small screens */
     max-width: 300px; /* Reduced max-width */
+    margin: 0.5rem auto; /* Center on mobile */
   }
   
   .display-4 {
@@ -134,11 +135,13 @@
   .display-4 {
     word-break: break-word;
     hyphens: auto;
+
   }
   
   .highlight-bar {
     width: 85%; /* Further reduced for very small screens */
     max-width: 250px;
+    margin: 0.5rem auto; /* Center on mobile */
   }
 }
 
@@ -151,6 +154,7 @@
   .highlight-bar {
     width: 90%;
     max-width: 350px;
+    margin: 0.5rem auto; /* Center on tablet */
   }
 }
 
@@ -163,6 +167,7 @@
   .highlight-bar {
     width: 80%;
     max-width: 400px;
+    margin: 0.5rem auto; /* Center on tablet */
   }
 }
 
@@ -174,6 +179,7 @@
   .highlight-bar {
     width: 75%; /* Balanced width for large screens */
     max-width: 450px;
+    margin: 0.5rem 0; /* Left aligned on desktop */
   }
 }
 </style>

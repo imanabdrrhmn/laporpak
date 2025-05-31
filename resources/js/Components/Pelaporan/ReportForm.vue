@@ -550,7 +550,7 @@ const onPhoneInput = (e) => {
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
-  font-size: clamp(0.9rem, 2.5vw, 1rem); 
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
   padding: clamp(0.5rem, 2vw, 0.75rem);
   height: auto;
   overflow-x: hidden;
@@ -777,28 +777,38 @@ const onPhoneInput = (e) => {
   height: 1rem;
 }
 
-/* Custom Scrollbar for country list */
-.country-list::-webkit-scrollbar {
+/* Custom Scrollbar for country list, region dropdown, and description textarea */
+.country-list,
+.custom-select,
+.custom-textarea {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+.country-list::-webkit-scrollbar,
+.custom-select::-webkit-scrollbar,
+.custom-textarea::-webkit-scrollbar {
   width: 6px;
 }
 
-.country-list::-webkit-scrollbar-track {
+.country-list::-webkit-scrollbar-track,
+.custom-select::-webkit-scrollbar-track,
+.custom-textarea::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 3px;
 }
 
-.country-list::-webkit-scrollbar-thumb {
+.country-list::-webkit-scrollbar-thumb,
+.custom-select::-webkit-scrollbar-thumb,
+.custom-textarea::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 3px;
 }
 
-.country-list::-webkit-scrollbar-thumb:hover {
+.country-list::-webkit-scrollbar-thumb:hover,
+.custom-select::-webkit-scrollbar-thumb:hover,
+.custom-textarea::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
-}
-
-.country-list {
-  scrollbar-width: thin;
-  scrollbar-color: #c1c1c1 #f1f1f1;
 }
 
 @keyframes shake {
@@ -910,5 +920,4 @@ const onPhoneInput = (e) => {
     height: clamp(10px, 1.5vw, 12px);
   }
 }
-
 </style>

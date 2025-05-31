@@ -51,13 +51,6 @@
             >
               <i class="bi bi-geo-alt-fill"></i>
             </div>
-            <div class="floating-card">
-              <div class="card-body">
-                <h5><i class="bi bi-shield-fill-check me-2"></i> Kawasan Aman</h5>
-                <p class="mb-0">Bandung, Jawa Barat</p>
-                <small class="text-success">Pelaporan menurun 23%</small>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -187,26 +180,6 @@ const mapPins = computed(() => [
 .pin-2 { top: 45%; left: 65%; }
 .pin-3 { top: 65%; left: 25%; }
 
-.floating-card {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--border-radius);
-  padding: 10px;
-  box-shadow: 0 5px 10px var(--shadow-light);
-  color: #333;
-  max-width: 200px;
-  transform: translateY(0);
-  transition: var(--transition);
-  will-change: transform;
-  backdrop-filter: blur(10px);
-}
-
-.map-container:hover .floating-card {
-  transform: translateY(-8px);
-}
-
 .stat-item {
   text-align: center;
   background: var(--white-overlay);
@@ -320,11 +293,6 @@ const mapPins = computed(() => [
   .map-container {
     margin-bottom: 20px;
   }
-  .floating-card {
-    max-width: 180px;
-    padding: 8px;
-    font-size: 0.9rem;
-  }
 }
 
 @media (max-width: 768px) {
@@ -349,13 +317,6 @@ const mapPins = computed(() => [
   }
   .map-pin {
     font-size: 18px;
-  }
-  .floating-card {
-    max-width: 150px;
-    padding: 6px;
-    font-size: 0.8rem;
-    bottom: 10px;
-    right: 10px;
   }
 }
 
@@ -403,8 +364,7 @@ const mapPins = computed(() => [
   }
   
   .stat-item:hover,
-  .map-container:hover .map-image,
-  .map-container:hover .floating-card {
+  .map-container:hover .map-image {
     transform: none;
   }
 }
