@@ -35,15 +35,17 @@
                                 type="text" 
                                 class="form-control py-2 rounded-pill mb-3" 
                                 placeholder="Nomor/Email" 
-                                v-model="searchQuery"
+                                v-model.lazy="searchQuery"
+                                @keydown.enter="navigateToSearch"
                                 aria-label="Search for reports"
                             />
-                            <a 
-                                class="btn btn-primary px-4 py-2 mt-2" 
-                                :href="`/CariLaporan?query=${encodeURIComponent(searchQuery)}`"
+                            <button 
+                                type="button"
+                                class="btn btn-primary px-4 py-2 mt-2"
+                                @click="navigateToSearch"
                             >
                                 Telusuri
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -120,7 +122,7 @@
 
 <script>
 export default {
-    name: 'aboutSection',
+    name: 'AboutSection',
     props: {
         showSearch: {
             type: Boolean,
@@ -147,54 +149,63 @@ export default {
             displayFraudReports: 0,
             animateStats: false,
             observer: null,
-            hasAnimated: false
+            hasAnimated: false,
+            animationFrameId: null
+        }
+    },
+    computed: {
+        encodedSearchQuery() {
+            return encodeURIComponent(this.searchQuery.trim());
         }
     },
     mounted() {
+        // Use passive listeners for better performance
         this.setupIntersectionObserver();
-        // Trigger animation immediately if already in viewport
-        this.$nextTick(() => {
-            if (this.isElementInViewport(this.$refs.statsSection)) {
-                this.startCountingAnimation();
-            }
-        });
     },
     beforeUnmount() {
-        if (this.observer) {
-            this.observer.disconnect();
-        }
+        this.cleanup();
     },
     methods: {
+        // Navigation method untuk better performance
+        navigateToSearch() {
+            if (this.searchQuery.trim()) {
+                window.location.href = `/CariLaporan?query=${this.encodedSearchQuery}`;
+            }
+        },
+
         setupIntersectionObserver() {
-            // Setup Intersection Observer to detect when stats section comes into view
+            // Gunakan passive listeners dan threshold yang lebih optimized
             const options = {
                 root: null,
-                rootMargin: '0px',
-                threshold: 0.3 // Trigger when 30% of element is visible
+                rootMargin: '50px', // Preload animation sedikit lebih awal
+                threshold: 0.2 // Reduce threshold untuk trigger lebih cepat
             };
 
             this.observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && !this.hasAnimated) {
-                        this.startCountingAnimation();
+                        // Debounce untuk mencegah multiple calls
+                        this.debounceAnimation();
                     }
                 });
             }, options);
 
-            if (this.$refs.statsSection) {
-                this.observer.observe(this.$refs.statsSection);
-            }
+            // Check if element exists before observing
+            this.$nextTick(() => {
+                if (this.$refs.statsSection) {
+                    this.observer.observe(this.$refs.statsSection);
+                }
+            });
         },
 
-        isElementInViewport(el) {
-            if (!el) return false;
-            const rect = el.getBoundingClientRect();
-            return (
-                rect.top >= 0 &&
-                rect.left >= 0 &&
-                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-            );
+        debounceAnimation() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            
+            this.animationFrameId = requestAnimationFrame(() => {
+                this.startCountingAnimation();
+            });
         },
 
         startCountingAnimation() {
@@ -203,89 +214,145 @@ export default {
             this.hasAnimated = true;
             this.animateStats = true;
 
-            // Animate each counter with different durations for variety
-            this.animateCounter('displayVerifiedReports', this.verifiedReports, 2000);
-            
-            // Start total reports animation after a short delay
-            setTimeout(() => {
-                this.animateCounter('displayTotalReports', this.totalReports, 2500);
-            }, 300);
-            
-            // Start fraud reports animation after another delay
-            setTimeout(() => {
-                this.animateCounter('displayFraudReports', this.fraudReports, 2200);
-            }, 600);
+            // Use Set timeout dengan delay yang lebih optimal
+            const delays = [0, 150, 300];
+            const counters = [
+                { prop: 'displayVerifiedReports', target: this.verifiedReports, duration: 1800 },
+                { prop: 'displayTotalReports', target: this.totalReports, duration: 2000 },
+                { prop: 'displayFraudReports', target: this.fraudReports, duration: 1900 }
+            ];
+
+            counters.forEach((counter, index) => {
+                setTimeout(() => {
+                    this.animateCounter(counter.prop, counter.target, counter.duration);
+                }, delays[index]);
+            });
         },
 
         animateCounter(property, targetValue, duration) {
-            // Adjust duration based on target value (max 5 seconds)
-            const adjustedDuration = Math.min(5000, duration + Math.log10(Math.max(1, targetValue)) * 1000);
-            const startTime = Date.now();
+            if (targetValue === 0) {
+                this[property] = 0;
+                return;
+            }
+
+            // Optimize duration calculation
+            const maxDuration = 3000;
+            const minDuration = 1000;
+            const adjustedDuration = Math.min(maxDuration, Math.max(minDuration, duration));
+            
+            const startTime = performance.now();
             const startValue = 0;
             const difference = targetValue - startValue;
 
-            const updateCounter = () => {
-                const currentTime = Date.now();
+            const updateCounter = (currentTime) => {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / adjustedDuration, 1);
-                const easedProgress = this.easeOutQuart(progress);
-                let currentValue = Math.floor(startValue + (difference * easedProgress));
+                const easedProgress = this.easeOutCubic(progress);
+                const currentValue = Math.floor(startValue + (difference * easedProgress));
                 
-                // Format singkat untuk angka besar selama animasi
-                if (currentValue >= 1000000) {
-                    this[property] = (currentValue / 1000000).toFixed(1) + 'M';
-                } else if (currentValue >= 10000) {
-                    this[property] = (currentValue / 1000).toFixed(1) + 'K';
-                } else {
-                    this[property] = currentValue;
-                }
+                // Format angka dengan lebih efisien
+                this[property] = this.formatNumber(currentValue, targetValue, progress === 1);
 
                 if (progress < 1) {
                     requestAnimationFrame(updateCounter);
                 } else {
-                    this[property] = targetValue; // Tampilkan angka penuh di akhir
+                    this[property] = this.formatNumber(targetValue, targetValue, true);
                 }
             };
 
             requestAnimationFrame(updateCounter);
         },
 
-        // Easing function for smoother animation
-        easeOutQuart(t) {
-            return 1 - Math.pow(1 - t, 4);
+        formatNumber(value, finalValue, isFinal) {
+            if (isFinal) {
+                return finalValue.toLocaleString('id-ID');
+            }
+            
+            if (value >= 1000000) {
+                return (value / 1000000).toFixed(1) + 'M';
+            } else if (value >= 10000) {
+                return (value / 1000).toFixed(0) + 'K';
+            } else {
+                return value.toLocaleString('id-ID');
+            }
         },
 
-        // Method to reset and replay animation (useful for testing)
-        replayAnimation() {
+        // Easing function yang lebih ringan
+        easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        },
+
+        // Cleanup method untuk prevent memory leaks
+        cleanup() {
+            if (this.observer) {
+                this.observer.disconnect();
+                this.observer = null;
+            }
+            
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+                this.animationFrameId = null;
+            }
+        },
+
+        // Optimized reset method
+        resetAnimation() {
+            this.cleanup();
             this.hasAnimated = false;
             this.animateStats = false;
             this.displayVerifiedReports = 0;
             this.displayTotalReports = 0;
             this.displayFraudReports = 0;
             
-            setTimeout(() => {
-                this.startCountingAnimation();
-            }, 100);
+            this.$nextTick(() => {
+                this.setupIntersectionObserver();
+            });
+        },
+        // Utility debounce function
+        debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
         }
     },
 
     watch: {
-        // Watch for prop changes and restart animation
-        verifiedReports(newVal, oldVal) {
-            if (newVal !== oldVal && this.hasAnimated) {
-                this.replayAnimation();
-            }
+        // Optimized watchers dengan debouncing
+        verifiedReports: {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal && this.hasAnimated) {
+                    this.debouncedReset();
+                }
+            },
+            immediate: false
         },
-        totalReports(newVal, oldVal) {
-            if (newVal !== oldVal && this.hasAnimated) {
-                this.replayAnimation();
-            }
+        totalReports: {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal && this.hasAnimated) {
+                    this.debouncedReset();
+                }
+            },
+            immediate: false
         },
-        fraudReports(newVal, oldVal) {
-            if (newVal !== oldVal && this.hasAnimated) {
-                this.replayAnimation();
-            }
+        fraudReports: {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal && this.hasAnimated) {
+                    this.debouncedReset();
+                }
+            },
+            immediate: false
         }
+    },
+
+    // Setup debounced reset saat component dibuat
+    created() {
+        this.debouncedReset = this.debounce(this.resetAnimation, 300);
     }
 }
 </script>
@@ -310,11 +377,13 @@ blockquote {
     background-color: #0d6efd;
     border-color: #0d6efd;
     box-shadow: 0px 2px 10px rgba(101, 192, 237, 0.5);
+    transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
     background-color: #0b5ed7;
     border-color: #0a58ca;
+    transform: translateY(-1px);
 }
 
 .quote-box {
@@ -331,6 +400,7 @@ blockquote {
 .form-control {
     border-radius: 20px;
     border: 1px solid #ced4da;
+    transition: border-color 0.2s ease;
 }
 
 .form-control:focus {
@@ -338,13 +408,10 @@ blockquote {
     border-color: #0d6efd;
 }
 
-.stat-icon {
-    color: #0d6efd;
-}
-
-/* Triangle Layout Styling */
+/* Optimized triangle layout */
 .statistics-triangular {
     position: relative;
+    will-change: transform; /* Hint browser untuk optimisasi */
 }
 
 .stats-triangle {
@@ -358,174 +425,117 @@ blockquote {
 
 .stat-item {
     padding: 1.5rem;
-    transition: all 0.3s ease;
     flex: 1;
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
 }
 
-/* Animation for statistics */
+/* Optimized animations dengan GPU acceleration */
 .stat-item.animate-stat {
-    animation: slideInUp 0.8s ease-out forwards;
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.stat-item:nth-child(1) {
-    animation-delay: 0.2s;
-}
-
-.stat-item:nth-child(2) {
-    animation-delay: 0.4s;
-}
-
-.stat-item:nth-child(3) {
-    animation-delay: 0.6s;
-}
+.stat-item:nth-child(1) { animation-delay: 0.1s; }
+.stat-item:nth-child(2) { animation-delay: 0.2s; }
+.stat-item:nth-child(3) { animation-delay: 0.3s; }
 
 @keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) translateZ(0);
     }
 }
 
-/* Counter number styling with subtle animation */
+/* Optimized counter styling */
 .counter-number {
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease;
     display: inline-block;
+    will-change: transform;
 }
 
 .animate-stat .counter-number {
-    animation: numberGlow 0.5s ease-in-out;
+    animation: numberScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes numberGlow {
-    0% { 
-        transform: scale(1); 
-        color: #333;
-    }
-    50% { 
-        transform: scale(1.05); 
-        color: #0d6efd;
-        text-shadow: 0 0 10px rgba(13, 110, 253, 0.3);
-    }
-    100% { 
-        transform: scale(1); 
-        color: #333;
-    }
+@keyframes numberScale {
+    0% { transform: scale(1) translateZ(0); }
+    50% { transform: scale(1.05) translateZ(0); }
+    100% { transform: scale(1) translateZ(0); }
 }
 
+/* Optimized hover effects */
 .stat-item:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px) translateZ(0);
 }
 
 .stat-item:hover .counter-number {
     color: #0d6efd;
-    transform: scale(1.05);
+    transform: scale(1.02) translateZ(0);
 }
 
 .stat-item:hover .stat-icon {
-    transform: scale(1.1);
+    transform: scale(1.05) translateZ(0);
 }
 
-/* Button sizing in search container */
-.search-container .btn {
-    width: 150px;
+.stat-icon {
+    color: #0d6efd;
+    transition: transform 0.2s ease;
+    will-change: transform;
 }
 
-/* Mission statement adjustment */
-.mission-statement {
-    padding-top: 10px;
-}
-
-/* Pulse animation for icons when stats animate */
-.animate-stat .stat-icon {
-    animation: iconPulse 1.5s ease-in-out;
-}
-
-@keyframes iconPulse {
-    0%, 100% { 
-        transform: scale(1); 
+/* Reduce motion untuk accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .stat-item,
+    .counter-number,
+    .stat-icon,
+    .btn-primary {
+        transition: none;
+        animation: none;
     }
-    50% { 
-        transform: scale(1.2);
-        filter: drop-shadow(0 0 8px rgba(13, 110, 253, 0.4));
+    
+    .stat-item.animate-stat {
+        opacity: 1;
+        transform: none;
     }
 }
 
-/* Responsive adjustments */
+/* Optimized responsive design */
 @media (max-width: 992px) {
     .stat-row.justify-content-between {
         flex-direction: column;
     }
     
     .stat-item {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
     
-    h2.fs-2 {
-        font-size: 1.75rem !important;
-    }
-    
-    .fs-5 {
-        font-size: 1.1rem !important;
-    }
+    h2.fs-2 { font-size: 1.75rem !important; }
+    .fs-5 { font-size: 1.1rem !important; }
 }
 
 @media (max-width: 768px) {
-    .stat-row {
-        flex-direction: column;
-    }
-    
-    .stat-item {
-        margin-bottom: 2rem;
-    }
-    
-    .quote-box {
-        padding: 1.5rem !important;
-    }
-    
-    h2.fs-2 {
-        font-size: 1.5rem !important;
-    }
-    
-    .fs-5 {
-        font-size: 1rem !important;
-    }
-    
-    .mission-statement {
-        margin-bottom: 2rem;
-    }
+    .stat-row { flex-direction: column; }
+    .stat-item { margin-bottom: 1.5rem; }
+    .quote-box { padding: 1.5rem !important; }
+    h2.fs-2 { font-size: 1.5rem !important; }
+    .fs-5 { font-size: 1rem !important; }
+    .mission-statement { margin-bottom: 2rem; }
 }
 
 @media (max-width: 576px) {
-    .search-container .form-control {
-        font-size: 0.9rem;
-    }
-    
-    .search-container .btn {
-        width: 120px;
-        font-size: 0.9rem;
-    }
-    
-    h3.fs-2 {
-        font-size: 1.75rem !important;
-    }
-    
-    .stat-icon svg {
-        width: 20px;
-        height: 20px;
-    }
-    
-    .stat-item {
-        padding: 1rem;
-    }
-    
-    .text-muted {
-        font-size: 0.85rem;
-    }
+    .search-container .form-control { font-size: 0.9rem; }
+    .search-container .btn { width: 120px; font-size: 0.9rem; }
+    h3.fs-2 { font-size: 1.75rem !important; }
+    .stat-icon svg { width: 20px; height: 20px; }
+    .stat-item { padding: 1rem; }
+    .text-muted { font-size: 0.85rem; }
+}
+
+/* Content visibility untuk better loading */
+.statistics-triangular {
+    content-visibility: auto;
+    contain-intrinsic-size: 400px;
 }
 </style>

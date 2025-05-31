@@ -132,16 +132,39 @@
                 id="evidence"
                 type="file"
                 class="form-control"
-                accept="image/*,.pdf"
-                @change="$emit('file-upload', $event)"
+                accept="image/jpeg,image/jpg,image/png"
+                @change="handleFileUpload"
                 aria-label="Bukti"
+                :disabled="isProcessingImage"
               />
               <span class="input-group-text py-0 px-2">
-                <i class="bi bi-image text-primary"></i>
+                <i class="bi bi-image text-primary" v-if="!isProcessingImage"></i>
+                <div class="spinner-border spinner-border-sm text-primary" role="status" v-else>
+                  <span class="visually-hidden">Processing...</span>
+                </div>
               </span>
             </div>
             <div class="form-text">
-              Format: JPEG, PNG, PDF (Max: 5MB)
+              Format: JPEG, PNG (Max: 5MB) 
+            </div>
+            <div v-if="isProcessingImage" class="mt-2">
+              <div class="alert alert-info d-flex align-items-center" role="alert">
+                <div class="spinner-border spinner-border-sm me-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <div>Sedang memproses gambar...</div>
+              </div>
+            </div>
+            <div v-if="convertedImageInfo" class="mt-2">
+              <div class="alert alert-success" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                Gambar berhasil dikonversi ke WebP! 
+                <small class="d-block mt-1">
+                  Ukuran asli: {{ formatFileSize(convertedImageInfo.originalSize) }} → 
+                  Ukuran WebP: {{ formatFileSize(convertedImageInfo.webpSize) }} 
+                  ({{ convertedImageInfo.compressionRatio }}% lebih kecil)
+                </small>
+              </div>
             </div>
           </div>
           <div class="col-12">
@@ -207,7 +230,7 @@
               <button
                 type="submit"
                 class="btn btn-primary position-relative overflow-hidden submit-btn py-3"
-                :disabled="!isFormValid"
+                :disabled="!isFormValid || isProcessingImage"
               >
                 <span class="btn-animation"></span>
                 <i class="bi bi-send me-2"></i> Kirim Laporan
@@ -236,7 +259,7 @@ const props = defineProps({
   provinces: Array,
 });
 
-defineEmits(['select-service', 'submit-report', 'file-upload', 'validate-description', 'get-current-location']);
+const emit = defineEmits(['select-service', 'submit-report', 'file-upload', 'validate-description', 'get-current-location']);
 
 defineExpose({
   formRef: ref(null)
@@ -249,6 +272,10 @@ const countrySearch = ref('');
 const filteredCountries = ref([]);
 const searchInput = ref(null);
 const countryDropdown = ref(null);
+
+// Image processing states
+const isProcessingImage = ref(false);
+const convertedImageInfo = ref(null);
 
 const sortedCountries = computed(() => {
   return allCountries.sort((a, b) => {
@@ -275,7 +302,6 @@ const toggleDropdown = () => {
   if (showDropdown.value) {
     countrySearch.value = '';
     filteredCountries.value = sortedCountries.value;
-    // Focus search input after dropdown opens
     setTimeout(() => {
       if (searchInput.value) {
         searchInput.value.focus();
@@ -289,11 +315,9 @@ const selectCountry = (country) => {
   showDropdown.value = false;
   countrySearch.value = '';
   
-  // Clear validation error when changing country if phone number is empty
   if (!localPhoneNumber.value.trim()) {
     props.validationErrors.source = false;
   } else {
-    // Only validate if there's already a phone number entered
     validatePhoneNumber();
   }
 };
@@ -316,7 +340,6 @@ onUnmounted(() => {
 const validatePhoneNumber = () => {
   const phoneNumber = localPhoneNumber.value.replace(/\D/g, '');
   
-  // Don't validate if phone number is empty
   if (!phoneNumber) {
     props.validationErrors.source = false;
     props.formData.source = '';
@@ -346,17 +369,119 @@ const validateEmail = () => {
 };
 
 const onPhoneKeypress = (e) => {
-  // Allow only numeric input
   if (!/[\d]/.test(e.key)) {
     e.preventDefault();
   }
 };
 
 const onPhoneInput = (e) => {
-  // Remove any non-numeric characters that might have been pasted
   e.target.value = e.target.value.replace(/\D/g, '');
   localPhoneNumber.value = e.target.value;
   validatePhoneNumber();
+};
+
+// Image conversion functions
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const convertImageToWebP = (file, quality = 0.8) => {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      // Set canvas dimensions
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      // Draw image on canvas
+      ctx.drawImage(img, 0, 0);
+      
+      // Convert to WebP blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to convert image to WebP'));
+        }
+      }, 'image/webp', quality);
+    };
+    
+    img.onerror = () => {
+      reject(new Error('Failed to load image'));
+    };
+    
+    // Load the image
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validate file type
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  if (!allowedTypes.includes(file.type)) {
+    alert('Format file tidak didukung. Harap pilih file JPEG atau PNG.');
+    event.target.value = '';
+    return;
+  }
+  
+  // Validate file size (5MB)
+  const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+  if (file.size > maxSize) {
+    alert('Ukuran file terlalu besar. Maksimal 5MB.');
+    event.target.value = '';
+    return;
+  }
+  
+  try {
+    isProcessingImage.value = true;
+    convertedImageInfo.value = null;
+    
+    // Convert to WebP
+    const webpBlob = await convertImageToWebP(file, 0.8);
+    
+    // Create new File object from blob
+    const webpFile = new File([webpBlob], 
+      file.name.replace(/\.(jpg|jpeg|png)$/i, '.webp'), 
+      { type: 'image/webp' }
+    );
+    
+    // Calculate compression ratio
+    const compressionRatio = Math.round(((file.size - webpBlob.size) / file.size) * 100);
+    
+    // Store conversion info
+    convertedImageInfo.value = {
+      originalSize: file.size,
+      webpSize: webpBlob.size,
+      compressionRatio: compressionRatio > 0 ? compressionRatio : 0
+    };
+    
+    // Create a new event object with the converted file
+    const newEvent = {
+      target: {
+        files: [webpFile]
+      }
+    };
+    
+    // Emit to parent component
+    emit('file-upload', newEvent);
+    
+  } catch (error) {
+    console.error('Error converting image:', error);
+    alert('Gagal memproses gambar. Silakan coba lagi.');
+    event.target.value = '';
+  } finally {
+    isProcessingImage.value = false;
+  }
 };
 </script>
 
@@ -547,6 +672,11 @@ const onPhoneInput = (e) => {
   border-bottom-right-radius: 0;
 }
 
+.custom-file-input .form-control:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.65;
+}
+
 .service-btn {
   border-radius: 6px;
   font-weight: 500;
@@ -599,6 +729,11 @@ const onPhoneInput = (e) => {
 .input-group .form-control {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Custom Scrollbar for country list */
