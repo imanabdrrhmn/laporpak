@@ -124,6 +124,9 @@ class UserManagementController extends Controller
                 'name' => $user->name,
                 'permissions' => $user->permissions->pluck('name'),
                 'allowed_regions' => $user->allowed_regions ?? [],
+                'avatar_url' => $user->avatar 
+                ? asset('storage/' . $user->avatar) 
+                : asset('/Default-Profile.png'),
             ],
             'allPermissions' => $permissions->pluck('name'),
             'allRegions' => $allProvinces,
