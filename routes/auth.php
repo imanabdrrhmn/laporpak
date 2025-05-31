@@ -52,7 +52,10 @@ Route::middleware('auth')->group(function () {
     ->name('email.verify.send');
 
     Route::get('/verify-phone', function () {
-    return Inertia::render('VerifyPhone');})->name('verification.phone.notice');
+        return Inertia::render('VerifyPhone');
+    })->name('verification.phone.notice')
+    ->middleware('phone.not.verified');
+
 
     Route::post('/phone/send-verification', [PhoneVerificationController::class, 'send'])->name('phone.send');
     Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');
