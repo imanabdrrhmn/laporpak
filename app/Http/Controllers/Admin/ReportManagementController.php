@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Report;
 use App\Models\Feedback;
 use App\Models\ReportFlag;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 use App\Policies\ReportPolicy;
+use App\Jobs\SendReportPublishedMailJob;
+use App\Jobs\SendReportRejectedMailJob;
+use App\Jobs\SendReportUnpublishedMailJob;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Inertia\Inertia;
+
 
 class ReportManagementController
 {
@@ -88,12 +92,17 @@ class ReportManagementController
     {
         $this->authorize('verify_reports', $report);
 
+        if ($report->status !== 'pending') {
+            return redirect()->route('laporan.index')->with('error', 'Laporan sudah diproses sebelumnya.');
+        }
+
         $report->status = 'rejected';
         $report->save();
 
-        return redirect()->route('laporan.index')->with('error', 'Laporan ditolak');
-    }
+        SendReportRejectedMailJob::dispatch($report->user, $report);
 
+        return redirect()->route('laporan.index')->with('success', 'Laporan ditolak');
+    }
     public function publish(Report $report)
     {
         $this->authorize('verify_reports', $report);
@@ -104,6 +113,8 @@ class ReportManagementController
 
         $report->status = 'published';
         $report->save();
+
+        SendReportPublishedMailJob::dispatch($report->user, $report);
 
         return redirect()->route('laporan.index')->with('success', 'Laporan dipublikasikan');
     }
@@ -137,6 +148,8 @@ class ReportManagementController
         $report->status = 'unpublished'; 
         $report->reason = $request->input('reason');
         $report->save();
+
+        SendReportUnpublishedMailJob::dispatch($report->user, $report);
 
         return redirect()->route('laporan.index')->with('success', 'Publikasi laporan dibatalkan dengan alasan.');
     }
