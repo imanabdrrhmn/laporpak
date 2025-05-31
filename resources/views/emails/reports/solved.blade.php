@@ -1,16 +1,17 @@
 <x-mail::message>
-# Laporan Ditolak
+# Laporan Anda Telah Selesai
 
 Halo {{ $user->name }},
 
-Mohon maaf, laporan Anda dengan ID **{{ $report->id }}** tidak dapat kami terima.
+Laporan Anda dengan ID **{{ $report->id }}** telah berhasil diproses dan ditandai sebagai **selesai**.
 
 Berikut detail laporannya:
+
 - **Kategori**: {{ $report->category }}
 - **Deskripsi**: {{ $report->description }}
 - **Waktu Pengiriman**: {{ $report->created_at->format('d M Y H:i') }}
 
-Jika Anda merasa ini sebuah kesalahan, silakan hubungi tim kami.
+Terima kasih atas laporan Anda dan kontribusinya.
 
 Salam,<br>
 {{ config('app.name') }}

@@ -9,6 +9,7 @@ use App\Policies\ReportPolicy;
 use App\Jobs\SendReportPublishedMailJob;
 use App\Jobs\SendReportRejectedMailJob;
 use App\Jobs\SendReportUnpublishedMailJob;
+use App\Jobs\SendReportSolvedMailJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -129,6 +130,9 @@ class ReportManagementController
 
         $report->status = 'solved';
         $report->save();
+
+        // Kirim email menggunakan job
+        SendReportSolvedMailJob::dispatch($report->user, $report);
 
         return redirect()->route('laporan.index')->with('success', 'Laporan telah ditandai sebagai selesai');
     }
