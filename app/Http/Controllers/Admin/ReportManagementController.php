@@ -2,183 +2,191 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Report;
-use App\Models\Feedback;
-use App\Models\ReportFlag;
-use App\Policies\ReportPolicy;
+use App\Models\User;
 use App\Jobs\SendReportPublishedMailJob;
 use App\Jobs\SendReportRejectedMailJob;
 use App\Jobs\SendReportUnpublishedMailJob;
 use App\Jobs\SendReportSolvedMailJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\ReportResource;
+use App\Http\Resources\FlagResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 
-class ReportManagementController
+class ReportManagementController extends Controller
 {
     use AuthorizesRequests;
 
     public function index(Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
 
         if (!$user || !($user->hasRole('admin') || $user->hasRole('verifier'))) {
-            abort(403, 'Unauthorized action.');
+            return response()->json(['message' => 'Akses tidak diizinkan untuk peran Anda.'], 403);
         }
 
-        $reports = Report::with('user')
-            ->withCount('flags')
-            ->latest()
-            ->get()
-            ->filter(function ($report) use ($user) {
-                return $user->can('view', $report);
-            })
-            ->map(function ($report) {
-                return [
-                    'id' => $report->id,
-                    'user_id' => $report->user_id,
-                    'user' => [
-                        'id' => $report->user->id,
-                        'name' => $report->user->name,
-                        'avatar_url' => $report->user->avatar
-                            ? asset('storage/' . $report->user->avatar)
-                            : asset('/Default-Profile.png'),
-                    ],
-                    'category' => $report->category,
-                    'description' => $report->description,
-                    'status' => $report->status,
-                    'latitude' => $report->latitude,
-                    'longitude' => $report->longitude,
-                    'address' => $report->address,
-                    'service' => $report->service,
-                    'source' => $report->source,
-                    'created_at' => $report->created_at->toDateTimeString(),
-                    'evidence' => $report->evidence
-                        ? asset('storage/' . $report->evidence)
-                        : null,
-                    'flags_count' => $report->flags_count,
-                ];
-            });
+        $baseQueryForStats = Report::visibleTo($user);
+        $paginatedQuery = Report::with(['user'])->visibleTo($user); 
 
-        return Inertia::render('Admin/Pelaporan/Index', [
-            'reports' => $reports->values()->all(),
-            'can' => [
-                'verifyReports' => $request->user()->can('verify_reports'),
-            ],
+        if (!$user->hasRole('admin') && !(clone $baseQueryForStats)->exists()) {
+            return ReportResource::collection(collect())->additional($this->getEmptyResponseMetadata());
+        }
+
+        $reportStats = $this->calculateGlobalStats(clone $baseQueryForStats);
+        $uniqueCategories = (clone $baseQueryForStats)->distinct()->whereNotNull('category')->pluck('category')->filter()->values()->all();
+        $uniqueServices = (clone $baseQueryForStats)->distinct()->whereNotNull('service')->pluck('service')->filter()->values()->all();
+
+        // Terapkan filter dari request
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $paginatedQuery->where(function ($q) use ($searchTerm) {
+                $q->where('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('address', 'like', "%{$searchTerm}%")
+                  ->orWhere('category', 'like', "%{$searchTerm}%")
+                  ->orWhere('service', 'like', "%{$searchTerm}%")
+                  ->orWhere('source', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('user', function($userQuery) use ($searchTerm){ 
+                      $userQuery->where('name', 'like', "%{$searchTerm}%");
+                  });
+            });
+        }
+        if ($request->filled('category')) {
+            $paginatedQuery->where('category', $request->category);
+        }
+        if ($user->hasRole('admin') && $request->filled('service')) {
+             $paginatedQuery->where('service', $request->service);
+        }
+        if ($request->filled('status')) {
+            $paginatedQuery->where('status', $request->status);
+        }
+
+        $sortDirection = $request->input('sort_direction', 'desc');
+        $paginatedQuery->orderBy('created_at', $sortDirection === 'asc' ? 'asc' : 'desc');
+
+        $perPage = $request->input('per_page', $request->input('itemsPerPage', 15));
+        $reports = $paginatedQuery->withCount('flags')->paginate((int)$perPage);
+        Log::info('Pagination Data:', [
+    'total' => $reports->total(),
+    'current_page' => $reports->currentPage(),
+    'last_page' => $reports->lastPage(),
+    'per_page' => $reports->perPage(),
+]);
+
+        return ReportResource::collection($reports)->additional([
+            'meta' => [
+                'stats' => $reportStats,
+                'filter_options' => [
+                    'categories' => $uniqueCategories,
+                    'services' => $uniqueServices,
+                ],
+            ]
         ]);
     }
 
-    public function destroy(Request $request, Report $report)
+    
+    private function calculateGlobalStats($query) 
     {
-        $this->authorize('verify_reports', $report);
-
-        $report->delete();
-
-        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil dihapus');
+        return [
+            'total' => (clone $query)->count(),
+            'pending' => (clone $query)->where('status', 'pending')->count(),
+            'approved' => (clone $query)->where('status', 'approved')->count(),
+            'rejected' => (clone $query)->where('status', 'rejected')->count(),
+            'published' => (clone $query)->where('status', 'published')->count(),
+            'solved' => (clone $query)->where('status', 'solved')->count(),
+            'unpublished' => (clone $query)->where('status', 'unpublished')->count(),
+        ];
     }
 
-    public function accept(Report $report)
+    private function getEmptyResponseMetadata() 
     {
-        $this->authorize('verify_reports', $report);
+        return [
+            'stats' => $this->calculateGlobalStats(Report::query()->whereRaw('1=0')),
+            'filter_options' => ['categories' => [], 'services' => []],
+        ];
+    }
 
+    public function getFlags(Request $request, Report $report)
+    {
+        $this->authorize('view', $report); 
+        $flags = $report->flags()->with('user')->latest()->get(); 
+        return FlagResource::collection($flags);
+    }
+
+    private function validateReportStatus(Report $report, $expectedStatus, string $actionName = 'melakukan aksi ini')
+    {
+        $statuses = is_array($expectedStatus) ? $expectedStatus : [$expectedStatus];
+        if (!in_array($report->status, $statuses)) {
+            $statusString = implode("' atau '", $statuses);
+            abort(422, "Laporan harus berstatus '{$statusString}' untuk {$actionName}. Status saat ini: '{$report->status}'.");
+        }
+    }
+
+    public function accept(Request $request, Report $report)
+    {
+        $this->authorize('verify_reports', $report); 
+        $this->validateReportStatus($report, 'pending', 'diterima');
         $report->status = 'approved';
         $report->save();
-
-        return redirect()->route('laporan.index')->with('success', 'Laporan diterima');
+        return new ReportResource($report->loadMissing(['user'])->loadCount('flags'));
     }
 
-    public function reject(Report $report)
+    public function reject(Request $request, Report $report)
     {
-        $this->authorize('verify_reports', $report);
-
-        if ($report->status !== 'pending') {
-            return redirect()->route('laporan.index')->with('error', 'Laporan sudah diproses sebelumnya.');
-        }
+        $this->authorize('verify_reports', $report); 
+        $this->validateReportStatus($report, 'pending', 'ditolak');
+        
+        $validated = $request->validate(['reason' => 'nullable|string|max:1000']);
 
         $report->status = 'rejected';
+        if (isset($validated['reason'])) {
+            $report->rejected_reason = $validated['reason']; 
+        }
         $report->save();
-
-        SendReportRejectedMailJob::dispatch($report->user, $report);
-
-        return redirect()->route('laporan.index')->with('success', 'Laporan ditolak');
+        SendReportRejectedMailJob::dispatch($report->user, $report); 
+        return new ReportResource($report->loadMissing(['user'])->loadCount('flags'));
     }
-    public function publish(Report $report)
+
+    public function publish(Request $request, Report $report)
     {
         $this->authorize('verify_reports', $report);
-
-        if ($report->status !== 'approved') {
-            return redirect()->route('laporan.index')->with('error', 'Laporan harus disetujui terlebih dahulu sebelum dipublikasikan.');
-        }
-
+        $this->validateReportStatus($report, 'approved', 'dipublikasikan');
         $report->status = 'published';
         $report->save();
-
         SendReportPublishedMailJob::dispatch($report->user, $report);
-
-        return redirect()->route('laporan.index')->with('success', 'Laporan dipublikasikan');
-    }
-
-    public function solved(Report $report)
-    {
-        $this->authorize('verify_reports', $report);
-
-        if ($report->status !== 'published') {
-            return redirect()->route('laporan.index')->with('error', 'Hanya laporan yang dipublikasikan yang bisa ditandai sebagai selesai.');
-        }
-
-        $report->status = 'solved';
-        $report->save();
-
-        // Kirim email menggunakan job
-        SendReportSolvedMailJob::dispatch($report->user, $report);
-
-        return redirect()->route('laporan.index')->with('success', 'Laporan telah ditandai sebagai selesai');
+        return new ReportResource($report->loadMissing(['user'])->loadCount('flags'));
     }
 
     public function unpublish(Request $request, Report $report)
     {
         $this->authorize('verify_reports', $report);
-
-        if ($report->status !== 'published') {
-            return redirect()->route('laporan.index')->with('error', 'Hanya laporan yang dipublikasikan yang bisa dibatalkan publikasinya.');
-        }
-
-        $request->validate([
-            'reason' => 'required|string|max:1000',
-        ]);
-
-        $report->status = 'unpublished'; 
-        $report->reason = $request->input('reason');
+        $this->validateReportStatus($report, 'published', 'dibatalkan publikasinya');
+        $validated = $request->validate(['reason' => 'required|string|max:1000']);
+        $report->status = 'unpublished';
+        $report->reason = $validated['reason']; 
         $report->save();
-
         SendReportUnpublishedMailJob::dispatch($report->user, $report);
-
-        return redirect()->route('laporan.index')->with('success', 'Publikasi laporan dibatalkan dengan alasan.');
+        return new ReportResource($report->loadMissing(['user'])->loadCount('flags'));
     }
 
-    public function getFlags(Report $report)
+    public function solved(Request $request, Report $report)
     {
         $this->authorize('verify_reports', $report);
+        $this->validateReportStatus($report, 'published', 'ditandai selesai');
+        $report->status = 'solved';
+        $report->save();
+        SendReportSolvedMailJob::dispatch($report->user, $report);
+        return new ReportResource($report->loadMissing(['user'])->loadCount('flags'));
+    }
 
-        $flags = $report->flags()->with('user')->get()->map(function ($flag) {
-            return [
-                'id' => $flag->id,
-                'reason' => $flag->reason,
-                'created_at' => $flag->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $flag->user->id,
-                    'name' => $flag->user->name,
-                    'avatar_url' => $flag->user->avatar
-                        ? asset('storage/' . $flag->user->avatar)
-                        : asset('/Default-Profile.png'),
-                ],
-            ];
-        });
-
-        return response()->json([
-            'flags' => $flags,
-        ]);
+    public function destroy(Request $request, Report $report)
+    {
+        $this->authorize('verify_reports', $report); 
+        
+        $report->delete();
+        return response()->json(['message' => 'Laporan berhasil dihapus.'], 200);
     }
 }

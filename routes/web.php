@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Feedback;
 use App\Models\Report;
-
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     $feedbacks = Feedback::with('user')->latest()->take(10)->get();
@@ -51,9 +51,7 @@ Route::get('/verifikasi', function () {
 });
 
 Route::get('/LaporMap', [LaporMapController::class, 'index'])->name('LaporMap');
-
 Route::get('/CariLaporan', [ReportController::class, 'search'])->name('CariLaporan');
-
 
 Route::get('/tentang-kami', function () {
     return Inertia::render('TentangKami');
@@ -76,21 +74,40 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
 });
 
-Route::middleware('auth','contact.verified')->group(function () {
-    Route::middleware('role:admin||verifier')->group(function () {
-        Route::get('/admin/pelaporan', [ReportManagementController::class, 'index'])->name('laporan.index');
-        Route::patch('/pelaporan/{report}/terima', [ReportManagementController::class, 'accept'])->name('laporan.terima');
-        Route::patch('/pelaporan/{report}/tolak', [ReportManagementController::class, 'reject'])->name('laporan.tolak');
-        Route::patch('/pelaporan/{report}/publikasikan', [ReportManagementController::class, 'publish'])->name('laporan.publikasikan');
-        Route::delete('/pelaporan/{report}/hapus', [ReportManagementController::class, 'destroy'])->name('laporan.hapus');
-        Route::get('/pelaporan/{report}/flags', [ReportManagementController::class, 'getFlags'])->name('laporan.flags');
-        Route::patch('/pelaporan/{report}/selesai', [ReportManagementController::class, 'solved'])->name('laporan.solved');
-        Route::patch('/pelaporan/{report}/batalkan-publikasi', [ReportManagementController::class, 'unpublish'])->name('laporan.unpublish');
-    });
+Route::get('/admin/pelaporan', function () {
+    $user = Auth::user();
+    $permissions = [];
+
+    if ($user) {
+        $permissions = [
+            'verifyReports' => $user->can('verify_reports'),
+        ];
+    }
+
+    return Inertia::render('Admin/Pelaporan/Index', [
+        'can' => $permissions,
+    ]);
+})
+->middleware(['auth', 'contact.verified', 'role:admin||verifier'])
+->name('admin.reports.page');
+
+Route::middleware(['auth','contact.verified'])->group(function () {
+    Route::middleware('role:admin||verifier')
+        ->prefix('admin/data/reports')
+        ->name('admin.data.reports.')
+        ->group(function () {
+            Route::get('/', [ReportManagementController::class, 'index'])->name('index');
+            Route::get('/{report}/flags', [ReportManagementController::class, 'getFlags'])->name('flags.index');
+            Route::post('/{report}/accept', [ReportManagementController::class, 'accept'])->name('accept');
+            Route::post('/{report}/rejected', [ReportManagementController::class, 'reject'])->name('reject');
+            Route::post('/{report}/publish', [ReportManagementController::class, 'publish'])->name('publish');
+            Route::post('/{report}/unpublish', [ReportManagementController::class, 'unpublish'])->name('unpublish');
+            Route::post('/{report}/solved', [ReportManagementController::class, 'solved'])->name('solved');
+            Route::delete('/{report}', [ReportManagementController::class, 'destroy'])->name('destroy');
+        });
 
     Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
     Route::post('/laporan/flag', [ReportController::class, 'flagReport'])->name('laporan.flag');
-
 });
 
 Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.create');
@@ -100,9 +117,9 @@ Route::middleware(['auth','contact.verified'])->group(function () {
 });
 
 Route::middleware(['auth','contact.verified'])->group(function () {
-    Route::get('/top-ups/history', [TopUpController::class, 'index'])->name('top-ups.index');     
-    Route::get('/top-ups', [TopUpController::class, 'create'])->name('top-ups.create');; 
-    Route::post('/top-ups/create', [TopUpController::class, 'store'])->name('top-ups.store');       
+    Route::get('/top-ups/history', [TopUpController::class, 'index'])->name('top-ups.index');
+    Route::get('/top-ups', [TopUpController::class, 'create'])->name('top-ups.create');
+    Route::post('/top-ups/create', [TopUpController::class, 'store'])->name('top-ups.store');
 });
 
 Route::middleware(['auth', 'contact.verified', 'role:admin|verifier'])->group(function () {
@@ -120,7 +137,6 @@ Route::middleware(['auth', 'contact.verified', 'role:admin|verifier'])->group(fu
         ->name('admin.topups.exportLogs');
 });
 
-
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
     Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.delete');
@@ -129,7 +145,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/roles/{roles}', [UserManagementController::class, 'destroyRole'])->name('roles.destroy');
     Route::get('/users/{user}/permissions', [UserManagementController::class, 'editPermissions']);
     Route::patch('/users/{user}/permissions', [UserManagementController::class, 'updatePermissions']);
-
 });
 
 require __DIR__.'/auth.php';

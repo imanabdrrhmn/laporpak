@@ -265,7 +265,7 @@ const updatePassword = () => {
     return;
   }
 
-  form.put(route('password.update'), {
+  form.put(route('password.reset.update'), {
     preserveScroll: true,
     onSuccess: () => {
       form.reset();

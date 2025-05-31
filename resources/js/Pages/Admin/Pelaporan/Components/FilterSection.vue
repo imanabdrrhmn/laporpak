@@ -9,7 +9,7 @@
           title="Grid View"
         >
           <i class="fas fa-th-large"></i>
-        </button> 
+        </button>
         <button
           @click="$emit('update:viewMode', 'list')"
           :class="['toggle-btn', viewMode === 'list' ? 'active' : '']"
@@ -30,7 +30,7 @@
           class="search-input"
           placeholder="Cari laporan..."
         />
-        <button v-if="searchQuery" @click="$emit('update:searchQuery', '')" class="clear-btn">
+        <button v-if="searchQuery" @click="$emit('update:searchQuery', '')" class="clear-btn" aria-label="Hapus pencarian">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -38,10 +38,11 @@
 
     <div class="filters">
       <div class="dropdown-filter">
-        <select 
-          :value="selectedCategory" 
+        <select
+          :value="selectedCategory"
           @change="$emit('update:selectedCategory', $event.target.value)"
           class="filter-select"
+          aria-label="Filter Kategori"
         >
           <option value="">Semua Kategori</option>
           <option v-for="category in categories" :key="category" :value="category">
@@ -52,10 +53,11 @@
       </div>
 
       <div class="dropdown-filter">
-        <select 
+        <select
           :value="selectedService"
           @change="$emit('update:selectedService', $event.target.value)"
           class="filter-select"
+          aria-label="Filter Layanan"
         >
           <option value="">Semua Layanan</option>
           <option v-for="service in services" :key="service" :value="service">
@@ -66,10 +68,11 @@
       </div>
 
       <div class="dropdown-filter">
-        <select 
+        <select
           :value="selectedStatus"
           @change="$emit('update:selectedStatus', $event.target.value)"
           class="filter-select"
+          aria-label="Filter Status"
         >
           <option value="">Semua Status</option>
           <option value="pending">Pending</option>
@@ -83,10 +86,11 @@
       </div>
 
       <div class="dropdown-filter">
-        <select 
+        <select
           :value="sortDirection"
           @change="$emit('update:sortDirection', $event.target.value)"
           class="filter-select"
+          aria-label="Urutkan Berdasarkan"
         >
           <option value="desc">Terbaru</option>
           <option value="asc">Terlama</option>
@@ -103,43 +107,51 @@
       <div class="filter-chips">
         <div v-if="selectedCategory" class="filter-chip">
           Kategori: {{ selectedCategory }}
-          <button @click="$emit('update:selectedCategory', '')" class="remove-filter">×</button>
+          <button @click="$emit('update:selectedCategory', '')" class="remove-filter" aria-label="Hapus filter kategori">×</button>
         </div>
         <div v-if="selectedService" class="filter-chip">
           Layanan: {{ selectedService }}
-          <button @click="$emit('update:selectedService', '')" class="remove-filter">×</button>
+          <button @click="$emit('update:selectedService', '')" class="remove-filter" aria-label="Hapus filter layanan">×</button>
         </div>
         <div v-if="selectedStatus" class="filter-chip">
           Status: {{ capitalize(selectedStatus) }}
-          <button @click="$emit('update:selectedStatus', '')" class="remove-filter">×</button>
+          <button @click="$emit('update:selectedStatus', '')" class="remove-filter" aria-label="Hapus filter status">×</button>
         </div>
         <div v-if="searchQuery" class="filter-chip">
           Pencarian: "{{ searchQuery }}"
-          <button @click="$emit('update:searchQuery', '')" class="remove-filter">×</button>
+          <button @click="$emit('update:searchQuery', '')" class="remove-filter" aria-label="Hapus filter pencarian">×</button>
         </div>
       </div>
-      <p class="results-count">{{ filteredReports.length }} laporan ditemukan</p>
+      <p class="results-count" v-if="totalResults > 0">{{ totalResults }} laporan ditemukan</p>
+      <p class="results-count" v-else-if="!totalResults && hasActiveFilters">Tidak ada laporan yang cocok dengan filter Anda.</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-
-const props = defineProps({
+defineProps({
   searchQuery: String,
   selectedCategory: String,
   selectedService: String,
   selectedStatus: String,
   sortDirection: String,
   viewMode: String,
-  categories: Array,
-  services: Array,
+  categories: {
+    type: Array,
+    default: () => []
+  },
+  services: {
+    type: Array,
+    default: () => []
+  },
   hasActiveFilters: Boolean,
-  filteredReports: Array
+  totalResults: {
+    type: Number,
+    default: 0
+  }
 });
 
-const emit = defineEmits([
+defineEmits([
   'update:searchQuery',
   'update:selectedCategory',
   'update:selectedService',
@@ -149,7 +161,10 @@ const emit = defineEmits([
   'resetFilters'
 ]);
 
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str) => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
 </script>
 
 <style scoped>
@@ -263,6 +278,8 @@ const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
   background-color: #f9f9f9;
   color: #333;
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }

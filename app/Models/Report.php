@@ -24,7 +24,8 @@ class Report extends Model
         'reason', 
         'service',
         'source', 
-        'address'
+        'address',
+        'reason'
     ];
 
     /**
@@ -66,6 +67,40 @@ class Report extends Model
         public function flags()
     {
         return $this->hasMany(ReportFlag::class);
+    }
+
+    public function scopeVisibleTo($query, User $user)
+    {
+        if ($user->hasRole('admin')) {
+            return $query; 
+        }
+
+        if ($user->hasRole('verifier')) {
+            return $query->where(function ($subQuery) use ($user) {
+                $viewableServices = [];
+                if ($user->can('view_reports_penipuan')) {
+                    $viewableServices[] = 'Penipuan';
+                }
+                if ($user->can('view_reports_infrastruktur')) {
+                    $viewableServices[] = 'Infrastruktur';
+                }
+
+                if (empty($viewableServices)) {
+                    return $subQuery->whereRaw('1 = 0');
+                }
+                $subQuery->whereIn('service', $viewableServices);
+
+                if ($user->can('view_reports_by_region')) {
+                    $allowedRegions = $user->allowed_regions ?? [];
+                    if (empty($allowedRegions)) {
+                        return $subQuery->whereRaw('1 = 0');
+                    }
+                    $subQuery->whereIn('region', $allowedRegions);
+                }
+            });
+        }
+
+        return $query->whereRaw('1 = 0');
     }
 
 }
