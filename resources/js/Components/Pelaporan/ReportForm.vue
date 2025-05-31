@@ -25,7 +25,7 @@
           </button>
         </div>
       </div>
-      <form @submit.prevent="$emit('submit-report')" ref="formRef">
+      <form @submit.prevent="submitForm" ref="formRef">
         <div class="row g-3">
           <div class="col-12">
             <label for="category" class="form-label mb-2">Kategori</label>
@@ -51,6 +51,7 @@
               Kategori harus dipilih
             </div>
           </div>
+          
           <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category === 'Email' && formData.category">
             <label for="email" class="form-label mb-2">Alamat Email</label>
             <input
@@ -67,6 +68,7 @@
               Alamat email tidak valid
             </div>
           </div>
+          
           <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category !== 'Email' && formData.category">
             <label for="source" class="form-label mb-2">Nomer Telepon</label>
             <div class="input-group">
@@ -125,6 +127,7 @@
               Nomor telepon tidak valid
             </div>
           </div>
+          
           <div class="col-12">
             <label for="evidence" class="form-label mb-2">Bukti</label>
             <div class="input-group custom-file-input">
@@ -134,39 +137,39 @@
                 class="form-control"
                 accept="image/jpeg,image/jpg,image/png"
                 @change="handleFileUpload"
-                aria-label="Bukti"
                 :disabled="isProcessingImage"
+                aria-label="Bukti"
+                ref="fileInput"
               />
               <span class="input-group-text py-0 px-2">
                 <i class="bi bi-image text-primary" v-if="!isProcessingImage"></i>
                 <div class="spinner-border spinner-border-sm text-primary" role="status" v-else>
-                  <span class="visually-hidden">Processing...</span>
+                  <span class="visually-hidden">Loading...</span>
                 </div>
               </span>
             </div>
             <div class="form-text">
-              Format: JPEG, PNG (Max: 5MB) 
-            </div>
-            <div v-if="isProcessingImage" class="mt-2">
-              <div class="alert alert-info d-flex align-items-center" role="alert">
-                <div class="spinner-border spinner-border-sm me-2" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-                <div>Sedang memproses gambar...</div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span>Format: JPEG, PNG (Max: 5MB)</span>
+                <span v-if="isProcessingImage" class="text-primary">
+                  <small>Memproses gambar...</small>
+                </span>
+                <span v-if="uploadedFile && !isProcessingImage" class="text-success">
+                  <small><i class="bi bi-check-circle me-1"></i>Siap dikirim</small>
+                </span>
               </div>
             </div>
-            <div v-if="convertedImageInfo" class="mt-2">
-              <div class="alert alert-success" role="alert">
-                <i class="bi bi-check-circle me-2"></i>
-                Gambar berhasil dikonversi ke WebP! 
-                <small class="d-block mt-1">
-                  Ukuran asli: {{ formatFileSize(convertedImageInfo.originalSize) }} → 
-                  Ukuran WebP: {{ formatFileSize(convertedImageInfo.webpSize) }} 
-                  ({{ convertedImageInfo.compressionRatio }}% lebih kecil)
-                </small>
+            <!-- Preview gambar yang sudah dikonversi -->
+            <div v-if="previewUrl" class="mt-3">
+              <div class="image-preview">
+                <img :src="previewUrl" alt="Preview" class="img-fluid rounded" style="max-height: 200px; max-width: 100%;">
+                <button type="button" class="btn btn-sm btn-outline-danger mt-2" @click="removeImage">
+                  <i class="bi bi-trash me-1"></i>Hapus Gambar
+                </button>
               </div>
             </div>
           </div>
+          
           <div class="col-12">
             <label for="description" class="form-label mb-2">Deskripsi Kejadian</label>
             <textarea
@@ -191,6 +194,7 @@
               </span>
             </div>
           </div>
+          
           <div class="col-12">
             <label for="region" class="form-label mb-2">Wilayah</label>
             <select
@@ -215,6 +219,7 @@
               Wilayah harus dipilih
             </div>
           </div>
+          
           <div class="col-12">
             <MapContainer
               :form-data="formData"
@@ -225,6 +230,7 @@
               @get-current-location="$emit('get-current-location')"
             />
           </div>
+          
           <div class="col-12">
             <div class="d-grid">
               <button
@@ -233,7 +239,8 @@
                 :disabled="!isFormValid || isProcessingImage"
               >
                 <span class="btn-animation"></span>
-                <i class="bi bi-send me-2"></i> Kirim Laporan
+                <i class="bi bi-send me-2"></i> 
+                {{ isProcessingImage ? 'Memproses...' : 'Kirim Laporan' }}
               </button>
             </div>
           </div>
@@ -265,6 +272,7 @@ defineExpose({
   formRef: ref(null)
 });
 
+// Existing country code functionality
 const selectedCountry = ref(allCountries.find(c => c.iso2 === 'id'));
 const localPhoneNumber = ref('');
 const showDropdown = ref(false);
@@ -273,9 +281,11 @@ const filteredCountries = ref([]);
 const searchInput = ref(null);
 const countryDropdown = ref(null);
 
-// Image processing states
+// New image processing functionality
 const isProcessingImage = ref(false);
-const convertedImageInfo = ref(null);
+const uploadedFile = ref(null);
+const previewUrl = ref('');
+const fileInput = ref(null);
 
 const sortedCountries = computed(() => {
   return allCountries.sort((a, b) => {
@@ -285,6 +295,129 @@ const sortedCountries = computed(() => {
   });
 });
 
+// Image conversion function
+const convertToWebP = (file, quality = 0.8) => {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      // Set canvas dimensions
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      // Draw image on canvas
+      ctx.drawImage(img, 0, 0);
+      
+      // Convert to WebP blob
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            // Create new File object with WebP format
+            const webpFile = new File(
+              [blob], 
+              file.name.replace(/\.(jpg|jpeg|png)$/i, '.webp'), 
+              { type: 'image/webp' }
+            );
+            resolve(webpFile);
+          } else {
+            reject(new Error('Gagal mengkonversi gambar'));
+          }
+        },
+        'image/webp',
+        quality
+      );
+    };
+    
+    img.onerror = () => reject(new Error('Gagal memuat gambar'));
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+// Handle file upload and conversion
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validate file type
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  if (!allowedTypes.includes(file.type)) {
+    alert('Format file tidak didukung. Gunakan JPEG atau PNG.');
+    resetFileInput();
+    return;
+  }
+  
+  // Validate file size (5MB)
+  const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+  if (file.size > maxSize) {
+    alert('Ukuran file terlalu besar. Maksimal 5MB.');
+    resetFileInput();
+    return;
+  }
+  
+  try {
+    isProcessingImage.value = true;
+    
+    // Convert to WebP
+    const webpFile = await convertToWebP(file, 0.8);
+    
+    // Create preview URL
+    previewUrl.value = URL.createObjectURL(webpFile);
+    
+    // Store the converted file
+    uploadedFile.value = webpFile;
+    
+    // Emit the converted file to parent
+    emit('file-upload', { 
+      target: { 
+        files: [webpFile] 
+      } 
+    });
+    
+    console.log('Original file size:', (file.size / 1024).toFixed(2), 'KB');
+    console.log('WebP file size:', (webpFile.size / 1024).toFixed(2), 'KB');
+    console.log('Compression ratio:', ((1 - webpFile.size / file.size) * 100).toFixed(1), '%');
+    
+  } catch (error) {
+    console.error('Error converting image:', error);
+    alert('Gagal memproses gambar. Silakan coba lagi.');
+    resetFileInput();
+  } finally {
+    isProcessingImage.value = false;
+  }
+};
+
+// Remove uploaded image
+const removeImage = () => {
+  uploadedFile.value = null;
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value);
+    previewUrl.value = '';
+  }
+  resetFileInput();
+  
+  // Emit empty file to parent
+  emit('file-upload', { target: { files: [] } });
+};
+
+// Reset file input
+const resetFileInput = () => {
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
+};
+
+// Submit form with image processing check
+const submitForm = () => {
+  if (isProcessingImage.value) {
+    alert('Tunggu hingga proses gambar selesai.');
+    return;
+  }
+  emit('submit-report');
+};
+
+// Existing filter countries function
 const filterCountries = () => {
   const search = countrySearch.value.toLowerCase();
   if (!search) {
@@ -335,6 +468,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
+  // Clean up preview URL when component unmounts
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value);
+  }
 });
 
 const validatePhoneNumber = () => {
@@ -378,110 +515,6 @@ const onPhoneInput = (e) => {
   e.target.value = e.target.value.replace(/\D/g, '');
   localPhoneNumber.value = e.target.value;
   validatePhoneNumber();
-};
-
-// Image conversion functions
-const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
-
-const convertImageToWebP = (file, quality = 0.8) => {
-  return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    
-    img.onload = () => {
-      // Set canvas dimensions
-      canvas.width = img.width;
-      canvas.height = img.height;
-      
-      // Draw image on canvas
-      ctx.drawImage(img, 0, 0);
-      
-      // Convert to WebP blob
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error('Failed to convert image to WebP'));
-        }
-      }, 'image/webp', quality);
-    };
-    
-    img.onerror = () => {
-      reject(new Error('Failed to load image'));
-    };
-    
-    // Load the image
-    img.src = URL.createObjectURL(file);
-  });
-};
-
-const handleFileUpload = async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  // Validate file type
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-  if (!allowedTypes.includes(file.type)) {
-    alert('Format file tidak didukung. Harap pilih file JPEG atau PNG.');
-    event.target.value = '';
-    return;
-  }
-  
-  // Validate file size (5MB)
-  const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-  if (file.size > maxSize) {
-    alert('Ukuran file terlalu besar. Maksimal 5MB.');
-    event.target.value = '';
-    return;
-  }
-  
-  try {
-    isProcessingImage.value = true;
-    convertedImageInfo.value = null;
-    
-    // Convert to WebP
-    const webpBlob = await convertImageToWebP(file, 0.8);
-    
-    // Create new File object from blob
-    const webpFile = new File([webpBlob], 
-      file.name.replace(/\.(jpg|jpeg|png)$/i, '.webp'), 
-      { type: 'image/webp' }
-    );
-    
-    // Calculate compression ratio
-    const compressionRatio = Math.round(((file.size - webpBlob.size) / file.size) * 100);
-    
-    // Store conversion info
-    convertedImageInfo.value = {
-      originalSize: file.size,
-      webpSize: webpBlob.size,
-      compressionRatio: compressionRatio > 0 ? compressionRatio : 0
-    };
-    
-    // Create a new event object with the converted file
-    const newEvent = {
-      target: {
-        files: [webpFile]
-      }
-    };
-    
-    // Emit to parent component
-    emit('file-upload', newEvent);
-    
-  } catch (error) {
-    console.error('Error converting image:', error);
-    alert('Gagal memproses gambar. Silakan coba lagi.');
-    event.target.value = '';
-  } finally {
-    isProcessingImage.value = false;
-  }
 };
 </script>
 
@@ -673,8 +706,16 @@ const handleFileUpload = async (event) => {
 }
 
 .custom-file-input .form-control:disabled {
-  background-color: #f8f9fa;
+  background-color: #e9ecef;
   opacity: 0.65;
+}
+
+.image-preview {
+  text-align: center;
+  padding: 1rem;
+  border: 2px dashed #dee2e6;
+  border-radius: 6px;
+  background-color: #f8f9fa;
 }
 
 .service-btn {
@@ -869,4 +910,5 @@ const handleFileUpload = async (event) => {
     height: clamp(10px, 1.5vw, 12px);
   }
 }
+
 </style>
