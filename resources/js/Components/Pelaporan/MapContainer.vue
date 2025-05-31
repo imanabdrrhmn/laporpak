@@ -29,21 +29,37 @@
         Lokasi harus dipilih pada peta
       </div>
      <button
-  type="button"
-  class="btn btn-outline-primary w-100 py-2 px-3"
-  @click="goToCurrentLocation"
-  :disabled="isFetchingLocation || isFetchingLocationInternal"
->
-  <i class="bi bi-geo-fill me-1"></i> Lokasi Saya
-</button>
+      type="button"
+      class="btn btn-outline-primary w-100 py-2 px-3"
+      @click="goToCurrentLocation"
+      :disabled="isLocationLoading"
+    >
+      <i class="bi bi-geo-fill me-1"></i> 
+      {{ isLocationLoading ? 'Mencari...' : 'Lokasi Saya' }}
+    </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { ref, onMounted, onUnmounted, watch, computed, nextTick, shallowRef } from 'vue';
+
+// Lazy loading Leaflet
+let L = null;
+const loadLeaflet = async () => {
+  if (!L) {
+    const leafletModule = await import('leaflet');
+    L = leafletModule.default;
+    // Load CSS dinamis
+    if (!document.querySelector('link[href*="leaflet"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+  }
+  return L;
+};
 
 const props = defineProps({
   formData: Object,
@@ -54,64 +70,132 @@ const props = defineProps({
 
 const emit = defineEmits(['update:location', 'update:address', 'update:validation-errors', 'error']);
 
+// Gunakan shallowRef untuk objek yang tidak perlu deep reactivity
 const mapRef = ref(null);
+const map = shallowRef(null);
+const marker = shallowRef(null);
 const isFetchingAddress = ref(false);
 const isFetchingLocationInternal = ref(false);
 
-let map = null;
-let marker = null;
+// Computed untuk menggabungkan loading states
+const isLocationLoading = computed(() => 
+  props.isFetchingLocation || isFetchingLocationInternal.value
+);
 
-function debounce(func, wait) {
-  let timeout;
+// Cache untuk reverse geocoding
+const geocodeCache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 menit
+
+// Optimized debounce dengan cleanup
+let debounceTimeout = null;
+const createDebounce = (func, wait) => {
   return function executedFunction(...args) {
     const later = () => {
-      clearTimeout(timeout);
+      debounceTimeout = null;
       func(...args);
     };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+    debounceTimeout = setTimeout(later, wait);
   };
-}
+};
 
-const debouncedResizeHandler = debounce(handleMapResize, 200);
+const debouncedResizeHandler = createDebounce(handleMapResize, 250);
+const debouncedReverseGeocode = createDebounce(reverseGeocode, 500);
 
-onMounted(() => {
-  setTimeout(() => {
-    initMap();
-    window.addEventListener('resize', debouncedResizeHandler);
-  }, 300);
+// Intersection Observer untuk lazy loading
+let intersectionObserver = null;
+
+onMounted(async () => {
+  // Lazy loading dengan intersection observer
+  intersectionObserver = new IntersectionObserver(
+    async (entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting) {
+        await nextTick();
+        setTimeout(async () => {
+          await initMap();
+        }, 100); // Reduced dari 300ms
+        intersectionObserver.disconnect();
+      }
+    },
+    { rootMargin: '50px' }
+  );
+  
+  if (mapRef.value) {
+    intersectionObserver.observe(mapRef.value);
+  }
+  
+  window.addEventListener('resize', debouncedResizeHandler, { passive: true });
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', debouncedResizeHandler);
-  if (map) {
-    map.remove();
+  // Cleanup yang lebih thorough
+  if (debounceTimeout) {
+    clearTimeout(debounceTimeout);
   }
+  
+  window.removeEventListener('resize', debouncedResizeHandler);
+  
+  if (intersectionObserver) {
+    intersectionObserver.disconnect();
+  }
+  
+  if (map.value) {
+    map.value.off(); // Remove semua event listeners
+    map.value.remove();
+    map.value = null;
+  }
+  
+  // Clear cache
+  geocodeCache.clear();
 });
 
-function initMap() {
-  const defaultPosition = [-6.2, 106.8];
-  if (!mapRef.value) return;
+async function initMap() {
+  if (!mapRef.value || map.value) return;
+  
   try {
-    map = L.map(mapRef.value, {
+    await loadLeaflet();
+    
+    const defaultPosition = [-6.2, 106.8];
+    
+    map.value = L.map(mapRef.value, {
       zoomControl: true,
-      attributionControl: true
+      attributionControl: true,
+      preferCanvas: true, // Untuk performa yang lebih baik
+      renderer: L.canvas(), // Canvas renderer lebih cepat untuk banyak marker
     }).setView(defaultPosition, 12);
 
+    // Gunakan tile layer yang lebih ringan
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution:
-        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19
-    }).addTo(map);
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+      tileSize: 256,
+      zoomOffset: 0,
+      crossOrigin: true
+    }).addTo(map.value);
 
-    map.on('click', (e) => {
-      placeMarker(e.latlng);
-      emit('update:validation-errors', { ...props.validationErrors, location: false });
+    // Throttled click handler
+    let clickTimeout = null;
+    map.value.on('click', (e) => {
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+      }
+      clickTimeout = setTimeout(() => {
+        placeMarker(e.latlng);
+        emit('update:validation-errors', { ...props.validationErrors, location: false });
+      }, 100);
     });
 
+    // Delayed resize untuk memastikan DOM sudah ready
+    await nextTick();
     setTimeout(() => {
-      map.invalidateSize();
-    }, 500);
+      if (map.value) {
+        map.value.invalidateSize();
+      }
+    }, 200);
+    
   } catch (error) {
     console.error("Error initializing map:", error);
     emit('error', 'Gagal menginisialisasi peta');
@@ -119,59 +203,110 @@ function initMap() {
 }
 
 function handleMapResize() {
-  if (map) {
-    map.invalidateSize();
+  if (map.value) {
+    map.value.invalidateSize();
   }
 }
 
+// Optimized reverse geocoding dengan cache dan rate limiting
 async function reverseGeocode(lat, lng) {
+  const cacheKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+  const cached = geocodeCache.get(cacheKey);
+  
+  // Check cache dengan expiry
+  if (cached && (Date.now() - cached.timestamp < CACHE_DURATION)) {
+    emit('update:address', cached.address);
+    return cached.address;
+  }
+  
   isFetchingAddress.value = true;
+  
   try {
+    // AbortController untuk cancel request jika komponen di-unmount
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&limit=1`,
+      { 
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+        }
+      }
     );
+    
+    clearTimeout(timeoutId);
+    
     if (!response.ok) {
-      throw new Error('Gagal mendapatkan alamat');
+      throw new Error(`HTTP ${response.status}`);
     }
+    
     const data = await response.json();
-    return data.display_name || 'Alamat tidak ditemukan';
+    const address = data.display_name || 'Alamat tidak ditemukan';
+    
+    // Cache result
+    geocodeCache.set(cacheKey, {
+      address,
+      timestamp: Date.now()
+    });
+    
+    emit('update:address', address);
+    return address;
+    
   } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Reverse geocoding dibatalkan');
+      return 'Alamat tidak tersedia';
+    }
+    
     console.error('Error saat reverse geocoding:', error);
     emit('error', 'Gagal mendapatkan alamat');
     return 'Alamat tidak tersedia';
+    
   } finally {
     isFetchingAddress.value = false;
   }
 }
 
 function placeMarker(latlng) {
-  if (marker) {
-    map.removeLayer(marker);
-  }
+  if (!map.value) return;
+  
   try {
+    // Remove existing marker
+    if (marker.value) {
+      map.value.removeLayer(marker.value);
+    }
+    
+    // Optimized icon dengan caching
     const customIcon = L.icon({
-      iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
-      shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       shadowSize: [41, 41]
     });
 
-    marker = L.marker(latlng, { icon: customIcon }).addTo(map);
+    marker.value = L.marker(latlng, { 
+      icon: customIcon,
+      riseOnHover: true // Performance optimization
+    }).addTo(map.value);
 
-    const popupContent =
-      props.selectedService === 'Penipuan'
-        ? '<b>Lokasi Pelaporan</b>'
-        : '<b>Lokasi Kerusakan Infrastruktur</b>';
+    const popupContent = props.selectedService === 'Penipuan'
+      ? '<b>Lokasi Pelaporan</b>'
+      : '<b>Lokasi Kerusakan Infrastruktur</b>';
 
-    marker.bindPopup(popupContent).openPopup();
+    marker.value.bindPopup(popupContent, {
+      closeOnClick: false,
+      autoClose: false
+    }).openPopup();
 
     emit('update:location', { lat: latlng.lat, lng: latlng.lng });
 
-    reverseGeocode(latlng.lat, latlng.lng).then((address) => {
-      emit('update:address', address);
-    });
+    // Debounced reverse geocoding
+    debouncedReverseGeocode(latlng.lat, latlng.lng);
+    
   } catch (error) {
     console.error("Error placing marker:", error);
     emit('error', 'Gagal menempatkan marker');
@@ -183,44 +318,74 @@ async function goToCurrentLocation() {
     emit('error', 'Geolocation tidak didukung oleh browser Anda');
     return;
   }
+  
+  if (isFetchingLocationInternal.value) return; // Prevent multiple calls
+  
   try {
     isFetchingLocationInternal.value = true;
+    
     const position = await new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      });
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Timeout: Gagal mendapatkan lokasi dalam 15 detik'));
+      }, 15000);
+      
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          clearTimeout(timeoutId);
+          resolve(pos);
+        },
+        (err) => {
+          clearTimeout(timeoutId);
+          reject(err);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 60000 // Cache selama 1 menit
+        }
+      );
     });
 
     const { latitude, longitude } = position.coords;
-    if (map) {
-      map.setView([latitude, longitude], 16);
+    
+    if (map.value) {
+      map.value.setView([latitude, longitude], 16);
       placeMarker({ lat: latitude, lng: longitude });
       emit('update:validation-errors', { ...props.validationErrors, location: false });
     }
+    
   } catch (error) {
-    emit('error', 'Gagal mendapatkan lokasi Anda: ' + error.message);
+    const errorMessage = error.code === 1 
+      ? 'Akses lokasi ditolak. Mohon izinkan akses lokasi.'
+      : error.code === 2 
+      ? 'Lokasi tidak tersedia. Periksa GPS atau koneksi internet.'
+      : error.code === 3 
+      ? 'Timeout saat mendapatkan lokasi.'
+      : `Gagal mendapatkan lokasi: ${error.message}`;
+      
+    emit('error', errorMessage);
   } finally {
     isFetchingLocationInternal.value = false;
   }
 }
 
-// Jika selectedService berubah, update popup-nya
+// Optimized watcher dengan immediate: false
 watch(
   () => props.selectedService,
   (newVal) => {
-    if (marker) {
-      const newContent =
-        newVal === 'Penipuan'
-          ? '<b>Lokasi Pelaporan</b>'
-          : '<b>Lokasi Kerusakan Infrastruktur</b>';
-      marker.bindPopup(newContent).openPopup();
+    if (marker.value && map.value) {
+      const newContent = newVal === 'Penipuan'
+        ? '<b>Lokasi Pelaporan</b>'
+        : '<b>Lokasi Kerusakan Infrastruktur</b>';
+      marker.value.setPopupContent(newContent);
+      if (marker.value.isPopupOpen()) {
+        marker.value.openPopup();
+      }
     }
-  }
+  },
+  { immediate: false }
 );
 </script>
-
 
 <style scoped>
 .map-container {
@@ -230,6 +395,9 @@ watch(
   width: 100%;
   height: 250px;
   position: relative;
+  /* GPU acceleration untuk smooth animations */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .is-loading {
@@ -239,14 +407,10 @@ watch(
   background-size: 1rem 1rem;
 }
 
-.leaflet-default-icon-path {
-  background-image: url("/assets/marker-icon.png");
-}
-
-@media (min-width: 600px) and (max-width: 1199px) {
+/* Optimized media queries dengan container queries jika didukung */
+@container (min-width: 600px) and (max-width: 1199px) {
   .map-container {
-    height: 280px !important;
-    width: 100% !important;
+    height: 280px;
   }
 }
 
@@ -301,6 +465,13 @@ watch(
 @media (max-height: 600px) and (orientation: landscape) {
   .map-container {
     height: 200px;
+  }
+}
+
+/* Preload critical resources */
+@media (prefers-reduced-motion: no-preference) {
+  .map-container {
+    transition: height 0.2s ease;
   }
 }
 </style>
