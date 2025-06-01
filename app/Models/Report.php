@@ -71,11 +71,7 @@ class Report extends Model
 
     public function scopeVisibleTo($query, User $user)
     {
-        if ($user->hasRole('admin')) {
-            return $query; 
-        }
-
-        if ($user->hasRole('verifier')) {
+        if ($user->hasRole('admin') || $user->hasRole('verifier'))  {
             return $query->where(function ($subQuery) use ($user) {
                 $viewableServices = [];
                 if ($user->can('view_reports_penipuan')) {

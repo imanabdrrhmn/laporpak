@@ -81,33 +81,21 @@ Route::get('/admin/pelaporan', function () {
     if ($user) {
         $permissions = [
             'verifyReports' => $user->can('verify_reports'),
+            'viewPenipuan' => $user->can('view_reports_penipuan'),
+            'viewInfrastructure' => $user->can('view_reports_infrastruktur'),
+            'view_reports_by_region' => $user->can('view_reports_by_region'),
         ];
     }
-
     return Inertia::render('Admin/Pelaporan/Index', [
         'can' => $permissions,
     ]);
 })
-->middleware(['auth', 'contact.verified', 'role:admin||verifier'])
+->middleware(['auth', 'contact.verified', 'role:admin|verifier'])
 ->name('admin.reports.page');
 
 Route::middleware(['auth','contact.verified'])->group(function () {
-    Route::middleware('role:admin||verifier')
-        ->prefix('admin/data/reports')
-        ->name('admin.data.reports.')
-        ->group(function () {
-            Route::get('/', [ReportManagementController::class, 'index'])->name('index');
-            Route::get('/{report}/flags', [ReportManagementController::class, 'getFlags'])->name('flags.index');
-            Route::post('/{report}/accept', [ReportManagementController::class, 'accept'])->name('accept');
-            Route::post('/{report}/rejected', [ReportManagementController::class, 'reject'])->name('reject');
-            Route::post('/{report}/publish', [ReportManagementController::class, 'publish'])->name('publish');
-            Route::post('/{report}/unpublish', [ReportManagementController::class, 'unpublish'])->name('unpublish');
-            Route::post('/{report}/solved', [ReportManagementController::class, 'solved'])->name('solved');
-            Route::delete('/{report}', [ReportManagementController::class, 'destroy'])->name('destroy');
-        });
-
-    Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
-    Route::post('/laporan/flag', [ReportController::class, 'flagReport'])->name('laporan.flag');
+Route::post('/pelaporan/create', [ReportController::class, 'store'])->name('laporan.store');
+Route::post('/laporan/flag', [ReportController::class, 'flagReport'])->name('laporan.flag');
 });
 
 Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.create');
@@ -145,6 +133,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/roles/{roles}', [UserManagementController::class, 'destroyRole'])->name('roles.destroy');
     Route::get('/users/{user}/permissions', [UserManagementController::class, 'editPermissions']);
     Route::patch('/users/{user}/permissions', [UserManagementController::class, 'updatePermissions']);
+});
+
+// API
+Route::middleware(['auth','contact.verified'])->group(function () {
+    Route::middleware('role:admin||verifier')
+        ->prefix('/data/reports')
+        ->name('admin.data.reports.')
+        ->group(function () {
+            Route::get('/', [ReportManagementController::class, 'index'])->name('index');
+            Route::get('/{report}/flags', [ReportManagementController::class, 'getFlags'])->name('flags.index');
+            Route::post('/{report}/accept', [ReportManagementController::class, 'accept'])->name('accept');
+            Route::post('/{report}/rejected', [ReportManagementController::class, 'reject'])->name('reject');
+            Route::post('/{report}/publish', [ReportManagementController::class, 'publish'])->name('publish');
+            Route::post('/{report}/unpublish', [ReportManagementController::class, 'unpublish'])->name('unpublish');
+            Route::post('/{report}/solved', [ReportManagementController::class, 'solved'])->name('solved');
+            Route::delete('/{report}', [ReportManagementController::class, 'destroy'])->name('destroy');
+        });
 });
 
 require __DIR__.'/auth.php';

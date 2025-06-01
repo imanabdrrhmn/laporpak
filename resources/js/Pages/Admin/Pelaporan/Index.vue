@@ -158,7 +158,7 @@ const toast = ref({
   visible: false, message: '', type: 'success',
 });
 
-const API_BASE_URL = '/admin/data/reports';
+const API_BASE_URL = '/data/reports';
 
 const fetchReports = async () => {
   isLoading.value = true;
@@ -178,15 +178,14 @@ const fetchReports = async () => {
     reports.value = response.data.data;
 
     const { data: reportDataFromResponse, meta: metaFromServer, ...paginationMetaFromResponse } = response.data;
-    paginationData.value = {
-      current_page: metaFromServer.current_page,
-      last_page: metaFromServer.last_page,
-      total: metaFromServer.total,
-      per_page: metaFromServer.per_page,
-      links: metaFromServer.links
-    };
-
-    itemsPerPage.value = paginationData.value.per_page || 15;
+      paginationData.value = {
+        current_page: metaFromServer.current_page,
+        last_page: metaFromServer.last_page,
+        per_page: metaFromServer.per_page,
+        total: metaFromServer.total,
+        links: metaFromServer.links,
+      };    
+      itemsPerPage.value = paginationData.value.per_page || 15;
 
     if (metaFromServer && metaFromServer.stats) {
       reportStatsFromServer.value = metaFromServer.stats;

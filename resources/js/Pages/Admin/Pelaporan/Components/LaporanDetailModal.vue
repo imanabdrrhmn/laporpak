@@ -114,7 +114,9 @@ const props = defineProps({
   isVisible: Boolean,
 })
 
-const emit = defineEmits(['close'])
+
+
+const emit = defineEmits(['close', 'openFlagSummary', 'actionTriggered'])
 
 const closeModal = () => emit('close')
 
@@ -140,7 +142,7 @@ const onConfirm = () => {
 
 const handleApprove = () => {
   confirmWithModal(() => {
-    router.patch(`/pelaporan/${props.report.id}/terima`, {}, {
+    router.patch(`/data/reports/${props.report.id}/accept`, {}, {
       preserveScroll: true,
       onSuccess: () => emit('close'),
     })
@@ -149,7 +151,7 @@ const handleApprove = () => {
 
 const handleReject = () => {
   confirmWithModal(() => {
-    router.patch(`/pelaporan/${props.report.id}/tolak`, {}, {
+    router.patch(`/data/reports/${props.report.id}/rejected`, {}, {
       preserveScroll: true,
       onSuccess: () => {
         router.reload({ only: ['reports'] })
@@ -161,7 +163,7 @@ const handleReject = () => {
 
 const handlePublish = () => {
   confirmWithModal(() => {
-    router.patch(`/pelaporan/${props.report.id}/publikasikan`, {}, {
+    router.patch(`/data/reports/${props.report.id}/publish`, {}, {
       preserveScroll: true,
       onSuccess: () => emit('close')
     })
@@ -185,7 +187,7 @@ const openFlagModal = async () => {
     return;
   }
   try {
-    const response = await fetch(`/pelaporan/${props.report.id}/flags`);
+    const response = await fetch(`/data/reports/${props.report.id}/flags`);
     if (!response.ok) throw new Error('Gagal mengambil laporan flag');
     const data = await response.json();
     reportFlags.value = data.flags || [];

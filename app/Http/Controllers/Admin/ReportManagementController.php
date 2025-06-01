@@ -14,8 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ReportResource;
 use App\Http\Resources\FlagResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Log;
-
 
 class ReportManagementController extends Controller
 {
@@ -69,12 +67,6 @@ class ReportManagementController extends Controller
 
         $perPage = $request->input('per_page', $request->input('itemsPerPage', 15));
         $reports = $paginatedQuery->withCount('flags')->paginate((int)$perPage);
-        Log::info('Pagination Data:', [
-    'total' => $reports->total(),
-    'current_page' => $reports->currentPage(),
-    'last_page' => $reports->lastPage(),
-    'per_page' => $reports->perPage(),
-]);
 
         return ReportResource::collection($reports)->additional([
             'meta' => [
