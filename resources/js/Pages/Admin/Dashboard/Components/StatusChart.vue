@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <!-- Chart Distribusi Aktivitas Pengguna -->
-    <div class="col-lg-6 mb-3">
+    <div class="col-lg-6 col-12 mb-3">
       <div class="card border-0 shadow-sm">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -10,7 +10,7 @@
               <i class="bi bi-download me-1"></i> Ekspor
             </button>
           </div>
-          <div class="chart-container" style="position: relative; height: 300px;">
+          <div class="chart-container">
             <canvas ref="statusChart"></canvas>
           </div>
         </div>
@@ -18,7 +18,7 @@
     </div>
 
     <!-- Chart Status Laporan -->
-    <div class="col-lg-6 mb-3">
+    <div class="col-lg-6 col-12 mb-3">
       <div class="card border-0 shadow-sm">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -27,7 +27,7 @@
               <i class="bi bi-download me-1"></i> Ekspor
             </button>
           </div>
-          <div class="chart-container" style="position: relative; height: 300px;">
+          <div class="chart-container">
             <canvas ref="reportChart"></canvas>
           </div>
         </div>
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Chart Verifikasi -->
-    <div class="col-lg-6 mb-3">
+    <div class="col-lg-6 col-12 mb-3">
       <div class="card border-0 shadow-sm">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -44,7 +44,7 @@
               <i class="bi bi-download me-1"></i> Ekspor
             </button>
           </div>
-          <div class="chart-container" style="position: relative; height: 300px;">
+          <div class="chart-container">
             <canvas ref="verificationChart"></canvas>
           </div>
         </div>
@@ -52,7 +52,7 @@
     </div>
 
     <!-- Chart Trend Laporan Bulanan -->
-    <div class="col-lg-6 mb-3">
+    <div class="col-lg-6 col-12 mb-3">
       <div class="card border-0 shadow-sm">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -61,7 +61,7 @@
               <i class="bi bi-download me-1"></i> Ekspor
             </button>
           </div>
-          <div class="chart-container" style="position: relative; height: 300px;">
+          <div class="chart-container">
             <canvas ref="trendChart"></canvas>
           </div>
         </div>
@@ -286,7 +286,12 @@ onUnmounted(() => {
 }
 
 .chart-container {
-  min-height: 300px;
+  width: 100%; /* Make sure the chart container is responsive */
+  height: 300px; /* Default height for all charts */
+}
+
+.chart-container canvas {
+  width: 100% !important; /* Ensure the canvas scales correctly */
 }
 
 .btn-outline-secondary:hover {

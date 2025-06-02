@@ -46,7 +46,7 @@
       </div>
       <div v-if="report.location" class="location-badge">
         <i class="fas fa-map-marker-alt location-icon"></i>
-        <span class="location-text">{{ truncateText(report.location, 30) }}</span>
+        <span class="location-text">{{ truncateText(report.region, 30) }}</span>
       </div>
     </div>
 

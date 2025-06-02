@@ -41,7 +41,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 
 Route::get('admin/dashboard', [DashboardAdminController::class, 'index'])
     ->middleware(['auth', 'contact.verified', 'role:admin||verifier'])
-    ->name('dashboard.admin');
+    ->name('dashboard.admin.page');
 
 Route::get('/verifikasi', function () {
     $feedbacks = Feedback::with('user')->where('kategori', 'Verifikasi')->latest()->take(10)->get();
@@ -153,5 +153,9 @@ Route::middleware(['auth','contact.verified'])->group(function () {
 });
 
 Route::get('/api/laporan/search', [ReportController::class, 'search'])->name('laporan.search');
+
+Route::get('/api/dashboard-data', [DashboardAdminController::class, 'getDashboardData'])
+    ->middleware(['auth', 'contact.verified', 'role:admin||verifier'])
+    ->name('admin.api.dashboard.data');
 
 require __DIR__.'/auth.php';

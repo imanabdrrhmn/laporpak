@@ -1,101 +1,145 @@
 <!DOCTYPE html>
-<html lang="id" style="margin:0; padding:0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color:#f9fafb;">
+<html lang="id" style="margin:0; padding:0; background-color:#f0f2f5; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
 <head>
     <meta charset="UTF-8" />
-    <title>Verifikasi Email</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Email Anda</title>
     <style>
         /* Reset */
-        body, p, h1, a {
+        body, p, h1, a, table, td, th {
             margin: 0; padding: 0;
             text-decoration: none;
             color: #333333;
-        }
-        body {
-            background-color: #f9fafb;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            padding: 40px 10px;
+            box-sizing: border-box;
         }
-        .container {
-            max-width: 600px;
-            background: #ffffff;
-            margin: 0 auto;
-            border-radius: 8px;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.1);
-            padding: 40px 30px;
-        }
-        h1 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        p {
-            font-size: 16px;
+        body {
+            background-color: #f0f2f5; /* Light gray background for the whole page */
+            padding: 20px;
             line-height: 1.6;
-            color: #4a5568;
-            margin-bottom: 24px;
+        }
+        .email-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff; /* White background for the content area */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+            overflow: hidden; /* Ensures border-radius applies to children like header */
+        }
+        .email-header {
+            background-color: #ffffff; /* White header */
+            padding: 30px 30px 20px; /* More padding at the top */
+            text-align: center; /* Center logo */
+        }
+        .email-header img {
+            max-width: 150px; /* Adjust logo size as needed */
+            height: auto;
+        }
+        .email-body {
+            padding: 20px 30px 30px; /* Consistent padding */
+            color: #374151; /* Darker gray for text */
+            font-size: 16px;
+        }
+        .email-body h1 {
+            font-size: 22px; /* Slightly smaller H1 */
+            font-weight: 600;
+            color: #1f2937; /* Even darker for headings */
+            margin-bottom: 20px;
+            text-align: left; /* Align heading to the left as per image */
+        }
+        .email-body p {
+            margin-bottom: 18px;
+            color: #4b5563; /* Slightly lighter text color */
+        }
+        .button-container {
+            text-align: left; /* Align button to the left */
+            margin-bottom: 25px;
+            margin-top: 10px;
         }
         .button {
-            display: block;
-            width: fit-content;
-            margin: 0 auto 30px;
-            background-color: #2563eb;
-            color: white !important;
-            font-weight: 600;
-            padding: 14px 28px;
+            display: inline-block; /* Changed from block to inline-block */
+            background-color: #0D6EFD; /* Blue button color from image */
+            color: #ffffff !important; /* White text for button */
+            font-weight: 500;
+            padding: 12px 25px;
             border-radius: 6px;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+            text-decoration: none;
             transition: background-color 0.3s ease;
+            font-size: 16px;
         }
         .button:hover {
-            background-color: #1e40af;
+            background-color: #0a58ca; /* Darker blue on hover */
         }
-        a.url {
+        .link-info {
+            font-size: 12px;
+            color: #6b7280; /* Lighter gray for less important text */
+            margin-top: 30px;
+            line-height: 1.5;
+        }
+        .link-info a {
+            color: #0D6EFD; /* Blue for the link */
             word-break: break-all;
-            color: #2563eb;
-            font-size: 14px;
-            display: block;
-            text-align: center;
-            margin-bottom: 16px;
+            text-decoration: underline;
         }
-        .footer {
+        .email-footer {
             text-align: center;
             font-size: 12px;
-            color: #a0aec0;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 20px;
-            margin-top: 20px;
+            color: #9ca3af; /* Even lighter gray for footer */
+            padding: 20px 30px;
+            background-color: #f9fafb; /* Slightly off-white for footer background */
+            border-top: 1px solid #e5e7eb; /* Light border */
         }
-        @media only screen and (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
+
+        /* Responsive adjustments */
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 10px;
             }
-            h1 {
-                font-size: 24px;
+            .email-header, .email-body, .email-footer {
+                padding: 20px;
             }
-            p {
+            .email-body h1 {
+                font-size: 20px;
+            }
+            .email-body p {
                 font-size: 15px;
             }
             .button {
-                padding: 12px 24px;
+                padding: 12px 20px;
                 font-size: 15px;
+                width: 100%; /* Make button full width on small screens */
+                text-align: center;
+            }
+            .button-container{
+                text-align: center; /* Center button on small screens */
             }
         }
     </style>
 </head>
 <body>
-    <div class="container" role="main" aria-label="Verifikasi Email">
-        <h1>Verifikasi Email Anda</h1>
-        <p>Halo,</p>
-        <p>Terima kasih telah mendaftar! Silakan klik tombol di bawah untuk memverifikasi alamat email Anda dan mengaktifkan akun Anda.</p>
-        <a href="{{ $url }}" class="button" target="_blank" rel="noopener">Verifikasi Email</a>
-        <a href="{{ $url }}" class="url" target="_blank" rel="noopener">{{ $url }}</a>
-        <p>Jika Anda tidak membuat akun ini, silakan abaikan email ini.</p>
-        <div class="footer">
-            &copy; {{ date('Y') }} LaporPak. Semua hak dilindungi.
+    <div class="email-wrapper">
+        <div class="email-header">
+            <img src="https://laporpak.com/images/logo.svg" alt="LaporPak Logo">
+        </div>
+        <div class="email-body">
+            <h1>Halo {{ $name ?? 'Pengguna' }},</h1>
+            <p>Tekan tombol dibawah ini untuk verifikasi email anda.</p>
+            <div class="button-container">
+                <a href="{{ $url }}" class="button" target="_blank" rel="noopener">Verifikasi Alamat Email</a>
+            </div>
+            <p>Jika Anda tidak membuat akun, tidak ada tindakan lebih lanjut yang diperlukan.</p>
+            <p>Salam,<br>Tim LaporPak.com</p>
+
+            <div class="link-info">
+                Jika Anda kesulitan mengklik tombol "Verifikasi Alamat Email", salin dan tempel URL di bawah ini ke browser web Anda:
+                <br>
+                <a href="{{ $url }}" target="_blank" rel="noopener">{{ $url }}</a>
+            </div>
+        </div>
+        <div class="email-footer">
+            &copy; {{ date('Y') }} LaporPak.com. Semua hak dilindungi.
         </div>
     </div>
 </body>
