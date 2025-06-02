@@ -1,7 +1,6 @@
 <template>
   <Head title="Ulasan" />
   <AppLayout>
-    <!-- Header Section -->
     <div class="header-gradient text-white py-4 py-md-5 text-center">
       <h1 class="display-5 display-md-4 fw-bold">Ulasan</h1>
       <p class="lead mt-2 px-3">
@@ -10,7 +9,6 @@
     </div>
 
     <div class="container py-3 py-md-5">
-      <!-- Flash Messages -->
       <div v-if="$page.props.flash?.success" class="alert alert-success alert-dismissible fade show" role="alert">
         {{ $page.props.flash.success }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -20,11 +18,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
 
-      <!-- Navigation and Filter Card -->
       <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body p-3 p-md-4">
           <div class="row g-3">
-            <!-- Beri Feedback Button - Always First -->
             <div class="col-12 col-md-6 col-xl-3 order-1">
               <div v-if="isLoggedIn && contactVerified">
                 <button class="btn btn-primary w-100" @click="openFeedbackModal('create')">
@@ -38,7 +34,6 @@
               </div>
             </div>
 
-            <!-- My Feedback Button - Second Position -->
             <div class="col-12 col-md-6 col-xl-3 order-2" v-if="isLoggedIn">
               <button 
                 class="btn w-100" 
@@ -49,7 +44,6 @@
               </button>
             </div>
 
-            <!-- Category Filter - Third Position -->
             <div class="col-12 col-md-6 col-xl-3 order-3">
               <div class="input-group">
                 <span class="input-group-text bg-light">Kategori</span>
@@ -64,7 +58,6 @@
               </div>
             </div>
             
-            <!-- Sort Options - Fourth Position -->
             <div class="col-12 col-md-6 col-xl-3 order-4">
               <div class="btn-group w-100">
                 <button class="btn flex-grow-1" :class="sortBy === 'latest' ? 'btn-primary' : 'btn-outline-primary'" @click="sortBy = 'latest'">
@@ -77,7 +70,6 @@
             </div>
           </div>
           
-          <!-- Warning message for unverified users -->
           <div v-if="isLoggedIn && !contactVerified" class="mt-3">
             <div class="alert alert-warning mb-0 py-2" role="alert">
               <small><i class="bi bi-exclamation-triangle me-1"></i> Anda perlu verifikasi email atau nomor HP terlebih dahulu untuk memberi feedback.</small>
@@ -86,14 +78,11 @@
         </div>
       </div>
 
-      <!-- Feedback List with Fixed Layout -->
       <div class="feedback-container">
-        <!-- Skeleton View -->
         <div v-if="isLoading" class="row g-3">
           <div v-for="n in 3" :key="n" class="col-12 col-sm-6 col-lg-4 mb-3">
             <div class="card border-0 shadow-lg h-100">
               <div class="card-body p-3">
-                <!-- User info skeleton at top -->
                 <div class="d-flex align-items-center mb-3">
                   <div class="skeleton skeleton-circle me-3"></div>
                   <div class="skeleton skeleton-name"></div>
@@ -109,13 +98,11 @@
           </div>
         </div>
 
-        <!-- Feedback List or Empty State -->
         <div v-else>
-          <div v-if="filteredFeedbacks.length > 0" class="row g-3">
-            <div v-for="feedback in filteredFeedbacks" :key="feedback.id" class="col-12 col-sm-6 col-lg-4 mb-3">
+          <div v-if="paginatedFeedbacks.length > 0" class="row g-3">
+            <div v-for="feedback in paginatedFeedbacks" :key="feedback.id" class="col-12 col-sm-6 col-lg-4 mb-3">
               <div class="card border-0 shadow-lg rounded-lg h-100 feedback-card">
                 <div class="card-body p-3">
-                  <!-- User Info moved to top -->
                   <div class="d-flex align-items-center mb-3">
                     <img
                       v-if="feedback.user.avatar_url"
@@ -133,7 +120,6 @@
                     </div>
                     <h5 class="card-title mb-0 fs-6 text-truncate" style="max-width: 150px;">{{ feedback.user.name }}</h5>
                     
-                    <!-- Burger Menu Dropdown -->
                     <div class="ms-auto position-relative">
                       <button
                         class="btn btn-sm btn-light rounded-circle"
@@ -164,19 +150,8 @@
                       </ul>
                     </div>
                   </div>
-                  
-                  <!-- Category and Timestamp -->
                   <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-                    <span :class="[
-                      'badge',
-                      'rounded-pill',
-                      'mb-1',
-                      'me-1',
-                      feedback.kategori === 'Verifikasi' ? 'bg-verifikasi text-verifikasi' :
-                      feedback.kategori === 'Pelaporan' ? 'bg-pelaporan text-pelaporan' :
-                      feedback.kategori === 'Umum' ? 'bg-umum text-umum' :
-                      'bg-purple text-white'
-                    ]">
+                    <span :class="[ 'badge', 'rounded-pill', 'mb-1', 'me-1', feedback.kategori === 'Verifikasi' ? 'bg-verifikasi text-verifikasi' : feedback.kategori === 'Pelaporan' ? 'bg-pelaporan text-pelaporan' : feedback.kategori === 'Umum' ? 'bg-umum text-umum' : 'bg-purple text-white' ]">
                       {{ feedback.kategori }}
                     </span>
                     <small class="text-muted">
@@ -185,21 +160,18 @@
                     </small>
                   </div>
 
-                  <!-- Star Rating -->
                   <div class="text-warning mb-3">
                     <span v-for="i in 5" :key="i">
                       <i class="bi" :class="i <= feedback.rating ? 'bi-star-fill' : 'bi-star'"></i>
                     </span>
                   </div>
 
-                  <!-- Feedback Message -->
                   <p class="card-text mb-0">{{ truncateText(feedback.message, 100) }}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Empty State -->
           <div v-else class="empty-state text-center py-5">
             <i class="bi bi-emoji-frown display-4 text-muted mb-3"></i>
             <p class="text-muted">Tidak ditemukan feedback untuk kategori ini.</p>
@@ -207,7 +179,24 @@
         </div>
       </div>
 
-      <!-- Modal Component for Feedback Form -->
+      <div class="d-flex justify-content-center mt-4">
+        <button
+          class="btn btn-outline-primary"
+          :disabled="currentPage === 1"
+          @click="currentPage--"
+        >
+          <i class="bi bi-chevron-left"></i> Previous
+        </button>
+        <span class="mx-2 align-self-center">{{ currentPage }} / {{ totalPages }}</span>
+        <button
+          class="btn btn-outline-primary"
+          :disabled="currentPage === totalPages"
+          @click="currentPage++"
+        >
+          Next <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+
       <FeedbackModal
         ref="feedbackModalRef"
         :mode="mode"
@@ -215,7 +204,6 @@
         @modal-closed="handleModalClosed"
       />
 
-      <!-- Detail Feedback Modal -->
       <div class="modal fade" ref="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div class="modal-content">
@@ -248,15 +236,9 @@
                 </div>
               </div>
               
+
               <div class="mb-3">
-                <span :class="[
-                  'badge',
-                  'rounded-pill',
-                  selectedFeedback.kategori === 'Verifikasi' ? 'bg-verifikasi text-verifikasi' :
-                  selectedFeedback.kategori === 'Pelaporan' ? 'bg-pelaporan text-pelaporan' :
-                  selectedFeedback.kategori === 'Umum' ? 'bg-umum text-umum' :
-                  'bg-purple text-white'
-                ]">
+                <span :class="[ 'badge', 'rounded-pill', selectedFeedback.kategori === 'Verifikasi' ? 'bg-verifikasi text-verifikasi' : selectedFeedback.kategori === 'Pelaporan' ? 'bg-pelaporan text-pelaporan' : selectedFeedback.kategori === 'Umum' ? 'bg-umum text-umum' : 'bg-purple text-white' ]">
                   {{ selectedFeedback.kategori }}
                 </span>
               </div>
@@ -283,7 +265,6 @@
         </div>
       </div>
 
-      <!-- Delete Confirmation Modal -->
       <div class="modal fade" ref="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
@@ -324,28 +305,22 @@ const isLoggedIn = computed(() => !!page.props.auth?.user);
 const roles = page.props.auth?.user?.roles ?? [];
 const isAdmin = computed(() => roles.includes('admin'));
 
-// Filter and Sort state
 const selectedCategory = ref('');
 const sortBy = ref('latest');
 const isLoading = ref(false);
 const searchQuery = ref('');
-const isMyFeedbackActive = ref(false); // State untuk tombol "Feedback Saya"
+const isMyFeedbackActive = ref(false); 
 
-// Filtered and sorted feedbacks
 const filteredFeedbacks = computed(() => {
   let result = props.feedbacks;
 
-  // Filter untuk "Feedback Saya" jika tombol aktif
   if (isMyFeedbackActive.value && isLoggedIn.value) {
     result = result.filter(feedback => feedback.user_id === page.props.auth?.user?.id);
   } 
-  // Filter by category from dropdown
   else if (selectedCategory.value) {
-    // Normal category filtering
     result = result.filter(feedback => feedback.kategori === selectedCategory.value);
   }
 
-  // Filter by search query
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase().trim();
     result = result.filter(feedback => 
@@ -355,7 +330,6 @@ const filteredFeedbacks = computed(() => {
     );
   }
 
-  // Sort by rating or latest
   if (sortBy.value === 'highestRating') {
     const maxRating = Math.max(...result.map(f => f.rating));
     result = result.filter(feedback => feedback.rating === maxRating);
@@ -366,23 +340,29 @@ const filteredFeedbacks = computed(() => {
   return result;
 });
 
-// Toggle fungsi untuk tombol "Feedback Saya"
+const currentPage = ref(1);
+const feedbacksPerPage = 6;
+const totalPages = computed(() => Math.ceil(filteredFeedbacks.value.length / feedbacksPerPage));
+
+const paginatedFeedbacks = computed(() => {
+  const start = (currentPage.value - 1) * feedbacksPerPage;
+  const end = start + feedbacksPerPage;
+  return filteredFeedbacks.value.slice(start, end);
+});
+
 const toggleMyFeedback = () => {
   isMyFeedbackActive.value = !isMyFeedbackActive.value;
   
-  // Reset filter kategori saat mengaktifkan "Feedback Saya"
   if (isMyFeedbackActive.value) {
     selectedCategory.value = '';
   }
   
-  // Simulasi loading saat mengubah filter
   isLoading.value = true;
   setTimeout(() => {
     isLoading.value = false;
   }, 700);
 };
 
-// Handle search with debounce
 const handleSearch = () => {
   isLoading.value = true;
   clearTimeout(searchTimeout);
@@ -393,9 +373,7 @@ const handleSearch = () => {
 
 let searchTimeout;
 
-// Handle category change
 const handleCategoryChange = () => {
-  // Reset "Feedback Saya" ketika filter kategori berubah
   if (selectedCategory.value !== '') {
     isMyFeedbackActive.value = false;
   }
@@ -406,15 +384,13 @@ const handleCategoryChange = () => {
   }, 700);
 };
 
-// Watch for changes in filters to simulate loading
 watch([sortBy], () => {
   isLoading.value = true;
   setTimeout(() => {
     isLoading.value = false;
-  }, 700); // Simulate loading
+  }, 700);
 });
 
-// Modal management for feedback
 const feedbackModalRef = ref(null);
 const mode = ref('create');
 const currentFeedback = ref({});
@@ -435,12 +411,10 @@ const handleModalClosed = () => {
   currentFeedback.value = {};
 };
 
-// Delete Modal management
 const deleteModal = ref(null);
 const feedbackToDelete = ref(null);
 let deleteModalInstance = null;
 
-// Detail Modal management
 const detailModal = ref(null);
 const selectedFeedback = ref(null);
 let detailModalInstance = null;
@@ -478,7 +452,6 @@ const confirmDelete = () => {
   }
 };
 
-// Helpers
 const truncateText = (text, maxLength) => {
   if (!text) return '';
   if (text.length <= maxLength) return text;
@@ -497,7 +470,6 @@ document.addEventListener('click', (e) => {
     activeDropdownId.value = null;
   }
 });
-
 </script>
 
 <style scoped>

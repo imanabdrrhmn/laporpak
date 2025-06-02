@@ -19,7 +19,6 @@ class LaporMapController extends Controller
 
         $userCount = User::count();
 
-        // Ambil feedbacks kategori 'Lapor Map', ambil 10 terbaru dengan relasi user
         $feedbacks = Feedback::with('user')
             ->where('kategori', 'Lapor Map')
             ->latest()

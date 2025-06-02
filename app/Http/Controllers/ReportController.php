@@ -139,9 +139,9 @@ class ReportController extends Controller
         $publishedReportsQuery = Report::where('status', 'published');
 
         $reportStats = [
-            'verifiedReports' => (clone $publishedReportsQuery)->whereIn('status', ['published', 'approved'])->count(), // Ini akan sama dengan totalReports jika hanya published & approved yang dihitung verified
-            'totalPublicReports' => (clone $publishedReportsQuery)->count(),
-            'fraudPublicReports' => (clone $publishedReportsQuery)->where('service', 'Penipuan')->count(),
+            'verifiedReports' => Report::whereIn('status', ['published', 'approved'])->count(),
+            'totalReports' => Report::count(),
+            'fraudReports' => Report::where('service', 'Penipuan')->count(),
         ];
 
         $initialCategories = Report::where('status', 'published')

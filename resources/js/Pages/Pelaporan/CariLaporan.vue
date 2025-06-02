@@ -94,7 +94,6 @@
 
 <script>
 import { debounce } from 'lodash';
-import { Inertia } from '@inertiajs/inertia';
 import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Feedback from '@/Components/Feedback.vue';
