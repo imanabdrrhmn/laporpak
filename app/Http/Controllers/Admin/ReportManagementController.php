@@ -47,6 +47,7 @@ class ReportManagementController extends Controller
                   ->orWhere('category', 'like', "%{$searchTerm}%")
                   ->orWhere('service', 'like', "%{$searchTerm}%")
                   ->orWhere('source', 'like', "%{$searchTerm}%")
+                  ->orWhere('status', 'like', "%{$searchTerm}%")
                   ->orWhereHas('user', function($userQuery) use ($searchTerm){ 
                       $userQuery->where('name', 'like', "%{$searchTerm}%");
                   });

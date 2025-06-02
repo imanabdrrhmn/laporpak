@@ -51,7 +51,7 @@ Route::get('/verifikasi', function () {
 });
 
 Route::get('/LaporMap', [LaporMapController::class, 'index'])->name('LaporMap');
-Route::get('/CariLaporan', [ReportController::class, 'search'])->name('CariLaporan');
+Route::get('/CariLaporan', [ReportController::class, 'index'])->name('CariLaporan');
 
 Route::get('/tentang-kami', function () {
     return Inertia::render('TentangKami');
@@ -151,5 +151,7 @@ Route::middleware(['auth','contact.verified'])->group(function () {
             Route::delete('/{report}', [ReportManagementController::class, 'destroy'])->name('destroy');
         });
 });
+
+Route::get('/api/laporan/search', [ReportController::class, 'search'])->name('laporan.search');
 
 require __DIR__.'/auth.php';

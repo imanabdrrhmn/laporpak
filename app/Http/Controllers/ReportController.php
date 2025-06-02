@@ -8,11 +8,13 @@ use App\Models\Feedback;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Http;
 use App\Services\ActivityLoggerService;
+use App\Http\Resources\ReportResource;
 
 class ReportController extends Controller
-{   
+{  
+    use AuthorizesRequests;
+
     protected $provinces = [
         'Aceh', 'Bali', 'Banten', 'Bengkulu', 'Gorontalo', 'Jakarta', 'Jambi',
         'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Kalimantan Barat', 'Kalimantan Selatan',
@@ -22,8 +24,6 @@ class ReportController extends Controller
         'Sulawesi Selatan', 'Sulawesi Tengah', 'Sulawesi Tenggara', 'Sulawesi Utara',
         'Sumatera Barat', 'Sumatera Selatan', 'Sumatera Utara', 'Yogyakarta',
     ];
-
-    use AuthorizesRequests;
 
     protected $logger;
 
@@ -38,6 +38,7 @@ class ReportController extends Controller
         $verifiedReports = Report::whereIn('status', ['published', 'approved'])->count();
         $totalReports = Report::count();
         $fraudReports = Report::where('service', 'Penipuan')->count();
+
         return Inertia::render('Pelaporan/pelaporan', [
             'feedbacks' => $feedbacks,
             'provinces' => $this->provinces,
@@ -56,18 +57,18 @@ class ReportController extends Controller
         }
 
         if (!$user->email_verified_at && !$user->no_hp_verified_at) {
-            return redirect()->route('laporan.index')->with('error', 'Akun kamu belum diverifikasi. Silakan verifikasi email atau nomor HP terlebih dahulu.');
+            return redirect()->back()->with('error', 'Akun kamu belum diverifikasi. Silakan verifikasi email atau nomor HP terlebih dahulu.');
         }
 
         $request->validate([
-            'category' => 'required|string',
+            'category' => 'required|string|max:255',
             'description' => 'required|string|max:1500',
             'evidence' => 'required|file|mimes:jpg,jpeg,png,webp|max:5120',
             'location.lat' => 'required|numeric',
             'location.lng' => 'required|numeric',
-            'service' => 'required|string',
-            'source' => 'nullable|string',
-            'address' => 'nullable|string',
+            'service' => 'required|string|max:255',
+            'source' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:1000',
             'region' => 'required|string|in:' . implode(',', $this->provinces),
         ]);
         
@@ -91,9 +92,9 @@ class ReportController extends Controller
             'address' => $request->address,
         ]);
 
-        $this->logger->log('Kirim Laporan', 'Pengguna mengirim laporan baru di wilayah ' . $region);
+        $this->logger->log('Kirim Laporan', 'Pengguna mengirim laporan baru di wilayah ' . $region . ' ID: ' . $report->id);
 
-        return back()->with('success', true);
+        return back()->with('success', 'Laporan Anda berhasil dikirim dan sedang menunggu verifikasi.');
     }
 
     public function edit(Request $request, Report $report)
@@ -101,7 +102,8 @@ class ReportController extends Controller
         $this->authorize('update', $report);
 
         return Inertia::render('Pelaporan/Edit', [
-            'report' => $report,
+            'report' => new ReportResource($report),
+            'provinces' => $this->provinces,
         ]);
     }
 
@@ -110,82 +112,104 @@ class ReportController extends Controller
         $this->authorize('update', $report);
 
         $request->validate([
-            'category' => 'required|string',
+            'category' => 'required|string|max:255',
             'description' => 'required|string|max:1500',
-            'service' => 'required|string',
-            'source' => 'nullable|string',
-            'address' => 'nullable|string', 
+            'service' => 'required|string|max:255',
+            'source' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:1000',
         ]);
 
-        $report->update([
-            'category' => $request->category,
-            'description' => $request->description,
-            'service' => $request->service,
-            'source' => $request->source, 
-            'address' => $request->address,  
-        ]);
+        $report->update($request->only([
+            'category', 'description', 'service', 'source', 'address'
+        ]));
 
         $this->logger->log('Update Laporan', 'Pengguna memperbarui laporan ID #' . $report->id);
 
-        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil diperbarui.');
+        return redirect()->route('history')->with('success', 'Laporan berhasil diperbarui.');
+    }
+
+    public function index() 
+    {
+        $feedbacks = Feedback::where('kategori', 'Cari Laporan') 
+                            ->with('user')
+                            ->latest()
+                            ->take(8) 
+                            ->get();
+
+        $publishedReportsQuery = Report::where('status', 'published');
+
+        $reportStats = [
+            'verifiedReports' => (clone $publishedReportsQuery)->whereIn('status', ['published', 'approved'])->count(), // Ini akan sama dengan totalReports jika hanya published & approved yang dihitung verified
+            'totalPublicReports' => (clone $publishedReportsQuery)->count(),
+            'fraudPublicReports' => (clone $publishedReportsQuery)->where('service', 'Penipuan')->count(),
+        ];
+
+        $initialCategories = Report::where('status', 'published')
+                                ->whereNotNull('category')
+                                ->where('category', '!=', '')
+                                ->distinct()
+                                ->orderBy('category')
+                                ->pluck('category')
+                                // ->filter() // filter() akan menghapus nilai null atau false, pluck sudah ambil non-null
+                                ->values() 
+                                ->all();
+
+        return Inertia::render('Pelaporan/CariLaporan', [
+            'feedbacks' => $feedbacks,
+            'reportStats' => $reportStats,
+            'initialCategories' => $initialCategories,
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+            ],
+        ]);
     }
 
     public function search(Request $request)
     {
         $request->validate([
             'query' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'sortOrder' => 'nullable|string|in:newest,oldest',
+            'page' => 'nullable|integer|min:1',
+            'perPage' => 'nullable|integer|min:1|max:50',
         ]);
 
-        $query = $request->input('query', '');
+        $searchQuery = $request->input('query');
+        $category = $request->input('category');
+        $sortOrder = $request->input('sortOrder', 'newest');
+        $perPage = (int) $request->input('perPage', 12);
 
-        $reports = Report::with('user')
-            ->where('status', 'published')
-            ->when($query, function ($q) use ($query) {
-                $q->where(function ($q2) use ($query) {
-                    $q2->where('description', 'like', "%{$query}%")
-                    ->orWhere('source', 'like', "%{$query}%");  
-                });
-            })
-            ->latest()
-            ->get()
-            ->map(function ($report) {
-                return [
-                    'id' => $report->id,
-                    'user_id' => $report->user_id,
-                    'user' => [
-                        'id' => $report->user->id,
-                        'name' => $report->user->name,
-                        'avatar_url' => $report->user->avatar 
-                            ? asset('storage/' . $report->user->avatar) 
-                            : asset('/Default-Profile.png'),
-                    ],
-                    'category' => $report->category,
-                    'description' => $report->description,
-                    'status' => $report->status,
-                    'latitude' => $report->latitude,
-                    'longitude' => $report->longitude,
-                    'address' => $report->address,
-                    'service' => $report->service,
-                    'source' => $report->source,
-                    'created_at' => $report->created_at->toDateTimeString(),
-                    'evidence' => $report->evidence 
-                        ? asset('storage/' . $report->evidence) 
-                        : null,
-                ];
+        $reportsQueryBuilder = Report::with('user')
+            ->where('status', 'published');
+
+        if ($searchQuery) {
+            $reportsQueryBuilder->where(function ($q) use ($searchQuery) {
+                $q->where('description', 'like', "%{$searchQuery}%")
+                  ->orWhere('address', 'like', "%{$searchQuery}%")
+                  ->orWhere('category', 'like', "%{$searchQuery}%")
+                  ->orWhere('service', 'like', "%{$searchQuery}%")
+                  ->orWhere('source', 'like', "%{$searchQuery}%")
+                  ->orWhereHas('user', function($userQ) use ($searchQuery) {
+                      $userQ->where('name', 'like', "%{$searchQuery}%");
+                  });
             });
+        }
 
-        $feedbacks = Feedback::where('kategori', 'Cari Laporan')->with('user')->latest()->take(10)->get();
-        $verifiedReports = Report::whereIn('status', ['published', 'approved'])->count();
-        $totalReports = Report::count();
-        $fraudReports = Report::where('service', 'Penipuan')->count();
+        if ($category && $category !== 'all' && $category !== '') {
+            $reportsQueryBuilder->where('category', $category);
+        }
 
-        return Inertia::render('Pelaporan/CariLaporan', [
-            'reports' => $reports,
-            'feedbacks' => $feedbacks,
-            'query' => $query,
-            'verifiedReports' => $verifiedReports,
-            'totalReports' => $totalReports,
-            'fraudReports' => $fraudReports,
+        if ($sortOrder === 'oldest') {
+            $reportsQueryBuilder->orderBy('created_at', 'asc');
+        } else {
+            $reportsQueryBuilder->orderBy('created_at', 'desc');
+        }
+
+        $reports = $reportsQueryBuilder->paginate($perPage);
+
+        return ReportResource::collection($reports)->additional([
+            'app_meta' => []
         ]);
     }
 
@@ -201,12 +225,17 @@ class ReportController extends Controller
             return redirect()->route('login')->with('error', 'Silakan login untuk melaporkan laporan.');
         }
 
+        $reportToFlag = Report::find($request->report_id);
+        if (!$reportToFlag || $reportToFlag->status !== 'published') {
+            return back()->with('error', 'Hanya laporan yang sudah dipublikasi yang bisa Anda laporkan.');
+        }
+
         $exists = ReportFlag::where('report_id', $request->report_id)
             ->where('user_id', $user->id)
             ->exists();
 
         if ($exists) {
-            return back()->with('error', 'Kamu sudah pernah melaporkan laporan ini.');
+            return back()->with('error', 'Kamu sudah pernah menandai laporan ini.');
         }
 
         ReportFlag::create([
@@ -215,8 +244,8 @@ class ReportController extends Controller
             'reason' => $request->reason,
         ]);
 
-        $this->logger->log('Melaporkan Laporan', 'Pengguna melaporkan laporan ID #' . $request->report_id);
+        $this->logger->log('Menandai Laporan', 'Pengguna menandai laporan ID #' . $request->report_id);
 
-        return back()->with('success', 'Laporan berhasil dilaporkan.');
+        return back()->with('success', 'Laporan berhasil ditandai.');
     }
 }

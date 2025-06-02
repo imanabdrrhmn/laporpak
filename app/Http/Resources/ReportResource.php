@@ -35,6 +35,7 @@ class ReportResource extends JsonResource
             'location' => $this->address,        
             'service' => $this->service,
             'source' => $this->source,
+            'region' => $this->region,
             'created_at' => $this->created_at->toDateTimeString(),
             'evidence' => $this->evidence
                             ? asset('storage/' . $this->evidence)

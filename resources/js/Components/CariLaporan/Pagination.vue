@@ -4,7 +4,7 @@
       <li class="page-item" :class="{ disabled: currentPage === 1 }">
         <button
           class="page-link"
-          @click="$emit('change-page', currentPage - 1)"
+          @click="changePage(currentPage - 1)"
           :disabled="currentPage === 1"
           aria-label="Halaman sebelumnya"
         >
@@ -25,8 +25,9 @@
       >
         <button
           class="page-link"
-          @click="$emit('change-page', page)"
+          @click="changePage(page)"
           :aria-current="page === currentPage ? 'page' : undefined"
+          :aria-label="`Ke halaman ${page}`"
         >
           {{ page }}
         </button>
@@ -39,7 +40,7 @@
       <li class="page-item" :class="{ disabled: currentPage === totalPages }">
         <button
           class="page-link"
-          @click="$emit('change-page', currentPage + 1)"
+          @click="changePage(currentPage + 1)"
           :disabled="currentPage === totalPages"
           aria-label="Halaman selanjutnya"
         >
@@ -55,18 +56,82 @@
 export default {
   name: 'Pagination',
   props: {
-    currentPage: Number,
-    totalPages: Number,
-    visiblePageNumbers: Array,
-    showStartEllipsis: Boolean,
-    showEndEllipsis: Boolean,
+    currentPage: {
+      type: Number,
+      required: true,
+    },
+    totalPages: {
+      type: Number,
+      required: true,
+    },
+    visiblePageNumbers: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+    showStartEllipsis: {
+      type: Boolean,
+      default: false,
+    },
+    showEndEllipsis: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ['change-page'],
+  methods: {
+    changePage(page) {
+      if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+        this.$emit('change-page', page);
+      }
+    },
+  },
 };
 </script>
 
 <style scoped>
-.pagination .page-link {
+.pagination {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.page-item .page-link {
   cursor: pointer;
+  user-select: none;
+  border-radius: 0.375rem;
+  margin: 0 2px;
+  color: #0d6efd;
+  border-color: #dee2e6;
+}
+
+.page-item.active .page-link {
+  z-index: 3;
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.page-item.disabled .page-link {
+  color: #6c757d;
+  pointer-events: none;
+  background-color: #fff;
+  border-color: #dee2e6;
+}
+
+.page-item .page-link:hover {
+  z-index: 2;
+  color: #0a58ca;
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.page-item.active .page-link:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+.page-item.disabled span.page-link {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
 }
 </style>

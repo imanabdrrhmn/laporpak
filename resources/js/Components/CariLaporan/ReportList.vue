@@ -1,8 +1,7 @@
 <template>
   <div>
-    <!-- Loading skeleton -->
-    <div v-if="loading" class="report-grid">
-      <div v-for="n in 6" :key="n" class="skeleton-wrapper">
+    <div v-if="loading && (!reportsToDisplay || reportsToDisplay.length === 0)" class="report-grid">
+      <div v-for="n in 6" :key="`skeleton-${n}`" class="skeleton-wrapper">
         <div class="card skeleton-card">
           <div class="skeleton-type-indicator"></div>
           <div class="card-header skeleton-header"></div>
@@ -16,16 +15,15 @@
       </div>
     </div>
 
-    <!-- Tidak ada hasil -->
-    <div v-if="!loading && filteredReports.length === 0" class="no-results">
+    <div v-else-if="!loading && reportsToDisplay.length === 0" class="no-results">
       <div class="text-center">
-        <i class="fas fa-search fa-3x text-muted mb-3" aria-hidden="true"></i>
-        <h5>Tidak ada hasil ditemukan</h5>
+        <i class="fas fa-folder-open fa-3x text-muted mb-3" aria-hidden="true"></i>
+        <h5>Tidak Ada Laporan Ditemukan</h5>
         <p class="text-muted">
-          Coba gunakan kata kunci yang berbeda atau reset filter pencarian.
+          Belum ada laporan yang sesuai dengan kriteria pencarian Anda.
         </p>
         <button
-          class="btn btn-outline-primary mt-2"
+          v-if="showResetButtonInEmptyState" class="btn btn-outline-primary mt-2"
           @click="$emit('reset-filters')"
           aria-label="Reset semua filter"
         >
@@ -35,14 +33,17 @@
       </div>
     </div>
 
-    <!-- Grid hasil laporan -->
-    <transition-group name="reports-fade" tag="div" class="report-grid">
+    <transition-group v-else name="reports-fade" tag="div" class="report-grid">
       <div
-        v-for="report in paginatedReports"
+        v-for="report in reportsToDisplay"
         :key="report.id"
         class="report-card-wrapper"
       >
-        <ReportCard :report="report" @open-detail="$emit('open-detail', $event)" />
+        <ReportCard
+          :report="report"
+          @open-detail="$emit('open-detail', $event)"
+          @open-flag="$emit('open-flag', $event)"
+        />
       </div>
     </transition-group>
   </div>
@@ -58,10 +59,16 @@ export default {
   },
   props: {
     loading: Boolean,
-    filteredReports: Array,
-    paginatedReports: Array,
+    reportsToDisplay: {
+      type: Array,
+      default: () => []
+    },
+    showResetButtonInEmptyState: {
+      type: Boolean,
+      default: true
+    }
   },
-  emits: ['reset-filters', 'open-detail'],
+  emits: ['reset-filters', 'open-detail', 'open-flag'],
 };
 </script>
 
@@ -69,9 +76,9 @@ export default {
 .report-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px; /* Consistent spacing between cards, including between rows */
+  gap: 20px;
   padding: 16px;
-  max-width: 1200px; /* Optional: Limit total width for larger screens */
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -86,67 +93,90 @@ export default {
 }
 
 .skeleton-card {
-  height: 550px; /* Match ReportCard height for consistency */
+  height: 550px;
   background: #f8f9fa;
-  animation: pulse 1.5s infinite;
-  width: 350px; /* Match ReportCard width */
-}
-
-.skeleton-type-indicator,
-.skeleton-header,
-.skeleton-title,
-.skeleton-text,
-.skeleton-footer {
-  background: #e9ecef;
-  border-radius: 4px;
-  margin-bottom: 10px;
-}
-
-.skeleton-type-indicator {
-  width: 10px;
-  height: 100%;
-  position: absolute;
-  left: 0;
+  animation: pulse 1.5s infinite ease-in-out;
+  width: 350px;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .skeleton-header {
-  height: 250px; /* Match ReportCard image height */
+  height: 220px;
   width: 100%;
+  margin-bottom: 0;
+}
+
+.card-body {
+  padding: 16px;
 }
 
 .skeleton-title {
   height: 24px;
-  width: 80%;
-  margin: 16px;
+  width: 70%;
+  margin-top: 12px;
+  margin-bottom: 12px;
 }
 
 .skeleton-text {
   height: 16px;
   width: 90%;
-  margin: 8px 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-text:last-of-type {
+  width: 60%;
 }
 
 .skeleton-footer {
-  height: 40px; /* Approximate button height */
-  width: 40%;
-  margin: 16px auto;
+  height: 38px;
+  width: 60%;
+  margin-top: 20px;
 }
 
 @keyframes pulse {
-  0% {
+  0%, 100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.5;
-  }
-  100% {
-    opacity: 1;
+    opacity: 0.6;
   }
 }
 
 .no-results {
   text-align: center;
-  padding: 40px 0;
+  padding: 50px 20px;
+  margin-top: 20px;
+  color: #6c757d;
+}
+
+.no-results .fa-folder-open {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  color: #adb5bd;
+}
+
+.no-results h5 {
+  font-size: 1.25rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.no-results p {
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+}
+
+.btn-outline-primary {
+  color: #0d6efd;
+  border-color: #0d6efd;
+  font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
 }
 
 .reports-fade-enter-active,
@@ -162,17 +192,9 @@ export default {
 
 @media (max-width: 768px) {
   .report-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 15px; /* Slightly smaller gap for mobile */
-  }
-
-  .skeleton-card {
-    height: 500px; /* Match ReportCard mobile height */
-    width: 300px; /* Match ReportCard mobile width */
-  }
-
-  .skeleton-header {
-    height: 200px; /* Match ReportCard mobile image height */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    padding: 10px;
   }
 }
 </style>

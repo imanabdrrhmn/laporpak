@@ -11,7 +11,7 @@
             class="form-control border-start-0"
             placeholder="Cari nomor telepon, email, alamat, atau deskripsi..."
             :value="searchQuery"
-            @input="$emit('update:searchQuery', $event.target.value)"
+            @input="$emit('update:searchQuery', $event.target.value); $emit('debounced-search')"
             @keyup.enter="$emit('search')"
             aria-label="Pencarian laporan"
           >
@@ -40,9 +40,9 @@
               aria-label="Filter kategori laporan"
             >
               <option value="all">Semua Kategori</option>
-              <option value="Nomor Hp">Nomor Hp</option>
-              <option value="Email">Email</option>
-              <option value="Infrastruktur">Infrastruktur</option>
+              <option v-for="category in categories" :key="category" :value="category">
+                {{ category }}
+              </option>
             </select>
           </div>
           <div class="col-sm-6">
@@ -62,22 +62,23 @@
 
     <div class="d-flex justify-content-between align-items-center mt-3">
       <div class="active-filters" v-if="hasActiveFilters">
-        <span class="me-2">Filter aktif:</span>
-        <span v-if="searchQuery" class="badge bg-light text-dark me-1 active-filter">
+        <span class="me-2 active-filters-label">Filter aktif:</span>
+        <span v-if="searchQuery" class="badge bg-light text-dark me-1 active-filter-chip">
           "{{ searchQuery }}"
           <button @click="$emit('clear-search')" class="btn-close btn-close-sm ms-1" aria-label="Hapus filter pencarian"></button>
         </span>
-        <span v-if="categoryFilter !== 'all'" class="badge bg-light text-dark me-1 active-filter">
+        <span v-if="categoryFilter !== 'all' && categoryFilter !== ''" class="badge bg-light text-dark me-1 active-filter-chip">
           {{ categoryFilter }}
           <button @click="$emit('clear-category')" class="btn-close btn-close-sm ms-1" aria-label="Hapus filter kategori"></button>
         </span>
       </div>
+      <div v-else class="active-filters-placeholder"></div>
       <div>
         <button
-          class="btn btn-outline-secondary btn-sm"
+          class="btn btn-outline-secondary btn-sm reset-filters-button"
           @click="$emit('reset-filters')"
           aria-label="Reset filter"
-          :disabled="!hasActiveFilters"
+          :disabled="!hasActiveFilters && !searchQuery"
         >
           <i class="fas fa-undo-alt me-1" aria-hidden="true"></i>
           Reset Filter
@@ -97,6 +98,10 @@ export default {
     searchError: String,
     loading: Boolean,
     hasActiveFilters: Boolean,
+    categories: {
+      type: Array,
+      default: () => []
+    }
   },
   emits: [
     'update:searchQuery',
@@ -114,13 +119,58 @@ export default {
 <style scoped>
 .filter-bar {
   background: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
 }
 
-.active-filter .btn-close-sm {
-  font-size: 0.6rem;
-  vertical-align: middle;
+.input-group .form-control {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.input-group .input-group-text {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.input-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-select, .form-control {
+  font-size: 0.9rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+.btn {
+  font-size: 0.9rem;
+}
+
+.active-filters-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.active-filter-chip {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.active-filter-chip .btn-close-sm {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.2rem;
+}
+.active-filters-placeholder {
+  min-height: 28px;
+}
+.reset-filters-button {
+  display: flex;
+  align-items: center;
+}
+.reset-filters-button i {
+  font-size: 0.8em;
 }
 </style>
