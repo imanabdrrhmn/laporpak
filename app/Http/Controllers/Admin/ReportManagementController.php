@@ -102,31 +102,12 @@ class ReportManagementController extends Controller
         ];
     }
 
-    public function store(Request $request)
+    public function getFlags(Request $request, $report_id)
     {
-        $user = $request->user();
-
-        if (!$user) {
-            return back()->with('error', 'Kamu harus login untuk melaporkan.');
-        }
-
-        $exists = ReportFlag::where('report_id', $request->report_id)
-            ->where('user_id', $user->id)
-            ->exists();
-
-        if ($exists) {
-            return back()->with('error', 'Kamu sudah pernah menandai laporan ini.');
-        }
-
-        ReportFlag::create([
-            'report_id' => $request->report_id,
-            'user_id' => $user->id,
-            'reason' => $request->reason,
-        ]);
-
-        return back()->with('success', 'Laporan berhasil dikirim.');
+        $report = Report::findOrFail($report_id);
+        $flags = $report->flags()->with('user')->latest()->get();
+        return response()->json(['flags' => $flags]);
     }
-
 
     private function validateReportStatus(Report $report, $expectedStatus, string $actionName = 'melakukan aksi ini')
     {
