@@ -72,13 +72,13 @@
                 <li>
                   <a class="dropdown-item" href="/profile">
                     <i class="bi bi-person-fill me-2"></i>
-                    Profil Saya
+                    Profil 
                   </a>
                 </li>
                 <li>
                   <a class="dropdown-item" href="/laporan-saya">
                     <i class="bi bi-file-earmark-text-fill me-2"></i>
-                    Laporan Saya
+                    Riwayat Laporan
                   </a>
                 </li>
                 <li>
@@ -297,11 +297,11 @@
                 </Link>
                 <Link href="/profile" class="nav-link" @click="closeMobileNav">
                   <i class="bi bi-person-fill me-2"></i>
-                  Profil Saya
+                  Profil 
                 </Link>
                 <Link href="/laporan-saya" class="nav-link" @click="closeMobileNav">
                   <i class="bi bi-file-earmark-text-fill me-2"></i>
-                  Laporan Saya
+                  Riwayat Laporan
                 </Link>
                 <Link href="/top-ups" class="nav-link" @click="closeMobileNav">
                   <i class="bi bi-wallet-fill me-2"></i>

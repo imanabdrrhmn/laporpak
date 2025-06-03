@@ -21,11 +21,8 @@
         </div>
 
         <div v-if="isLoading" class="loading-indicator-page">
-          <svg aria-hidden="true" class="spinner-icon-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 50.1208 80.5027 69.2768 60.2711 79.6801C54.7108 82.3998 48.1338 84.3529 41.3896 85.1838C34.6454 86.0147 27.8502 85.6635 21.4064 84.1651C14.9626 82.6667 8.93458 79.9504 3.80109 76.1769C-1.3324 72.4034 -5.99974 67.5066 -9.99958 61.8511" fill="currentFill"/>
-          </svg>
-          <p class="loading-text-page">Memuat data dashboard...</p>
+          <div class="simple-spinner"></div>
+          <p class="loading-text-page">Memuat data...</p>
         </div>
         <div v-else-if="fetchError" class="error-indicator-page">
             <p class="error-title-page">Gagal Memuat Data Dashboard</p>
@@ -310,7 +307,7 @@ const showFilterModal = () => console.log('Show filter modal triggered');
   color: #6b7280;
 }
 
-.loading-indicator-page, .error-indicator-page {
+.loading-indicator-page {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -321,25 +318,64 @@ const showFilterModal = () => console.log('Show filter modal triggered');
   margin-top: 1rem;
 }
 
-.spinner-icon-lg {
-  width: 3rem; height: 3rem; color: #d1d5db; fill: #3b82f6;
+.simple-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .loading-text-page {
-  margin-top: 1rem; font-size: 1rem; color: #4b5563;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #6b7280;
 }
 
 .error-indicator-page {
-  background-color: #fee2e2; border: 1px solid #fecaca; color: #991b1b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
 }
 
-.error-title-page { font-weight: 600; font-size: 1.25rem; }
-.error-message-page { margin-top: 0.5rem; }
-.retry-button-page {
-  margin-top: 1rem; padding: 0.6rem 1.2rem; background-color: #3b82f6;
-  color: white; border-radius: 0.375rem; font-size: 0.9rem; transition: background-color 0.2s; border: none;
+.error-title-page { 
+  font-weight: 600; 
+  font-size: 1.25rem; 
 }
-.retry-button-page:hover { background-color: #2563eb; }
+
+.error-message-page { 
+  margin-top: 0.5rem; 
+}
+
+.retry-button-page {
+  margin-top: 1rem; 
+  padding: 0.6rem 1.2rem; 
+  background-color: #3b82f6;
+  color: white; 
+  border-radius: 0.375rem; 
+  font-size: 0.9rem; 
+  transition: background-color 0.2s; 
+  border: none;
+  cursor: pointer;
+}
+
+.retry-button-page:hover { 
+  background-color: #2563eb; 
+}
 
 .stats-grid {
   display: grid;

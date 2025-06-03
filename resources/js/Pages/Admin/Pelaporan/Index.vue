@@ -19,11 +19,8 @@
         />
 
         <div v-if="isLoading" class="loading-indicator">
-          <svg aria-hidden="true" class="spinner-icon" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 50.1208 80.5027 69.2768 60.2711 79.6801C54.7108 82.3998 48.1338 84.3529 41.3896 85.1838C34.6454 86.0147 27.8502 85.6635 21.4064 84.1651C14.9626 82.6667 8.93458 79.9504 3.80109 76.1769C-1.3324 72.4034 -5.99974 67.5066 -9.99958 61.8511" fill="currentFill"/>
-          </svg>
-          <p class="loading-text">Memuat laporan...</p>
+          <div class="simple-spinner"></div>
+          <p class="loading-text">Memuat data...</p>
         </div>
         <div v-else-if="fetchError" class="error-indicator">
           <p class="error-title">Gagal memuat laporan!</p>
@@ -396,72 +393,95 @@ const confirmUnpublish = (reason) => {
  max-width: 1400px;
  margin: 0 auto;
 }
-.loading-indicator, .error-indicator, .no-reports-found {
+
+/* Simple Loading Screen */
+.loading-indicator {
+  text-align: center;
+  padding: 60px 20px;
+  margin-top: 20px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.simple-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  margin: 0 auto 16px auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Error and No Reports States */
+.error-indicator, .no-reports-found {
   text-align: center;
   padding: 40px 20px;
   margin-top: 20px;
   border-radius: 8px;
 }
-.loading-indicator .spinner-icon {
-  width: 2.5rem; /* 40px */
-  height: 2.5rem; /* 40px */
-  display: inline-block;
-  color: #d1d5db; /* text-gray-300 */
-  fill: #3b82f6; /* fill-blue-600 */
-}
-.loading-indicator .loading-text {
-  margin-top: 0.5rem; /* 8px */
-  font-size: 0.875rem; /* 14px */
-  color: #6b7280; /* text-gray-500 */
-}
+
 .error-indicator {
-  background-color: #fee2e2; /* bg-red-100 */
-  border: 1px solid #fecaca; /* border-red-200 */
-  color: #991b1b; /* text-red-700 */
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
 }
 .error-indicator .error-title {
   font-weight: 600;
-  font-size: 1.125rem; /* 18px */
+  font-size: 1.125rem;
 }
 .error-indicator .error-message {
-  font-size: 0.875rem; /* 14px */
-  margin-top: 0.25rem; /* 4px */
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 .error-indicator .retry-button {
-  margin-top: 1rem; /* 16px */
-  padding: 0.5rem 1rem; /* px-4 py-2 */
-  background-color: #3b82f6; /* bg-blue-600 */
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #3b82f6;
   color: white;
-  border-radius: 0.375rem; /* rounded-md */
-  font-size: 0.875rem; /* 14px */
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   transition: background-color 0.2s;
 }
 .error-indicator .retry-button:hover {
-  background-color: #2563eb; /* bg-blue-700 */
+  background-color: #2563eb;
 }
 .no-reports-found {
-  color: #6b7280; /* text-gray-500 */
+  color: #6b7280;
 }
 .no-reports-found .empty-icon {
-  font-size: 3rem; /* 48px */
-  margin-bottom: 1rem; /* 16px */
+  font-size: 3rem;
+  margin-bottom: 1rem;
   opacity: 0.6;
 }
 .no-reports-found h3 {
-  font-size: 1.125rem; /* 18px */
-  margin-bottom: 0.5rem; /* 8px */
-  color: #374151; /* text-gray-700 */
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  color: #374151;
 }
 .no-reports-found p {
-  margin-bottom: 1rem; /* 16px */
-  font-size: 0.875rem; /* 14px */
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
 }
 .reset-btn-empty {
-  padding: 0.625rem 1.25rem; /* py-2.5 px-5 */
-  background-color: #3b82f6; /* bg-blue-600 */
+  padding: 0.625rem 1.25rem;
+  background-color: #3b82f6;
   color: #fff;
   border: none;
-  border-radius: 0.5rem; /* rounded-lg */
+  border-radius: 0.5rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
