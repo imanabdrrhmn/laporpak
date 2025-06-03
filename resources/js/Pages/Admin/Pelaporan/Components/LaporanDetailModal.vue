@@ -3,23 +3,23 @@
     <div class="modal-content" @click.stop>
       <button class="close-btn" @click="closeModal">×</button>
 
-      <div v-if="report && report.id">
-        <p>
-      <div>
-        <strong>Bukti:</strong><br />
-        <a :href="report.evidence" target="_blank">
-          <div class="evidence-image-container">
-            <img
-              :src="report.evidence"
-              alt="Bukti Laporan"
-              class="evidence-image"
-              :class="{ portrait: isPortrait, landscape: !isPortrait }"
-              @load="onImageLoad"
-            />
+      <div v-if="report && report.id" class="modal-body">
+        <div class="evidence-section">
+          <div>
+            <strong>Bukti:</strong><br />
+            <a :href="report.evidence" target="_blank">
+              <div class="evidence-image-container">
+                <img
+                  :src="report.evidence"
+                  alt="Bukti Laporan"
+                  class="evidence-image"
+                  :class="{ portrait: isPortrait, landscape: !isPortrait }"
+                  @load="onImageLoad"
+                />
+              </div>
+            </a>
           </div>
-        </a>
-      </div>
-    </p>
+        </div>
 
         <!-- Judul & Status -->
         <div class="modal-header">
@@ -50,7 +50,7 @@
         <!-- Deskripsi -->
         <div class="modal-section">
           <strong>Deskripsi:</strong>
-          <p class="description">{{ report.description }}</p>
+          <div class="description">{{ report.description }}</div>
         </div>
 
         <div class="flag-info">
@@ -113,8 +113,6 @@ const props = defineProps({
   report: Object,
   isVisible: Boolean,
 })
-
-
 
 const emit = defineEmits(['close', 'openFlagSummary', 'actionTriggered'])
 
@@ -201,7 +199,6 @@ const closeFlagModal = () => {
   flagModalOpen.value = false
 }
 
-
 </script>
 
 <style scoped>
@@ -213,22 +210,28 @@ const closeFlagModal = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow-y: auto;
-  padding: 40px 16px;
+  padding: 20px;
   animation: fadeIn 0.3s ease;
 }
 
 .modal-content {
   background: white;
-  padding: 24px;
   border-radius: 12px;
   width: 100%;
   max-width: 600px;
-  max-height: 90vh; 
-  overflow-y: auto;  
+  max-height: 90vh;
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   animation: slideIn 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0; /* Penting untuk flexbox scroll */
 }
 
 .close-btn {
@@ -254,17 +257,25 @@ const closeFlagModal = () => {
   color: #dc3545;
 }
 
+.evidence-section {
+  margin-bottom: 20px;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin: 16px 0;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .modal-title {
   font-size: 20px;
   font-weight: 600;
   text-transform: capitalize;
+  margin: 0;
+  flex: 1;
 }
 
 .info-grid {
@@ -286,32 +297,37 @@ const closeFlagModal = () => {
   font-size: 15px;
   color: #444;
   line-height: 1.5;
+  margin: 20px 0;
 }
 
 .description {
-  margin: 5px 0 15px;
+  margin: 8px 0 0 0;
   background: #f8f9fa;
-  padding: 10px;
-  border-radius: 6px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.6;
+  max-height: none; /* Remove height restriction */
 }
-
 
 .evidence-image-container {
   display: flex;
   justify-content: center;
   align-items: center;
   max-width: 100%;
-  height: 200px; 
+  max-height: 200px;
   overflow: hidden;
-  margin-top: 20px; /* Add margin to prevent overlap with close button */
-}
-
-
-.evidence-image {
   margin-top: 8px;
-  max-width: 100%;
   border-radius: 8px;
   border: 1px solid #ddd;
+}
+
+.evidence-image {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
   object-fit: contain;
   cursor: zoom-in;
   transition: transform 0.2s ease;
@@ -321,16 +337,14 @@ const closeFlagModal = () => {
   transform: scale(1.02);
 }
 
-/* Portrait image */
 .evidence-image.portrait {
-  max-height: 100%;
+  max-height: 200px;
   width: auto;
 }
 
-/* Landscape image */
 .evidence-image.landscape {
   width: 100%;
-  max-height: 300px;
+  max-height: 200px;
 }
 
 .modal-actions {
@@ -339,17 +353,24 @@ const closeFlagModal = () => {
   justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.flag-info {
+  margin: 20px 0;
 }
 
 .btn {
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 6px;
   font-weight: 600;
   border: none;
   color: white;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  min-width: 80px;
 }
 
 .btn-success {
@@ -357,6 +378,7 @@ const closeFlagModal = () => {
 }
 .btn-success:hover {
   background-color: #218838;
+  transform: translateY(-1px);
 }
 
 .btn-danger {
@@ -364,6 +386,7 @@ const closeFlagModal = () => {
 }
 .btn-danger:hover {
   background-color: #c82333;
+  transform: translateY(-1px);
 }
 
 .btn-primary {
@@ -371,14 +394,16 @@ const closeFlagModal = () => {
 }
 .btn-primary:hover {
   background-color: #0069d9;
+  transform: translateY(-1px);
 }
 
 .status-badge {
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
   text-transform: capitalize;
+  white-space: nowrap;
 }
 .status-badge.pending {
   background: #fff3cd;
@@ -397,17 +422,17 @@ const closeFlagModal = () => {
   color: #084298;
 }
 
-.modal-content::-webkit-scrollbar {
-  width: 8px; /* Lebar scrollbar */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
 }
 
-.modal-content::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2); /* Warna thumb */
-  border-radius: 4px; /* Sudut bulat */
+.modal-body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
 }
 
-.modal-content::-webkit-scrollbar-track {
-  background-color: transparent; /* Warna track */
+.modal-body::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
 .source-link {
@@ -433,6 +458,39 @@ const closeFlagModal = () => {
   to { 
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 10px;
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .modal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
   }
 }
 </style>

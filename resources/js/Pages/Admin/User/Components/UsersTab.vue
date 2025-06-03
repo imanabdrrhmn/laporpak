@@ -30,100 +30,102 @@
       </div>
     </div>
 
-    <!-- Desktop: tabel (≥1025px) -->
-    <div class="d-none d-custom-table-block">
+    <!-- Desktop: tabel (responsive dengan zoom) -->
+    <div class="desktop-table-container">
       <div class="table-container">
-        <table class="user-table">
-          <thead>
-            <tr>
-              <th class="col-no">No</th>
-              <th class="col-name">Nama</th>
-              <th class="col-email">Email</th>
-              <th class="col-phone">Nomor</th>
-              <th class="col-role">Role</th>
-              <th class="col-change-role">Ubah Role</th>
-              <th class="col-permission">Izin</th>
-              <th class="col-action">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(user, index) in filteredUsers" :key="user.id">
-              <td class="col-no">{{ index + 1 }}</td>
-              <td class="col-name">
-                <div class="user-info">
-                  <img :src="user.avatar_url" alt="Avatar" class="user-avatar" />
-                  <span class="user-name">{{ user.name }}</span>
-                </div>
-              </td>
-              <td class="col-email">
-                <div class="email-text" :title="user.email">{{ user.email }}</div>
-              </td>
-              <td class="col-phone">{{ user.phone || '-' }}</td>
-              <td class="col-role">
-                <span v-if="user.roles.length" class="badge role-badge">{{ user.roles }}</span>
-                <span v-else class="badge no-role-badge">Tidak Ada Role</span>
-              </td>
-              <td class="col-change-role">
-                <div class="role-select-container">
-                  <div 
-                    v-if="userStates[user.id]?.isSubmitting" 
-                    class="loading-overlay"
-                  >
-                    <div v-if="userStates[user.id]?.submitSuccess" class="success-icon">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="3">
-                        <polyline points="20,6 9,17 4,12"></polyline>
-                      </svg>
-                    </div>
-                    <div v-else class="loading-spinner"></div>
+        <div class="table-responsive">
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th class="col-no">No</th>
+                <th class="col-name">Nama</th>
+                <th class="col-email">Email</th>
+                <th class="col-phone">Nomor</th>
+                <th class="col-role">Role</th>
+                <th class="col-change-role">Ubah Role</th>
+                <th class="col-permission">Izin</th>
+                <th class="col-action">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(user, index) in filteredUsers" :key="user.id">
+                <td class="col-no">{{ index + 1 }}</td>
+                <td class="col-name">
+                  <div class="user-info">
+                    <img :src="user.avatar_url" alt="Avatar" class="user-avatar" />
+                    <span class="user-name">{{ user.name }}</span>
                   </div>
-                  <select
-                    class="role-select"
-                    @change="(e) => submitRoleChange(e, user.id, user.name)"
-                    :disabled="userStates[user.id]?.isSubmitting"
-                  >
-                    <option disabled selected>Pilih role</option>
-                    <option
-                      v-for="role in roles"
-                      :key="role"
-                      :value="role"
-                      :selected="user.roles === role"
+                </td>
+                <td class="col-email">
+                  <div class="email-text" :title="user.email">{{ user.email }}</div>
+                </td>
+                <td class="col-phone">{{ user.phone || '-' }}</td>
+                <td class="col-role">
+                  <span v-if="user.roles.length" class="badge role-badge">{{ user.roles }}</span>
+                  <span v-else class="badge no-role-badge">Tidak Ada Role</span>
+                </td>
+                <td class="col-change-role">
+                  <div class="role-select-container">
+                    <div 
+                      v-if="userStates[user.id]?.isSubmitting" 
+                      class="loading-overlay"
                     >
-                      {{ role }}
-                    </option>
-                  </select>
-                </div>
-              </td>
-              <td class="col-permission">
-                <button
-                  class="btn-icon btn-primary"
-                  @click="$emit('open-permission-modal', user)"
-                  title="Edit Izin"
-                >
-                  <i class="bi bi-pencil-square"></i>
-                </button>
-              </td>
-              <td class="col-action">
-                <form :action="route('admin.users.delete', user.id)" method="POST">
-                  <input type="hidden" name="_method" value="DELETE" />
-                  <input type="hidden" name="_token" :value="csrf" />
+                      <div v-if="userStates[user.id]?.submitSuccess" class="success-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="3">
+                          <polyline points="20,6 9,17 4,12"></polyline>
+                        </svg>
+                      </div>
+                      <div v-else class="loading-spinner"></div>
+                    </div>
+                    <select
+                      class="role-select"
+                      @change="(e) => submitRoleChange(e, user.id, user.name)"
+                      :disabled="userStates[user.id]?.isSubmitting"
+                    >
+                      <option disabled selected>Pilih role</option>
+                      <option
+                        v-for="role in roles"
+                        :key="role"
+                        :value="role"
+                        :selected="user.roles === role"
+                      >
+                        {{ role }}
+                      </option>
+                    </select>
+                  </div>
+                </td>
+                <td class="col-permission">
                   <button
-                    class="btn-icon btn-danger"
-                    type="submit"
-                    @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
-                    title="Hapus Pengguna"
+                    class="btn-icon btn-primary"
+                    @click="$emit('open-permission-modal', user)"
+                    title="Edit Izin"
                   >
-                    <i class="bi bi-trash"></i>
+                    <i class="bi bi-pencil-square"></i>
                   </button>
-                </form>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td class="col-action">
+                  <form :action="route('admin.users.delete', user.id)" method="POST">
+                    <input type="hidden" name="_method" value="DELETE" />
+                    <input type="hidden" name="_token" :value="csrf" />
+                    <button
+                      class="btn-icon btn-danger"
+                      type="submit"
+                      @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
+                      title="Hapus Pengguna"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Mobile: card layout (≤1024px) -->
-    <div class="d-block d-custom-table-none">
+    <!-- Mobile: card layout -->
+    <div class="mobile-card-container">
       <div v-for="(user, index) in filteredUsers" :key="user.id" class="user-card">
         <div class="user-header">
           <img :src="user.avatar_url" alt="Avatar" class="user-avatar" />
@@ -341,7 +343,11 @@ function confirmDelete(userName, form) {
   font-size: 0.9rem;
 }
 
-/* Table Container */
+/* Desktop Table Container - Enhanced for better zoom support */
+.desktop-table-container {
+  display: block;
+}
+
 .table-container {
   background: white;
   border-radius: 12px;
@@ -350,7 +356,12 @@ function confirmDelete(userName, form) {
   border: 1px solid #e5e7eb;
 }
 
-/* Table Styles */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Table Styles - No scroll, fully responsive */
 .user-table {
   width: 100%;
   border-collapse: collapse;
@@ -361,42 +372,44 @@ function confirmDelete(userName, form) {
   background: #f8fafc;
   color: #374151;
   font-weight: 600;
-  padding: 16px 12px;
+  padding: 18px 12px; /* Increased padding */
   text-align: left;
   border-bottom: 2px solid #e5e7eb;
-  font-size: 0.875rem;
+  font-size: 0.875rem; /* Increased font size */
+  white-space: nowrap;
 }
 
 .user-table td {
-  padding: 14px 12px;
+  padding: 16px 12px; /* Increased padding */
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
+  font-size: 0.875rem; /* Increased font size */
 }
 
 .user-table tbody tr:hover {
   background: #f8fafc;
 }
 
-/* Column Widths */
-.col-no { width: 60px; text-align: center; }
-.col-name { width: 200px; }
-.col-email { width: 220px; }
-.col-phone { width: 140px; }
-.col-role { width: 120px; }
-.col-change-role { width: 140px; }
-.col-permission { width: 80px; text-align: center; }
-.col-action { width: 80px; text-align: center; }
+/* Responsive Column Widths - Percentage based for no scroll */
+.col-no { width: 5%; text-align: center; min-width: 50px; }
+.col-name { width: 20%; min-width: 150px; }
+.col-email { width: 25%; min-width: 180px; }
+.col-phone { width: 12%; min-width: 100px; }
+.col-role { width: 10%; min-width: 80px; }
+.col-change-role { width: 15%; min-width: 120px; }
+.col-permission { width: 7%; text-align: center; min-width: 60px; }
+.col-action { width: 6%; text-align: center; min-width: 60px; }
 
-/* User Info */
+/* User Info - Enhanced spacing */
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 12px; /* Increased gap */
 }
 
 .user-avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px; /* Increased size */
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #e5e7eb;
@@ -406,25 +419,37 @@ function confirmDelete(userName, form) {
 .user-name {
   font-weight: 500;
   color: #1f2937;
-  font-size: 0.875rem;
+  font-size: 0.875rem; /* Increased font size */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Email Text */
+/* Email Text - Responsive with better wrapping */
 .email-text {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: #6b7280;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 200px;
+  width: 100%;
   cursor: help;
 }
 
-/* Badges */
+/* On smaller screens, allow email to wrap */
+@media (max-width: 1200px) {
+  .email-text {
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+  }
+}
+
+/* Badges - Enhanced design */
 .badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  padding: 4px 8px; /* Increased padding */
+  border-radius: 8px;
+  font-size: 0.75rem; /* Increased font size */
   font-weight: 500;
   white-space: nowrap;
 }
@@ -439,17 +464,17 @@ function confirmDelete(userName, form) {
   color: #6b7280;
 }
 
-/* Role Select */
+/* Role Select - Enhanced */
 .role-select-container {
   position: relative;
 }
 
 .role-select {
   width: 100%;
-  padding: 6px 8px;
+  padding: 8px 10px; /* Increased padding */
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 0.75rem; /* Increased font size */
   background: white;
   cursor: pointer;
   color: black;
@@ -489,10 +514,10 @@ function confirmDelete(userName, form) {
   animation: scaleIn 0.3s ease;
 }
 
-/* Buttons */
+/* Buttons - Enhanced */
 .btn-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px; /* Increased size */
+  height: 36px;
   border: none;
   border-radius: 6px;
   display: flex;
@@ -500,7 +525,7 @@ function confirmDelete(userName, form) {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.875rem;
+  font-size: 0.875rem; /* Increased font size */
 }
 
 .btn-primary {
@@ -521,6 +546,11 @@ function confirmDelete(userName, form) {
 .btn-danger:hover {
   background: #dc2626;
   transform: translateY(-1px);
+}
+
+/* Mobile Card Container - Hidden on desktop */
+.mobile-card-container {
+  display: none;
 }
 
 /* Mobile Styles */
@@ -623,19 +653,65 @@ function confirmDelete(userName, form) {
   to { transform: scale(1); opacity: 1; }
 }
 
-/* Responsive breakpoints */
-@media (min-width: 1025px) {
-  .d-custom-table-block { display: block !important; }
-  .d-custom-table-none { display: none !important; }
+/* Enhanced Responsive breakpoints - No horizontal scroll */
+
+/* Large screens - full spacing */
+@media (min-width: 1200px) {
+  .desktop-table-container { display: block; }
+  .mobile-card-container { display: none; }
+  
+  .user-table th { padding: 16px 12px; font-size: 0.875rem; }
+  .user-table td { padding: 14px 12px; font-size: 0.875rem; }
+  .user-avatar { width: 40px; height: 40px; }
+  .user-name { font-size: 0.875rem; }
+  .email-text { font-size: 0.875rem; }
+  .btn-icon { width: 36px; height: 36px; font-size: 0.875rem; }
 }
 
-@media (max-width: 1024px) {
-  .d-custom-table-block { display: none !important; }
-  .d-custom-table-none { display: block !important; }
+/* Medium screens - compact but readable */
+@media (max-width: 1199px) and (min-width: 900px) {
+  .desktop-table-container { display: block; }
+  .mobile-card-container { display: none; }
+  
+  .user-table th { padding: 14px 8px; font-size: 0.8rem; }
+  .user-table td { padding: 12px 8px; font-size: 0.8rem; }
+  .user-avatar { width: 36px; height: 36px; }
+  .user-name { font-size: 0.8rem; }
+  .email-text { font-size: 0.75rem; }
+  .btn-icon { width: 32px; height: 32px; font-size: 0.75rem; }
+  
+  /* Adjust column proportions for medium screens */
+  .col-name { width: 18%; }
+  .col-email { width: 27%; }
+  .col-phone { width: 10%; }
+  .col-change-role { width: 17%; }
 }
 
-/* Mobile responsive */
-@media (max-width: 576px) {
+/* Small desktop screens - more compact */
+@media (max-width: 899px) and (min-width: 768px) {
+  .desktop-table-container { display: block; }
+  .mobile-card-container { display: none; }
+  
+  .user-table th { padding: 12px 6px; font-size: 0.75rem; }
+  .user-table td { padding: 10px 6px; font-size: 0.75rem; }
+  .user-avatar { width: 32px; height: 32px; }
+  .user-name { font-size: 0.75rem; }
+  .email-text { font-size: 0.7rem; }
+  .btn-icon { width: 28px; height: 28px; font-size: 0.7rem; }
+  
+  /* Hide phone column on smaller screens to save space */
+  .col-phone { display: none; }
+  .col-name { width: 22%; }
+  .col-email { width: 30%; }
+  .col-role { width: 12%; }
+  .col-change-role { width: 18%; }
+}
+
+/* Mobile and Small Tablet (<768px) */
+@media (max-width: 767px) {
+  .desktop-table-container { display: none; }
+  .mobile-card-container { display: block; }
+  
   .user-card {
     padding: 16px;
   }

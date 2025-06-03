@@ -81,19 +81,6 @@
           </div>
         </div>
       </div>
-      
-      <!-- Enhanced Description Section -->
-      <div class="description-section">
-        <div class="description-header">
-          <i class="bi bi-file-text"></i>
-          <span>Deskripsi Laporan</span>
-        </div>
-        <p class="description-enhanced">{{ truncate(report.description, 100) }}</p>
-        <div v-if="report.description && report.description.length > 100" class="read-more-hint">
-          <i class="bi bi-three-dots"></i>
-          <span>Klik "Lihat Detail" untuk membaca selengkapnya</span>
-        </div>
-      </div>
     </div>
     
     <div class="flag-info-enhanced">
@@ -179,10 +166,6 @@ const formatDate = (iso) => {
   });
 };
 
-const truncate = (text, max) => {
-  return text && text.length > max ? text.substring(0, max) + '…' : text || '';
-};
-
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const getPublishButtonClasses = computed(() => ({
@@ -211,7 +194,7 @@ const flagCount = computed(() => {
   border: 1px solid #eee;
   transition: all 0.3s ease;
   position: relative;
-  min-height: 220px; /* Further reduced for more compact size */
+  min-height: 220px;
   display: flex;
   flex-direction: column;
 }
@@ -235,7 +218,7 @@ const flagCount = computed(() => {
 .report-badge.published { background-color: #0d6efd; }
 
 .report-header {
-  padding: 10px; /* Further reduced from 12px */
+  padding: 10px;
   border-bottom: 1px solid #f0f0f0;
   display: flex;
   justify-content: space-between;
@@ -246,11 +229,11 @@ const flagCount = computed(() => {
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px; /* Reduced from 10px */
+  gap: 8px;
 }
 
 .user-avatar {
-  width: 32px; /* Reduced from 40px */
+  width: 32px;
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
@@ -265,24 +248,24 @@ const flagCount = computed(() => {
 
 .user-name {
   font-weight: 600;
-  font-size: 13px; /* Reduced from 14px */
+  font-size: 13px;
   color: #333;
 }
 
 .timestamp {
-  font-size: 11px; /* Reduced from 12px */
+  font-size: 11px;
   color: #777;
 }
 
 .report-labels {
   display: flex;
-  gap: 6px; /* Reduced from 8px */
+  gap: 6px;
 }
 
 .status-badge {
-  padding: 3px 8px; /* Reduced from 4px 10px */
-  border-radius: 20px; /* Reduced from 30px */
-  font-size: 11px; /* Reduced from 12px */
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: capitalize;
 }
@@ -309,7 +292,7 @@ const flagCount = computed(() => {
 
 /* ENHANCED MIDDLE SECTION STYLES */
 .report-content {
-  padding: 10px; /* Further reduced from 12px */
+  padding: 10px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -318,20 +301,20 @@ const flagCount = computed(() => {
 }
 
 .report-meta-enhanced {
-  margin-bottom: 8px; /* Further reduced from 12px */
+  margin-bottom: 8px;
 }
 
 .meta-row {
-  margin-bottom: 6px; /* Further reduced from 8px */
+  margin-bottom: 6px;
 }
 
 .meta-item-enhanced {
   display: flex;
   align-items: center;
-  gap: 8px; /* Further reduced from 10px */
-  padding: 6px; /* Further reduced from 8px */
+  gap: 8px;
+  padding: 6px;
   background: rgba(255, 255, 255, 0.7);
-  border-radius: 5px; /* Further reduced from 6px */
+  border-radius: 5px;
   border-left: 3px solid transparent;
   transition: all 0.2s ease;
 }
@@ -342,9 +325,9 @@ const flagCount = computed(() => {
 }
 
 .meta-icon-wrapper {
-  width: 24px; /* Further reduced from 28px */
+  width: 24px;
   height: 24px;
-  border-radius: 4px; /* Further reduced from 6px */
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -383,16 +366,16 @@ const flagCount = computed(() => {
 }
 
 .meta-label {
-  font-size: 10px; /* Reduced from 11px */
+  font-size: 10px;
   font-weight: 600;
   color: #666;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 1px; /* Reduced from 2px */
+  margin-bottom: 1px;
 }
 
 .meta-value {
-  font-size: 12px; /* Reduced from 13px */
+  font-size: 12px;
   font-weight: 500;
   color: #333;
 }
@@ -403,66 +386,22 @@ const flagCount = computed(() => {
   color: #00b894;
 }
 
-.description-section {
-  background: white;
-  border-radius: 6px; /* Further reduced from 8px */
-  padding: 8px; /* Further reduced from 10px */
-  border: 1px solid #e9ecef;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.description-header {
-  display: flex;
-  align-items: center;
-  gap: 5px; /* Further reduced from 6px */
-  margin-bottom: 6px; /* Further reduced from 8px */
-  color: #495057;
-  font-weight: 600;
-  font-size: 11px; /* Further reduced from 12px */
-}
-
-.description-header i {
-  color: #6c757d;
-}
-
-.description-enhanced {
-  font-size: 12px; /* Further reduced from 13px */
-  line-height: 1.4; /* Further reduced from 1.5 */
-  color: #343a40;
-  margin: 0;
-  text-align: justify;
-}
-
-.read-more-hint {
-  display: flex;
-  align-items: center;
-  gap: 4px; /* Reduced from 6px */
-  margin-top: 6px; /* Reduced from 8px */
-  font-size: 10px; /* Reduced from 11px */
-  color: #6c757d;
-  font-style: italic;
-}
-
-.read-more-hint i {
-  color: #adb5bd;
-}
-
 .flag-info-enhanced {
-  padding: 8px 10px; /* Further reduced from 10px 12px */
+  padding: 8px 10px;
   border-top: 1px solid #f0f0f0;
   color: #333;
   display: flex;
   align-items: center;
-  gap: 8px; /* Further reduced from 10px */
+  gap: 8px;
   margin: 0;
   background: white;
 }
 
 .flag-icon-wrapper {
-  width: 24px; /* Reduced from 28px */
+  width: 24px;
   height: 24px;
   background: #f8f9fa;
-  border-radius: 5px; /* Reduced from 6px */
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -476,7 +415,7 @@ const flagCount = computed(() => {
 }
 
 .flag-label {
-  font-size: 10px; /* Reduced from 11px */
+  font-size: 10px;
   font-weight: 500;
   color: #6c757d;
   text-transform: uppercase;
@@ -484,35 +423,35 @@ const flagCount = computed(() => {
 }
 
 .flag-count {
-  font-size: 14px; /* Reduced from 16px */
+  font-size: 14px;
   font-weight: 700;
   color: #333;
 }
 
 .report-actions {
-  padding: 10px; /* Further reduced from 12px */
+  padding: 10px;
   border-top: 1px solid #f0f0f0;
   display: flex;
   flex-direction: column;
-  gap: 6px; /* Further reduced from 8px */
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .view-button {
   width: 100%;
-  padding: 7px; /* Further reduced from 8px */
+  padding: 7px;
   background-color: #4b6cb7;
   color: #fff;
   border: none;
-  border-radius: 5px; /* Further reduced from 6px */
+  border-radius: 5px;
   font-weight: 600;
-  font-size: 12px; /* Further reduced from 13px */
+  font-size: 12px;
   cursor: pointer;
   transition: background-color 0.2s;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 5px; /* Further reduced from 6px */
+  gap: 5px;
 }
 
 .view-button:hover {
@@ -521,20 +460,20 @@ const flagCount = computed(() => {
 
 .publish-button {
   width: 100%;
-  padding: 7px; /* Further reduced from 8px */
+  padding: 7px;
   background-color: #f8f9fa;
   color: #6c757d;
   border: 1px solid #dee2e6;
-  border-radius: 5px; /* Further reduced from 6px */
+  border-radius: 5px;
   font-weight: 600;
-  font-size: 12px; /* Further reduced from 13px */
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 5px; /* Further reduced from 6px */
-  margin: 4px 0; /* Further reduced from 6px 0 */
+  gap: 5px;
+  margin: 4px 0;
 }
 
 .publish-button.published {
@@ -564,18 +503,18 @@ const flagCount = computed(() => {
 
 .action-buttons {
   display: flex;
-  gap: 6px; /* Reduced from 8px */
+  gap: 6px;
 }
 
 .quick-action {
   flex: 1;
-  padding: 5px 8px; /* Further reduced from 6px 10px */
+  padding: 5px 8px;
   border: none;
-  border-radius: 4px; /* Further reduced from 5px */
+  border-radius: 4px;
   background-color: #f5f5f5;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 10px; /* Further reduced from 11px */
+  font-size: 10px;
   font-weight: 600;
   text-align: center;
   position: relative;
@@ -620,13 +559,13 @@ const flagCount = computed(() => {
 
 .quick-action .spinner {
   display: inline-block;
-  width: 10px; /* Reduced from 12px */
+  width: 10px;
   height: 10px;
   border: 2px solid currentColor;
   border-radius: 50%;
   border-top-color: transparent;
   animation: spin 1s linear infinite;
-  margin-right: 4px; /* Reduced from 6px */
+  margin-right: 4px;
 }
 
 @keyframes spin {
@@ -636,8 +575,8 @@ const flagCount = computed(() => {
 .quick-action.solve {
   background-color: #17a2b8;
   color: white;
-  border-radius: 4px; /* Further reduced from 5px */
-  padding: 5px 8px; /* Further reduced from 6px 10px */
+  border-radius: 4px;
+  padding: 5px 8px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
