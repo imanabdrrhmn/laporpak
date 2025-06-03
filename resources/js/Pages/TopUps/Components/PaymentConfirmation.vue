@@ -5,13 +5,13 @@
       <div v-if="selectedPaymentMethodDetails.id === 'BCA'" class="mb-4">
         <p class="fw-bold">Intruksi Pembayaran</p>
         <ol class="mb-4 ps-4">
-          <li>Buka BCA Mobile Banking atau Internet Banking Anda</li>
-          <li>Pilih menu "Transfer" ke Rekening Virtual Account</li>
-          <li>Masukkan Nomer Rekening Virtual di bawah ini</li>
-          <li>Konfirmasikan jumlah dan selesaikan transaksi</li>
+          <li>Buka aplikasi perbankan atau Internet Banking Anda</li>
+          <li>Pilih menu "Transfer" ke rekening bank</li>
+          <li>Masukkan nomor rekening tujuan dan nama bank yang sesuai</li>
+          <li>Konfirmasikan jumlah transfer dan selesaikan transaksi</li>
         </ol>
         <div class="text-center bg-light p-3 rounded">
-          <p class="mb-1 text-muted small">Nomer {{ selectedPaymentMethodDetails.name }} Virtual Account</p>
+          <p class="mb-1 text-muted small">Nomir Rekening {{ selectedPaymentMethodDetails.name }}</p>
           <div class="d-flex flex-wrap justify-content-center align-items-center">
             <span class="fs-4 fw-bold me-3 mb-2 mb-sm-0">{{ bcaVirtualAccount }}</span>
             <button class="btn btn-sm btn-outline-primary" @click="$emit('copy-to-clipboard', bcaVirtualAccount)">
@@ -22,6 +22,10 @@
       </div>
       <div class="border rounded p-3 mb-4">
         <h5 class="fw-bold mb-3">Ringkasan Pembayaran</h5>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Nama Penerima :</span>
+          <span class="fw-bold">{{ Name }}</span>
+        </div>
         <div class="d-flex justify-content-between mb-2">
           <span class="text-muted">Jumlah :</span>
           <span class="fw-bold">Rp {{ formatCurrency(finalSelectedAmount) }}</span>
@@ -48,9 +52,6 @@
           <img :src="proofPreview" class="img-fluid rounded shadow-sm" style="max-height: 200px; max-width: 100%;" />
         </div>
       </div>
-      <div v-if="paymentTimerValue" class="text-center text-danger mb-4">
-        Pembayaran selesai dalam waktu : <span class="fw-bold">{{ paymentTimerValue }}</span>
-      </div>
       <div class="d-flex justify-content-between mt-5">
         <button class="btn btn-outline-secondary px-4" @click="$emit('back')" :disabled="form.processing">
           <i class="bi bi-arrow-left me-1"></i> Back
@@ -75,13 +76,13 @@
       type: String,
       required: true,
     },
+    Name: {
+      type: String,
+      required: true,
+    },
     finalSelectedAmount: {
       type: Number,
       required: true,
-    },
-    paymentTimerValue: {
-      type: String,
-      default: '',
     },
     proofPreview: {
       type: String,

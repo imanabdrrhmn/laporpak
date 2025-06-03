@@ -1,4 +1,3 @@
-<!-- File: src/components/PaymentMethodSelection.vue -->
 <template>
     <div>
       <h3 class="fw-bold mb-4">Metode Pembayaran</h3>

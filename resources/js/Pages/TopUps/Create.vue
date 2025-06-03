@@ -33,8 +33,8 @@
               v-if="currentStep === 'confirmation' && selectedPaymentMethodDetails"
               :selected-payment-method-details="selectedPaymentMethodDetails"
               :bca-virtual-account="bcaVirtualAccount"
+              :Name="Name"
               :final-selected-amount="finalSelectedAmount"
-              :payment-timer-value="paymentTimerValue"
               :proof-preview="proofPreview"
               :form="form"
               @copy-to-clipboard="copyToClipboard"
@@ -84,13 +84,13 @@ const availablePaymentMethods = ref([
     id: 'BCA',
     name: 'Bank Central Asia (BCA)',
     description: 'transfer via BCA Mobile Banking atau Internet Banking',
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia_logo.svg/2560px-Bank_Central_Asia_logo.svg.png',
+    icon: '/images/Bank_Central_Asia.svg',
     type: 'Transfer'
   },
 ]);
 const selectedPaymentMethodId = ref(null);
-const bcaVirtualAccount = ref('39012 76783 43336');
-const paymentTimerValue = ref('');
+const bcaVirtualAccount = ref('2063131911');
+const Name = ref('PT Pelopor Ide Kreatif');
 const proofPreview = ref(null);
 const notification = ref({
   show: false,
@@ -203,21 +203,6 @@ const goBack = () => {
   window.history.back();
 };
 
-const startPaymentTimer = (durationInSeconds) => {
-  let timer = durationInSeconds;
-  clearInterval(timerInterval);
-  const updateTimer = () => {
-    const minutes = String(Math.floor(timer / 60)).padStart(2, '0');
-    const seconds = String(timer % 60).padStart(2, '0');
-    paymentTimerValue.value = `${minutes}:${seconds}`;
-    if (--timer < 0) {
-      clearInterval(timerInterval);
-      paymentTimerValue.value = 'Waktu Habis';
-    }
-  };
-  updateTimer();
-  timerInterval = setInterval(updateTimer, 1000);
-};
 
 const copyToClipboard = async (text) => {
   try {
@@ -271,8 +256,6 @@ const handlePaymentConfirmed = () => {
       customAmountRaw.value = 0;
       selectedPaymentMethodId.value = null;
       currentStep.value = 'nominal';
-      clearInterval(timerInterval);
-      paymentTimerValue.value = '';
     },
     onError: (errors) => {
       let errorMessages = Object.values(errors).join(' ');
