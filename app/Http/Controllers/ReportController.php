@@ -154,10 +154,13 @@ class ReportController extends Controller
                                 ->values() 
                                 ->all();
 
+        $user = auth()->user();
+
         return Inertia::render('Pelaporan/CariLaporan', [
             'feedbacks' => $feedbacks,
             'reportStats' => $reportStats,
             'initialCategories' => $initialCategories,
+            'user' => $user,
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),
@@ -213,6 +216,7 @@ class ReportController extends Controller
         ]);
     }
 
+
     public function flagReport(Request $request)
     {
         $request->validate([
@@ -238,14 +242,26 @@ class ReportController extends Controller
             return back()->with('error', 'Kamu sudah pernah menandai laporan ini.');
         }
 
-        ReportFlag::create([
-            'report_id' => $request->report_id,
-            'user_id' => $user->id,
-            'reason' => $request->reason,
-        ]);
+        try {
+            ReportFlag::create([
+                'report_id' => $request->report_id,
+                'user_id' => $user->id,
+                'reason' => $request->reason,
+            ]);
 
-        $this->logger->log('Menandai Laporan', 'Pengguna menandai laporan ID #' . $request->report_id);
+            if (property_exists($this, 'logger') && method_exists($this->logger, 'log')) {
+                $this->logger->log('Menandai Laporan', 'Pengguna menandai laporan ID #' . $request->report_id);
+            } else {
+                Log::info('User #' . $user->id . ' menandai laporan ID #' . $request->report_id);
+            }
 
-        return back()->with('success', 'Laporan berhasil ditandai.');
+            return back()->with('success', 'Laporan berhasil ditandai.');
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->with('error', 'Kamu sudah pernah menandai laporan ini.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat menandai laporan. Coba lagi nanti.');
+        }
     }
+
 }

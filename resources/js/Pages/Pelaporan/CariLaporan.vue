@@ -64,13 +64,14 @@
       <ReportDetailModal
         :isOpen="detailModalOpen"
         :report="selectedReport"
+        :user="user"
         @close="closeDetailModal"
         @open-flag-modal="openFlagModalFromDetail"
       />
 
       <ReportFlagModal
         :isOpen="flagModalOpen"
-        :reportId="selectedReport?.id || null"
+        :reportId="selectedReport?.id"
         @close="closeFlagModal"
         @reported="handleFlagSubmitted"
       />
@@ -123,7 +124,9 @@ export default {
   props: {
     reportStats: { type: Object, default: () => ({ verifiedReports: 0, totalReports: 0, fraudReports: 0 }) },
     feedbacks: { type: Array, default: () => [] },
-    initialCategories: { type: Array, default: () => [] }
+    initialCategories: { type: Array, default: () => [] },
+    user: { type: Object },
+
   },
   data() {
     return {

@@ -10,7 +10,6 @@
   >
     <div class="modal-container" :class="{ active: isOpen }" role="document">
       <div class="modal-content">
-        <!-- Header -->
         <div class="modal-header">
           <div class="header-content">
             <div class="icon-wrapper">
@@ -24,7 +23,7 @@
             </div>
             <div>
               <h2 class="modal-title" id="modalTitle">Detail Laporan</h2>
-              <p class="modal-subtitle">Informasi lengkap laporan</p>
+              <p class="modal-subtitle">Informasi lengkap mengenai laporan</p>
             </div>
           </div>
           <button
@@ -41,60 +40,11 @@
           </button>
         </div>
 
-        <!-- Body -->
-        <div class="modal-body">
-          <!-- Info Grid -->
+        <div class="modal-body" v-if="report && report.id">
           <div class="info-grid">
-            <div class="info-card">
-              <div class="info-header">
-                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                <span class="info-label">Tanggal Laporan</span>
-              </div>
-              <div class="info-value">{{ formatDate(report.created_at) }}</div>
-            </div>
-
-            <div class="info-card">
-              <div class="info-header">
-                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7 7-7z"/>
-                </svg>
-                <span class="info-label">Kategori</span>
-              </div>
-              <div class="info-value">
-                <span class="category-tag">{{ report.category }}</span>
-              </div>
-            </div>
-
-            <div class="info-card" v-if="report.source">
-              <div class="info-header">
-                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-                <span class="info-label">Sumber</span>
-              </div>
-              <div class="info-value">{{ report.source }}</div>
-            </div>
-
-            <div class="info-card" v-if="report.address">
-              <div class="info-header">
-                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span class="info-label">Alamat</span>
-              </div>
-              <div class="info-value">{{ report.address }}</div>
-            </div>
           </div>
 
-          <!-- Description Section -->
-          <div class="description-section">
+=          <div class="description-section">
             <div class="section-header">
               <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -110,7 +60,6 @@
             </div>
           </div>
 
-          <!-- Evidence Section -->
           <div class="evidence-section">
             <div class="section-header">
               <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -122,7 +71,7 @@
             </div>
             <div class="evidence-content">
               <div v-if="report.evidence" class="evidence-wrapper">
-                <div class="image-container" @click="openImageModal">
+                <div class="image-container" @click="openImageModal" @keyup.enter="openImageModal" tabindex="0">
                   <img
                     :src="report.evidence"
                     alt="Bukti Laporan"
@@ -151,22 +100,30 @@
             </div>
           </div>
 
-          <!-- Tombol buka modal laporan hoax -->
-          <div style="margin-top: 1rem;">
-            <button class="btn btn-primary" @click="flagModalOpen = true" :disabled="isLoading">
+          <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e9ecef;">
+            <button
+                class="btn btn-danger"
+                @click="openFlagModal"
+                :disabled="flagModalOpen || !user"
+                v-if="user" 
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:16px; height:16px; margin-right: 0.5rem;">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                <line x1="4" y1="22" x2="4" y2="15"></line>
+              </svg>
               Laporkan
             </button>
           </div>
         </div>
+        <div v-else class="modal-body no-data-container">
+            <p>Data laporan tidak tersedia atau tidak dapat dimuat.</p>
+        </div>
 
-        <!-- Footer -->
         <div class="modal-footer">
           <div class="footer-actions">
             <button class="btn btn-secondary" @click="handleClose" :disabled="isLoading || flagModalOpen">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M9 11l3-3 3 3"/>
-                <path d="M22 12h-20"/>
-              </svg>
+                 <path d="M18 6L6 18M6 6l12 12" /> </svg>
               Tutup
             </button>
           </div>
@@ -174,18 +131,18 @@
       </div>
     </div>
 
-    <!-- Modal laporkan hoax terpisah -->
     <ReportFlagModal
       :isOpen="flagModalOpen"
-      :reportId="report.id"
+      :reportId="report ? report.id : null"
+      :user="user"
       @close="flagModalOpen = false"
       @reported="onFlagReported"
+      @error="onFlagError"
     />
 
-    <!-- Image Modal -->
-    <div v-if="imageModalOpen" class="image-modal-overlay" @click="closeImageModal">
+    <div v-if="imageModalOpen" class="image-modal-overlay" @click="closeImageModal" @keyup.esc="closeImageModal">
       <div class="image-modal-content" @click.stop>
-        <button class="image-close-btn" @click="closeImageModal">
+        <button class="image-close-btn" @click="closeImageModal" aria-label="Close image view">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
@@ -208,6 +165,10 @@ export default {
     report: {
       type: Object,
       default: () => ({}),
+    },
+    user: { 
+      type: Object,
+      default: () => null,
     },
   },
   emits: ['close'],
@@ -232,42 +193,34 @@ export default {
       });
     },
     openImageModal() {
-      this.imageModalOpen = true;
-      document.body.style.overflow = 'hidden';
+      if (this.report && this.report.evidence) {
+        this.imageModalOpen = true;
+      }
     },
     closeImageModal() {
       this.imageModalOpen = false;
-      document.body.style.overflow = 'auto';
+    },
+    openFlagModal() {
+        if (this.report && this.report.id) {
+            this.flagModalOpen = true;
+        } else {
+            alert('Tidak ada ID laporan yang valid untuk dilaporkan.');
+        }
     },
     handleClose() {
       if (this.isLoading || this.flagModalOpen) return;
-      this.flagModalOpen = false;
       this.$emit('close');
-      document.body.style.overflow = 'auto';
     },
-    onFlagReported() {
-      alert('Terima kasih, laporan berhasil dikirim.');
+    onFlagReported(payload) {
       this.flagModalOpen = false;
       this.handleClose();
-    }
-  },
-  watch: {
-    isOpen(newVal) {
-      if (newVal) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        this.flagModalOpen = false;
-        this.closeImageModal();
-        document.body.style.overflow = 'auto';
-      }
     },
-  },
-  beforeUnmount() {
-    document.body.style.overflow = 'auto';
+    onFlagError(errorMessage) {
+      console.warn('Gagal melaporkan:', errorMessage);
+    }
   },
 };
 </script>
-
 
 <style scoped>
 .modal-overlay {
@@ -310,11 +263,10 @@ export default {
   max-height: calc(100vh - 2rem);
 }
 
-/* Header */
 .modal-header {
-  background: #007bff; /* Change to solid blue */
+  background: #007bff;
   color: white;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -330,12 +282,12 @@ export default {
   background: rgba(255, 255, 255, 0.2);
   padding: 0.75rem;
   border-radius: 12px;
-  backdrop-filter: blur(10px);
 }
 
 .report-icon {
   width: 24px;
   height: 24px;
+  stroke: white;
 }
 
 .modal-title {
@@ -347,7 +299,7 @@ export default {
 
 .modal-subtitle {
   font-size: 0.9rem;
-  opacity: 0.8;
+  opacity: 0.85;
   margin: 0.25rem 0 0 0;
 }
 
@@ -358,38 +310,62 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   transform-origin: center;
-  background: transparent;  /* Remove background */
+  background: transparent;
 }
 
-.close-button:hover {
-  transform: rotate(90deg);
+.close-button:hover:not(:disabled) {
+  transform: rotate(90deg) scale(1.1);
+  background: rgba(255,255,255,0.1);
+}
+
+.close-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .close-button svg {
   width: 24px;
   height: 24px;
   stroke-width: 2;
-  transition: stroke-width 0.3s ease;
+  stroke: white;
 }
 
-.close-button:hover svg {
-  stroke-width: 2.5;
-}
-
-/* Body */
 .modal-body {
   padding: 2rem;
   overflow-y: auto;
   flex: 1;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: thin;
+  scrollbar-color: #6c757d #f8f9fa;
 }
 
 .modal-body::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  width: 8px;
 }
 
-/* Info Grid */
+.modal-body::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background-color: #adb5bd;
+  border-radius: 4px;
+  border: 2px solid #f8f9fa;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background-color: #6c757d;
+}
+
+.no-data-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    color: #6c757d;
+    font-style: italic;
+}
+
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -403,11 +379,13 @@ export default {
   padding: 1.5rem;
   border: 1px solid #e9ecef;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .info-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .info-header {
@@ -420,7 +398,7 @@ export default {
 .info-icon {
   width: 20px;
   height: 20px;
-  color: #667eea;
+  color: #007bff;
 }
 
 .info-label {
@@ -434,18 +412,19 @@ export default {
   font-weight: 600;
   color: #212529;
   line-height: 1.4;
+  word-break: break-word;
 }
 
 .category-tag {
-  background: rgba(1, 128, 255, 0.8);
+  background: #007bff;
   color: white;
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 16px;
   font-size: 0.875rem;
   font-weight: 500;
+  display: inline-block;
 }
 
-/* Sections */
 .description-section,
 .evidence-section {
   margin-bottom: 2rem;
@@ -463,7 +442,7 @@ export default {
 .section-icon {
   width: 22px;
   height: 22px;
-  color: #667eea;
+  color: #007bff;
 }
 
 .section-header h3 {
@@ -477,7 +456,7 @@ export default {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 1.25rem;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #007bff;
 }
 
 .description-content p {
@@ -492,10 +471,12 @@ export default {
   font-style: italic;
 }
 
-/* Evidence */
 .evidence-wrapper {
   display: flex;
   justify-content: center;
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
 }
 
 .image-container {
@@ -504,11 +485,13 @@ export default {
   border-radius: 12px;
   overflow: hidden;
   max-width: 100%;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #dee2e6;
 }
 
 .image-container:hover {
   transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .evidence-image {
@@ -521,7 +504,7 @@ export default {
 .image-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -530,9 +513,11 @@ export default {
   opacity: 0;
   transition: opacity 0.2s ease;
   gap: 0.5rem;
+  text-align: center;
+  padding: 1rem;
 }
 
-.image-container:hover .image-overlay {
+.image-container:hover .image-overlay, .image-container:focus .image-overlay {
   opacity: 1;
 }
 
@@ -543,8 +528,11 @@ export default {
 
 .no-evidence {
   text-align: center;
-  padding: 3rem;
+  padding: 3rem 1rem;
   color: #6c757d;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px dashed #dee2e6;
 }
 
 .no-evidence-icon {
@@ -554,7 +542,6 @@ export default {
   opacity: 0.5;
 }
 
-/* Footer */
 .modal-footer {
   background: #f8f9fa;
   padding: 1.5rem 2rem;
@@ -574,9 +561,20 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .btn svg {
@@ -587,24 +585,36 @@ export default {
 .btn-secondary {
   background: #6c757d;
   color: white;
+  border: 1px solid #6c757d;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   background: #5a6268;
-  transform: translateY(-1px);
+  border-color: #545b62;
 }
 
 .btn-primary {
-  background: #667eea;
+  background: #007bff;
   color: white;
+  border: 1px solid #007bff;
 }
 
-.btn-primary:hover {
-  background: #5a6fd8;
-  transform: translateY(-1px);
+.btn-primary:hover:not(:disabled) {
+  background: #0056b3;
+  border-color: #0056b3;
 }
 
-/* Image Modal */
+.btn-danger {
+  background: #dc3545;
+  color: white;
+  border: 1px solid #dc3545;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #c82333;
+  border-color: #bd2130;
+}
+
 .image-modal-overlay {
   position: fixed;
   inset: 0;
@@ -613,35 +623,42 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .image-modal-content {
   position: relative;
   max-width: 95vw;
   max-height: 95vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .image-close-btn {
   position: absolute;
-  top: -3rem;
-  right: 0;
-  background: rgba(255, 255, 255, 0.2);
+  top: -2.5rem;
+  right: -0.5rem;
+  background: rgba(255, 255, 255, 0.15);
   border: none;
   padding: 0.75rem;
-  border-radius: 8px;
+  border-radius: 50%;
   color: white;
   cursor: pointer;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  line-height: 0;
 }
 
 .image-close-btn:hover {
   background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
 }
 
 .image-close-btn svg {
   width: 20px;
   height: 20px;
+  stroke: white;
 }
 
 .full-image {
@@ -649,33 +666,45 @@ export default {
   max-height: 100%;
   object-fit: contain;
   border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .modal-overlay {
     padding: 0.5rem;
   }
-  
+
   .modal-header {
-    padding: 1.5rem;
+    padding: 1rem 1.5rem;
   }
-  
+
   .modal-body {
     padding: 1.5rem;
   }
-  
+
   .info-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .footer-actions {
     flex-direction: column;
+    gap: 0.75rem;
   }
-  
+
   .btn {
+    width: 100%;
     justify-content: center;
+  }
+
+  .image-modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .image-close-btn {
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0,0,0,0.5);
   }
 }
 </style>

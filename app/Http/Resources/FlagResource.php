@@ -16,6 +16,7 @@ class FlagResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'report_id' => $this->report_id,
             'reason' => $this->reason,
             'created_at' => $this->created_at->toDateTimeString(),
             'user' => $this->whenLoaded('user', function () {
