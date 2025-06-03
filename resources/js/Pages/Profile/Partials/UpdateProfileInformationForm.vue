@@ -1,4 +1,3 @@
-```vue
 <template>
   <div>
     <!-- Profile Information Section -->
@@ -47,11 +46,11 @@
                   :class="{ 'is-invalid': validationErrors.email }"
                   id="email"
                   v-model="profileForm.email"
-                  :disabled="user.email && user.email.length > 0"
+                  :readonly="isEmailReadonly"
                   :required="!user.email || user.email.length === 0"
                   autocomplete="username"
                 />
-                <span v-if="user.email && user.email.length > 0" class="input-group-text bg-secondary">
+                <span v-if="isEmailReadonly" class="input-group-text bg-secondary">
                   <i class="bi bi-lock-fill text-white"></i>
                 </span>
               </div>
@@ -61,12 +60,12 @@
               <div v-if="validationErrors.email" class="invalid-feedback">
                 {{ validationErrors.email }}
               </div>
-              <small v-if="user.email && user.email.length > 0" class="text-muted">
+              <small v-if="isEmailReadonly" class="text-danger">
                 Email tidak dapat diubah setelah diverifikasi
               </small>
             </div>
             <div class="col-md-6">
-              <label for="phone" class="form-label small fw-medium">No. Telp</label>
+              <label for="phone" class="form-label small fw-medium">Nomor HP</label>
               <div class="input-group">
                 <span class="input-group-text bg-light">
                   <i class="bi bi-telephone"></i>
@@ -77,11 +76,11 @@
                   :class="{ 'is-invalid': validationErrors.no_hp }"
                   id="no_hp"
                   v-model="profileForm.no_hp"
-                  :disabled="user.no_hp && user.no_hp.length > 0"
+                  :readonly="isPhoneReadonly"
                   autocomplete="tel"
                   @input="restrictToNumbers"
                 />
-                <span v-if="user.no_hp && user.no_hp.length > 0" class="input-group-text bg-secondary">
+                <span v-if="isPhoneReadonly" class="input-group-text bg-secondary">
                   <i class="bi bi-lock-fill text-white"></i>
                 </span>
               </div>
@@ -91,7 +90,7 @@
               <div v-if="validationErrors.no_hp" class="invalid-feedback">
                 {{ validationErrors.no_hp }}
               </div>
-              <small v-if="user.no_hp && user.no_hp.length > 0" class="text-muted">
+              <small v-if="isPhoneReadonly" class="text-danger">
                 Nomor telepon tidak dapat diubah setelah diverifikasi
               </small>
             </div>
@@ -134,18 +133,18 @@
 
           <div v-if="mustVerifyEmail && user.email_verified_at === null">
             <p class="mt-2 text-sm text-gray-800">
-              Your email address is unverified.
+              Alamat email Anda belum terverifikasi.
               <Link
                 :href="route('verification.send')"
                 method="post"
                 as="button"
                 class="text-indigo-600 underline hover:text-indigo-800"
               >
-                Click here to re-send the verification email.
+              Klik di sini untuk mengirim ulang email verifikasi.
               </Link>
             </p>
             <div v-show="status === 'verification-link-sent'" class="mt-2 text-sm font-medium text-green-600">
-              A new verification link has been sent to your email address.
+              Link verifikasi baru telah dikirim ke alamat email Anda..
             </div>
           </div>
         </form>
@@ -418,6 +417,15 @@ defineProps({
 
 const user = usePage().props.auth.user;
 
+// Computed properties untuk menentukan status readonly
+const isEmailReadonly = computed(() => {
+  return user.email && user.email.length > 0 && user.email_verified_at !== null;
+});
+
+const isPhoneReadonly = computed(() => {
+  return user.no_hp && user.no_hp.length > 0 && user.no_hp_verified_at !== null;
+});
+
 // Profile Form
 const showConfirmationModal = ref(false);
 const validationErrors = reactive({});
@@ -492,7 +500,7 @@ const restrictToNumbers = (event) => {
   profileForm.no_hp = input;
 };
 
-// Profile Form Validation
+// Profile Form Validation dengan logika readonly
 const validateProfileForm = () => {
   Object.keys(validationErrors).forEach((key) => {
     delete validationErrors[key];
@@ -505,21 +513,22 @@ const validateProfileForm = () => {
     isValid = false;
   }
 
-  if (
-    (!user.email || user.email.length === 0) &&
-    (!profileForm.email || profileForm.email.trim().length === 0)
-  ) {
-    validationErrors.email = 'Email harus diisi';
-    isValid = false;
-  } else if (profileForm.email && profileForm.email.trim().length > 0) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(profileForm.email)) {
-      validationErrors.email = 'Format email tidak valid';
+  // Validasi email hanya jika tidak readonly
+  if (!isEmailReadonly.value) {
+    if (!profileForm.email || profileForm.email.trim().length === 0) {
+      validationErrors.email = 'Email harus diisi';
       isValid = false;
+    } else if (profileForm.email && profileForm.email.trim().length > 0) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(profileForm.email)) {
+        validationErrors.email = 'Format email tidak valid';
+        isValid = false;
+      }
     }
   }
 
-  if (profileForm.no_hp && profileForm.no_hp.trim().length > 0) {
+  // Validasi nomor HP hanya jika ada input dan tidak readonly
+  if (!isPhoneReadonly.value && profileForm.no_hp && profileForm.no_hp.trim().length > 0) {
     const phoneRegex = /^[0-9]+$/;
     if (!phoneRegex.test(profileForm.no_hp)) {
       validationErrors.no_hp = 'Nomor telepon hanya boleh berisi angka';
@@ -670,7 +679,7 @@ const submitForms = () => {
   border-color: #5a67d8;
   outline: none;
 }
-.form-control:disabled {
+.form-control:disabled, .form-control[readonly] {
   background-color: #f8f9fa;
   color: #6c757d;
   cursor: not-allowed;
@@ -776,4 +785,3 @@ const submitForms = () => {
   color: #dc3545;
 }
 </style>
-```
