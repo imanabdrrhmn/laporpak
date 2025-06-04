@@ -140,8 +140,7 @@ const onConfirm = () => {
 
 const handleApprove = () => {
   confirmWithModal(() => {
-    router.patch(`/data/reports/${props.report.id}/accept`, {}, {
-      preserveScroll: true,
+    router.post(`/data/reports/${props.report.id}/accept`, {}, {
       onSuccess: () => emit('close'),
     })
   }, 'Setujui Laporan', 'Apakah kamu yakin ingin menyetujui laporan ini?')
@@ -149,8 +148,7 @@ const handleApprove = () => {
 
 const handleReject = () => {
   confirmWithModal(() => {
-    router.patch(`/data/reports/${props.report.id}/rejected`, {}, {
-      preserveScroll: true,
+    router.post(`/data/reports/${props.report.id}/rejected`, {}, {
       onSuccess: () => {
         router.reload({ only: ['reports'] })
         emit('close')
@@ -161,8 +159,7 @@ const handleReject = () => {
 
 const handlePublish = () => {
   confirmWithModal(() => {
-    router.patch(`/data/reports/${props.report.id}/publish`, {}, {
-      preserveScroll: true,
+    router.post(`/data/reports/${props.report.id}/publish`, {}, {
       onSuccess: () => emit('close')
     })
   }, 'Publikasikan Laporan', 'Laporan akan dipublikasikan ke publik.')

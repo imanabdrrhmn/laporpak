@@ -132,12 +132,6 @@ class ReportManagementController extends Controller
         $this->authorize('verify_reports', $report); 
         $this->validateReportStatus($report, 'pending', 'ditolak');
         
-        $validated = $request->validate(['reason' => 'nullable|string|max:1000']);
-
-        $report->status = 'rejected';
-        if (isset($validated['reason'])) {
-            $report->rejected_reason = $validated['reason']; 
-        }
         $report->save();
         SendReportRejectedMailJob::dispatch($report->user, $report); 
         return new ReportResource($report->loadMissing(['user'])->loadCount('flags'));
