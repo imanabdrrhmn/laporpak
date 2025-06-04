@@ -78,8 +78,11 @@
           :type="toast.type"
           :message="toast.message"
           @close="toast.visible = false"
+          
         />
+        
       </div>
+
     </div>
   </AppLayout>
 </template>

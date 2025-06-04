@@ -412,7 +412,7 @@ function confirmDelete(userName, form) {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e5e7eb;
+  background: white;
   flex-shrink: 0;
 }
 

@@ -368,10 +368,10 @@ export default {
   margin: 2rem auto;
   padding: 20px;
   font-family: 'Inter', sans-serif;
-  background-color: #f9fafb;
+  background-color: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
+
+} 
 .page-title {
   font-size: 1.75rem;
   font-weight: 700;

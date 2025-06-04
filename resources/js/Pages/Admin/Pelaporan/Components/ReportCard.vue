@@ -237,7 +237,7 @@ const flagCount = computed(() => {
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #fff;
+  
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 

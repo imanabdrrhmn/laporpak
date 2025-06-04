@@ -36,6 +36,7 @@
         :selected-location="selectedLocation"
         @close="closeModal"
       />
+      <Section/>
       <Feedback :feedbacks="feedbacks" />
     </AppLayout>
   </div>
@@ -51,6 +52,7 @@ import MapArea from '@/Components/LaporMap/MapArea.vue';
 import LegendCard from '@/Components/LaporMap/LegendCard.vue';
 import LocationList from '@/Components/LaporMap/LocationList.vue';
 import ReportDetailModal from '@/Components/LaporMap/ReportDetailModal.vue';
+import Section from '@/Components/Section.vue'
 
 const page = usePage();
 
@@ -158,7 +160,7 @@ const focusRegion = (region) => {
 @import 'leaflet/dist/leaflet.css';
 
 .map-page {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
 }
 
 :global(.custom-marker) {

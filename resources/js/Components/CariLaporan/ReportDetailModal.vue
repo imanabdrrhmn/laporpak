@@ -41,8 +41,70 @@
         </div>
 
         <div class="modal-body" v-if="report && report.id">
-          <div class="info-grid">
+          <!-- Report Info Grid - only show if there's data -->
+          <div class="info-grid" v-if="hasReportInfo">
+            <div class="info-card" v-if="report.reporter">
+              <div class="info-header">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span class="info-label">Pelapor</span>
+              </div>
+              <div class="info-value">{{ report.reporter }}</div>
+            </div>
+
+            <div class="info-card" v-if="report.category">
+              <div class="info-header">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M7 7h10v10H7z"/>
+                  <path d="M3 7h4v10H3z"/>
+                  <path d="M17 7h4v10h-4z"/>
+                </svg>
+                <span class="info-label">Kategori</span>
+              </div>
+              <div class="info-value">
+                <span class="category-tag">{{ report.category }}</span>
+              </div>
+            </div>
+
+            <div class="info-card" v-if="report.location">
+              <div class="info-header">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span class="info-label">Lokasi</span>
+              </div>
+              <div class="info-value">{{ report.location }}</div>
+            </div>
+
+            <div class="info-card" v-if="report.created_at">
+              <div class="info-header">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12,6 12,12 16,14"/>
+                </svg>
+                <span class="info-label">Tanggal Laporan</span>
+              </div>
+              <div class="info-value">{{ formatDate(report.created_at) }}</div>
+            </div>
+
+            <div class="info-card" v-if="report.status">
+              <div class="info-header">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="20,6 9,17 4,12"/>
+                </svg>
+                <span class="info-label">Status</span>
+              </div>
+              <div class="info-value">
+                <span class="status-tag" :class="getStatusClass(report.status)">
+                  {{ report.status }}
+                </span>
+              </div>
+            </div>
           </div>
+
           <div class="description-section">
             <div class="section-header">
               <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -99,14 +161,13 @@
             </div>
           </div>
 
-          <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e9ecef;">
+          <div class="action-section" v-if="user">
             <button
-                class="btn btn-danger"
-                @click="openFlagModal"
-                :disabled="flagModalOpen || !user"
-                v-if="user" 
+              class="btn btn-danger"
+              @click="openFlagModal"
+              :disabled="flagModalOpen || !user"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:16px; height:16px; margin-right: 0.5rem;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
                 <line x1="4" y1="22" x2="4" y2="15"></line>
               </svg>
@@ -114,15 +175,17 @@
             </button>
           </div>
         </div>
+        
         <div v-else class="modal-body no-data-container">
-            <p>Data laporan tidak tersedia atau tidak dapat dimuat.</p>
+          <p>Data laporan tidak tersedia atau tidak dapat dimuat.</p>
         </div>
 
         <div class="modal-footer">
           <div class="footer-actions">
             <button class="btn btn-secondary" @click="handleClose" :disabled="isLoading || flagModalOpen">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                 <path d="M18 6L6 18M6 6l12 12" /> </svg>
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
               Tutup
             </button>
           </div>
@@ -178,6 +241,17 @@ export default {
       isLoading: false,
     };
   },
+  computed: {
+    hasReportInfo() {
+      return this.report && (
+        this.report.reporter || 
+        this.report.category || 
+        this.report.location || 
+        this.report.created_at || 
+        this.report.status
+      );
+    }
+  },
   methods: {
     formatDate(dateStr) {
       if (!dateStr) return '-';
@@ -191,6 +265,15 @@ export default {
         minute: '2-digit',
       });
     },
+    getStatusClass(status) {
+      const statusMap = {
+        'pending': 'status-pending',
+        'in_progress': 'status-progress',
+        'completed': 'status-completed',
+        'rejected': 'status-rejected'
+      };
+      return statusMap[status] || 'status-default';
+    },
     openImageModal() {
       if (this.report && this.report.evidence) {
         this.imageModalOpen = true;
@@ -200,11 +283,11 @@ export default {
       this.imageModalOpen = false;
     },
     openFlagModal() {
-        if (this.report && this.report.id) {
-            this.flagModalOpen = true;
-        } else {
-            alert('Tidak ada ID laporan yang valid untuk dilaporkan.');
-        }
+      if (this.report && this.report.id) {
+        this.flagModalOpen = true;
+      } else {
+        alert('Tidak ada ID laporan yang valid untuk dilaporkan.');
+      }
     },
     handleClose() {
       if (this.isLoading || this.flagModalOpen) return;
@@ -269,6 +352,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .header-content {
@@ -281,6 +365,7 @@ export default {
   background: rgba(255, 255, 255, 0.2);
   padding: 0.75rem;
   border-radius: 12px;
+  flex-shrink: 0;
 }
 
 .report-icon {
@@ -310,6 +395,8 @@ export default {
   transition: all 0.3s ease;
   transform-origin: center;
   background: transparent;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .close-button:hover:not(:disabled) {
@@ -318,8 +405,8 @@ export default {
 }
 
 .close-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .close-button svg {
@@ -335,6 +422,9 @@ export default {
   flex: 1;
   scrollbar-width: thin;
   scrollbar-color: #6c757d #f8f9fa;
+  /* Ensure content doesn't overflow */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .modal-body::-webkit-scrollbar {
@@ -357,12 +447,12 @@ export default {
 }
 
 .no-data-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
-    color: #6c757d;
-    font-style: italic;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: #6c757d;
+  font-style: italic;
 }
 
 .info-grid {
@@ -380,6 +470,9 @@ export default {
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
+  /* Prevent overflow */
+  min-width: 0;
+  word-wrap: break-word;
 }
 
 .info-card:hover {
@@ -392,12 +485,14 @@ export default {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.75rem;
+  flex-shrink: 0;
 }
 
 .info-icon {
   width: 20px;
   height: 20px;
   color: #007bff;
+  flex-shrink: 0;
 }
 
 .info-label {
@@ -412,6 +507,7 @@ export default {
   color: #212529;
   line-height: 1.4;
   word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .category-tag {
@@ -422,6 +518,39 @@ export default {
   font-size: 0.875rem;
   font-weight: 500;
   display: inline-block;
+}
+
+.status-tag {
+  padding: 0.3rem 0.8rem;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status-pending {
+  background: #ffc107;
+  color: #212529;
+}
+
+.status-progress {
+  background: #17a2b8;
+  color: white;
+}
+
+.status-completed {
+  background: #28a745;
+  color: white;
+}
+
+.status-rejected {
+  background: #dc3545;
+  color: white;
+}
+
+.status-default {
+  background: #6c757d;
+  color: white;
 }
 
 .description-section,
@@ -442,6 +571,7 @@ export default {
   width: 22px;
   height: 22px;
   color: #007bff;
+  flex-shrink: 0;
 }
 
 .section-header h3 {
@@ -463,6 +593,8 @@ export default {
   line-height: 1.6;
   color: #495057;
   white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .no-data {
@@ -516,7 +648,8 @@ export default {
   padding: 1rem;
 }
 
-.image-container:hover .image-overlay, .image-container:focus .image-overlay {
+.image-container:hover .image-overlay, 
+.image-container:focus .image-overlay {
   opacity: 1;
 }
 
@@ -541,10 +674,17 @@ export default {
   opacity: 0.5;
 }
 
+.action-section {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
 .modal-footer {
   background: #f8f9fa;
   padding: 1.5rem 2rem;
   border-top: 1px solid #e9ecef;
+  flex-shrink: 0;
 }
 
 .footer-actions {
@@ -565,11 +705,12 @@ export default {
   justify-content: center;
   gap: 0.5rem;
   font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .btn:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .btn:hover:not(:disabled) {
@@ -579,6 +720,7 @@ export default {
 .btn svg {
   width: 16px;
   height: 16px;
+  flex-shrink: 0;
 }
 
 .btn-secondary {

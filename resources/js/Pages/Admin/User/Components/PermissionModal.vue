@@ -469,8 +469,8 @@ const clearAllRegions = () => {
 .user-avatar {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;

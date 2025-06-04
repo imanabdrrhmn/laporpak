@@ -1,20 +1,16 @@
 <template>
   <div class="access-denied-container text-center py-5 px-3">
     <div class="icon-wrapper mb-4">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="icon animate-pulse"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        stroke-width="1.5"
-        aria-hidden="true"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M12 9v3m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
+      <svg xmlns="http://www.w3.org/2000/svg" 
+           class="icon animate-pulse" 
+           fill="none" 
+           viewBox="0 0 24 24" 
+           stroke="currentColor" 
+           stroke-width="1.5" 
+           aria-hidden="true">
+        <path stroke-linecap="round" 
+              stroke-linejoin="round" 
+              d="M12 9v3m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     </div>
     <h3 class="mb-3 fw-bold text-danger">Akses Ditolak</h3>
@@ -23,7 +19,8 @@
       Silakan hubungi admin untuk mendapatkan akses.
     </p>
     <button class="btn btn-outline-danger mt-4" @click="goBack">
-      <i class="bi bi-arrow-left me-2"></i> Kembali
+      <i class="bi bi-arrow-left me-2"></i>
+      Kembali
     </button>
   </div>
 </template>
@@ -31,8 +28,15 @@
 <script setup>
 import { router } from '@inertiajs/vue3';
 
-const goBack = () => router.visit('/');
-
+const goBack = () => {
+  // Check if there's a previous page in browser history
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    // Fallback to home page if no previous page exists
+    router.visit('/');
+  }
+};
 </script>
 
 <style scoped>
