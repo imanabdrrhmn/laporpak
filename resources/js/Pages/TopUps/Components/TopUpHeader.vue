@@ -3,10 +3,6 @@
     <div class="top-up-header-bar">
       <div class="container d-flex justify-content-between align-items-center py-3">
         <h2 class="text-white fw-bold mb-0 h5">Top Up Credit</h2>
-        <div class="text-white">
-          <small class="opacity-75">Saldo saat ini</small>
-          <div class="fw-bold fs-5">Rp {{ formatCurrency(saldoKredit) }}</div>
-        </div>
       </div>
     </div>
   </template>

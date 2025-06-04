@@ -3,7 +3,7 @@
   <AppLayout>
     <Head title="Top Up Credit" />
     <div class="top-up-page-container">
-      <TopUpHeader :current-balance="currentBalance" />
+      <TopUpHeader />
       <div class="container py-4">
         <div class="card shadow-sm mx-auto" style="max-width: 800px;">
           <div class="card-body p-md-5 p-4">
