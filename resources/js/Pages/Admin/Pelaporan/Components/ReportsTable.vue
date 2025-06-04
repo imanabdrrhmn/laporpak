@@ -29,7 +29,7 @@
             {{ capitalize(report.status) }}
           </span>
         </td>
-        <td>{{ report.location }}</td>
+        <td>{{ report.region }}</td>
         <td>{{ formatDateShort(report.created_at) }}</td>
         <td>
           <div class="table-actions">
