@@ -151,8 +151,8 @@ const detailModalRef = ref(null);
 let detailModalInstance = null;
 
 const proofImageUrl = computed(() => {
-  if (!selectedTopUp.value || !selectedTopUp.value.proof_filename) return '';
-  return `/storage/${selectedTopUp.value.proof_filename}`;
+  if (!selectedTopUp.value || !selectedTopUp.value.proof) return '';
+  return `/storage/${selectedTopUp.value.proof}`;
 });
 
 const filteredTopUps = computed(() => {

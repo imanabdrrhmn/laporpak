@@ -1,4 +1,3 @@
-<!-- File: src/components/TopUpHeader.vue -->
 <template>
     <div class="top-up-header-bar">
       <div class="container d-flex justify-content-between align-items-center py-3">
