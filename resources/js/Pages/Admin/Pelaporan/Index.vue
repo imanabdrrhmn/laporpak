@@ -287,7 +287,7 @@ const openFlagSummaryModal = async (reportId) => {
 const performReportAction = async (reportId, action, payload = {}, successMessage = '') => {
   quickActionLoading.value = { ...quickActionLoading.value, [reportId]: true };
   let url = `${API_BASE_URL}/${reportId}`;
-  let httpMethod = 'post';
+  let httpMethod = 'patch';
 
   if (action === 'destroy') {
     httpMethod = 'delete';
@@ -300,7 +300,7 @@ const performReportAction = async (reportId, action, payload = {}, successMessag
     if (httpMethod === 'delete') {
       response = await axios.delete(url);
     } else {
-      response = await axios.post(url, payload);
+      response = await axios.patch(url, payload);
     }
 
     const message = response.data.message || successMessage || `Aksi ${action} berhasil.`;

@@ -143,11 +143,11 @@ Route::middleware(['auth','contact.verified'])->group(function () {
         ->group(function () {
             Route::get('/', [ReportManagementController::class, 'index'])->name('index');
             Route::get('/{report}/flags', [ReportManagementController::class, 'getFlags'])->name('flags.index');
-            Route::post('/{report}/accept', [ReportManagementController::class, 'accept'])->name('accept');
-            Route::post('/{report}/rejected', [ReportManagementController::class, 'reject'])->name('reject');
-            Route::post('/{report}/publish', [ReportManagementController::class, 'publish'])->name('publish');
-            Route::post('/{report}/unpublish', [ReportManagementController::class, 'unpublish'])->name('unpublish');
-            Route::post('/{report}/solved', [ReportManagementController::class, 'solved'])->name('solved');
+            Route::patch('/{report}/accept', [ReportManagementController::class, 'accept'])->name('accept');
+            Route::patch('/{report}/rejected', [ReportManagementController::class, 'reject'])->name('reject');
+            Route::patch('/{report}/publish', [ReportManagementController::class, 'publish'])->name('publish');
+            Route::patch('/{report}/unpublish', [ReportManagementController::class, 'unpublish'])->name('unpublish');
+            Route::patch('/{report}/solved', [ReportManagementController::class, 'solved'])->name('solved');
             Route::delete('/{report}', [ReportManagementController::class, 'destroy'])->name('destroy');
         });
 });
