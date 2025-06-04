@@ -114,7 +114,11 @@ const props = defineProps({
         { value: 'all_time', label: 'Semua Waktu'},
         { value: 'custom', label: 'Kustom Rentang'},
     ]
-  }
+  },
+  canViewDashboard: {
+    type: Boolean,
+    default: false, 
+  },
 });
 
 const dashboardData = ref({
@@ -138,103 +142,108 @@ const selectedPeriod = ref('this_month');
 const customStartDate = ref('');
 const customEndDate = ref('');
 
-const userPermissions = computed(() => page.props.auth?.user?.permissions || []);
-
-const canViewDashboard = computed(() => {
-  return true; 
-});
-
 const API_DASHBOARD_URL = '/api/dashboard-data';
 
 const fetchDashboardData = async () => {
-  isLoading.value = true;
-  fetchError.value = null;
-  try {
-    const params = {
-      period: selectedPeriod.value,
-    };
-    if (selectedPeriod.value === 'custom') {
-      if (customStartDate.value && customEndDate.value) {
-        params.start_date = customStartDate.value;
-        params.end_date = customEndDate.value;
-      } else {
-        fetchError.value = "Untuk periode kustom, tanggal mulai dan akhir harus diisi.";
+    if (!props.canViewDashboard) {
         isLoading.value = false;
-        dashboardData.value = {
+        fetchError.value = "Anda tidak memiliki izin untuk memuat data dashboard.";
+        return;
+    }
+
+    isLoading.value = true;
+    fetchError.value = null;
+    try {
+        const params = {
+            period: selectedPeriod.value,
+        };
+        if (selectedPeriod.value === 'custom') {
+            if (customStartDate.value && customEndDate.value) {
+                params.start_date = customStartDate.value;
+                params.end_date = customEndDate.value;
+            } else {
+                fetchError.value = "Untuk periode kustom, tanggal mulai dan akhir harus diisi.";
+                isLoading.value = false;
+                dashboardData.value = {
+                    dashboardStats: { laporanMasuk: {}, laporanTerverifikasi: {}, totalPengguna: {}, saldoTopUp: {} },
+                    recentReports: [], reportStatusCounts: {}
+                };
+                return;
+            }
+        }
+
+        const response = await axios.get(API_DASHBOARD_URL, { params });
+        dashboardData.value = response.data;
+
+        if (response.data.dashboardStats?.filter_period) {
+            selectedPeriod.value = response.data.dashboardStats.filter_period;
+        }
+        if (response.data.dashboardStats?.current_period_start) {
+            customStartDate.value = response.data.dashboardStats.current_period_start;
+        }
+        if (response.data.dashboardStats?.current_period_end) {
+            customEndDate.value = response.data.dashboardStats.current_period_end;
+        }
+
+    } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        // Display user-friendly message from API error, or generic one
+        fetchError.value = error.response?.data?.message || error.message || "Gagal memuat data dashboard.";
+        dashboardData.value = { // Reset data on error
             dashboardStats: { laporanMasuk: {}, laporanTerverifikasi: {}, totalPengguna: {}, saldoTopUp: {} },
             recentReports: [], reportStatusCounts: {}
         };
-        return;
-      }
+    } finally {
+        isLoading.value = false;
     }
-
-    const response = await axios.get(API_DASHBOARD_URL, { params });
-    dashboardData.value = response.data;
-
-    if (response.data.dashboardStats?.filter_period) {
-        selectedPeriod.value = response.data.dashboardStats.filter_period;
-    }
-    if (response.data.dashboardStats?.current_period_start) {
-        customStartDate.value = response.data.dashboardStats.current_period_start;
-    }
-     if (response.data.dashboardStats?.current_period_end) {
-        customEndDate.value = response.data.dashboardStats.current_period_end;
-    }
-
-  } catch (error) {
-    console.error("Error fetching dashboard data:", error);
-    fetchError.value = error.response?.data?.message || error.message || "Gagal memuat data dashboard.";
-    dashboardData.value = {
-        dashboardStats: { laporanMasuk: {}, laporanTerverifikasi: {}, totalPengguna: {}, saldoTopUp: {} },
-        recentReports: [], reportStatusCounts: {}
-    };
-  } finally {
-    isLoading.value = false;
-  }
 };
 
 const handlePeriodChange = () => {
-  if (selectedPeriod.value === 'custom' && (!customStartDate.value || !customEndDate.value)) {
-    return;
-  }
-  if (selectedPeriod.value === 'custom' && customStartDate.value && customEndDate.value) {
-      if (new Date(customStartDate.value) > new Date(customEndDate.value)) {
-          fetchError.value = "Tanggal mulai tidak boleh setelah tanggal akhir.";
-          dashboardData.value = {
-              dashboardStats: { laporanMasuk: {}, laporanTerverifikasi: {}, totalPengguna: {}, saldoTopUp: {} },
-              recentReports: [], reportStatusCounts: {}
-          };
-          return;
-      }
-  }
-  fetchDashboardData();
+    if (selectedPeriod.value === 'custom' && (!customStartDate.value || !customEndDate.value)) {
+        return; 
+    }
+    if (selectedPeriod.value === 'custom' && customStartDate.value && customEndDate.value) {
+        if (new Date(customStartDate.value) > new Date(customEndDate.value)) {
+            fetchError.value = "Tanggal mulai tidak boleh setelah tanggal akhir.";
+            dashboardData.value = {
+                dashboardStats: { laporanMasuk: {}, laporanTerverifikasi: {}, totalPengguna: {}, saldoTopUp: {} },
+                recentReports: [], reportStatusCounts: {}
+            };
+            return;
+        }
+    }
+    fetchDashboardData();
 };
 
 onMounted(() => {
-  if (selectedPeriod.value === 'custom' && !customStartDate.value && !customEndDate.value) {
-      const today = new Date();
-      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      customStartDate.value = firstDayOfMonth.toISOString().split('T')[0];
-      customEndDate.value = today.toISOString().split('T')[0];
-  }
-  fetchDashboardData();
+    if (props.canViewDashboard) {
+        if (selectedPeriod.value === 'custom' && !customStartDate.value && !customEndDate.value) {
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            customStartDate.value = firstDayOfMonth.toISOString().split('T')[0];
+            customEndDate.value = today.toISOString().split('T')[0];
+        }
+        fetchDashboardData();
+    } else {
+        isLoading.value = false;
+    }
 });
 
 const formatNumber = (number) => {
-  if (number === undefined || number === null || isNaN(parseFloat(number))) return '0';
-  return parseFloat(number).toLocaleString('id-ID');
+    if (number === undefined || number === null || isNaN(parseFloat(number))) return '0';
+    return parseFloat(number).toLocaleString('id-ID');
 };
 
 const getStatusClass = (status) => {
-  switch (status?.toLowerCase()) {
-    case 'pending': return 'text-warning';
-    case 'approved': return 'text-primary';
-    case 'published': return 'text-success';
-    case 'solved': return 'text-info';
-    case 'rejected': return 'text-danger';
-    case 'unpublished': return 'text-secondary';
-    default: return 'text-secondary';
-  }
+    switch (status?.toLowerCase()) {
+        case 'pending': return 'text-warning';
+        case 'approved': return 'text-primary';
+        case 'published': return 'text-success';
+        case 'solved': return 'text-info';
+        case 'rejected': return 'text-danger';
+        case 'unpublished': return 'text-secondary';
+        default: return 'text-secondary';
+    }
 };
 
 const exportStatusData = () => console.log('Export status data triggered', dashboardData.value.reportStatusCounts);

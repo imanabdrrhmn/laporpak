@@ -48,7 +48,7 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
     
                 'isAdmin' => $user?->hasAnyRole(['admin', 'verifier']),
-    
+                'IsSuperAdmin' => $user?->hasRole('admin'),
                 'needsEmailVerification' => $user?->email && !$user?->hasVerifiedEmail(),
                 'needsPhoneVerification' => $user?->no_hp && !$user?->hasVerifiedPhone(),
 

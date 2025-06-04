@@ -6,47 +6,46 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Report;
 use App\Models\User;
-use Illuminate\Support\Facades\DB; // Pastikan DB facade di-import
+use Illuminate\Support\Facades\DB;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\Auth; // Jika ada otorisasi
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Http\Resources\ReportResource; // Untuk recentReports
+use App\Http\Resources\ReportResource;
+use Inertia\Inertia;
 
 class DashboardAdminController extends Controller
 {
-    /**
-     * Menampilkan halaman shell untuk dashboard admin.
-     * Data utama akan diambil via API.
-     */
     public function index(Request $request)
-    {
-        // Anda bisa mengirim props awal yang statis atau konfigurasi ke Vue jika perlu
-        // Misalnya, daftar opsi periode filter
-        $availablePeriods = [
-            ['value' => 'today', 'label' => 'Hari Ini'],
-            ['value' => 'yesterday', 'label' => 'Kemarin'],
-            ['value' => 'this_week', 'label' => 'Minggu Ini'],
-            ['value' => 'last_week', 'label' => 'Minggu Lalu'],
-            ['value' => 'this_month', 'label' => 'Bulan Ini'],
-            ['value' => 'last_month', 'label' => 'Bulan Lalu'],
-            ['value' => 'this_year', 'label' => 'Tahun Ini'],
-            ['value' => 'last_year', 'label' => 'Tahun Lalu'],
-            ['value' => 'all_time', 'label' => 'Semua Waktu'],
-            ['value' => 'custom', 'label' => 'Kustom Rentang'],
-        ];
+        {
+            $canViewDashboard = $request->user() && $request->user()->can('view_dashboard');
 
-        return inertia('Admin/Dashboard/DashboardAdmin', [
-            'availablePeriods' => $availablePeriods,
-        ]);
-    }
+            if (!$canViewDashboard) {
+                return Inertia::render('Admin/Dashboard/DashboardAdmin', [
+                    'canViewDashboard' => false,
+                ]);
+            }
 
-    /**
-     * Menyediakan data dashboard sebagai API endpoint.
-     * Menerima parameter filter periode.
-     */
+            $availablePeriods = [
+                ['value' => 'today', 'label' => 'Hari Ini'],
+                ['value' => 'yesterday', 'label' => 'Kemarin'],
+                ['value' => 'this_week', 'label' => 'Minggu Ini'],
+                ['value' => 'last_week', 'label' => 'Minggu Lalu'],
+                ['value' => 'this_month', 'label' => 'Bulan Ini'],
+                ['value' => 'last_month', 'label' => 'Bulan Lalu'],
+                ['value' => 'this_year', 'label' => 'Tahun Ini'],
+                ['value' => 'last_year', 'label' => 'Tahun Lalu'],
+                ['value' => 'all_time', 'label' => 'Semua Waktu'],
+                ['value' => 'custom', 'label' => 'Kustom Rentang'],
+            ];
+
+            return inertia('Admin/Dashboard/DashboardAdmin', [
+                'availablePeriods' => $availablePeriods,
+                'canViewDashboard' => $canViewDashboard
+            ]);
+        }
+
     public function getDashboardData(Request $request)
     {
-        // Otorisasi jika perlu (misalnya, pastikan user adalah admin/verifier)
         $user = Auth::user();
         if (!$user || !($user->hasRole('admin') || $user->hasRole('verifier'))) {
             return response()->json(['message' => 'Akses tidak diizinkan.'], 403);
@@ -64,45 +63,37 @@ class DashboardAdminController extends Controller
         }
 
 
-        // Laporan Masuk
         $laporanMasukThisPeriod = $this->getReportCount($dateRanges->currentStart, $dateRanges->currentEnd);
         $laporanMasukLastPeriod = $this->getReportCount($dateRanges->previousStart, $dateRanges->previousEnd);
         $laporanMasukPercentage = $this->calcPercentageChange($laporanMasukThisPeriod, $laporanMasukLastPeriod);
-        $totalLaporanMasuk = Report::count(); // Total keseluruhan
+        $totalLaporanMasuk = Report::count();
 
-        // Laporan Terverifikasi
         $laporanTerverifikasiThisPeriod = $this->getVerifiedReportCount($dateRanges->currentStart, $dateRanges->currentEnd);
         $laporanTerverifikasiLastPeriod = $this->getVerifiedReportCount($dateRanges->previousStart, $dateRanges->previousEnd);
         $laporanTerverifikasiPercentage = $this->calcPercentageChange($laporanTerverifikasiThisPeriod, $laporanTerverifikasiLastPeriod);
-        $totalLaporanTerverifikasi = Report::whereIn('status', ['published', 'approved'])->count(); // Total keseluruhan
+        $totalLaporanTerverifikasi = Report::whereIn('status', ['published', 'approved'])->count();
 
-        // Total Pengguna
         $totalPenggunaThisPeriod = $this->getUserCount($dateRanges->currentStart, $dateRanges->currentEnd);
         $totalPenggunaLastPeriod = $this->getUserCount($dateRanges->previousStart, $dateRanges->previousEnd);
         $totalPenggunaPercentage = $this->calcPercentageChange($totalPenggunaThisPeriod, $totalPenggunaLastPeriod);
-        $totalPengguna = User::count(); // Total keseluruhan
+        $totalPengguna = User::count();
 
-        // Saldo Top Up (Pastikan tabel 'top_ups' dan kolom 'amount', 'status', 'created_at' ada)
         $saldoTopUpThisPeriod = $this->getTopUpAmount($dateRanges->currentStart, $dateRanges->currentEnd);
         $saldoTopUpLastPeriod = $this->getTopUpAmount($dateRanges->previousStart, $dateRanges->previousEnd);
         $saldoTopUpPercentage = $this->calcPercentageChange($saldoTopUpThisPeriod, $saldoTopUpLastPeriod);
-        $totalSaldoTopUp = DB::table('top_ups')->where('status', 'verified')->sum('amount'); // Total keseluruhan
+        $totalSaldoTopUp = DB::table('top_ups')->where('status', 'verified')->sum('amount');
 
-        // Data untuk Charts (sekarang difilter berdasarkan periode)
         $reportStatusCounts = Report::select('status', DB::raw('count(*) as total'))
-            ->whereBetween('created_at', [$dateRanges->currentStart, $dateRanges->currentEnd]) // Filter berdasarkan periode
+            ->whereBetween('created_at', [$dateRanges->currentStart, $dateRanges->currentEnd])
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
 
-        // Laporan Terbaru (bisa tetap all-time atau difilter periode jika diinginkan)
-        // Untuk contoh ini, kita buat recentReports juga mengikuti periode filter
         $recentReportsQuery = Report::with('user')
                                 ->whereBetween('created_at', [$dateRanges->currentStart, $dateRanges->currentEnd]);
         
-        // Jika periode 'all_time', mungkin tidak ingin limit, atau limit lebih besar
         if ($filterPeriod === 'all_time') {
-            $recentReports = $recentReportsQuery->latest()->take(10)->get(); // Ambil lebih banyak untuk all_time
+            $recentReports = $recentReportsQuery->latest()->take(10)->get();
         } else {
             $recentReports = $recentReportsQuery->latest()->take(5)->get();
         }
@@ -133,7 +124,6 @@ class DashboardAdminController extends Controller
                 'percentage' => $saldoTopUpPercentage,
                 'period_label' => $dateRanges->label,
             ],
-            // Informasi filter yang sedang aktif bisa dikirim kembali untuk konfirmasi di FE
             'filter_period' => $filterPeriod,
             'current_period_start' => $dateRanges->currentStart->toDateString(),
             'current_period_end' => $dateRanges->currentEnd->toDateString(),
@@ -141,14 +131,11 @@ class DashboardAdminController extends Controller
 
         return response()->json([
             'dashboardStats' => $dashboardStats,
-            'recentReports' => ReportResource::collection($recentReports), // Gunakan resource
-            'reportStatusCounts' => $reportStatusCounts, // Sebelumnya 'reportData'
+            'recentReports' => ReportResource::collection($recentReports),
+            'reportStatusCounts' => $reportStatusCounts,
         ]);
     }
 
-    // Helper methods (getReportCount, getVerifiedReportCount, dll.) tetap sama
-    // Pastikan semua helper method ini ada dan berfungsi dengan benar.
-    // ... (kode helper method dari controller aslimu) ...
     private function getReportCount(CarbonImmutable $start, CarbonImmutable $end)
     {
         return Report::whereBetween('created_at', [$start, $end])->count();
@@ -156,10 +143,8 @@ class DashboardAdminController extends Controller
 
     private function getVerifiedReportCount(CarbonImmutable $start, CarbonImmutable $end)
     {
-        // Menggunakan updated_at untuk laporan terverifikasi mungkin lebih tepat jika status berubah
-        // Jika verifikasi dicatat berdasarkan created_at laporan, maka gunakan 'created_at'
         return Report::whereIn('status', ['published', 'approved'])
-            ->whereBetween('created_at', [$start, $end]) // atau 'updated_at'
+            ->whereBetween('created_at', [$start, $end])
             ->count();
     }
 
@@ -170,13 +155,12 @@ class DashboardAdminController extends Controller
 
     private function getTopUpAmount(CarbonImmutable $start, CarbonImmutable $end)
     {
-        // Pastikan tabel 'top_ups' ada dan memiliki kolom yang benar
         if (!\Illuminate\Support\Facades\Schema::hasTable('top_ups')) {
             Log::warning('Table "top_ups" does not exist. Returning 0 for getTopUpAmount.');
             return 0;
         }
         return DB::table('top_ups')
-            ->where('status', 'verified') // Asumsi status 'verified' atau 'completed'
+            ->where('status', 'verified')
             ->whereBetween('created_at', [$start, $end])
             ->sum('amount');
     }
@@ -184,11 +168,11 @@ class DashboardAdminController extends Controller
     private function resolveDateRanges(string $period, ?string $customStartDate, ?string $customEndDate): object
     {
         $now = CarbonImmutable::now();
-        $currentStart = $now->startOfMonth(); // Default: this_month
+        $currentStart = $now->startOfMonth();
         $currentEnd = $now->endOfMonth();
         $previousStart = $now->subMonthNoOverflow()->startOfMonth();
         $previousEnd = $now->subMonthNoOverflow()->endOfMonth();
-        $label = "vs Bulan Sebelumnya"; // Default label
+        $label = "vs Bulan Sebelumnya";
 
         switch ($period) {
             case 'today':
@@ -220,7 +204,6 @@ class DashboardAdminController extends Controller
                 $label = "vs Minggu Sebelumnya";
                 break;
             case 'this_month':
-                // Default sudah benar
                 break;
             case 'last_month':
                 $currentStart = $now->subMonthNoOverflow()->startOfMonth();
@@ -261,8 +244,6 @@ class DashboardAdminController extends Controller
                         }
                     } catch (\Exception $e) {
                         Log::error('Invalid custom date range in DashboardAdminController: ' . $e->getMessage() . " Dates: $customStartDate, $customEndDate");
-                        // Fallback ke default (this_month) jika custom date tidak valid
-                        // Atau bisa throw error ke client
                         throw new \InvalidArgumentException("Rentang tanggal kustom tidak valid: " . $e->getMessage());
                     }
                 } else {
@@ -270,19 +251,15 @@ class DashboardAdminController extends Controller
                 }
                 break;
             case 'all_time':
-                // Untuk all_time, currentStart bisa dari data terlama, currentEnd adalah sekarang
-                // Previous period bisa di set sangat jauh ke belakang atau tidak dibandingkan (percentage 0)
                 $minReportDate = Report::min('created_at');
-                $currentStart = $minReportDate ? CarbonImmutable::parse($minReportDate)->startOfDay() : $now->subYears(10)->startOfYear(); // Fallback 10 tahun jika tidak ada report
+                $currentStart = $minReportDate ? CarbonImmutable::parse($minReportDate)->startOfDay() : $now->subYears(10)->startOfYear();
                 $currentEnd = $now->endOfDay();
-                // Untuk 'all_time', perbandingan persentase mungkin tidak relevan, jadi previous bisa diabaikan atau diset agar persentase 0
-                $previousStart = $currentStart->subSecond(); // Periode sebelumnya yang tidak akan ada datanya
+                $previousStart = $currentStart->subSecond();
                 $previousEnd = $currentStart->subSecond();
                 $label = "(Semua Waktu)";
                 break;
             default:
                 Log::warning("Invalid period '{$period}' requested for dashboard. Defaulting to 'this_month'.");
-                // Default sudah 'this_month'
                 break;
         }
 
@@ -292,7 +269,7 @@ class DashboardAdminController extends Controller
             'previousStart' => $previousStart,
             'previousEnd' => $previousEnd,
             'label' => $label,
-            'selected_period' => $period // Kirim kembali periode yang dipilih
+            'selected_period' => $period
         ];
     }
 
@@ -301,7 +278,7 @@ class DashboardAdminController extends Controller
         if ($previous == 0) {
             return $current > 0 ? 100.0 : 0.0;
         }
-        if ($current == 0 && $previous == 0) return 0.0; // Hindari NaN jika keduanya 0
-        return round((($current - $previous) / abs($previous)) * 100, 1); // Gunakan abs($previous) untuk menghindari pembagian dengan negatif jika ada penurunan drastis
+        if ($current == 0 && $previous == 0) return 0.0;
+        return round((($current - $previous) / abs($previous)) * 100, 1);
     }
 }

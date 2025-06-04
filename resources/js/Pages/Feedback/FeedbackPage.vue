@@ -185,7 +185,7 @@
           :disabled="currentPage === 1"
           @click="currentPage--"
         >
-          <i class="bi bi-chevron-left"></i> Previous
+          <i class="bi bi-chevron-left"></i> Sebelumnya
         </button>
         <span class="mx-2 align-self-center">{{ currentPage }} / {{ totalPages }}</span>
         <button
@@ -193,7 +193,7 @@
           :disabled="currentPage === totalPages"
           @click="currentPage++"
         >
-          Next <i class="bi bi-chevron-right"></i>
+          Selanjutnya <i class="bi bi-chevron-right"></i>
         </button>
       </div>
 
