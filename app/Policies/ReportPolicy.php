@@ -15,17 +15,14 @@ class ReportPolicy
 
     public function view(User $user, Report $report)
     {
-        // Jika user punya permission view_reports_by_region, batasi akses berdasarkan region
         if ($user->can('view_reports_by_region')) {
             $allowedRegions = $user->allowed_regions ?? [];
 
-            // Jika region laporan tidak ada di allowedRegions, tolak akses
             if (!in_array($report->region, $allowedRegions)) {
                 return false;
             }
         }
 
-        // Cek permission spesifik berdasarkan jenis service laporan
         if ($report->service === 'Penipuan') {
             return $user->can('view_reports_penipuan');
         }
@@ -34,7 +31,6 @@ class ReportPolicy
             return $user->can('view_reports_infrastruktur');
         }
 
-        // Default tolak jika service tidak dikenali
         return false;
     }
 

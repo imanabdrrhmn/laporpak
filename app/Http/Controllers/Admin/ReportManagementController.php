@@ -109,9 +109,24 @@ class ReportManagementController extends Controller
         return response()->json(['flags' => $flags]);
     }
 
+    private function validateReportStatus(Report $report, $expectedStatus, string $actionName = 'melakukan aksi ini')
+    {
+        $statuses = is_array($expectedStatus) ? $expectedStatus : [$expectedStatus];
+        if (!in_array($report->status, $statuses)) {
+            $statusString = implode("' atau '", $statuses);
+            abort(422, "Laporan harus berstatus '{$statusString}' untuk {$actionName}. Status saat ini: '{$report->status}'.");
+        }
+    }
+
     public function accept(Request $request, Report $report)
     {
         $this->authorize('verify_reports', $report); 
+        if ($report->status === 'rejected') {
+            if (!$request->user()->hasRole('admin')) {
+                abort(403, 'Mohon hubungi admin untuk menerima laporan ini.');
+            }
+        }
+        $this->validateReportStatus($report, ['pending','rejected'], 'diterima');
         $report->status = 'approved';
         $report->save();
         return new ReportResource($report->loadMissing(['user'])->loadCount('flags'));
@@ -120,6 +135,12 @@ class ReportManagementController extends Controller
     public function reject(Request $request, Report $report)
     {
         $this->authorize('verify_reports', $report); 
+        if ($report->status === 'approved') {
+            if (!$request->user()->hasRole('admin')) {
+                abort(403, 'Mohon hubungi admin untuk menolak laporan ini.');
+            }
+        }
+        $this->validateReportStatus($report, ['pending','approved'], 'ditolak');
         $report->status = 'rejected';
         $report->save();
         SendReportRejectedMailJob::dispatch($report->user, $report); 
@@ -129,6 +150,12 @@ class ReportManagementController extends Controller
     public function publish(Request $request, Report $report)
     {
         $this->authorize('verify_reports', $report);
+        if ($report->status === 'unpublished') {
+            if (!$request->user()->hasRole('admin')) {
+                abort(403, 'Hanya admin yang dapat menerbitkan ulang laporan yang dibatalkan publikasinya.');
+            }
+        }
+        $this->validateReportStatus($report,  ['approved', 'unpublished'], 'dipublikasikan');
         $report->status = 'published';
         $report->save();
         SendReportPublishedMailJob::dispatch($report->user, $report);
@@ -138,6 +165,7 @@ class ReportManagementController extends Controller
     public function unpublish(Request $request, Report $report)
     {
         $this->authorize('verify_reports', $report);
+        $this->validateReportStatus($report, 'published', 'dibatalkan publikasinya');
         $validated = $request->validate(['reason' => 'required|string|max:1000']);
         $report->status = 'unpublished';
         $report->reason = $validated['reason']; 
@@ -149,6 +177,7 @@ class ReportManagementController extends Controller
     public function solved(Request $request, Report $report)
     {
         $this->authorize('verify_reports', $report);
+        $this->validateReportStatus($report, 'published', 'ditandai selesai');
         $report->status = 'solved';
         $report->save();
         SendReportSolvedMailJob::dispatch($report->user, $report);

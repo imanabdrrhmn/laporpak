@@ -411,7 +411,7 @@ const handleAction = (aksi) => {
 
 @media (max-width: 576px) {
   .quick-actions-wrapper {
-    padding: clamp(1rem, 3vw, 1.5rem);
+    padding: clamp(1.5rem, 3vw, 1.5rem);
   }
 
   .layout-grid {
@@ -419,7 +419,7 @@ const handleAction = (aksi) => {
   }
 
   .quick-actions-grid {
-    gap: clamp(0.5rem, 1.5vw, 0.75rem);
+    gap: clamp(0.7rem, 1vw, 0.75rem);
   }
 
   .action-item {
@@ -432,7 +432,7 @@ const handleAction = (aksi) => {
 
   .action-icon {
     margin-bottom: 0;
-    margin-right: 1rem;
+    margin-right: 0.5rem;
   }
 
   .action-icon i {
@@ -441,6 +441,10 @@ const handleAction = (aksi) => {
 
   .action-label {
     font-size: 0.7rem;
+  }
+
+  .action-description{
+    display: none;
   }
 }
 </style>

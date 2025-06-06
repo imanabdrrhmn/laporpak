@@ -1,8 +1,7 @@
 <template>
   <div class="card shadow">
-    <div class="card-header bg-white py-3">
-      <h5 class="mb-0">Riwayat Transaksi</h5>
-    </div>
+      <h5 class="mb-3">Riwayat Transaksi</h5>
+    <div class="table-container">
     <div class="table-responsive">
       <table class="table table-hover m-0">
         <thead class="table-light">
@@ -75,6 +74,7 @@
         </tbody>
       </table>
     </div>
+    </div>
     <div v-if="topUps.last_page > 1" class="card-footer bg-white">
       <nav aria-label="Page navigation">
         <ul class="pagination pagination-sm justify-content-center flex-wrap mb-0">
@@ -135,6 +135,14 @@ const totalPages = computed(() => {
 </script>
 
 <style scoped>
+
+.table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
 .user-avatar {
   width: 40px;
   height: 40px;

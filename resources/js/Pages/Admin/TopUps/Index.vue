@@ -1,4 +1,3 @@
-```vue
 <template>
   <AppLayout>
     <Head title="Manajemen Top Up" />
@@ -110,14 +109,18 @@ let actionModalInstance = null;
 const openActionModal = (topUp) => {
   selectedTopUp.value = topUp;
   isModalOpen.value = true;
-  if (!actionModalInstance && actionModalRef.value) {
-    actionModalInstance = new Modal(actionModalRef.value);
+  if (!actionModalInstance && actionModalRef.value && actionModalRef.value.$el) {
+    actionModalInstance = new Modal(actionModalRef.value.$el);
     actionModalInstance._element.addEventListener("hidden.bs.modal", () => {
       isModalOpen.value = false;
       selectedTopUp.value = null;
     });
   }
-  actionModalInstance.show();
+  if (actionModalInstance) {
+    actionModalInstance.show();
+  } else {
+    console.error("Bootstrap Action Modal instance could not be initialized.");
+  }
 };
 
 const closeActionModal = () => {
@@ -127,14 +130,18 @@ const closeActionModal = () => {
 const showProofModal = (path) => {
   proofModalUrl.value = getProofUrl(path);
   isModalOpen.value = true;
-  if (!proofModalInstance.value && proofModalRef.value) {
-    proofModalInstance.value = new Modal(proofModalRef.value);
+  if (!proofModalInstance.value && proofModalRef.value && proofModalRef.value.$el) {
+    proofModalInstance.value = new Modal(proofModalRef.value.$el);
     proofModalInstance.value._element.addEventListener("hidden.bs.modal", () => {
       isModalOpen.value = false;
       proofModalUrl.value = "";
     });
   }
-  proofModalInstance.value.show();
+  if (proofModalInstance.value) {
+    proofModalInstance.value.show();
+  } else {
+    console.error("Bootstrap Proof Modal instance could not be initialized.");
+  }
 };
 
 const closeProofModal = () => {
@@ -142,10 +149,14 @@ const closeProofModal = () => {
 };
 
 const showExportModal = () => {
-  if (!exportModalInstance.value && exportModalRef.value) {
-    exportModalInstance.value = new Modal(exportModalRef.value);
+  if (!exportModalInstance.value && exportModalRef.value && exportModalRef.value.$el) {
+    exportModalInstance.value = new Modal(exportModalRef.value.$el);
   }
-  exportModalInstance.value.show();
+  if (exportModalInstance.value) {
+    exportModalInstance.value.show();
+  } else {
+    console.error("Bootstrap Export Modal instance could not be initialized.");
+  }
 };
 
 const closeExportModal = () => {
@@ -361,4 +372,3 @@ watch(
   margin-top: -30px !important;
 }
 </style>
-`
