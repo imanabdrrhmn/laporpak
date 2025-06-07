@@ -1,3 +1,4 @@
+```vue
 <template>
   <div>
     <!-- Profile Information Section -->
@@ -24,8 +25,15 @@
                   id="name"
                   v-model="profileForm.name"
                   required
+                  maxlength="30"
                   autocomplete="given-name"
+                  @input="handleNameInput"
                 />
+              </div>
+              <div class="d-flex justify-content-between mt-1">
+                <small :class="{ 'text-danger': profileForm.name.length > 30 }" class="form-text">
+                  {{ profileForm.name.length }}/30 karakter
+                </small>
               </div>
               <div v-if="profileForm.errors.name" class="mt-2 text-sm text-red-600">
                 {{ profileForm.errors.name }}
@@ -140,11 +148,11 @@
                 as="button"
                 class="text-indigo-600 underline hover:text-indigo-800"
               >
-              Klik di sini untuk mengirim ulang email verifikasi.
+                Klik di sini untuk mengirim ulang email verifikasi.
               </Link>
             </p>
             <div v-show="status === 'verification-link-sent'" class="mt-2 text-sm font-medium text-green-600">
-              Link verifikasi baru telah dikirim ke alamat email Anda..
+              Link verifikasi baru telah dikirim ke alamat email Anda.
             </div>
           </div>
         </form>
@@ -302,109 +310,28 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div
-      class="modal fade"
-      :class="{ show: showConfirmationModal }"
-      :style="{ display: showConfirmationModal ? 'block' : 'none' }"
-      tabindex="-1"
-      role="dialog"
-      v-if="showConfirmationModal"
-    >
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header border-0 pb-0">
-            <h5 class="modal-title d-flex align-items-center">
-              <i class="bi bi-question-circle-fill me-2 text-warning"></i>
-              Konfirmasi Perubahan
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              @click="closeConfirmationModal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <p class="mb-3">Apakah Anda yakin ingin menyimpan perubahan berikut?</p>
-            <div class="bg-light p-3 rounded">
-              <h6 class="mb-2 fw-semibold">Data yang akan disimpan:</h6>
-              <ul class="mb-0 list-unstyled">
-                <template v-if="hasProfileFormChanged">
-                  <li><strong>Nama:</strong> {{ profileForm.name }}</li>
-                  <li><strong>Email:</strong> {{ profileForm.email }}</li>
-                  <li v-if="profileForm.no_hp"><strong>No. Telp:</strong> {{ profileForm.no_hp }}</li>
-                  <li><strong>Jenis Kelamin:</strong> {{ profileForm.gender === 'male' ? 'Laki-laki' : 'Perempuan' }}</li>
-                </template>
-                <template v-if="hasPasswordFormChanged">
-                  <li><strong>Password:</strong> (Akan diperbarui)</li>
-                </template>
-                <li v-if="!hasProfileFormChanged && !hasPasswordFormChanged">Tidak ada perubahan.</li>
-              </ul>
-            </div>
-          </div>
-          <div class="modal-footer border-0 pt-0">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              @click="closeConfirmationModal"
-              :disabled="profileForm.processing || passwordForm.processing"
-            >
-              <i class="bi bi-x-circle me-2"></i>
-              Batal
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="submitForms"
-              :disabled="profileForm.processing || passwordForm.processing"
-            >
-              <span v-if="profileForm.processing || passwordForm.processing">
-                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                Menyimpan...
-              </span>
-              <span v-else>
-                <i class="bi bi-check-circle me-2"></i>
-                Ya, Simpan
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ConfirmationModal
+      :show="showConfirmationModal"
+      :profileForm="profileForm"
+      :passwordForm="passwordForm"
+      :hasProfileFormChanged="hasProfileFormChanged"
+      :hasPasswordFormChanged="hasPasswordFormChanged"
+      :isPasswordValid="isPasswordValid"
+      :isPasswordMatch="isPasswordMatch"
+      @close="closeConfirmationModal"
+      @submit="submitForms"
+    />
 
     <!-- Password Success Modal -->
-    <div class="modal fade" id="passwordSuccessModal" tabindex="-1" aria-labelledby="passwordSuccessModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header border-0 pb-0">
-            <h5 class="modal-title text-success" id="passwordSuccessModalLabel">
-              <i class="bi bi-check-circle-fill me-2"></i>
-              Berhasil!
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body pt-0">
-            <p class="mb-0">Password Anda berhasil diperbarui. Silakan gunakan password baru untuk login selanjutnya.</p>
-          </div>
-          <div class="modal-footer border-0 pt-0">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Backdrop -->
-    <div
-      v-if="showConfirmationModal"
-      class="modal-backdrop fade show"
-      @click="closeConfirmationModal"
-    ></div>
+    <!-- <PasswordSuccessModal ref="passwordSuccessModal" /> -->
   </div>
 </template>
 
 <script setup>
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref, reactive, computed, nextTick } from 'vue';
+import ConfirmationModal from './ConfirmationModal.vue';
+// import PasswordSuccessModal from './PasswordSuccessModal.vue';
 
 defineProps({
   mustVerifyEmail: {
@@ -457,6 +384,7 @@ const passwordForm = useForm({
 
 const currentPasswordInput = ref(null);
 const passwordInput = ref(null);
+const passwordSuccessModal = ref(null);
 
 // Computed properties
 const isPasswordValid = computed(() => {
@@ -510,6 +438,9 @@ const validateProfileForm = () => {
 
   if (!profileForm.name || profileForm.name.trim().length === 0) {
     validationErrors.name = 'Nama lengkap harus diisi';
+    isValid = false;
+  } else if (profileForm.name.trim().length > 30) {
+    validationErrors.name = 'Nama lengkap maksimal 30 karakter';
     isValid = false;
   }
 
@@ -623,8 +554,7 @@ const submitForms = () => {
             passwordForm.reset();
             resetForms();
             nextTick(() => {
-              const modal = new bootstrap.Modal(document.getElementById('passwordSuccessModal'));
-              modal.show();
+              passwordSuccessModal.value.show();
             });
             resolve('password');
           },
@@ -647,6 +577,13 @@ const submitForms = () => {
   Promise.allSettled(promises).then((results) => {
     closeConfirmationModal();
   });
+};
+
+// Handle Name Input
+const handleNameInput = (e) => {
+  if (profileForm.name.length > 30) {
+    profileForm.name = profileForm.name.slice(0, 30);
+  }
 };
 </script>
 
@@ -679,7 +616,8 @@ const submitForms = () => {
   border-color: #5a67d8;
   outline: none;
 }
-.form-control:disabled, .form-control[readonly] {
+.form-control:disabled,
+.form-control[readonly] {
   background-color: #f8f9fa;
   color: #6c757d;
   cursor: not-allowed;
@@ -714,74 +652,5 @@ const submitForms = () => {
 .spinner-border-sm {
   width: 1rem;
   height: 1rem;
-}
-
-/* Modal Styles */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1055;
-  width: 100%;
-  height: 100%;
-}
-.modal.show {
-  display: block !important;
-}
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1050;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-.modal-dialog-centered {
-  display: flex;
-  align-items: center;
-  min-height: calc(100% - 1rem);
-}
-.modal-content {
-  position: relative;
-  background-color: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 0.375rem;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-.modal-header {
-  padding: 1rem 1rem 0.5rem;
-}
-.modal-body {
-  padding: 0.5rem 1rem;
-}
-.modal-footer {
-  padding: 0.5rem 1rem 1rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-.btn-close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-  color: #000;
-  opacity: 0.5;
-  cursor: pointer;
-}
-.btn-close:hover {
-  opacity: 0.75;
-}
-.is-invalid {
-  border-color: #dc3545;
-}
-.invalid-feedback {
-  display: block;
-  width: 100%;
-  margin-top: 0.25rem;
-  font-size: 0.875em;
-  color: #dc3545;
 }
 </style>
