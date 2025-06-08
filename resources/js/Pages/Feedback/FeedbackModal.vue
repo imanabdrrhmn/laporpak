@@ -514,7 +514,7 @@ defineExpose({
 
 .close-btn:hover {
   background-color: #f8f9fa;
-  color: #0d6efd;
+  color: red;
   transform: rotate(90deg);
 }
 

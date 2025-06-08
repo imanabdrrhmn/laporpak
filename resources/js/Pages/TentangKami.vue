@@ -142,7 +142,7 @@
                     <div class="card-body p-4">
                       <div class="mb-3 d-flex align-items-center">
                         <i class="bi bi-envelope me-3 contact-icon fs-4 animate__animated" data-animation="animate__bounceIn" data-delay="0.3s"></i>
-                        <span>info@laporpak.id</span>
+                        <span>info@laporpak.com</span>
                       </div>
                       <div class="mb-3 d-flex align-items-center">
                         <i class="bi bi-telephone me-3 contact-icon fs-4 animate__animated" data-animation="animate__bounceIn" data-delay="0.5s"></i>

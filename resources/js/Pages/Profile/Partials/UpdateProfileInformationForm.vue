@@ -1,4 +1,4 @@
-```vue
+
 <template>
   <div>
     <!-- Profile Information Section -->

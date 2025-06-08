@@ -107,8 +107,7 @@ export default {
 }
 
 .close-btn:hover {
-  color: #0d6efd;
-  transform: rotate(90deg);
+  color: red;
 }
 
 h3 {

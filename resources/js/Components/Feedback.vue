@@ -1,6 +1,6 @@
 <template>
   <div class="container py-5">
-    <h2 class="text-center mb-4 mb-md-5">Apa Yang Pengguna Sampaikan Setelah Menggunakan Layanan Kami.</h2>
+    <h2 class="text-center mb-4 mb-md-5">Apa Yang Pengguna Sampaikan Setelah Menggunakan Layanan Kami</h2>
     
     <div class="testimonial-carousel">
       <!-- Baris Pertama -->
@@ -319,6 +319,7 @@ export default {
 }
 
 .carousel-track {
+  display: flex;
   transition: transform 0.1s linear;
   will-change: transform;
 }
@@ -384,40 +385,19 @@ export default {
 .user-category {
   font-size: 12px;
   font-weight: 600;
-  margin-top: 2px;
-  margin-bottom: 0;
+  margin: 2px 0 0;
   padding: 2px 0;
   border-radius: 10px;
-  display: inline-block;
   text-align: center;
   width: 80px;
 }
 
-.category-pelaporan {
-  background-color: #D4EDFF;
-  color: #004085;
-}
-
-.category-verifikasi {
-  background-color: #FFF3CD;
-  color: #856404;
-}
-
-.category-umum {
-  background-color: #D1FAE5;
-  color: #065F46;
-}
-
-.category-cari-laporan {
-  background-color: #D1FAE5;
-  color: #065F46;
-
-}
-
-.category-lapor-map {
-  background-color: #D1FAE5;
-  color: #065F46;
-}
+/* Category Colors */
+.category-pelaporan { background-color: #FFD1D1; color: #B91C1C; }
+.category-verifikasi { background-color: #FFF3CD; color: #856404; }
+.category-umum { background-color: #D1FAE5; color: #065F46; }
+.category-cari-laporan { background-color: #BFDBFE; color: #1E40AF; }
+.category-lapor-map { background-color: #E9D5FF; color: #7E22CE; }
 
 .rating {
   display: flex;
@@ -454,97 +434,43 @@ export default {
   font-size: 14px;
 }
 
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+/* Responsive Design */
 @media (min-width: 576px) {
-  .testimonial-card {
-    width: 320px;
-    padding: 18px;
-  }
-  
-  .user-name {
-    font-size: 18px;
-    max-width: 150px;
-  }
-  
-  .user-category {
-    font-size: 13px;
-    width: 90px;
-  }
-  
-  .avatar {
-    width: 55px;
-    height: 55px;
-  }
-  
-  .testimonial-text {
-    font-size: 15px;
-    line-height: 1.45;
-  }
-  
-  .star-icon {
-    font-size: 20px;
-  }
-  
-  .btn-primary {
-    font-size: 15px;
-  }
+  .testimonial-card { width: 320px; padding: 18px; }
+  .user-name { font-size: 18px; max-width: 150px; }
+  .user-category { font-size: 13px; width: 90px; }
+  .avatar { width: 55px; height: 55px; }
+  .testimonial-text { font-size: 15px; line-height: 1.45; }
+  .star-icon { font-size: 20px; }
+  .btn-primary { font-size: 15px; }
 }
 
 @media (min-width: 768px) {
-  .testimonial-card {
-    width: 350px;
-    padding: 20px;
+  .testimonial-card { width: 350px; padding: 20px; }
+  .user-name { font-size: 20px; max-width: 180px; }
+  .user-category { font-size: 14px; width: 100px; padding: 3px 0; }
+  .avatar { width: 60px; height: 60px; padding: 3px; }
+  .testimonial-text { 
+    font-size: 16px; 
+    line-height: 1.5; 
+    -webkit-line-clamp: 5; 
+    line-clamp: 5; 
   }
-  
-  .user-name {
-    font-size: 20px;
-    max-width: 180px;
-  }
-  
-  .user-category {
-    font-size: 14px;
-    width: 100px;
-    padding: 3px 0;
-  }
-  
-  .avatar {
-    width: 60px;
-    height: 60px;
-    padding: 3px;
-  }
-  
-  .testimonial-text {
-    font-size: 16px;
-    line-height: 1.5;
-    -webkit-line-clamp: 5;
-    line-clamp: 5;
-  }
-  
-  .star-icon {
-    font-size: 22px;
-    margin-left: 2px;
-  }
-  
-  .btn-primary {
-    font-size: 16px;
-    font-weight: lighter;
-  }
-}
-
-.btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
+  .star-icon { font-size: 22px; margin-left: 2px; }
+  .btn-primary { font-size: 16px; font-weight: lighter; }
 }
 
 @media (min-width: 992px) {
-  .testimonial-card {
-    width: 380px;
-  }
+  .testimonial-card { width: 380px; }
 }
 
 @media (min-width: 1200px) {
-  .testimonial-card {
-    width: 400px;
-  }
+  .testimonial-card { width: 400px; }
 }
 
 @media (hover: hover) {
@@ -556,35 +482,16 @@ export default {
 }
 
 @media (max-width: 320px) {
-  .testimonial-card {
-    width: 240px;
-    padding: 12px;
-  }
-  
-  .avatar {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .user-name {
-    font-size: 14px;
-    max-width: 100px;
-  }
-  
-  .user-category {
-    font-size: 11px;
-    width: 70px;
-  }
-  
-  .star-icon {
-    font-size: 16px;
-  }
-  
-  .testimonial-text {
-    font-size: 12px;
-    line-height: 1.3;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+  .testimonial-card { width: 240px; padding: 12px; }
+  .avatar { width: 40px; height: 40px; }
+  .user-name { font-size: 14px; max-width: 100px; }
+  .user-category { font-size: 11px; width: 70px; }
+  .star-icon { font-size: 16px; }
+  .testimonial-text { 
+    font-size: 12px; 
+    line-height: 1.3; 
+    -webkit-line-clamp: 3; 
+    line-clamp: 3; 
   }
 }
 </style>

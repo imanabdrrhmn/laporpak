@@ -4,8 +4,9 @@
     <div class="container py-5">
       <template v-if="canViewTopUp">
         <DashboardHeader />
-        <FilterControls :filters="filters" @update-filters="updateFilters" @show-export-modal="showExportModal" />
+
         <StatusCards :pending-count="pendingCount" :verified-count="verifiedCount" :rejected-count="rejectedCount" />
+        <FilterControls :filters="filters" @update-filters="updateFilters" @show-export-modal="showExportModal" />
         <TransactionTable
           :top-ups="topUps"
           :format-currency="formatCurrency"

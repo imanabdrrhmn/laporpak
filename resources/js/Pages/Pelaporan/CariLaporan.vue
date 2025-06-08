@@ -1,6 +1,6 @@
 <template>
   <AppLayout>
-    <Head title="Cari Laporan - LaporPak" />
+    <Head title="Cari Laporan" />
     <div class="search-container">
       <h2 class="mb-4 page-title">Pencarian Laporan</h2>
 
@@ -20,10 +20,11 @@
       />
 
       <div v-if="loading && !reports.length" class="loading-indicator">
-        <svg aria-hidden="true" class="spinner-icon" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-          <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 50.1208 80.5027 69.2768 60.2711 79.6801C54.7108 82.3998 48.1338 84.3529 41.3896 85.1838C34.6454 86.0147 27.8502 85.6635 21.4064 84.1651C14.9626 82.6667 8.93458 79.9504 3.80109 76.1769C-1.3324 72.4034 -5.99974 67.5066 -9.99958 61.8511" fill="currentFill"/>
-        </svg>
+        <div class="loading-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
         <p class="loading-text">Mencari laporan...</p>
       </div>
       
@@ -75,16 +76,17 @@
         @close="closeFlagModal"
         @reported="handleFlagSubmitted"
       />
-
-      <Section 
-        v-if="showFallbackSectionInfo"
-        :verifiedReports="reportStats.verifiedReports"
-        :totalReports="reportStats.totalReports"
-        :fraudReports="reportStats.fraudReports"
-        :showSearch="false" 
-      />
-      <Feedback :feedbacks="feedbacks" v-if="showFallbackSectionInfo" />
     </div>
+
+    <!-- Pindahkan Section dan Feedback keluar dari search-container -->
+    <Section 
+      v-if="showFallbackSectionInfo"
+      :verifiedReports="reportStats.verifiedReports"
+      :totalReports="reportStats.totalReports"
+      :fraudReports="reportStats.fraudReports"
+      :showSearch="false" 
+    />
+    <Feedback :feedbacks="feedbacks" v-if="showFallbackSectionInfo" />
 
     <button v-if="showScrollTopButton" @click="scrollToTop" class="scroll-top-button" aria-label="Kembali ke atas">
       <i class="fas fa-arrow-up"></i>
@@ -370,8 +372,8 @@ export default {
   font-family: 'Inter', sans-serif;
   background-color: #ffffff;
   border-radius: 8px;
-
 } 
+
 .page-title {
   font-size: 1.75rem;
   font-weight: 700;
@@ -379,37 +381,79 @@ export default {
   text-align: center;
   margin-bottom: 1.5rem;
 }
-.loading-indicator, .error-indicator {
+
+.loading-indicator {
+  text-align: center;
+  padding: 40px 20px;
+  margin-top: 20px;
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes pulse {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.loading-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 500;
+}
+
+.error-indicator {
   text-align: center;
   padding: 30px 20px;
   margin-top: 20px;
   border-radius: 8px;
-}
-.loading-indicator .spinner-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  display: inline-block;
-  color: #d1d5db;
-  fill: #3b82f6;
-}
-.loading-indicator .loading-text {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-.error-indicator {
   background-color: #fee2e2;
   border: 1px solid #fecaca;
   color: #991b1b;
 }
+
 .error-indicator .error-title {
   font-weight: 600;
   font-size: 1.125rem;
 }
+
 .error-indicator .error-message {
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
+
 .retry-button {
   padding: 0.5rem 1rem;
   background-color: #3b82f6;
@@ -419,9 +463,11 @@ export default {
   transition: background-color 0.2s;
   border: none;
 }
+
 .retry-button:hover {
   background-color: #2563eb;
 }
+
 .scroll-top-button {
   position: fixed;
   bottom: 20px;
@@ -443,11 +489,26 @@ export default {
   transform: translateY(100px);
   z-index: 1000;
 }
+
 .scroll-top-button:hover {
   background-color: #2563eb;
 }
+
 .scroll-top-button[style*="display: block"] {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* CSS tambahan untuk responsive jika diperlukan */
+@media (max-width: 768px) {
+  .search-container {
+    margin: 1rem auto;
+    padding: 15px;
+    border-radius: 4px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
 }
 </style>

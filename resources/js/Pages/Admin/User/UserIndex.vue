@@ -196,7 +196,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 }
 
 .gradient-header {
-  background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
   border-radius: 0.5rem;
   position: relative;
   overflow: hidden;
@@ -279,14 +279,14 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 }
 
 .nav-tabs-modern .nav-link:hover {
-  color: #4e73df;
+  color: #0d6efd;
   background-color: rgba(78, 115, 223, 0.05);
 }
 
 .nav-tabs-modern .nav-link.active {
-  color: #4e73df;
+  color: #0d6efd;
   background-color: transparent;
-  border-bottom: 3px solid #4e73df;
+  border-bottom: 3px solid #0d6efd;
 }
 
 /* Search Container */
@@ -303,7 +303,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 
 .search-container .form-control:focus {
   box-shadow: none;
-  border-color: #4e73df;
+  border-color: #0d6efd;
 }
 
 .search-container .input-group-text {
@@ -328,7 +328,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 }
 
 .custom-select:focus {
-  border-color: #4e73df;
+  border-color: #0d6efd;
   box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
 }
 
@@ -400,7 +400,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 .user-avatar {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -408,7 +408,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
   justify-content: center;
   font-weight: 600;
   font-size: 1.2rem;
-  box-shadow: 0 2px 10px rgba(78, 115, 223, 0.25);
+
 }
 
 /* Role Badges */
@@ -431,7 +431,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 
 /* Custom Role Select */
 .custom-role-select {
-  border-color: #4e73df;
+  border-color: #0d6efd;
   font-weight: 500;
   padding: 0.375rem 0.75rem;
   border-radius: 0.375rem;
@@ -486,7 +486,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
   height: 28px;
   border-radius: 50%;
   background-color: rgba(78, 115, 223, 0.15);
-  color: #4e73df;
+  color: #0d6efd;
 }
 
 /* Users Count Badge */
@@ -524,7 +524,7 @@ function submitPermissions({ userId, permissions, allowed_regions }) {
 }
 
 .swal-confirm:hover {
-  background-color: #2563eb !important;
+  background-color: #0d6efd !important;
 }
 
 .swal-cancel {

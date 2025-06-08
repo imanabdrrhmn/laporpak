@@ -4,16 +4,15 @@
     <div class="row mb-4 align-items-center">
       <div class="col-12 col-md-6 mb-3 mb-md-0">
         <div class="search-container">
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-end-0">
-              <i class="bi bi-search text-primary"></i>
-            </span>
+          <div class="custom-search-field">
             <input 
               type="text" 
               v-model="searchQuery" 
-              class="form-control form-control-lg border-start-0" 
+              class="search-input" 
               placeholder="Cari pengguna..."
             >
+            <i class="bi bi-search search-icon"></i>
+            <div class="search-highlight"></div>
           </div>
         </div>
       </div>
@@ -48,7 +47,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(user, index) in filteredUsers" :key="user.id">
+              <tr v-if="filteredUsers.length === 0">
+                <td colspan="8" class="text-center py-4 text-gray-500">
+                  Tidak ada data pengguna yang ditemukan
+                </td>
+              </tr>
+              <tr v-else v-for="(user, index) in filteredUsers" :key="user.id">
                 <td class="col-no">{{ index + 1 }}</td>
                 <td class="col-name">
                   <div class="user-info">
@@ -126,7 +130,11 @@
 
     <!-- Mobile: card layout -->
     <div class="mobile-card-container">
-      <div v-for="(user, index) in filteredUsers" :key="user.id" class="user-card">
+      <div v-if="filteredUsers.length === 0" class="no-data-card">
+        <i class="bi bi-inbox text-gray-400 mb-2"></i>
+        <p>Tidak ada data pengguna yang ditemukan</p>
+      </div>
+      <div v-else v-for="(user, index) in filteredUsers" :key="user.id" class="user-card">
         <div class="user-header">
           <img :src="user.avatar_url" alt="Avatar" class="user-avatar" />
           <div class="user-details">
@@ -307,11 +315,77 @@ function confirmDelete(userName, form) {
 </script>
 
 <style scoped>
-/* Base styles */
+/* Search Field Styles - New */
 .search-container {
   max-width: 400px;
+  position: relative;
 }
 
+.custom-search-field {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 2px solid #e5e7eb;
+}
+
+.custom-search-field:hover {
+  border-color: #d1d5db;
+}
+
+.custom-search-field:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 45px 12px 20px;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  color: #374151;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.search-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3b82f6;
+  font-size: 16px;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.custom-search-field:focus-within .search-icon {
+  color: #2563eb;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.search-highlight {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #3b82f6;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.custom-search-field:focus-within .search-highlight {
+  width: 100%;
+}
+
+/* Base styles */
 .custom-select-container {
   max-width: 200px;
   display: inline-block;
@@ -529,7 +603,7 @@ function confirmDelete(userName, form) {
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: #0d6efd;
   color: white;
 }
 
@@ -641,6 +715,26 @@ function confirmDelete(userName, form) {
 
 .inline-form {
   flex: 1;
+}
+
+/* No Data Message Styles */
+.no-data-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.no-data-card i {
+  font-size: 2rem;
+  display: block;
+}
+
+.no-data-card p {
+  margin: 0;
+  font-size: 0.875rem;
 }
 
 /* Animations */

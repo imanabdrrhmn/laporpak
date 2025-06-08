@@ -2,7 +2,7 @@
   <div v-if="showImageModal" class="image-modal-overlay" @click="closeImageModal">
       <div class="image-modal-container" @click.stop>
         <button class="image-modal__close" @click="closeImageModal" aria-label="Tutup pratinjau gambar">
-          <i class="fas fa-times"></i>
+          ×
         </button>
         <div class="image-modal__content">
           <img 
@@ -45,7 +45,7 @@
         </div>
       </div>
       <div v-if="report.location" class="location-badge">
-        <i class="fas fa-map-marker-alt location-icon"></i>
+        <i class="bi bi-geo-alt location-icon"></i>
         <span class="location-text">{{ truncateText(report.region, 30) }}</span>
       </div>
     </div>
@@ -279,21 +279,33 @@ export default {
   align-items: center;
   gap: 6px;
   font-size: 0.8rem;
-  color: #495057;
+  color: #6c757d;
   background-color: #f8f9fa;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
   align-self: flex-start;
-  margin-top: 4px;
+  margin-top: 6px;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
 }
+
+.location-badge:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+}
+
 .location-icon {
-  color: #0d6efd;
+  color: #495057;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
+
 .location-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  font-weight: 500;
 }
 
 .report-card__content {
@@ -318,6 +330,7 @@ export default {
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -400,27 +413,29 @@ export default {
 
 .image-modal__close {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 36px;
-  height: 36px;
-  background-color: rgba(0,0,0,0.5);
+  top: 15px;
+  right: 15px;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.9);
   border: none;
-  border-radius: 50%;
-  color: white;
+  border-radius: 8px;
+  color: #333;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 30px;
+  font-weight: bold;
   z-index: 10;
-  transition: background-color 0.2s ease;
-}
-.image-modal__close:hover {
-  background-color: rgba(0,0,0,0.7);
-}
-.image-modal__close i {
+  transition: all 0.3s ease;
   line-height: 1;
+}
+
+.image-modal__close:hover {
+  background: white;
+  color: #000;
+  transform: rotate(180deg) scale(1.1);
 }
 
 .image-modal__content {
@@ -473,7 +488,7 @@ export default {
   }
   .location-badge {
     font-size: 0.75rem;
-    padding: 3px 7px;
+    padding: 5px 8px;
   }
   .report-card__content {
     padding: 12px;
@@ -485,6 +500,14 @@ export default {
   .detail-button, .flag-button {
     font-size: 0.8rem;
     padding: 7px 12px;
+  }
+  
+  .image-modal__close {
+    top: 10px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+    font-size: 26px;
   }
 }
 </style>

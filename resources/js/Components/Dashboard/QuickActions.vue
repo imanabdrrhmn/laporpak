@@ -18,8 +18,10 @@
             <i :class="aksi.iconClass"></i>
             <span v-if="aksi.badge && props.showBadges" class="action-badge">{{ aksi.badge }}</span>
           </div>
-          <span class="action-label">{{ aksi.label }}</span>
-          <span v-if="aksi.description" class="action-description">{{ aksi.description }}</span>
+          <div class="action-content">
+            <span class="action-label">{{ aksi.label }}</span>
+            <span v-if="aksi.description" class="action-description">{{ aksi.description }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -329,6 +331,7 @@ const handleAction = (aksi) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .action-icon i {
@@ -356,26 +359,40 @@ const handleAction = (aksi) => {
   font-weight: bold;
 }
 
+.action-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  min-width: 0; /* Allows text to shrink */
+}
+
 .action-label {
   font-size: clamp(0.75rem, 2vw, 0.875rem);
   font-weight: 500;
-  text-align: center;
   line-height: 1.3;
-  word-wrap: break-word;
   margin-bottom: 0.25rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  width: 100%;
 }
 
 .action-description {
   font-size: clamp(0.65rem, 1.5vw, 0.75rem);
   opacity: 0.7;
-  text-align: center;
   line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  width: 100%;
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
   .layout-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   }
   .quick-actions-grid {
     gap: clamp(0.75rem, 2.5vw, 1.5rem);
@@ -388,7 +405,7 @@ const handleAction = (aksi) => {
   }
 
   .layout-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   }
 
   .quick-actions-grid {
@@ -396,8 +413,12 @@ const handleAction = (aksi) => {
   }
 
   .size-medium .action-item {
-    min-height: 90px;
-    padding: 1rem 0.75rem;
+    min-height: 95px;
+    padding: 1rem 0.5rem;
+  }
+
+  .action-icon {
+    margin-bottom: 0.5rem;
   }
 
   .action-icon i {
@@ -406,45 +427,107 @@ const handleAction = (aksi) => {
 
   .action-label {
     font-size: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .action-description {
+    font-size: 0.65rem;
   }
 }
 
 @media (max-width: 576px) {
   .quick-actions-wrapper {
-    padding: clamp(1.5rem, 3vw, 1.5rem);
+    padding: 1rem;
   }
 
   .layout-grid {
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .quick-actions-grid {
-    gap: clamp(0.7rem, 1vw, 0.75rem);
+    gap: 0.75rem;
   }
 
   .action-item {
-    flex-direction: row;
-    text-align: left;
-    justify-content: flex-start;
-    min-height: auto;
-    padding: 0.75rem;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
+    padding: 0.75rem 0.5rem;
   }
 
   .action-icon {
-    margin-bottom: 0;
-    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-right: 0;
   }
 
   .action-icon i {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+  }
+
+  .action-content {
+    width: 100%;
   }
 
   .action-label {
     font-size: 0.7rem;
+    line-height: 1.1;
+    margin-bottom: 0.2rem;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
-  .action-description{
-    display: none;
+  .action-description {
+    font-size: 0.6rem;
+    line-height: 1.1;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
   }
 }
-</style>
+
+@media (max-width: 400px) {
+  .layout-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .action-item {
+    min-height: 90px;
+    padding: 0.6rem 0.4rem;
+  }
+
+  .action-icon i {
+    font-size: 1.3rem;
+  }
+
+  .action-label {
+    font-size: 0.65rem;
+    line-height: 1.1;
+  }
+
+  .action-description {
+    display: none; /* Hide description on very small screens */
+  }
+}
+
+/* Ensure text doesn't overflow */
+* {
+  box-sizing: border-box;
+}
+
+.action-item {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}</style>

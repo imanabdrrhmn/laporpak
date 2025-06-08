@@ -34,6 +34,13 @@
                 </p>
               </div>
             </div>
+
+            <!-- Alert untuk password salah -->
+            <div v-if="showPasswordError" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <strong>Kata sandi salah!</strong> Silakan periksa kembali kata sandi Anda.
+              <button type="button" class="btn-close" @click="showPasswordError = false"></button>
+            </div>
             
             <form @submit.prevent="deleteUser">
               <div class="mb-3">
@@ -49,16 +56,19 @@
                     id="password"
                     ref="passwordInput"
                     v-model="form.password"
-                    type="password"
-                    class="form-control custom-input border-start-0"
+                    :type="showPassword ? 'text' : 'password'"
+                    class="form-control custom-input border-start-0 border-end-0"
                     placeholder="Masukkan kata sandi Anda"
                     @keyup.enter="deleteUser"
                   />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary password-toggle"
+                    @click="togglePasswordVisibility"
+                  >
+                    <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+                  </button>
                 </div>
-                <small v-if="form.errors.password" class="text-danger d-block mt-2">
-                  <i class="bi bi-exclamation-circle me-1"></i>
-                  {{ form.errors.password }}
-                </small>
               </div>
             </form>
           </div>
@@ -90,6 +100,8 @@ import { ref, nextTick } from 'vue';
 
 const confirmingUserDeletion = ref(false);
 const passwordInput = ref(null);
+const showPassword = ref(false);
+const showPasswordError = ref(false);
 
 const form = useForm({
   password: '',
@@ -100,17 +112,32 @@ const confirmUserDeletion = () => {
   nextTick(() => passwordInput.value.focus());
 };
 
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
+
 const deleteUser = () => {
+  // Reset error alert sebelum submit
+  showPasswordError.value = false;
+  
   form.delete(route('profile.destroy'), {
     preserveScroll: true,
     onSuccess: () => closeModal(),
-    onError: () => passwordInput.value.focus(),
+    onError: (errors) => {
+      // Tampilkan alert jika ada error password
+      if (errors.password || errors.current_password) {
+        showPasswordError.value = true;
+      }
+      passwordInput.value.focus();
+    },
     onFinish: () => form.reset(),
   });
 };
 
 const closeModal = () => {
   confirmingUserDeletion.value = false;
+  showPasswordError.value = false;
+  showPassword.value = false;
   form.clearErrors();
   form.reset();
 };
@@ -205,7 +232,7 @@ const closeModal = () => {
 .custom-input {
   border: 2px solid #e9ecef;
   padding: 0.75rem 1rem;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0;
   transition: all 0.3s ease;
 }
 
@@ -219,6 +246,23 @@ const closeModal = () => {
   border: 2px solid #e9ecef;
   border-radius: 8px 0 0 8px;
   background: #f8f9fa;
+}
+
+.password-toggle {
+  border: 2px solid #e9ecef;
+  border-radius: 0 8px 8px 0;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.password-toggle:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.password-toggle:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
 }
 
 .custom-footer {
@@ -289,6 +333,18 @@ const closeModal = () => {
 
 .text-primary {
   color: #0d6efd !important;
+}
+
+/* Alert styling */
+.alert {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 2px 10px rgba(220, 53, 69, 0.1);
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  color: #721c24;
 }
 
 /* Responsive */

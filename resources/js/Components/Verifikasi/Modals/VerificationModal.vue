@@ -1,4 +1,4 @@
-```vue
+
 <template>
   <Teleport to="body">
     <div 
@@ -118,4 +118,3 @@ const close = () => {
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 </style>
-```

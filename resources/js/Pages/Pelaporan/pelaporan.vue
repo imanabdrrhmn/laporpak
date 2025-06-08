@@ -6,6 +6,7 @@
         <div class="row g-0">
           <HeroContent :selected-service="selectedService" :service-info="serviceInfo" />
           <ReportForm
+            ref="reportForm"
             :provinces="provinces"
             :selected-service="selectedService"
             :services="services"
@@ -24,11 +25,11 @@
       </div>
     </section>
     <Alur />
-      <Section 
-        :verifiedReports="verifiedReports"
-        :totalReports="totalReports"
-        :fraudReports="fraudReports"
-        />
+    <Section 
+      :verifiedReports="verifiedReports"
+      :totalReports="totalReports"
+      :fraudReports="fraudReports"
+    />
     <Feedback :feedbacks="feedbacks" />
     <SuccessModal
       :show="showSuccessModal"
@@ -58,19 +59,22 @@ const showSuccessModal = ref(false);
 const showLoginModal = ref(false);
 const showRegisterModal = ref(false);
 const provinces = page.props.provinces;
-const verifiedReports = page.props.verifiedReports || 0
-const totalReports = page.props.totalReports || 0
-const fraudReports = page.props.fraudReports || 0
+const verifiedReports = page.props.verifiedReports || 0;
+const totalReports = page.props.totalReports || 0;
+const fraudReports = page.props.fraudReports || 0;
 
 const userIsLoggedIn = computed(() => !!page.props.auth.user);
 
-// Service options with icons
+// Referensi untuk mengakses ReportForm
+const reportForm = ref(null);
+
+// Opsi layanan dengan ikon
 const services = [
   { label: 'Penipuan', value: 'Penipuan', icon: 'bi bi-shield-exclamation' },
   { label: 'Infrastruktur', value: 'Infrastruktur', icon: 'bi bi-building-gear' }
 ];
 
-// Categories for each service type
+// Kategori untuk setiap jenis layanan
 const fraudCategories = [
   { label: 'Nomor Telepon', value: 'Nomor Hp' },
   { label: 'Email', value: 'Email' }
@@ -84,7 +88,7 @@ const infrastructureCategories = [
   { label: 'Lainnya', value: 'Lainnya' }
 ];
 
-// Service information
+// Informasi layanan
 const serviceInfo = {
   Penipuan: {
     badge: 'Platform Pelaporan',
@@ -104,9 +108,9 @@ const serviceInfo = {
   }
 };
 
-// Reactive data
+// Data reaktif
 const selectedService = ref('Penipuan');
-const formData = ref({
+const formData = reactive({
   category: '',
   description: '',
   evidence: null,
@@ -114,60 +118,77 @@ const formData = ref({
   address: '',
   source: '',
   region: '',
+  email: '',
 });
 
-// Validation errors tracker
+// Pelacak error validasi
 const validationErrors = reactive({
   category: false,
   description: false,
   source: false,
-  location: false
+  location: false,
+  region: false,
+  email: false,
 });
 
-// Improved form validation
+// Validasi form yang ditingkatkan
 const isFormValid = computed(() => {
-  return formData.value.category &&
-         formData.value.category.trim() !== '' &&
-         formData.value.description &&
-         formData.value.description.trim() !== '' &&
-         formData.value.description.length <= 1500 &&
-         formData.value.location !== null;
+  const baseValid =
+    formData.category &&
+    formData.category.trim() !== '' &&
+    formData.description &&
+    formData.description.trim() !== '' &&
+    formData.description.length <= 1500 &&
+    formData.location !== null &&
+    formData.region &&
+    formData.region.trim() !== '';
+
+  if (selectedService.value === 'Penipuan') {
+    if (formData.category === 'Email') {
+      return baseValid && formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
+    }
+    return baseValid && formData.source && formData.source.startsWith('+') && formData.source.length >= 9;
+  }
+  return baseValid;
 });
 
-// Compute current categories based on selected service
+// Hitung kategori berdasarkan layanan yang dipilih
 const currentCategories = computed(() =>
   selectedService.value === 'Penipuan' ? fraudCategories : infrastructureCategories
 );
 
-// Watch for service changes to reset form values
+// Pantau perubahan layanan untuk mereset nilai form
 watch(selectedService, () => {
-  formData.value.category = '';
-  formData.value.description = '';
+  formData.category = '';
+  formData.description = '';
+  formData.source = '';
+  formData.email = '';
   Object.keys(validationErrors).forEach(key => {
     validationErrors[key] = false;
   });
 });
 
-// Service selection handler
+// Handler pemilihan layanan
 const selectService = (value) => {
   selectedService.value = value;
-  formData.value.category = '';
+  formData.category = '';
 };
 
-// File upload handler
+// Handler upload file
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
     if (file.size > 5 * 1024 * 1024) {
       alert('Ukuran file terlalu besar. Maksimal 5MB.');
-      event.target.value = '';
       return;
     }
-    formData.value.evidence = file;
+    formData.evidence = file;
+  } else {
+    formData.evidence = null;
   }
 };
 
-// Handle form submission with login check
+// Handler pengiriman form dengan cek login
 const handleSubmitReport = () => {
   if (!userIsLoggedIn.value) {
     showLoginModal.value = true;
@@ -176,33 +197,45 @@ const handleSubmitReport = () => {
   }
 };
 
-// Form submission handler
+// Handler pengiriman form
 const submitReport = () => {
   Object.keys(validationErrors).forEach(key => {
     validationErrors[key] = false;
   });
 
   let hasErrors = false;
-  if (!formData.value.category || formData.value.category.trim() === '') {
+  if (!formData.category || formData.category.trim() === '') {
     validationErrors.category = true;
     hasErrors = true;
   }
 
-  if (!formData.value.description || formData.value.description.trim() === '') {
+  if (!formData.description || formData.description.trim() === '') {
     validationErrors.description = true;
     hasErrors = true;
   }
 
-  if (!formData.value.location) {
+  if (!formData.location) {
     validationErrors.location = true;
     hasErrors = true;
   }
 
-  if (!formData.value.region || formData.value.region.trim() === '') {
-  validationErrors.region = true;
-  hasErrors = true;
-  } else {
-    validationErrors.region = false;
+  if (!formData.region || formData.region.trim() === '') {
+    validationErrors.region = true;
+    hasErrors = true;
+  }
+
+  if (selectedService.value === 'Penipuan') {
+    if (formData.category === 'Email') {
+      if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        validationErrors.email = true;
+        hasErrors = true;
+      }
+    } else {
+      if (!formData.source || !formData.source.startsWith('+') || formData.source.length < 9) {
+        validationErrors.source = true;
+        hasErrors = true;
+      }
+    }
   }
 
   if (hasErrors) {
@@ -214,53 +247,63 @@ const submitReport = () => {
   }
 
   const dataToSubmit = new FormData();
-  dataToSubmit.append('category', formData.value.category);
-  dataToSubmit.append('description', formData.value.description);
-  if (formData.value.evidence) {
-    dataToSubmit.append('evidence', formData.value.evidence);
+  dataToSubmit.append('category', formData.category);
+  dataToSubmit.append('description', formData.description);
+  if (formData.evidence) {
+    dataToSubmit.append('evidence', formData.evidence);
   }
-  dataToSubmit.append('source', formData.value.source);
-  dataToSubmit.append('location[lat]', formData.value.location.lat);
-  dataToSubmit.append('location[lng]', formData.value.location.lng);
-  dataToSubmit.append('address', formData.value.address);
+  dataToSubmit.append('source', formData.source);
+  dataToSubmit.append('location[lat]', formData.location.lat);
+  dataToSubmit.append('location[lng]', formData.location.lng);
+  dataToSubmit.append('address', formData.address);
   dataToSubmit.append('service', selectedService.value);
-  dataToSubmit.append('region', formData.value.region || '');
+  dataToSubmit.append('region', formData.region);
+  if (formData.email) {
+    dataToSubmit.append('email', formData.email);
+  }
 
   Inertia.post('/pelaporan/create', dataToSubmit, {
     onSuccess: () => {
-      formData.value = {
+      // Reset formData
+      Object.assign(formData, {
         category: '',
         description: '',
         evidence: null,
         location: null,
         address: '',
         source: '',
-      };
+        region: '',
+        email: '',
+      });
+      // Panggil resetForm dari child component
+      if (reportForm.value) {
+        reportForm.value.resetForm();
+      }
       showSuccessModal.value = true;
     },
-    onError: (error) => {
-      console.error('Error:', error);
+    onError: (errors) => {
+      console.error('Error pengiriman:', errors);
+      alert('Gagal mengirim laporan. Silakan coba lagi.');
     }
   });
 };
 
-// Geolocation handler
-const getCurrentLocation = () => {
+// Handler geolokasi
+const getCurrentLocation = async () => {
   if (navigator.geolocation) {
-    formData.value.address = 'Mendapatkan alamat...';
+    formData.address = 'Mendapatkan alamat...';
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const userLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
-        formData.value.location = userLocation;
+        formData.location = userLocation;
 
-        // Ambil alamat dan region sekaligus
         const { fullAddress, region } = await reverseGeocode(userLocation.lat, userLocation.lng);
 
-        formData.value.address = fullAddress;
-        formData.value.region = region || '';  // simpan region ke formData
+        formData.address = fullAddress;
+        formData.region = region || '';
 
         validationErrors.location = false;
       },
@@ -280,8 +323,8 @@ const getCurrentLocation = () => {
             message = "Terjadi kesalahan saat mendapatkan lokasi.";
         }
         alert(message);
-        formData.value.address = '';
-        formData.value.region = '';  // kosongkan region jika gagal
+        formData.address = '';
+        formData.region = '';
       },
       { enableHighAccuracy: true }
     );
@@ -290,8 +333,7 @@ const getCurrentLocation = () => {
   }
 };
 
-
-// Reverse geocoding using Nominatim API
+// Reverse geocoding menggunakan Nominatim API
 async function reverseGeocode(lat, lng) {
   try {
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
@@ -301,22 +343,19 @@ async function reverseGeocode(lat, lng) {
     const data = await response.json();
 
     const fullAddress = data.display_name || 'Alamat tidak ditemukan';
-
-    // region bisa diambil dari beberapa kemungkinan, contoh:
-    const region = data.address?.state || data.address?.city || data.address?.county || null;
+    const region = data.address?.state || data.address?.city || data.address?.county || '';
 
     return { fullAddress, region };
   } catch (error) {
     console.error('Error saat reverse geocoding:', error);
-    return { fullAddress: 'Alamat tidak tersedia', region: null };
+    return { fullAddress: 'Alamat tidak tersedia', region: '' };
   }
 }
 
-
-// Description validation
+// Validasi deskripsi
 const validateDescription = () => {
-  if (formData.value.description.length > 1500) {
-    formData.value.description = formData.value.description.substring(0, 1500);
+  if (formData.description.length > 1500) {
+    formData.description = formData.description.substring(0, 1500);
     const textarea = document.querySelector('.custom-textarea');
     if (textarea) {
       textarea.classList.add('border-danger');

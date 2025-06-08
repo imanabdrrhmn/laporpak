@@ -2,6 +2,16 @@
   <div class="admin-layout">
     <!-- Top Navbar -->
     <div class="top-navbar">
+      <!-- Hamburger menu di kiri -->
+      <div class="navbar-left">
+        <button class="hamburger-btn d-md-none" @click="toggleSidebar">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
+
+      <!-- Logo di kiri (desktop) -->
       <div class="navbar-brand">
         <img src="/images/logo-Navbar.svg" alt="LaporPak Logo" class="navbar-logo">
       </div>
@@ -10,9 +20,6 @@
         <div class="user-info d-none d-md-block">
           <span class="user-greeting">Selamat datang, {{ user.name }}</span>
         </div>
-        <button class="hamburger-btn d-md-none" @click="toggleSidebar">
-          <i class="bi bi-list"></i>
-        </button>
         <div class="navbar-icons d-none d-md-flex">
           <img v-if="user.avatar_url" :src="user.avatar_url" alt="User Avatar" class="avatar-image">
         </div>
@@ -38,7 +45,7 @@
           </li>
           <li class="nav-item">
             <Link class="nav-link admin-item" :class="{ 'active-item': $page.url === '/admin/top-ups' }" href="/admin/top-ups">
-              <i class ="bi bi-wallet-fill"></i>
+              <i class="bi bi-wallet-fill"></i>
               <span>Manajemen Top-up</span>
             </Link>
           </li>
@@ -101,7 +108,7 @@ const logout = () => {
 </script>
 
 <style scoped>
-/* Existing styles remain the same, adding avatar styling */
+/* Avatar styling */
 .avatar-image {
   width: 32px;
   height: 32px;
@@ -111,7 +118,6 @@ const logout = () => {
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Rest of your existing styles remain unchanged */
 .admin-layout {
   display: flex;
   min-height: 100vh;
@@ -129,15 +135,22 @@ const logout = () => {
   background-color: #ffffff;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 1.5rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
   z-index: 1000;
 }
 
+.navbar-left {
+  display: flex;
+  align-items: center;
+  width: 40px; /* Fixed width for hamburger button */
+}
+
 .navbar-brand {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  flex: 1; /* Takes remaining space */
 }
 
 .navbar-logo {
@@ -148,6 +161,7 @@ const logout = () => {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  width: auto; /* Adjust to content size */
 }
 
 .user-greeting {
@@ -161,15 +175,38 @@ const logout = () => {
   gap: 1rem;
 }
 
-.navbar-icons i {
-  font-size: 1.2rem;
-  color: #555;
+/* Custom Hamburger Button */
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: color 0.2s ease;
+  padding: 0;
+  transition: all 0.3s ease;
 }
 
-.navbar-icons i:hover {
-  color: #0d6efd;
+.hamburger-btn:hover {
+  background-color: rgba(13, 110, 253, 0.1);
+  border-radius: 8px;
+}
+
+.hamburger-line {
+  width: 24px;
+  height: 3px;
+  background-color: #0d6efd;
+  margin: 2px 0;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.hamburger-btn:hover .hamburger-line {
+  background-color: #0d6efd;
+  transform: scaleX(1.1);
 }
 
 /* Sidebar Styles */
@@ -196,10 +233,6 @@ const logout = () => {
 .sidebar-section {
   margin-bottom: 1.5rem;
   padding: 0 0.8rem;
-}
-
-.hamburger-btn {
-  background-color: #0d6efd;
 }
 
 .section-title {
@@ -254,12 +287,6 @@ const logout = () => {
   color: #ffffff;
 }
 
-.admin-item.active-dashboard {
-  color: #ffffff;
-  font-weight: 600;
-  background-color: rgba(255, 255, 255, 0.25);
-}
-
 .active-item {
   background-color: rgba(255, 255, 255, 0.2);
   transform: translateX(5px);
@@ -286,7 +313,7 @@ const logout = () => {
 .bottom-menu {
   margin-top: auto;
   padding: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .danger-item {
@@ -323,5 +350,13 @@ const logout = () => {
   .navbar-icons {
     display: none !important;
   }
+
+  .navbar-brand {
+    justify-content: flex-end;
+  }
+
+  .navbar-left {
+    justify-content: flex-start;
+  }
 }
-</style>
+</style>  

@@ -549,9 +549,11 @@ export default {
 }
 
 .status-default {
-  background: #6c757d;
-  color: white;
+background-color: #e3f2fd;
+  color: #1565c0;
 }
+
+
 
 .description-section,
 .evidence-section {

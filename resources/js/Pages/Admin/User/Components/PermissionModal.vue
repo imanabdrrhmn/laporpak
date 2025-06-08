@@ -232,10 +232,8 @@
   </Teleport>
 </template>
 
-
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue'
-
 
 const props = defineProps({
   user: {
@@ -252,7 +250,6 @@ const props = defineProps({
   },
   allowedRegions: { type: Array, default: () => [] },
   allRegions: { type: Array, default: () => [] },   
-
 })
 
 const emit = defineEmits(['close', 'submit', 'update:selected-permissions', 'update:allowed-regions'])
@@ -264,19 +261,15 @@ const submitSuccess = ref(false)
 const errorMessage = ref('')
 const isRotating = ref(false)
 
-
-// Animasi saat modal dibuka
 onMounted(async () => {
   await nextTick()
   isVisible.value = true
 })
 
-// Tangani error gambar avatar
 const handleImageError = () => {
   showFallback.value = true
 }
 
-// Fungsi pembantu
 const getUserInitials = (name) => {
   return name
     .split(' ')
@@ -309,7 +302,6 @@ const getPermissionDescription = (permission) => {
   return descriptions[permission] || 'Akses khusus'
 }
 
-// Penanganan event
 const updatePermissions = (permission) => {
   const newPermissions = [...props.selectedPermissions]
   const index = newPermissions.indexOf(permission)
@@ -332,10 +324,10 @@ const clearAllPermissions = () => {
 }
 
 const handleClose = async () => {
-  isRotating.value = true // Mulai animasi rotasi
+  isRotating.value = true
   isVisible.value = false
-  await new Promise(resolve => setTimeout(resolve, 300)) // Sesuaikan durasi animasi tutup
-  isRotating.value = false // Reset rotasi
+  await new Promise(resolve => setTimeout(resolve, 300))
+  isRotating.value = false
   emit('close')
 }
 
@@ -359,22 +351,18 @@ const handleSubmit = async () => {
   submitSuccess.value = false
 
   try {
-    // Panggil emit untuk submit izin, termasuk allowed regions
     await emit('submit', {
       userId: props.user.id,
       permissions: props.selectedPermissions,
       allowed_regions: selectedRegions.value, 
     })
-    // Tampilkan animasi sukses
     submitSuccess.value = true
-    await new Promise(resolve => setTimeout(resolve, 1000)) // Animasi sukses 1 detik
+    await new Promise(resolve => setTimeout(resolve, 1000))
   } catch (error) {
     console.error('Error menyimpan izin:', error)
     errorMessage.value = 'Gagal menyimpan izin. Silakan coba lagi.'
   } finally {
-    // Reset status submit
     isSubmitting.value = false
-    // Tunggu 3 detik sebelum reset animasi sukses agar pengguna melihatnya
     await new Promise(resolve => setTimeout(resolve, 3000))
     submitSuccess.value = false
   }
@@ -408,8 +396,6 @@ const clearAllRegions = () => {
   selectedRegions.value = []
   emit('update:allowed-regions', selectedRegions.value)
 }
-
-
 </script>
 
 <style scoped>
@@ -469,7 +455,6 @@ const clearAllRegions = () => {
 .user-avatar {
   width: 48px;
   height: 48px;
-  
   background: white;
   display: flex;
   align-items: center;
@@ -539,30 +524,29 @@ const clearAllRegions = () => {
   padding: 0 24px 24px;
   max-height: calc(90vh - 140px);
   overflow-y: auto;
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #3b82f6 #e5e7eb; /* Thumb and track colors for Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #0d6efd #e5e7eb;
 }
 
-/* Custom Scrollbar for WebKit browsers */
 .modal-body::-webkit-scrollbar {
-  width: 8px; /* Slimmer scrollbar */
+  width: 8px;
 }
 
 .modal-body::-webkit-scrollbar-track {
-  background: #e5e7eb; /* Light gray track */
-  border-radius: 4px; /* Rounded track */
-  margin: 4px 0; /* Add some margin to avoid touching edges */
+  background: #e5e7eb;
+  border-radius: 4px;
+  margin: 4px 0;
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-  background: #3b82f6; /* Primary color for thumb */
-  border-radius: 4px; /* Rounded thumb */
-  border: 2px solid #e5e7eb; /* Border to blend with track */
-  transition: background 0.2s ease; /* Smooth hover transition */
+  background: #0d6efd;
+  border-radius: 4px;
+  border: 2px solid #e5e7eb;
+  transition: background 0.2s ease;
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover {
-  background: #2563eb; /* Darker shade on hover */
+  background: #0a58ca;
 }
 
 .error-message {
@@ -633,7 +617,7 @@ const clearAllRegions = () => {
   width: 60px;
   height: 60px;
   border: 5px solid #e5e7eb;
-  border-top: 5px solid #3b82f6;
+  border-top: 5px solid #0d6efd;
   border-radius: 50%;
   animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   position: absolute;
@@ -645,7 +629,7 @@ const clearAllRegions = () => {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  background: rgba(13, 110, 253, 0.3);
   animation: pulse 2s ease-in-out infinite;
   position: absolute;
   top: 0;
@@ -684,8 +668,7 @@ const clearAllRegions = () => {
 
 .loading-progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #1d4ed8, #3b82f6);
-  background-size: 200% 100%;
+  background: #0d6efd;
   animation: progressMove 1.5s ease-in-out infinite;
   border-radius: 3px;
 }
@@ -709,10 +692,13 @@ const clearAllRegions = () => {
 
 @keyframes progressMove {
   0% {
-    background-position: 0% 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0);
   }
   100% {
-    background-position: 200% 0;
+    transform: translateX(100%);
   }
 }
 
@@ -767,8 +753,8 @@ const clearAllRegions = () => {
 }
 
 .permission-item--selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: #0d6efd;
+  background: #e7f1ff;
 }
 
 .permission-checkbox {
@@ -799,8 +785,8 @@ const clearAllRegions = () => {
 }
 
 .permission-item--selected .permission-checkbox-custom {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: #0d6efd;
+  border-color: #0d6efd;
 }
 
 .permission-checkbox-icon {
@@ -869,14 +855,14 @@ const clearAllRegions = () => {
 }
 
 .btn--primary {
-  background: #3b82f6;
+  background: #0d6efd;
   color: white;
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: #0a58ca;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
 }
 
 .btn--secondary {
@@ -890,13 +876,13 @@ const clearAllRegions = () => {
 
 .btn--text {
   background: none;
-  color: #3b82f6;
+  color: #0d6efd;
   padding: 8px 12px;
 }
 
 .btn--text:hover {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #e7f1ff;
+  color: #0a58ca;
 }
 
 .btn--small {
@@ -1016,10 +1002,10 @@ const clearAllRegions = () => {
 }
 
 .region-item--selected {
-  background-color: #eff6ff;
-  border-color: #3b82f6;
-  color: #1e40af;
-  outline: 1px solid #3b82f6;
+  background-color: #e7f1ff;
+  border-color: #0d6efd;
+  color: #0a58ca;
+  outline: 1px solid #0d6efd;
   outline-offset: 0px;
 }
 

@@ -70,7 +70,7 @@
           </div>
           
           <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category !== 'Email' && formData.category">
-            <label for="source" class="form-label mb-2">Nomer Telepon</label>
+            <label for="source" class="form-label mb-2">Nomor Telepon</label>
             <div class="input-group">
               <div class="country-select-wrapper">
                 <div class="dropdown" ref="countryDropdown">
@@ -211,6 +211,7 @@
                 v-for="province in provinces"
                 :key="province"
                 :value="province"
+                placeholder="Pilih Wilayah"
               >
                 {{ province }}
               </option>
@@ -268,11 +269,7 @@ const props = defineProps({
 
 const emit = defineEmits(['select-service', 'submit-report', 'file-upload', 'validate-description', 'get-current-location']);
 
-defineExpose({
-  formRef: ref(null)
-});
-
-// Existing country code functionality
+// Fungsi country code
 const selectedCountry = ref(allCountries.find(c => c.iso2 === 'id'));
 const localPhoneNumber = ref('');
 const showDropdown = ref(false);
@@ -281,7 +278,7 @@ const filteredCountries = ref([]);
 const searchInput = ref(null);
 const countryDropdown = ref(null);
 
-// New image processing functionality
+// Fungsi pemrosesan gambar
 const isProcessingImage = ref(false);
 const uploadedFile = ref(null);
 const previewUrl = ref('');
@@ -295,7 +292,7 @@ const sortedCountries = computed(() => {
   });
 });
 
-// Image conversion function
+// Fungsi konversi gambar ke WebP
 const convertToWebP = (file, quality = 0.8) => {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
@@ -303,18 +300,14 @@ const convertToWebP = (file, quality = 0.8) => {
     const img = new Image();
     
     img.onload = () => {
-      // Set canvas dimensions
       canvas.width = img.width;
       canvas.height = img.height;
       
-      // Draw image on canvas
       ctx.drawImage(img, 0, 0);
       
-      // Convert to WebP blob
       canvas.toBlob(
         (blob) => {
           if (blob) {
-            // Create new File object with WebP format
             const webpFile = new File(
               [blob], 
               file.name.replace(/\.(jpg|jpeg|png)$/i, '.webp'), 
@@ -335,12 +328,11 @@ const convertToWebP = (file, quality = 0.8) => {
   });
 };
 
-// Handle file upload and conversion
+// Handler upload file dan konversi
 const handleFileUpload = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
   
-  // Validate file type
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
   if (!allowedTypes.includes(file.type)) {
     alert('Format file tidak didukung. Gunakan JPEG atau PNG.');
@@ -348,8 +340,7 @@ const handleFileUpload = async (event) => {
     return;
   }
   
-  // Validate file size (5MB)
-  const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+  const maxSize = 5 * 1024 * 1024;
   if (file.size > maxSize) {
     alert('Ukuran file terlalu besar. Maksimal 5MB.');
     resetFileInput();
@@ -359,25 +350,17 @@ const handleFileUpload = async (event) => {
   try {
     isProcessingImage.value = true;
     
-    // Convert to WebP
     const webpFile = await convertToWebP(file, 0.8);
     
-    // Create preview URL
     previewUrl.value = URL.createObjectURL(webpFile);
     
-    // Store the converted file
     uploadedFile.value = webpFile;
     
-    // Emit the converted file to parent
     emit('file-upload', { 
       target: { 
         files: [webpFile] 
       } 
     });
-    
-    console.log('Original file size:', (file.size / 1024).toFixed(2), 'KB');
-    console.log('WebP file size:', (webpFile.size / 1024).toFixed(2), 'KB');
-    console.log('Compression ratio:', ((1 - webpFile.size / file.size) * 100).toFixed(1), '%');
     
   } catch (error) {
     console.error('Error converting image:', error);
@@ -388,7 +371,7 @@ const handleFileUpload = async (event) => {
   }
 };
 
-// Remove uploaded image
+// Hapus gambar yang diupload
 const removeImage = () => {
   uploadedFile.value = null;
   if (previewUrl.value) {
@@ -397,18 +380,36 @@ const removeImage = () => {
   }
   resetFileInput();
   
-  // Emit empty file to parent
   emit('file-upload', { target: { files: [] } });
 };
 
-// Reset file input
+// Reset input file
 const resetFileInput = () => {
   if (fileInput.value) {
     fileInput.value.value = '';
   }
 };
 
-// Submit form with image processing check
+// Fungsi reset form
+const resetForm = () => {
+  Object.keys(props.formData).forEach((key) => {
+    props.formData[key] = '';
+  });
+  localPhoneNumber.value = '';
+  selectedCountry.value = allCountries.find(c => c.iso2 === 'id');
+  countrySearch.value = '';
+  filteredCountries.value = sortedCountries.value;
+  showDropdown.value = false;
+  removeImage();
+  Object.keys(props.validationErrors).forEach((key) => {
+    props.validationErrors[key] = false;
+  });
+  if (formRef.value) {
+    formRef.value.reset();
+  }
+};
+
+// Fungsi submit form
 const submitForm = () => {
   if (isProcessingImage.value) {
     alert('Tunggu hingga proses gambar selesai.');
@@ -417,7 +418,7 @@ const submitForm = () => {
   emit('submit-report');
 };
 
-// Existing filter countries function
+// Fungsi filter negara
 const filterCountries = () => {
   const search = countrySearch.value.toLowerCase();
   if (!search) {
@@ -468,7 +469,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
-  // Clean up preview URL when component unmounts
   if (previewUrl.value) {
     URL.revokeObjectURL(previewUrl.value);
   }
@@ -516,6 +516,15 @@ const onPhoneInput = (e) => {
   localPhoneNumber.value = e.target.value;
   validatePhoneNumber();
 };
+
+// Form ref untuk reset
+const formRef = ref(null);
+
+// Ekspos formRef dan resetForm ke parent
+defineExpose({
+  formRef,
+  resetForm
+});
 </script>
 
 <style scoped>
@@ -777,7 +786,7 @@ const onPhoneInput = (e) => {
   height: 1rem;
 }
 
-/* Custom Scrollbar for country list, region dropdown, and description textarea */
+/* Custom Scrollbar untuk daftar negara, dropdown wilayah, dan textarea deskripsi */
 .country-list,
 .custom-select,
 .custom-textarea {
@@ -836,7 +845,7 @@ const onPhoneInput = (e) => {
   animation: btn-wave 2s infinite;
 }
 
-/* Responsive media queries */
+/* Media queries responsif */
 @media (min-width: 576px) {
   .form-container {
     max-width: 90%;
