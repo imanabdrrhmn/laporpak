@@ -1,4 +1,3 @@
-<!-- File: src/components/TopUpPage.vue -->
 <template>
   <AppLayout>
     <Head title="Top Up Credit" />
@@ -105,11 +104,20 @@ const form = useForm({
   proof: null,
 });
 
+const uniqueCode = ref(0); // New reactive variable for the unique code
+
+const generateUniqueCode = () => {
+  return Math.floor(Math.random() * 100) + 1; // Generates a number between 1 and 100
+};
+
 const finalSelectedAmount = computed(() => {
+  let baseAmount = 0;
   if (customAmountRaw.value && customAmountRaw.value >= 100000 && customAmountRaw.value % 100000 === 0) {
-    return customAmountRaw.value;
+    baseAmount = customAmountRaw.value;
+  } else if (selectedNominalPackage.value) {
+    baseAmount = selectedNominalPackage.value.idr;
   }
-  return selectedNominalPackage.value ? selectedNominalPackage.value.idr : 0;
+  return baseAmount + uniqueCode.value; // Add the unique code here
 });
 
 const selectedPaymentMethodDetails = computed(() =>
@@ -179,6 +187,7 @@ const proceedToPaymentMethod = () => {
     return;
   }
   if (isNominalValid()) {
+    uniqueCode.value = generateUniqueCode();
     goToStep('method');
   } else {
     if (!customAmountErrorInternal.value && customAmountRaw.value > 0) {
@@ -202,7 +211,6 @@ const goToStep = (stepName) => {
 const goBack = () => {
   window.history.back();
 };
-
 
 const copyToClipboard = async (text) => {
   try {
@@ -255,6 +263,7 @@ const handlePaymentConfirmed = () => {
       customAmountInput.value = '';
       customAmountRaw.value = 0;
       selectedPaymentMethodId.value = null;
+      uniqueCode.value = 0; 
       currentStep.value = 'nominal';
     },
     onError: (errors) => {
