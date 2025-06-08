@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="col-lg-6 d-flex align-items-center justify-content-center p-3 p-md-4 bg-light">
     <div class="form-container p-3 p-sm-4 p-lg-5 w-100">
@@ -23,14 +22,20 @@
             required
           >
             <option value="" disabled selected>-- Pilih Layanan Verifikasi --</option>
-            <option v-for="service in services" :key="service.id" :value="service.id">
+            <option 
+              v-for="service in services" 
+              :key="service.id" 
+              :value="service.id"
+              :disabled="service.comingSoon"
+            >
               {{ service.name }} ({{ service.price }} / {{ service.type }})
+              <span v-if="service.comingSoon"> - Coming Soon</span>
             </option>
           </select>
           <div id="serviceTypeError" class="invalid-feedback" v-if="validation.serviceType">{{ validation.serviceType }}</div>
         </div>
         
-        <div v-if="selectedService" class="fade-in">
+        <div v-if="selectedService && !isServiceComingSoon" class="fade-in">
           <div class="mb-3">
             <label for="fullName" class="form-label">Nama Lengkap</label>
             <div class="input-group has-validation">
@@ -129,6 +134,18 @@
             </button>
           </div>
         </div>
+
+        <!-- Coming Soon Message -->
+        <div v-if="selectedService && isServiceComingSoon" class="fade-in">
+          <div class="alert alert-info text-center py-4">
+            <i class="bi bi-clock-history fs-1 text-info mb-3 d-block"></i>
+            <h5 class="mb-2">Layanan Segera Hadir</h5>
+            <p class="mb-0 text-muted">
+              Layanan <strong>{{ getServiceName(selectedService) }}</strong> sedang dalam tahap pengembangan dan akan segera tersedia. 
+              Silakan pilih layanan lain yang tersedia saat ini.
+            </p>
+          </div>
+        </div>
       </form>
 
       <!-- Render Verification Modal -->
@@ -155,7 +172,7 @@ import { useRouter } from 'vue-router';
 import VerificationModal from './Modals/VerificationModal.vue';
 import SuccessModal from './Modals/SuccessModal.vue';
 
-defineProps({
+const props = defineProps({
   services: Array
 });
 
@@ -192,6 +209,11 @@ const showNpwpField = computed(() => {
   return selectedService.value && (selectedService.value.includes('npwp') || selectedService.value === 'income-tax');
 });
 
+const isServiceComingSoon = computed(() => {
+  const service = props.services.find(s => s.id === selectedService.value);
+  return service ? service.comingSoon : false;
+});
+
 // Restrict NIK input to numbers only
 const restrictToNumbers = (event) => {
   formData.value.idNumber = event.target.value.replace(/[^0-9]/g, '');
@@ -203,6 +225,12 @@ const validateAndSubmit = () => {
   if (!selectedService.value) {
     validation.value.serviceType = 'Silakan pilih layanan verifikasi';
     formError.value = 'Harap lengkapi semua field yang diperlukan';
+    return;
+  }
+
+  // Check if service is coming soon
+  if (isServiceComingSoon.value) {
+    formError.value = 'Layanan yang dipilih belum tersedia';
     return;
   }
   
@@ -335,6 +363,12 @@ const getServiceName = (serviceId) => {
   font-size: 0.875rem;
 }
 
+/* Style for disabled options */
+option:disabled {
+  color: #6c757d;
+  font-style: italic;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -377,4 +411,3 @@ const getServiceName = (serviceId) => {
   }
 }
 </style>
-```

@@ -26,21 +26,22 @@ import HeroContent from '@/Components/Verifikasi/HeroContent.vue';
 import VerificationForm from '@/Components/Verifikasi/VerificationForm.vue';
 
 const feedbacks = ref([]);
+
 const services = ref([
- 
-  { id: 'blacklist-v1', name: 'Blacklist V1', price: 'IDR 45,000', type: 'Success' },
-  { id: 'nik-trace', name: 'Digital NIK Trace (NIK to Phone)', price: 'IDR 10,000', type: 'Success' },
-  { id: 'income-tax', name: 'Income Tax Grade', price: 'IDR 10,000', type: 'Success' },
-  { id: 'multi-apply', name: 'Multi-Apply Feature Set', price: 'IDR 3,600', type: 'Query' },
-  { id: 'multi-loan', name: 'Multi-Loan Feature Set', price: 'IDR 3,600', type: 'Query' },
-  { id: 'npwp-v1', name: 'NPWP Check V1', price: 'IDR 7,200', type: 'Success' },
-  { id: 'npwp-v2', name: 'NPWP Check V2', price: 'IDR 7,200', type: 'Success' },
-  { id: 'phone-trace', name: 'Phone Trace (Phone to NIK)', price: 'IDR 10,000', type: 'Success' },
-  { id: 'portrait', name: 'Portrait Feature Set', price: 'IDR 5,600', type: 'Query' },
-  { id: 'sms', name: 'SMS Feature Set', price: 'IDR 4,800', type: 'Success' },
-  { id: 'telco', name: 'Telco Feature Set', price: 'IDR 3,600', type: 'Query' }
-
-
+  // Available services
+  { id: 'blacklist-v1', name: 'Blacklist V1', price: 'IDR 45,000', type: 'Success', comingSoon: false },
+  { id: 'multi-apply', name: 'Multi-Apply Feature Set', price: 'IDR 3,600', type: 'Query', comingSoon: false },
+  { id: 'multi-loan', name: 'Multi-Loan Feature Set', price: 'IDR 3,600', type: 'Query', comingSoon: false },
+  { id: 'npwp-v1', name: 'NPWP Check V1', price: 'IDR 7,200', type: 'Success', comingSoon: false },
+  { id: 'portrait', name: 'Portrait Feature Set', price: 'IDR 5,600', type: 'Query', comingSoon: false },
+  { id: 'sms', name: 'SMS Feature Set', price: 'IDR 4,800', type: 'Success', comingSoon: false },
+  { id: 'telco', name: 'Telco Feature Set', price: 'IDR 3,600', type: 'Query', comingSoon: false },
+  
+  // Coming soon services
+  { id: 'nik-trace', name: 'Digital NIK Trace (NIK to Phone)', price: 'IDR 10,000', type: 'Success', comingSoon: true },
+  { id: 'income-tax', name: 'Income Tax Grade', price: 'IDR 10,000', type: 'Success', comingSoon: true },
+  { id: 'npwp-v2', name: 'NPWP Check V2', price: 'IDR 7,200', type: 'Success', comingSoon: true },
+  { id: 'phone-trace', name: 'Phone Trace (Phone to NIK)', price: 'IDR 10,000', type: 'Success', comingSoon: true }
 ]);
 
 onMounted(() => {
