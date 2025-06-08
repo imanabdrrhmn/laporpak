@@ -295,6 +295,12 @@ const flagCount = computed(() => {
 color: #41464b;
 }
 
+.status-badge.solved {
+ background: #d4edda;
+color: #155724;
+}
+
+
 /* ENHANCED MIDDLE SECTION STYLES */
 .report-content {
   padding: 10px;

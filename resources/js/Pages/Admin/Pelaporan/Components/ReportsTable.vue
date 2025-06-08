@@ -205,6 +205,16 @@ const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
   color: #1565c0;
 }
 
+.status-badge.unpublished {
+ background-color: #e2e3e5;
+color: #41464b;
+}
+
+.status-badge.solved {
+ background: #d4edda;
+color: #155724;
+}
+
 .description-cell {
   max-width: 200px;
   white-space: nowrap;
