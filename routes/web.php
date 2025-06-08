@@ -135,6 +135,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/users/{user}/permissions', [UserManagementController::class, 'updatePermissions']);
 });
 
+Route::middleware('auth', 'contact.verified')->group(function () {
+    Route::post('/verify/{featureType}', [VerificationController::class, 'handleVerification']);
+});
+
 // API
 Route::middleware(['auth','contact.verified'])->group(function () {
     Route::middleware('role:admin||verifier')

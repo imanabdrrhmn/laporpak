@@ -197,7 +197,7 @@ const loadLeaflet = async () => {
     L = leafletModule.default
     leafletLoaded = true
     
-    // Import CSS dynamically
+
     if (typeof document !== 'undefined') {
       const links = [
         'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
