@@ -44,19 +44,50 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed, nextTick, shallowRef } from 'vue';
 
-// Lazy loading Leaflet
+// Lazy loading Leaflet dengan CSS loading yang lebih robust
 let L = null;
+let isLeafletCSSLoaded = false;
+
+const loadLeafletCSS = () => {
+  return new Promise((resolve, reject) => {
+    if (isLeafletCSSLoaded || document.querySelector('link[href*="leaflet.css"]')) {
+      isLeafletCSSLoaded = true;
+      resolve();
+      return;
+    }
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+    link.crossOrigin = '';
+    
+    link.onload = () => {
+      isLeafletCSSLoaded = true;
+      // Force reflow untuk memastikan CSS terapply
+      document.body.offsetHeight;
+      resolve();
+    };
+    
+    link.onerror = () => {
+      reject(new Error('Failed to load Leaflet CSS'));
+    };
+    
+    document.head.appendChild(link);
+  });
+};
+
 const loadLeaflet = async () => {
   if (!L) {
+    // Load CSS terlebih dahulu
+    await loadLeafletCSS();
+    
+    // Kemudian load JavaScript
     const leafletModule = await import('leaflet');
     L = leafletModule.default;
-    // Load CSS dinamis
-    if (!document.querySelector('link[href*="leaflet"]')) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(link);
-    }
+    
+    // Wait sedikit untuk memastikan CSS ter-render
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
   return L;
 };
@@ -76,6 +107,7 @@ const map = shallowRef(null);
 const marker = shallowRef(null);
 const isFetchingAddress = ref(false);
 const isFetchingLocationInternal = ref(false);
+const isMapInitialized = ref(false);
 
 // Computed untuk menggabungkan loading states
 const isLocationLoading = computed(() => 
@@ -108,15 +140,22 @@ const debouncedReverseGeocode = createDebounce(reverseGeocode, 500);
 let intersectionObserver = null;
 
 onMounted(async () => {
+  // Preload CSS lebih awal
+  try {
+    await loadLeafletCSS();
+  } catch (error) {
+    console.warn('Failed to preload Leaflet CSS:', error);
+  }
+
   // Lazy loading dengan intersection observer
   intersectionObserver = new IntersectionObserver(
     async (entries) => {
       const [entry] = entries;
-      if (entry.isIntersecting) {
+      if (entry.isIntersecting && !isMapInitialized.value) {
         await nextTick();
         setTimeout(async () => {
           await initMap();
-        }, 100); // Reduced dari 300ms
+        }, 200); // Increase delay untuk memastikan CSS loaded
         intersectionObserver.disconnect();
       }
     },
@@ -153,18 +192,22 @@ onUnmounted(() => {
 });
 
 async function initMap() {
-  if (!mapRef.value || map.value) return;
+  if (!mapRef.value || map.value || isMapInitialized.value) return;
   
   try {
+    isMapInitialized.value = true;
     await loadLeaflet();
+    
+    // Wait additional time untuk memastikan CSS ter-apply
+    await new Promise(resolve => setTimeout(resolve, 150));
     
     const defaultPosition = [-6.2, 106.8];
     
     map.value = L.map(mapRef.value, {
       zoomControl: true,
       attributionControl: true,
-      preferCanvas: true, // Untuk performa yang lebih baik
-      renderer: L.canvas(), // Canvas renderer lebih cepat untuk banyak marker
+      preferCanvas: true,
+      renderer: L.canvas(),
     }).setView(defaultPosition, 12);
 
     // Gunakan tile layer yang lebih ringan
@@ -188,16 +231,23 @@ async function initMap() {
       }, 100);
     });
 
-    // Delayed resize untuk memastikan DOM sudah ready
+    // Multiple resize attempts untuk memastikan map ter-render dengan benar
     await nextTick();
     setTimeout(() => {
       if (map.value) {
         map.value.invalidateSize();
       }
-    }, 200);
+    }, 100);
+    
+    setTimeout(() => {
+      if (map.value) {
+        map.value.invalidateSize();
+      }
+    }, 300);
     
   } catch (error) {
     console.error("Error initializing map:", error);
+    isMapInitialized.value = false;
     emit('error', 'Gagal menginisialisasi peta');
   }
 }
@@ -290,7 +340,7 @@ function placeMarker(latlng) {
 
     marker.value = L.marker(latlng, { 
       icon: customIcon,
-      riseOnHover: true // Performance optimization
+      riseOnHover: true
     }).addTo(map.value);
 
     const popupContent = props.selectedService === 'Penipuan'
@@ -319,7 +369,7 @@ async function goToCurrentLocation() {
     return;
   }
   
-  if (isFetchingLocationInternal.value) return; // Prevent multiple calls
+  if (isFetchingLocationInternal.value) return;
   
   try {
     isFetchingLocationInternal.value = true;
@@ -341,7 +391,7 @@ async function goToCurrentLocation() {
         {
           enableHighAccuracy: true,
           timeout: 12000,
-          maximumAge: 60000 // Cache selama 1 menit
+          maximumAge: 60000
         }
       );
     });
@@ -369,7 +419,7 @@ async function goToCurrentLocation() {
   }
 }
 
-// Optimized watcher dengan immediate: false
+// Optimized watcher
 watch(
   () => props.selectedService,
   (newVal) => {
@@ -395,9 +445,20 @@ watch(
   width: 100%;
   height: 250px;
   position: relative;
-  /* GPU acceleration untuk smooth animations */
   transform: translateZ(0);
   will-change: transform;
+  background-color: #f8f9fa; /* Fallback background saat loading */
+}
+
+/* Loading state untuk map container */
+.map-container:empty::before {
+  content: 'Memuat peta...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  font-size: 14px;
 }
 
 .is-loading {
@@ -407,13 +468,7 @@ watch(
   background-size: 1rem 1rem;
 }
 
-/* Optimized media queries dengan container queries jika didukung */
-@container (min-width: 600px) and (max-width: 1199px) {
-  .map-container {
-    height: 280px;
-  }
-}
-
+/* Media queries yang dioptimasi */
 @media (max-width: 320px) {
   .map-container {
     height: 200px;
@@ -468,10 +523,35 @@ watch(
   }
 }
 
-/* Preload critical resources */
 @media (prefers-reduced-motion: no-preference) {
   .map-container {
     transition: height 0.2s ease;
   }
+}
+
+/* Force Leaflet CSS jika belum ter-load */
+:deep(.leaflet-container) {
+  font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+
+:deep(.leaflet-control-zoom) {
+  box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+  border-radius: 4px;
+}
+
+:deep(.leaflet-control-zoom a) {
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  color: black;
+}
+
+:deep(.leaflet-control-zoom a:hover) {
+  background-color: #f4f4f4;
 }
 </style>

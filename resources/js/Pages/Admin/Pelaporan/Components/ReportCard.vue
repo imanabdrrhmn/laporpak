@@ -290,6 +290,17 @@ const flagCount = computed(() => {
   color: #1565c0;
 }
 
+.status-badge.unpublished {
+ background-color: #e2e3e5;
+color: #41464b;
+}
+
+.status-badge.solved {
+ background: #d4edda;
+color: #155724;
+}
+
+
 /* ENHANCED MIDDLE SECTION STYLES */
 .report-content {
   padding: 10px;

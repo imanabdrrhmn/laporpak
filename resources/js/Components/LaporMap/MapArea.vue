@@ -125,7 +125,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
 
-// Lazy import untuk Leaflet - hanya load ketika dibutuhkan
+// Leaflet variables - akan diisi setelah library dimuat
 let L = null
 let leafletLoaded = false
 
@@ -150,10 +150,10 @@ const emit = defineEmits(['map-ready', 'map-error'])
 const mapContainer = ref(null)
 let map = null
 let clusterGroup = null
-const markers = ref(new Map()) // Use Map for O(1) lookup
+const markers = ref(new Map())
 const isMapReady = ref(false)
 
-// Computed properties for performance
+// Computed properties
 const totalReports = computed(() => {
   return props.locationItems?.reduce((sum, item) => sum + (item.reports || 0), 0) || 0
 })
@@ -171,7 +171,7 @@ const formatLastUpdated = computed(() => {
   }
 })
 
-// Debounced functions for better performance
+// Debounce utility
 const debounce = (func, wait) => {
   let timeout
   return function executedFunction(...args) {
@@ -184,69 +184,92 @@ const debounce = (func, wait) => {
   }
 }
 
-// Lazy load Leaflet
+// Load CSS files
+const loadCSS = (href) => {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`link[href="${href}"]`)) {
+      resolve()
+      return
+    }
+    
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = href
+    link.onload = () => resolve()
+    link.onerror = () => reject(new Error(`Failed to load CSS: ${href}`))
+    document.head.appendChild(link)
+  })
+}
+
+// Improved Leaflet loading with proper dependency management
 const loadLeaflet = async () => {
-  if (leafletLoaded) return
+  if (leafletLoaded && L) return
   
   try {
-    const [leafletModule, markerClusterModule] = await Promise.all([
-      import('leaflet'),
-      import('leaflet.markercluster')
+    console.log('Loading Leaflet libraries...')
+    
+    // Load CSS files first
+    await Promise.all([
+      loadCSS('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'),
+      loadCSS('https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css')
     ])
     
+    // Load Leaflet core first
+    const leafletModule = await import('leaflet')
     L = leafletModule.default
-    leafletLoaded = true
     
-
-    if (typeof document !== 'undefined') {
-      const links = [
-        'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-        'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css'
-      ]
-      
-      links.forEach(href => {
-        if (!document.querySelector(`link[href="${href}"]`)) {
-          const link = document.createElement('link')
-          link.rel = 'stylesheet'
-          link.href = href
-          document.head.appendChild(link)
-        }
-      })
-    }
+    // Make sure L is available globally for markercluster
+    window.L = L
+    
+    // Now load markercluster after L is defined
+    await import('leaflet.markercluster')
+    
+    leafletLoaded = true
+    console.log('Leaflet libraries loaded successfully')
+    
   } catch (error) {
     console.error('Failed to load Leaflet:', error)
     emit('map-error', error)
+    throw error
   }
 }
 
-// Map initialization with error handling
+// Map initialization
 const initMap = async () => {
-  if (!mapContainer.value || !L) return
+  if (!mapContainer.value || !L) {
+    console.warn('Map container or Leaflet not ready')
+    return
+  }
   
   try {
+    console.log('Initializing map...')
+    
     // Destroy existing map if any
     if (map) {
       map.remove()
       map = null
     }
 
+    // Create map instance
     map = L.map(mapContainer.value, {
-      center: [-2.5489, 118.0149],
+      center: [-2.5489, 118.0149], // Indonesia center
       zoom: 5,
-      zoomControl: false, // We have custom controls
+      zoomControl: false,
       attributionControl: true,
-      preferCanvas: true // Better performance for many markers
+      preferCanvas: true
     })
 
-    // Add tile layer with better performance settings
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Add tile layer
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
       minZoom: 3,
       updateWhenIdle: true,
       updateWhenZooming: false,
       keepBuffer: 2
-    }).addTo(map)
+    })
+    
+    tileLayer.addTo(map)
 
     // Add scale control
     L.control.scale({ 
@@ -254,18 +277,26 @@ const initMap = async () => {
       position: 'bottomleft' 
     }).addTo(map)
 
-    // Initialize marker cluster with optimized settings
-    clusterGroup = L.markerClusterGroup({
-      maxClusterRadius: 50,
-      disableClusteringAtZoom: 12,
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      removeOutsideVisibleBounds: true // Performance optimization
-    })
+    // Initialize marker cluster group
+    if (L.markerClusterGroup) {
+      clusterGroup = L.markerClusterGroup({
+        maxClusterRadius: 50,
+        disableClusteringAtZoom: 12,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        removeOutsideVisibleBounds: true
+      })
+      
+      map.addLayer(clusterGroup)
+    } else {
+      console.error('MarkerClusterGroup not available')
+      emit('map-error', new Error('MarkerClusterGroup not available'))
+      return
+    }
 
-    map.addLayer(clusterGroup)
     isMapReady.value = true
+    console.log('Map initialized successfully')
     
     // Initialize markers after map is ready
     await nextTick()
@@ -279,8 +310,10 @@ const initMap = async () => {
   }
 }
 
-// Optimized marker creation with object pooling
+// Create marker icons
 const createMarkerIcon = (type) => {
+  if (!L) return null
+  
   const iconConfigs = {
     high: { className: 'custom-marker high-risk', color: '#dc3545' },
     medium: { className: 'custom-marker medium-risk', color: '#fd7e14' },
@@ -298,17 +331,21 @@ const createMarkerIcon = (type) => {
   })
 }
 
-// Optimized marker initialization
+// Initialize markers
 const initMarkers = () => {
-  if (!clusterGroup || !isMapReady.value) return
+  if (!clusterGroup || !isMapReady.value || !L) {
+    console.warn('Cluster group, map, or Leaflet not ready for markers')
+    return
+  }
 
-  // Clear existing markers efficiently
+  console.log('Initializing markers...', props.locationItems?.length || 0, 'locations')
+
+  // Clear existing markers
   clusterGroup.clearLayers()
   markers.value.clear()
 
   if (!props.locationItems?.length) return
 
-  // Batch marker creation for better performance
   const markersToAdd = []
   
   props.locationItems.forEach(location => {
@@ -317,48 +354,53 @@ const initMarkers = () => {
       return
     }
 
-    const marker = L.marker(location.coordinates, {
-      icon: createMarkerIcon(location.type),
-      riseOnHover: true,
-      title: location.name
-    })
+    try {
+      const marker = L.marker(location.coordinates, {
+        icon: createMarkerIcon(location.type),
+        riseOnHover: true,
+        title: location.name
+      })
 
-    // Optimized popup content tanpa tombol "Lihat Detail"
-    const popupContent = `
-      <div class="map-popup">
-        <h6 class="mb-2">${location.name}</h6>
-        <div class="popup-stats">
-          <span class="badge bg-${location.type === 'high' ? 'danger' : location.type === 'medium' ? 'warning' : 'success'} mb-2">
-            ${location.reports} laporan
-          </span>
+      const popupContent = `
+        <div class="map-popup">
+          <h6 class="mb-2">${location.name}</h6>
+          <div class="popup-stats">
+            <span class="badge bg-${location.type === 'high' ? 'danger' : location.type === 'medium' ? 'warning' : 'success'} mb-2">
+              ${location.reports} laporan
+            </span>
+          </div>
+          <p class="mb-2 small text-muted">Terakhir: ${location.lastReport}</p>
         </div>
-        <p class="mb-2 small text-muted">Terakhir: ${location.lastReport}</p>
-      </div>
-    `
+      `
 
-    marker.bindPopup(popupContent, {
-      maxWidth: 250,
-      className: 'custom-popup'
-    })
+      marker.bindPopup(popupContent, {
+        maxWidth: 250,
+        className: 'custom-popup'
+      })
 
-    markersToAdd.push(marker)
-    markers.value.set(location.id, marker)
+      markersToAdd.push(marker)
+      markers.value.set(location.id, marker)
+    } catch (error) {
+      console.error('Error creating marker for location:', location.id, error)
+    }
   })
 
-  // Add all markers at once for better performance
-  clusterGroup.addLayers(markersToAdd)
+  // Add all markers at once
+  if (markersToAdd.length) {
+    clusterGroup.addLayers(markersToAdd)
+    console.log('Added', markersToAdd.length, 'markers to map')
+  }
 }
 
 // Debounced marker updates
 const debouncedInitMarkers = debounce(initMarkers, 150)
 
-// Watch for location changes with deep comparison optimization
+// Watch for location changes
 watch(
   () => props.locationItems,
   (newItems, oldItems) => {
     if (!isMapReady.value) return
     
-    // Only update if data actually changed
     if (JSON.stringify(newItems) !== JSON.stringify(oldItems)) {
       debouncedInitMarkers()
     }
@@ -367,8 +409,14 @@ watch(
 )
 
 // Map control methods
-const zoomIn = () => map?.zoomIn()
-const zoomOut = () => map?.zoomOut()
+const zoomIn = () => {
+  if (map) map.zoomIn()
+}
+
+const zoomOut = () => {
+  if (map) map.zoomOut()
+}
+
 const resetView = () => {
   if (map) {
     map.setView([-2.5489, 118.0149], 5)
@@ -400,9 +448,13 @@ const showAllLocations = (locations) => {
 
 // Lifecycle hooks
 onMounted(async () => {
-  await loadLeaflet()
-  if (L) {
-    await initMap()
+  try {
+    await loadLeaflet()
+    if (L) {
+      await initMap()
+    }
+  } catch (error) {
+    console.error('Failed to initialize map component:', error)
   }
 })
 
@@ -414,6 +466,11 @@ onUnmounted(() => {
   clusterGroup = null
   markers.value.clear()
   isMapReady.value = false
+  
+  // Clean up global L if we set it
+  if (window.L && window.L === L) {
+    delete window.L
+  }
 })
 
 // Expose public methods

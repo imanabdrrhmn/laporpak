@@ -32,6 +32,10 @@
         <!-- Grid Info -->
         <div class="info-grid">
           <div>
+            <strong>Tanggal Laporan:</strong><br />
+            {{ formatDate(report.created_at) }}
+          </div>
+          <div>
             <strong>Kategori:</strong><br />
             {{ report.category }}
           </div>
@@ -119,6 +123,24 @@ const emit = defineEmits(['close', 'openFlagSummary', 'actionTriggered'])
 const closeModal = () => emit('close')
 
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1)
+
+// Date formatting function
+const formatDate = (dateString) => {
+  if (!dateString) return '-'
+  
+  const date = new Date(dateString)
+  const options = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Jakarta'
+  }
+  
+  return date.toLocaleDateString('id-ID', options)
+}
 
 // Confirmation dialog state & logic
 const confirmVisible = ref(false)
@@ -417,6 +439,15 @@ const closeFlagModal = () => {
 .status-badge.published {
   background: #cfe2ff;
   color: #084298;
+}
+.status-badge.unpublished {
+ background-color: #e2e3e5;
+color: #41464b;
+}
+
+.status-badge.solved {
+ background: #d4edda;
+color: #155724;
 }
 
 .modal-body::-webkit-scrollbar {

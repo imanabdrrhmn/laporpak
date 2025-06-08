@@ -50,15 +50,13 @@ export default {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 25, 47, 0.7);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 4000;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   padding: 2rem;
-  animation: fadeInBackdrop 0.35s ease forwards;
+  animation: fadeInBackdrop 0.3s ease forwards;
 }
 
 @keyframes fadeInBackdrop {
@@ -67,20 +65,20 @@ export default {
 }
 
 .modal-content {
-  background: linear-gradient(145deg, #1e2a47, #16203a);
-  border-radius: 20px;
+  background: white;
+  border-radius: 12px;
   width: 100%;
-  max-width: 520px;
+  max-width: 500px;
   max-height: 75vh;
   overflow-y: auto;
-  box-shadow: 0 25px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   position: relative;
   font-family: 'Inter', system-ui, sans-serif;
-  color: #f0f4ff;
-  padding: 2.5rem 3rem;
-  transform: translateY(-30px);
+  color: #333;
+  padding: 2rem;
+  transform: translateY(-20px);
   opacity: 0;
-  animation: slideInModal 0.4s ease forwards;
+  animation: slideInModal 0.3s ease forwards;
 }
 
 @keyframes slideInModal {
@@ -92,87 +90,84 @@ export default {
 
 .close-btn {
   position: absolute;
-  top: 18px;
-  right: 18px;
-  font-size: 2rem;
+  top: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  font-size: 36px;
   background: transparent;
   border: none;
-  color: #a1a9cc;
+  color: #666;
   cursor: pointer;
-  transition: color 0.3s ease;
-  line-height: 1;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s ease;
 }
 
 .close-btn:hover {
-  color: #ff6b6b;
+  color: #0d6efd;
   transform: rotate(90deg);
 }
 
 h3 {
   margin-top: 0;
-  margin-bottom: 2rem;
-  font-weight: 800;
-  font-size: 2.25rem;
-  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  font-size: 1.5rem;
   text-align: center;
-  color: #f9fafb;
-  text-shadow: 0 0 8px #0b2545;
+  color: #0d6efd;
 }
 
 .no-flags-text {
   font-style: italic;
-  color: #a1a9cc;
-  margin-bottom: 2rem;
-  font-size: 1.125rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
   text-align: center;
 }
 
 ul {
   list-style: none;
   padding: 0;
-  margin: 0 0 2rem 0;
+  margin: 0 0 1.5rem 0;
 }
 
 .category-count-item {
-  padding: 18px 24px;
-  margin-bottom: 1rem;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #25408f, #192a5f);
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #e0e6ff;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    0 6px 10px rgba(0, 0, 0, 0.25);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e9ecef;
+  font-size: 0.95rem;
+  color: #333;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background-color 0.3s ease;
-  cursor: default;
+  transition: all 0.2s ease;
 }
 
 .category-count-item:hover {
-  background: linear-gradient(135deg, #2f54ff, #1c39bb);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 8px 14px rgba(0, 0, 0, 0.35);
-  color: #fff;
+  border-color: #0d6efd;
+  background: #f8f9ff;
 }
 
 .category-count-item:last-child {
   margin-bottom: 0;
 }
 
-.total-flags {
-  font-weight: 700;
-  color: #ced6ff;
-  border-top: 2px solid #3b4cca;
-  padding-top: 1.25rem;
-  margin-top: 1.75rem;
-  text-align: right;
-  font-size: 1.25rem;
-  text-shadow: 0 0 5px #556ee6;
+.category-count-item strong {
+  color: #0d6efd;
 }
 
+.total-flags {
+  font-weight: 600;
+  color: #0d6efd;
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  text-align: right;
+  font-size: 1rem;
+}
 </style>
