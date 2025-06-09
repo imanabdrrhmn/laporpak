@@ -65,10 +65,10 @@ class TopUpController extends Controller
 
     public function adminIndex(Request $request)
     {
-        $this->authorize('viewAny', TopUp::class);
+        $canView = Auth::user()->can('viewAny', TopUp::class);
 
         return Inertia::render('Admin/TopUps/Index', [
-            'canViewTopUp' => true,
+            'canViewTopUp' => $canView,
             'filters' => $request->only(['status', 'search']),
         ]);
     }

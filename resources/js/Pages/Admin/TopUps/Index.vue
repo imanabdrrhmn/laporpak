@@ -2,11 +2,11 @@
   <AppLayout>
     <Head title="Manajemen Top Up" />
     <div class="container py-5">
-      <template v-if="canViewTopUp">
+      <!-- PERBAIKAN: Gunakan 'hasAccess' untuk kontrol utama -->
+      <template v-if="hasAccess">
         <DashboardHeader />
         <StatusCards :pending-count="statusCounts.pending" :verified-count="statusCounts.verified" :rejected-count="statusCounts.rejected" />
 
-        <!-- PERBAIKAN: Menggunakan v-model untuk sinkronisasi filter -->
         <FilterControls
           v-model="filters"
           @show-export-modal="showExportModal"
@@ -68,6 +68,7 @@
         />
       </template>
       <template v-else>
+        <!-- Komponen ini akan ditampilkan jika hasAccess false -->
         <AccessDenied />
       </template>
     </div>
@@ -95,6 +96,7 @@ const page = usePage();
 
 const props = defineProps({
   filters: Object,
+  // canViewTopUp tidak lagi jadi kontrol utama, tapi bisa tetap ada untuk pengecekan awal
   canViewTopUp: {
     type: Boolean,
     default: true,
@@ -116,8 +118,8 @@ const statusCounts = ref({
 });
 const isLoading = ref(true);
 const fetchError = ref(null);
+const hasAccess = ref(props.canViewTopUp); // PERBAIKAN: State baru untuk kontrol akses
 
-// State untuk filter, akan di-update oleh v-model dari FilterControls
 const filters = ref({
   status: props.filters?.status || "",
   search: props.filters?.search || "",
@@ -141,6 +143,12 @@ const selectedTopUp = ref(null);
 const API_BASE_URL = '/admin/api/topups';
 
 const fetchTopUps = async () => {
+  // Hanya fetch jika user punya akses awal
+  if (!hasAccess.value) {
+      isLoading.value = false;
+      return;
+  }
+
   isLoading.value = true;
   fetchError.value = null;
 
@@ -171,7 +179,15 @@ const fetchTopUps = async () => {
 
   } catch (error) {
     console.error("Error fetching top-ups:", error);
-    fetchError.value = error.response?.data?.message || 'Gagal memuat data.';
+    
+    // PERBAIKAN: Cek jika error adalah 403 Forbidden
+    if (error.response && error.response.status === 403) {
+        hasAccess.value = false; // Set hasAccess ke false
+        fetchError.value = "Anda tidak memiliki izin untuk melihat data ini.";
+    } else {
+        fetchError.value = error.response?.data?.message || 'Gagal memuat data.';
+    }
+    
     topUpsData.value = [];
     paginationData.value = { current_page: 1, last_page: 1, per_page: 10, total: 0, links: {} };
   } finally {
@@ -196,14 +212,11 @@ onMounted(() => {
   });
 });
 
-// PERBAIKAN UTAMA: Menggunakan watcher yang di-debounce untuk semua filter.
-// Watcher ini akan terpanggil setiap kali `filters` (yang di-bind dengan v-model) berubah.
 const debouncedFetch = debounce(() => {
     fetchTopUps();
 }, 300);
 
 watch(filters, (newFilters, oldFilters) => {
-  // Hanya reset halaman jika filter benar-benar berubah, bukan hanya saat pertama kali dimuat
   if (JSON.stringify(newFilters) !== JSON.stringify(oldFilters)) {
       paginationData.value.current_page = 1;
   }
@@ -216,15 +229,8 @@ const goToPage = (pageNumber) => {
       return;
     }
     paginationData.value.current_page = pageNumber;
-    fetchTopUps(); // Fetch langsung saat ganti halaman, tidak perlu debounce
+    fetchTopUps();
 };
-
-// Method `handleFilterUpdate` tidak lagi diperlukan karena v-model dan watch sudah menanganinya
-// const handleFilterUpdate = (newFilters) => {
-//     filters.value = newFilters;
-//     goToPage(1);
-// };
-
 
 const openActionModal = (topUp) => {
   selectedTopUp.value = topUp;
