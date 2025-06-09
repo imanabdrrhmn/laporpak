@@ -27,7 +27,7 @@
             <div class="flex-grow-1 user-content">
               <div class="d-flex justify-content-between align-items-start">
                 <div class="user-info">
-                  <h5 class="user-name mb-1">{{ selectedFeedback.user?.name || 'Abuyy' }}</h5>
+                  <h5 class="user-name mb-1">{{ selectedFeedback.user?.name || 'Anonim' }}</h5>
                   <div class="text-muted time-info">
                     {{ selectedFeedback.created_at }}
                     <span v-if="selectedFeedback.is_updated"> (diperbarui)</span>

@@ -106,12 +106,16 @@
                 placeholder="Bagikan pendapat Anda di sini..."
                 rows="4"
                 maxlength="255"
+                :class="{ 'is-invalid': form.errors.message }"
               ></textarea>
               <div class="text-counter" :class="{'text-warning': form.message.length > 200}">
                 {{ form.message.length }}/255
               </div>
             </div>
-            <div v-if="form.errors.message" class="error-message mt-1">{{ form.errors.message }}</div>
+            <div v-if="form.errors.message" class="invalid-feedback d-block">
+              <i class="bi bi-exclamation-circle me-1"></i>
+              Mohon berikan pendapat Anda untuk meningkatkan layanan kami
+            </div>
           </div>
 
           <!-- Submit Button with loading state -->
@@ -301,7 +305,7 @@ defineExpose({
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+  background: #0d6efd;
   color: white;
   font-size: 1.5rem;
   margin-bottom: 0.8rem;
@@ -318,11 +322,11 @@ defineExpose({
 
 /* Title with gradient */
 .gradient-text {
-  background: linear-gradient(45deg, #0d6efd, #0dcaf0);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #0d6efd;
   margin-bottom: 0.4rem;
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
 }
 
 /* Star rating styling */
@@ -366,9 +370,10 @@ defineExpose({
   font-size: 0.9rem;
   font-weight: 600;
   color: #0d6efd;
-  background: -webkit-linear-gradient(45deg, #0d6efd, #0dcaf0);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: unset;
   padding: 4px 12px;
   border-radius: 20px;
   transition: all 0.3s;
@@ -412,7 +417,7 @@ defineExpose({
   left: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #0d6efd, #0dcaf0, #0d6efd);
+  background: #0d6efd;
   background-size: 200% 100%;
   animation: gradient-move 3s linear infinite;
 }
@@ -476,7 +481,7 @@ defineExpose({
 }
 
 .tab-btn.active {
-  background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+  background: #0d6efd;
   color: white;
   border-color: transparent;
   box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
@@ -572,7 +577,7 @@ defineExpose({
 
 /* Submit button styling */
 .submit-btn {
-  background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+  background: #0d6efd;
   border: none;
   font-weight: 600;
   border-radius: 10px;
@@ -699,5 +704,17 @@ defineExpose({
   .form-control {
     padding: 0.25rem 0.5rem !important;
   }
+}
+
+/* Additional styles for validation feedback */
+.invalid-feedback {
+  font-size: 0.875rem;
+  color: #dc3545;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.1);
 }
 </style>
