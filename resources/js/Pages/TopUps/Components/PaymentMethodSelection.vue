@@ -32,14 +32,14 @@
       </div>
       <div class="d-flex justify-content-between mt-5">
         <button class="btn btn-outline-secondary px-4" @click="$emit('back')">
-          <i class="bi bi-arrow-left me-1"></i> Back
+          <i class="bi bi-arrow-left me-1"></i> Kembali
         </button>
         <button
           class="btn btn-primary px-4"
           @click="$emit('proceed')"
           :disabled="!selectedPaymentMethodId"
         >
-          Continue <i class="bi bi-arrow-right ms-1"></i>
+          Lanjutkan <i class="bi bi-arrow-right ms-1"></i>
         </button>
       </div>
     </div>
@@ -72,12 +72,12 @@
   }
   
   .payment-method-option:hover {
-    border-color: #4e73df !important;
+    border-color: #0d6efd !important;
     box-shadow: 0 4px 15px rgba(78,115,223,0.2);
   }
   
   .payment-method-option.selected {
-    border-color: #4e73df !important;
+    border-color: #0d6efd !important;
     box-shadow: 0 4px 15px rgba(78,115,223,0.3);
     background-color: #f8f9fa;
   }
@@ -87,7 +87,7 @@
   }
   
   .form-check-input[type="radio"]:checked {
-    background-color: #4e73df;
+    background-color: #0d6efd;
     border-color: #4e73df;
   }
   
@@ -103,12 +103,12 @@
   }
   
   .btn-primary {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    background:  #0d6efd;
     border: none;
   }
   
   .btn-primary:hover {
-    background: linear-gradient(135deg, #224abe 0%, #1e3a8a 100%);
+    background: #0b5ed7;
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(78,115,223,0.4);
   }
@@ -119,6 +119,7 @@
   }
   
   .btn-outline-secondary:hover {
+    color: white;
     background-color: #6c757d;
     border-color: #6c757d;
     transform: translateY(-1px);

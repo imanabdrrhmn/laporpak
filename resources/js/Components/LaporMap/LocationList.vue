@@ -1,7 +1,7 @@
 <template>
   <div class="card mb-4 shadow">
     <div class="card-header bg-primary text-white">
-      <h5 class="mb-0"><i class="bi bi-pin-map-fill me-2"></i>Region Pelaporan</h5>
+      <h5 class="mb-0"><i class="bi bi-pin-map-fill me-2"></i>Lokasi Pelaporan</h5>
     </div>
     <div class="card-body p-0">
       <div class="list-group list-group-flush location-list">

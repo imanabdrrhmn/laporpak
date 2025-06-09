@@ -106,7 +106,7 @@ Route::middleware(['auth','contact.verified'])->group(function () {
 
 Route::middleware(['auth','contact.verified'])->group(function () {
     Route::get('/top-ups/history', [TopUpController::class, 'index'])->name('top-ups.index');
-    Route::get('/top-ups', [TopUpController::class, 'create'])->name('top-ups.create');
+    Route::get('/top-ups/create', [TopUpController::class, 'create'])->name('top-ups.create');
     Route::post('/top-ups/create', [TopUpController::class, 'store'])->name('top-ups.store');
 });
 

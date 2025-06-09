@@ -82,10 +82,22 @@
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="/top-ups">
+                  <a class="dropdown-item" href="#" 
+                     @click.prevent="toggleCreditSubmenu = !toggleCreditSubmenu">
                     <i class="bi bi-wallet-fill me-2"></i>
                     Credit
+                    <i class="bi ms-auto" :class="toggleCreditSubmenu ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                   </a>
+                  <div class="collapse ps-3" :class="{ show: toggleCreditSubmenu }">
+                    <a class="dropdown-item" href="/top-ups/create">
+                      <i class="bi bi-plus-circle-fill me-2"></i>
+                      Top Up
+                    </a>
+                    <a class="dropdown-item" href="/top-ups/history">
+                      <i class="bi bi-clock-history me-2"></i>
+                      Riwayat Top Up
+                    </a>
+                  </div>
                 </li>
                  <li v-if="isAdmin">
                   <a class="dropdown-item" href="/admin/dashboard">
@@ -303,10 +315,25 @@
                   <i class="bi bi-file-earmark-text-fill me-2"></i>
                   Riwayat Laporan
                 </Link>
-                <Link href="/top-ups" class="nav-link" @click="closeMobileNav">
-                  <i class="bi bi-wallet-fill me-2"></i>
-                  Credit
+                <Link href="/top-ups" class="nav-link" @click.prevent="toggleCreditMobile = !toggleCreditMobile">
+                  <div>
+                    <i class="bi bi-wallet-fill me-2"></i>
+                    <span>Credit</span>
+                  </div>
+                  <i class="bi" :class="toggleCreditMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                 </Link>
+                <div class="collapse" :class="{ show: toggleCreditMobile }">
+                  <div class="nav flex-column submenu">
+                    <Link href="/top-ups/create" class="nav-link" @click="closeMobileNav">
+                      <i class="bi bi-plus-circle-fill me-2"></i>
+                      Top Up
+                    </Link>
+                    <Link href="/top-ups/history" class="nav-link" @click="closeMobileNav">
+                      <i class="bi bi-clock-history me-2"></i>
+                      Riwayat Top Up
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </li>
@@ -367,6 +394,8 @@ export default {
     const mobileNavOpen = ref(false);
     const toggleLayananMobile = ref(false);
     const toggleProfileMobile = ref(false);
+    const toggleCreditSubmenu = ref(false);
+    const toggleCreditMobile = ref(false);
 
     const isLoggedIn = computed(() => !!page.props.auth?.user);
     const user = computed(() => page.props.auth?.user || {});
@@ -395,6 +424,8 @@ export default {
       mobileNavOpen,
       toggleLayananMobile,
       toggleProfileMobile,
+      toggleCreditSubmenu,
+      toggleCreditMobile,
       isLoggedIn,
       user,
       getUserInitials,

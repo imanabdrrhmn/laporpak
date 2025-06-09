@@ -129,6 +129,10 @@ import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
 let L = null
 let leafletLoaded = false
 
+// Define emits and capture the emit function
+const emit = defineEmits(['open-location-detail', 'map-error', 'map-ready'])
+
+// Define component props
 const props = defineProps({
   loading: {
     type: Boolean,
@@ -143,8 +147,6 @@ const props = defineProps({
     default: () => []
   }
 })
-
-const emit = defineEmits(['map-ready', 'map-error'])
 
 // Refs
 const mapContainer = ref(null)
@@ -306,7 +308,7 @@ const initMap = async () => {
     
   } catch (error) {
     console.error('Map initialization failed:', error)
-    emit('map-error', error)
+    emit('map-error', error) // Now emit is properly defined
   }
 }
 

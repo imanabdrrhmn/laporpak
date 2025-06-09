@@ -35,7 +35,7 @@
             </div>
             <div class="saldo-amount">
               <span class="currency">Rp</span>
-              <span class="amount">{{ formatCurrency(saldoKredit) }}</span>
+              <span class="amount">{{ formatCurrency(displaySaldo) }}</span>
             </div>
           </div>
 
@@ -57,7 +57,7 @@
                     </div>
                     <div class="stat-content">
                       <span class="stat-label">Total Laporan</span>
-                      <span class="stat-value">{{ totalLaporan }}</span>
+                      <span class="stat-value">{{ displayTotalLaporan }}</span>
                     </div>
                   </div>
                 </div>
@@ -68,7 +68,7 @@
                     </div>
                     <div class="stat-content">
                       <span class="stat-label">Sedang Diproses</span>
-                      <span class="stat-value">{{ sedangDiproses }}</span>
+                      <span class="stat-value">{{ displaySedangDiproses }}</span>
                     </div>
                   </div>
                 </div>
@@ -79,7 +79,7 @@
                     </div>
                     <div class="stat-content">
                       <span class="stat-label">Proses Selesai</span>
-                      <span class="stat-value">{{ prosesSelesai }}</span>
+                      <span class="stat-value">{{ displayProsesSelesai }}</span>
                     </div>
                   </div>
                 </div>
@@ -128,15 +128,46 @@ const isLoggedIn = computed(() => !!page.props.auth?.user)
 const user = computed(() => page.props.auth?.user || {})
 const isAdmin = computed(() => page.props.auth?.isAdmin)
 
-defineProps({
-  namaUser: { type: String, default: 'User' },
-  levelUser: { type: String, default: null },
-  userImage: { type: String, default: null },
-  saldoKredit: { type: Number, default: 50000 },
-  totalLaporan: { type: Number, default: 10 },
-  sedangDiproses: { type: Number, default: 0 },
-  prosesSelesai: { type: Number, default: 0 }
+const props = defineProps({
+  namaUser: { 
+    type: String, 
+    default: 'User' 
+  },
+  levelUser: { 
+    type: String, 
+    default: '' // Mengubah dari null ke string kosong
+  },
+  userImage: { 
+    type: String, 
+    default: null 
+  },
+  saldoKredit: { 
+    type: [Number, String], // Menerima kedua tipe
+    default: 0,
+    transform: (value) => Number(value) // Mengubah ke number
+  },
+  totalLaporan: { 
+    type: [Number, String],
+    default: 0,
+    transform: (value) => Number(value)
+  },
+  sedangDiproses: { 
+    type: [Number, String],
+    default: 0,
+    transform: (value) => Number(value)
+  },
+  prosesSelesai: { 
+    type: [Number, String],
+    default: 0,
+    transform: (value) => Number(value)
+  }
 })
+
+// Menambahkan computed properties untuk transformasi nilai
+const displaySaldo = computed(() => Number(props.saldoKredit))
+const displayTotalLaporan = computed(() => Number(props.totalLaporan))
+const displaySedangDiproses = computed(() => Number(props.sedangDiproses))
+const displayProsesSelesai = computed(() => Number(props.prosesSelesai))
 
 const activeView = ref('saldo')
 const currentTime = ref(new Date())
@@ -278,7 +309,7 @@ onUnmounted(() => {
 .saldo-icon {
   width: clamp(32px, 8vw, 40px);
   height: clamp(32px, 8vw, 40px);
-  background: linear-gradient(135deg, #4285f4, #1a73e8);
+  background: #0d6efd;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -296,14 +327,14 @@ onUnmounted(() => {
 
 .currency {
   font-size: clamp(1rem, 2.5vw, 1.2rem);
-  color: #4285f4;
+  color: #0d6efd;
   font-weight: 500;
 }
 
 .amount {
   font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 700;
-  color: #4285f4;
+  color: #0d6efd;
 }
 
 .laporan-view {
@@ -389,15 +420,12 @@ onUnmounted(() => {
 }
 
 .saldo-btn.active {
-  background: #4285f4;
-  border-color: #4285f4;
+  background: #0d6efd;
+  border-color: #0d6efd;
   color: white;
 }
 
-.saldo-btn.active:hover {
-  background: #1a73e8;
-  border-color: #1a73e8;
-}
+
 
 .info-cards-section {
   margin-top: 1rem;

@@ -28,7 +28,7 @@
   
   <style scoped>
   .top-up-header-bar {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   }
   

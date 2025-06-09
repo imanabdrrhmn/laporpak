@@ -189,15 +189,17 @@ const truncateText = (text, maxLength) => {
 const getStatusClass = (status) => {
   switch (status?.toLowerCase()) {
     case 'rejected':
-      return 'bg-danger';
+      return 'rejected';
     case 'pending':
-      return 'bg-warning';
+      return 'pending';
     case 'approved':
-      return 'bg-success';
+      return 'approved';
     case 'published':
-      return 'bg-primary';
+      return 'published';
+    case 'solved':
+      return 'solved';
     default:
-      return 'bg-secondary';
+      return 'default';
   }
 };
 

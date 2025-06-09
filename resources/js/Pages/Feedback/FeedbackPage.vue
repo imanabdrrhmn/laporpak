@@ -15,9 +15,12 @@
         :is-logged-in="isLoggedIn"
         :contact-verified="contactVerified"
         :is-admin="isAdmin"
-        :selected-category.sync="selectedCategory"
-        :sort-by.sync="sortBy"
-        :is-my-feedback-active.sync="isMyFeedbackActive"
+        :selected-category="selectedCategory"
+        :sort-by="sortBy"
+        :is-my-feedback-active="isMyFeedbackActive"
+        @update:selected-category="selectedCategory = $event"
+        @update:sort-by="updateSortBy"
+        @update:is-my-feedback-active="isMyFeedbackActive = $event"
         @open-feedback-modal="openFeedbackModal"
         @toggle-my-feedback="toggleMyFeedback"
         @handle-category-change="handleCategoryChange"
@@ -34,11 +37,12 @@
         @toggle-dropdown="toggleDropdown"
       />
       <FeedbackPagination
-        :current-page.sync="currentPage"
+        :current-page="currentPage"
         :total-pages="totalPages"
         :start-index="startIndex"
         :end-index="endIndex"
         :total-items="totalItems"
+        @update:current-page="currentPage = $event"
         @go-to-previous-page="goToPreviousPage"
         @go-to-next-page="goToNextPage"
         @jump-to-page="jumpToPage"
@@ -62,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, watch, onMounted } from 'vue';
+import { ref, computed, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { usePage, router, Head } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import FeedbackModal from './FeedbackModal.vue';
@@ -91,8 +95,20 @@ const sortBy = ref('latest');
 const isLoading = ref(false);
 const isMyFeedbackActive = ref(false);
 
+// Add searchQuery ref
+const searchQuery = ref('');
+
+// Fungsi untuk update sortBy dengan debugging
+const updateSortBy = (newSortBy) => {
+  console.log('Updating sortBy from', sortBy.value, 'to', newSortBy);
+  sortBy.value = newSortBy;
+};
+
 const filteredFeedbacks = computed(() => {
-  let result = props.feedbacks;
+  let result = [...props.feedbacks];
+
+  // Log initial data
+  console.log('Initial feedbacks:', result.map(f => ({ id: f.id, rating: f.rating })));
 
   if (isMyFeedbackActive.value && isLoggedIn.value) {
     result = result.filter(feedback => feedback.user_id === page.props.auth?.user?.id);
@@ -100,14 +116,39 @@ const filteredFeedbacks = computed(() => {
     result = result.filter(feedback => feedback.kategori === selectedCategory.value);
   }
 
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase().trim();
+    result = result.filter(feedback =>
+      feedback.message?.toLowerCase().includes(query) ||
+      feedback.user?.name?.toLowerCase().includes(query) ||
+      feedback.kategori?.toLowerCase().includes(query)
+    );
+  }
+
   if (sortBy.value === 'highestRating') {
-    const maxRating = Math.max(...result.map(f => f.rating));
-    result = result.filter(feedback => feedback.rating === maxRating);
+    // Find max rating
+    const maxRating = Math.max(...result.map(f => Number(f.rating) || 0));
+    console.log('Max rating found:', maxRating);
+    
+    // Filter to show only highest rated items
+    result = result.filter(feedback => Number(feedback.rating) === maxRating);
+    console.log('Filtered highest rated items:', result);
   } else {
+    // Sort by latest
     result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
   return result;
+});
+
+// Update watch for sortBy
+watch(sortBy, (newValue) => {
+  console.log('Sort changed to:', newValue);
+  isLoading.value = true;
+  nextTick(() => {
+    console.log('Filtered results:', filteredFeedbacks.value);
+    isLoading.value = false;
+  });
 });
 
 const currentPage = ref(1);
@@ -177,7 +218,9 @@ const handleCategoryChange = () => {
   }, 700);
 };
 
-watch([sortBy], () => {
+// Watch untuk sortBy dengan debugging
+watch([sortBy], (newValues, oldValues) => {
+  console.log('sortBy changed from', oldValues[0], 'to', newValues[0]);
   isLoading.value = true;
   setTimeout(() => {
     isLoading.value = false;
@@ -337,9 +380,6 @@ onMounted(() => {
   // Add event listener for outside clicks
   document.addEventListener('click', handleOutsideClick);
 });
-
-// Clean up event listener on unmount
-import { onUnmounted } from 'vue';
 
 onUnmounted(() => {
   document.removeEventListener('click', handleOutsideClick);

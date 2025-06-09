@@ -54,7 +54,7 @@
       </div>
       <div class="d-flex justify-content-between mt-5">
         <button class="btn btn-outline-secondary px-4" @click="$emit('back')" :disabled="form.processing">
-          <i class="bi bi-arrow-left me-1"></i> Back
+          <i class="bi bi-arrow-left me-1"></i> Kembali 
         </button>
         <button class="btn btn-success px-4" @click="$emit('confirm-payment')" :disabled="form.processing || !form.proof">
           <span v-if="form.processing" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -118,6 +118,7 @@
   }
   
   .btn-outline-secondary:hover {
+    color: white;
     background-color: #6c757d;
     border-color: #6c757d;
     transform: translateY(-1px);

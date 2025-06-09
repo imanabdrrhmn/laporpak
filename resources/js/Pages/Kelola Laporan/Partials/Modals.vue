@@ -5,7 +5,7 @@
                 <div class="modal-content" @click.stop>
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            Detail {{ getModalTitle(item) }}
+                            Detail Pelaporan {{ getReportService(item) }}
                         </h5>
                         <button type="button" class="btn-close" @click="closeModal"></button>
                     </div>
@@ -28,21 +28,16 @@
                                             <td>{{ item.source || 'SMS' }}</td>
                                         </tr>
                                         <tr>
-                                            <th>Deskripsi</th>
-                                            <td>{{ item.description }}</td>
-                                        </tr>
-                                        <tr>
                                             <th>Status</th>
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="status-indicator" :class="getStatusClass(item.status)"></div>
-                                                    <span :class="getStatusTextClass(item.status)">{{ item.status }}</span>
-                                                </div>
+                                                <span class="status-badge" :class="getStatusBadgeClass(item.status)">
+                                                    {{ item.status }}
+                                                </span>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th>Alasan</th>
-                                            <td>{{ item.reason || '-' }}</td>
+                                            <th>Deskripsi</th>
+                                            <td>{{ item.description }}</td>
                                         </tr>
                                     </template>
 
@@ -57,21 +52,16 @@
                                             <td><span class="badge bg-light text-dark border">{{ item.category }}</span></td>
                                         </tr>
                                         <tr>
-                                            <th>Deskripsi</th>
-                                            <td>{{ item.description }}</td>
-                                        </tr>
-                                        <tr>
                                             <th>Status</th>
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="status-indicator" :class="getStatusClass(item.status)"></div>
-                                                    <span :class="getStatusTextClass(item.status)">{{ item.status }}</span>
-                                                </div>
+                                                <span class="status-badge" :class="getStatusBadgeClass(item.status)">
+                                                    {{ item.status }}
+                                                </span>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th>Alasan</th>
-                                            <td>{{ item.reason || '-' }}</td>
+                                            <th>Deskripsi</th>
+                                            <td>{{ item.description }}</td>
                                         </tr>
                                     </template>
 
@@ -82,21 +72,20 @@
                                             <td>{{ formatDate(item.tanggal) }}</td>
                                         </tr>
                                         <tr>
+                                            <th>Status</th>
+                                            <td>
+                                                <span class="status-badge" :class="getStatusBadgeClass(item.hasil)">
+                                                    {{ item.hasil }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <th>Data</th>
                                             <td>{{ item.data }}</td>
                                         </tr>
                                         <tr>
                                             <th>Query</th>
                                             <td>{{ item.query }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Status</th>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="status-indicator" :class="getStatusClass(item.hasil)"></div>
-                                                    <span :class="getStatusTextClass(item.hasil)">{{ item.hasil }}</span>
-                                                </div>
-                                            </td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -105,7 +94,6 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @click="closeModal">Tutup</button>
-                        <button type="button" class="btn btn-primary">Cetak</button>
                     </div>
                 </div>
             </div>
@@ -136,22 +124,31 @@ const isInfrastrukturReport = computed(() => {
     return props.item && 'category' in props.item && !('source' in props.item);
 });
 
-const getModalTitle = (item) => {
-    if (isPenipuanReport.value) return 'Laporan Penipuan';
-    if (isInfrastrukturReport.value) return 'Laporan Infrastruktur';
+const getReportService = (item) => {
+    console.log('Modal item:', item); // Debug log
+    console.log('isPenipuanReport:', isPenipuanReport.value);
+    console.log('isInfrastrukturReport:', isInfrastrukturReport.value);
+    
+    if (isPenipuanReport.value) return 'Penipuan';
+    if (isInfrastrukturReport.value) return 'Infrastruktur';
     return 'Verifikasi';
 };
 
-// Fungsi untuk memberikan kelas status indicator berdasarkan status
-const getStatusClass = (status) => {
-    if (!status) return '';
-    return status.toLowerCase();
+// Keep the old function for backward compatibility if needed
+const getModalTitle = (item) => {
+    console.log('Modal item:', item); // Debug log
+    console.log('isPenipuanReport:', isPenipuanReport.value);
+    console.log('isInfrastrukturReport:', isInfrastrukturReport.value);
+    
+    if (isPenipuanReport.value) return 'Detail Pelaporan Penipuan';
+    if (isInfrastrukturReport.value) return 'Detail Pelaporan Infrastruktur';
+    return 'Detail Verifikasi';
 };
 
-// Fungsi untuk memberikan kelas teks status sesuai status
-const getStatusTextClass = (status) => {
-    if (!status) return '';
-    return 'text-status ' + status.toLowerCase();
+// Fungsi untuk memberikan kelas status badge berdasarkan status
+const getStatusBadgeClass = (status) => {
+    if (!status) return 'default';
+    return status.toLowerCase();
 };
 </script>
 
@@ -184,12 +181,79 @@ const getStatusTextClass = (status) => {
     align-items: center;
     padding: 1rem;
     border-bottom: 1px solid #e9ecef;
+    background-color: #0d6efd;
+    color: white;
+}
+
+.modal-title {
+    margin: 0;
+    font-weight: 600;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.btn-close:before {
+    content: '×';
+}
+
+.btn-close:hover {
+    opacity: 1;
+    transform: rotate(180deg);
 }
 
 .modal-body {
     padding: 1rem;
-    max-height: 70vh;
+    max-height: 65vh;
     overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+/* Custom scrollbar styles */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #0d6efd;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #0b5ed7;
+}
+
+.table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.table td {
+    word-wrap: break-word;
+    white-space: pre-line;
+    vertical-align: top;
+}
+
+.table th {
+    width: 30%;
+    vertical-align: top;
 }
 
 .modal-footer {
@@ -217,55 +281,70 @@ const getStatusTextClass = (status) => {
     border-radius: 0.25rem;
 }
 
-/* Status Indicator Bulat */
-.status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 8px;
-}
-
-/* Warna untuk tiap status */
-.status-indicator.pending {
-    background-color: #ffc107; /* kuning */
-}
-.status-indicator.approved {
-    background-color: #28a745; /* hijau */
-}
-.status-indicator.rejected {
-    background-color: #dc3545; /* merah */
-}
-.status-indicator.published {
-    background-color: #0d6efd; /* biru */
-}
-.status-indicator.solved {
-    background-color: #198754; /* hijau gelap */
-}
-.status-indicator.unpublished {
-    background-color: #fd7e14; /* oranye */
-}
-
-/* Warna teks status */
-.text-status {
+/* Status Badge Styles */
+.status-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
     font-weight: 600;
     text-transform: capitalize;
+    display: inline-block;
 }
-.text-status.pending {
-    color: #ffc107;
+
+.status-badge.pending {
+    background-color: #fff8e1;
+    color: #ffa000;
 }
-.text-status.approved {
-    color: #28a745;
+
+.status-badge.approved {
+    background-color: #e8f5e9;
+    color: #2e7d32;
 }
-.text-status.rejected {
-    color: #dc3545;
+
+.status-badge.rejected {
+    background-color: #ffebee;
+    color: #c62828;
 }
-.text-status.published {
-    color: #0d6efd;
+
+.status-badge.published {
+    background-color: #e3f2fd;
+    color: #1565c0;
 }
-.text-status.solved {
-    color: #198754;
+
+.status-badge.solved {
+    background: #d4edda;
+    color: #155724;
 }
-.text-status.unpublished {
-    color: #fd7e14;
+
+.status-badge.open {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.default {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.9;
 }
 </style>

@@ -32,14 +32,14 @@
       </div>
       <div class="d-flex justify-content-between mt-4">
         <button class="btn btn-outline-secondary px-4" @click="$emit('back')">
-          <i class="bi bi-arrow-left me-1"></i> Back
+          <i class="bi bi-arrow-left me-1"></i> Kembali
         </button>
         <button
           class="btn btn-primary px-4"
           @click="$emit('proceed')"
           :disabled="!isNominalValid"
         >
-          Continue <i class="bi bi-arrow-right ms-1"></i>
+          Lanjutkan <i class="bi bi-arrow-right ms-1"></i>
         </button>
       </div>
     </div>
@@ -108,13 +108,14 @@
   }
   
   .nominal-option:hover {
+    background-color:  #0b5ed7;;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     border-color: #4e73df;
   }
   
   .nominal-option.active {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    background: #0d6efd;
     color: white;
     border-color: #4e73df;
     box-shadow: 0 8px 25px rgba(78,115,223,0.3);
@@ -153,12 +154,12 @@
   }
   
   .btn-primary {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    background: #0d6efd;
     border: none;
   }
   
   .btn-primary:hover {
-    background: linear-gradient(135deg, #224abe 0%, #1e3a8a 100%);
+    background:  #0b5ed7;
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(78,115,223,0.4);
   }
@@ -169,6 +170,7 @@
   }
   
   .btn-outline-secondary:hover {
+    color: white;
     background-color: #6c757d;
     border-color: #6c757d;
     transform: translateY(-1px);

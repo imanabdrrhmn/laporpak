@@ -218,7 +218,6 @@ const services = ref([
 // Intersection Observer untuk animasi scroll
 const initScrollAnimations = () => {
   if (typeof window !== 'undefined') {
-    // Mencari semua elemen dengan kelas .animate__animated
     const animateElements = document.querySelectorAll('.animate__animated');
     
     // Mengaktifkan animasi pada elemen
@@ -228,7 +227,11 @@ const initScrollAnimations = () => {
       const delay = element.getAttribute('data-delay');
       
       if (animation) {
-        element.classList.remove(animation); // Hapus dulu kelas animasi agar tidak langsung aktif
+        // Split animation classes and remove them individually
+        const animationClasses = animation.split(' ');
+        animationClasses.forEach(className => {
+          if (className) element.classList.remove(className.trim());
+        });
       }
       
       if (delay) {
@@ -248,8 +251,9 @@ const initScrollAnimations = () => {
             animatedElements.forEach((element) => {
               const animation = element.getAttribute('data-animation');
               if (animation) {
-                animation.split(' ').forEach(className => {
-                  element.classList.add(className);
+                const animationClasses = animation.split(' ');
+                animationClasses.forEach(className => {
+                  if (className) element.classList.add(className.trim());
                 });
               }
             });

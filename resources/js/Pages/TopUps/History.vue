@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+    <Head title="Riwayat Top Up" />
     <div class="container py-4">
       <div class="topup-history-container mx-auto">
         <h1 class="mb-4 fw-bold" >Riwayat Top Up</h1>
@@ -16,7 +17,7 @@
             <option value="">Semua Status</option>
             <option value="verified">Verified</option>
             <option value="pending">Pending</option>
-            <option value="failed">Gagal</option>
+            <option value="failed">Rejected</option>
           </select>
         </div>
 
@@ -71,68 +72,19 @@
       </div>
     </div>
 
-    <div
-      class="modal fade"
-      id="detailModal"
-      tabindex="-1"
-      aria-labelledby="detailModalLabel"
-      aria-hidden="true"
-      ref="detailModalRef"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 0.75rem;">
-          <div class="modal-body p-4">
-            <div v-if="selectedTopUp">
-              <h3 class="text-center fw-bold mb-1" style="font-size: 1.25rem;">Detail Top Up</h3>
-              <p class="text-center fw-bold mb-3" style="font-size: 1.75rem;">
-                Rp {{ formatCurrency(selectedTopUp.amount) }}
-              </p>
-
-              <div class="detail-item d-flex justify-content-between align-items-center mb-2">
-                <span class="text-muted">Status</span>
-                <span
-                  class="badge rounded-pill"
-                  :class="statusBadgeClass(selectedTopUp.status)"
-                >
-                  {{ selectedTopUp.status.toLowerCase() === 'success' ? 'Verified' : capitalize(selectedTopUp.status) }}
-                </span>
-              </div>
-              <div class="detail-item d-flex justify-content-between align-items-center mb-2">
-                <span class="text-muted">Tanggal</span>
-                <span>{{ formatDate(selectedTopUp.created_at, 'modal') }}</span>
-              </div>
-              <div class="detail-item d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted">Metode Pembayaran</span>
-                <span>{{ selectedTopUp.payment_method || 'Tidak tersedia' }}</span>
-              </div>
-
-              <div v-if="proofImageUrl" class="text-center mt-3">
-                <p class="fw-bold">Bukti Pembayaran:</p>
-                <img
-                  :src="proofImageUrl"
-                  alt="Bukti Pembayaran"
-                  class="img-fluid rounded shadow-sm"
-                  style="max-height: 200px; max-width: 100%;"
-                />
-              </div>
-              <div v-else-if="!proofImageUrl && selectedTopUp.status.toLowerCase() !== 'pending'" class="text-muted fst-italic text-center mt-3 small">
-                 Bukti pembayaran tidak tersedia.
-              </div>
-            </div>
-            <div class="d-grid mt-4">
-              <button type="button" class="btn btn-primary" @click="closeDetailModal">Tutup</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DetailModal 
+      ref="detailModal"
+      :top-up="selectedTopUp"
+      @close="closeDetailModal"
+    />
   </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Modal } from 'bootstrap';
+import DetailModal from './Components/DetailModal.vue';
+import { Head } from '@inertiajs/vue3';
 
 const props = defineProps({
   topUps: {
@@ -147,8 +99,7 @@ const currentPage = ref(1);
 const itemsPerPage = 5;
 
 const selectedTopUp = ref(null);
-const detailModalRef = ref(null);
-let detailModalInstance = null;
+const detailModal = ref(null);
 
 const proofImageUrl = computed(() => {
   if (!selectedTopUp.value || !selectedTopUp.value.proof) return '';
@@ -202,14 +153,15 @@ const formatDate = (dateString, context = 'list') => {
 const statusBadgeClass = (status) => {
   switch (status.toLowerCase()) {
     case 'verified':
-      return 'bg-verified-blue text-white';
+    case 'success':
+      return 'status-badge approved';
     case 'pending':
-      return 'bg-warning text-dark';
+      return 'status-badge pending';
     case 'failed':
     case 'gagal':
-      return 'bg-danger text-white';
+      return 'status-badge rejected';
     default:
-      return 'bg-secondary text-white';
+      return 'status-badge rejected';
   }
 };
 
@@ -225,24 +177,14 @@ const goToPage = (page) => {
 
 const openDetailModal = (topUp) => {
   selectedTopUp.value = topUp;
-  if (!detailModalInstance && detailModalRef.value) {
-     detailModalInstance = new Modal(detailModalRef.value);
-  }
-  if (detailModalInstance) {
-    detailModalInstance.show();
-  }
+  detailModal.value?.show();
 };
 
 const closeDetailModal = () => {
-  if (detailModalInstance) {
-    detailModalInstance.hide();
-  }
+  selectedTopUp.value = null;
 };
 
 onMounted(() => {
-  if (detailModalRef.value) {
-    detailModalInstance = new Modal(detailModalRef.value);
-  }
 });
 </script>
 
@@ -254,7 +196,7 @@ onMounted(() => {
 .topup-history-container h1 {
   font-size: 2rem;
   font-weight: 600;
-  color: #2F6CD6;
+  color: #0d6efd 
 }
 
 .topup-item.card {
@@ -275,7 +217,7 @@ onMounted(() => {
 .topup-item .amount {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #2F6CD6;
+  color: #0d6efd 
 }
 
 .topup-item .date {
@@ -289,79 +231,18 @@ onMounted(() => {
   font-weight: 500;
 }
 
-.bg-verified-blue {
-  background-color: #4361EE;
-  color: #052c65;
+.status-badge.pending {
+  background-color: #fff8e1;
+  color: #ffa000;
 }
 
-.modal-content {
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
-  border: none;
-  border-radius: 0.6rem;
+.status-badge.approved {
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
-.modal-body h3.fw-bold {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #212529;
-}
-
-.modal-body p.text-center.fw-bold {
-  font-size: 1.65rem;
-  font-weight: 600;
-  color: #212529;
-  margin-bottom: 1.25rem !important;
-}
-
-.modal-body .detail-item {
-  margin-bottom: 0.6rem !important;
-}
-
-.modal-body .detail-item span:first-child {
- color: #6c757d;
- font-weight: 400;
- font-size: 0.9rem;
-}
-
-.modal-body .detail-item span:last-child,
-.modal-body .detail-item .badge {
- color: #212529;
- font-weight: 500;
- font-size: 0.9rem;
-}
-
-.btn-primary {
-    background-color: #0D6EFD;
-    border-color: #0D6EFD;
-    padding: 0.55rem 1.2rem;
-    font-weight: 500;
-    font-size: 0.95rem;
-}
-
-@media (max-width: 576px) {
-  .topup-history-container h1 {
-    font-size: 1.4rem;
-    text-align: center;
-  }
-  .topup-item .card-body {
-    flex-direction: column;
-    align-items: flex-start !important;
-  }
-  .topup-item .details {
-    margin-bottom: 0.6rem;
-  }
-  .topup-item .badge {
-    align-self: flex-start;
-  }
-
-   .modal-body p.text-center.fw-bold {
-    font-size: 1.45rem !important;
-  }
-  .modal-body h3.fw-bold {
-    font-size: 1.1rem !important;
-  }
-  .modal-body .detail-item span {
-    font-size: 0.85rem;
-  }
+.status-badge.rejected {
+  background-color: #ffebee;
+  color: #c62828;
 }
 </style>

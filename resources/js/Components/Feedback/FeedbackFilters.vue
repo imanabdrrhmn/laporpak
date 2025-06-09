@@ -50,20 +50,22 @@
           </div>
         </div>
 
-        <!-- Sort Buttons -->
+        <!-- Sort Buttons - PERBAIKAN UTAMA -->
         <div class="col-12 col-md-6 col-xl-3 order-4">
           <div class="btn-group w-100 filter-btn-group">
             <button
+              type="button"
               class="btn flex-grow-1 filter-btn"
               :class="sortBy === 'latest' ? 'btn-primary active' : 'btn-outline-primary'"
-              @click="$emit('update:sortBy', 'latest')"
+              @click.prevent="handleSortChange('latest')"
             >
               <i class="bi bi-clock-history me-1"></i> Terbaru
             </button>
             <button
+              type="button"
               class="btn flex-grow-1 filter-btn"
               :class="sortBy === 'highestRating' ? 'btn-primary active' : 'btn-outline-primary'"
-              @click="$emit('update:sortBy', 'highestRating')"
+              @click.prevent="handleSortChange('highestRating')"
             >
               <i class="bi bi-star-fill me-1"></i> Rating Tertinggi
             </button>
@@ -101,6 +103,12 @@ const localSelectedCategory = computed({
   get: () => props.selectedCategory,
   set: (value) => emit('update:selectedCategory', value),
 });
+
+// Fungsi untuk menangani perubahan sort
+const handleSortChange = (sortType) => {
+  console.log('Sort changed to:', sortType); // Debug log
+  emit('update:sortBy', sortType);
+};
 </script>
 
 <style scoped>
@@ -121,6 +129,8 @@ const localSelectedCategory = computed({
   font-weight: 500;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer; /* Tambahkan cursor pointer */
+  user-select: none; /* Mencegah text selection */
 }
 
 .filter-btn:hover:not(:disabled) {
@@ -174,6 +184,8 @@ const localSelectedCategory = computed({
   font-size: 0.9rem;
   padding: 0.5rem;
   transition: all 0.2s ease;
+  cursor: pointer; /* Pastikan cursor pointer */
+  pointer-events: auto; /* Pastikan pointer events aktif */
 }
 
 .filter-btn-group .btn-outline-primary {
@@ -208,6 +220,12 @@ const localSelectedCategory = computed({
 .btn-primary.active {
   background-color: #0d6efd;
   color: white;
+}
+
+/* Pastikan tidak ada overlay yang menghalangi */
+.btn-group {
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 767.98px) {

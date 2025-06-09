@@ -11,13 +11,15 @@
       <div class="container-fluid py-5 map-container">
         <div class="row">
           <div class="col-lg-9 map-area">
-            <MapArea
-              ref="mapArea"
-              :loading="loading"
-              :last-updated="lastUpdated"
-              :location-items="filteredLocations"
-              @open-location-detail="openLocationDetail"
-            />
+            <div> <!-- Add wrapper div to avoid fragment root -->
+              <MapArea
+                ref="mapArea"
+                :loading="loading"
+                :last-updated="lastUpdated"
+                :location-items="filteredLocations"
+                @open-location-detail="openLocationDetail"
+              />
+            </div>
           </div>
           <div class="col-lg-3">
             <LegendCard :legend-items="legendItems" />
@@ -92,6 +94,9 @@ const filteredLocations = computed(() => {
   if (!selectedRegion.value) return allLocations.value;
   return allLocations.value.filter(loc => loc.region === selectedRegion.value);
 });
+
+// Define emits at the top level
+defineEmits(['update:location-items']);
 
 const mapArea = ref(null);
 const loading = ref(true);

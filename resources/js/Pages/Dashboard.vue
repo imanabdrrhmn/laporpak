@@ -4,7 +4,6 @@
     <div class="dashboard-container">
       <WelcomeHeader 
         :nama-user="namaUser" 
-        :level-user="levelUser"
         :total-laporan="stats.reports"
         :sedang-diproses="stats.in_process"
         :proses-selesai="stats.selected"
@@ -46,6 +45,25 @@ const page = usePage();
 const saldoKredit = computed(() => page.props.user?.balance ?? 0);
 const namaUser = computed(() => page.props.auth?.user?.name || 'User');
 
+// Tambahkan default aksi cepat
+const aksiCepat = ref([
+  {
+    label: 'Buat Laporan',
+    iconClass: 'bi bi-pencil-square',
+    url: '/pelaporan'
+  },
+  {
+    label: 'Cari Laporan',
+    iconClass: 'bi bi-search',
+    url: '/cari-laporan'
+  },
+  {
+    label: 'Top Up',
+    iconClass: 'bi bi-credit-card',
+    url: '/top-ups'
+  }
+]);
+
 const laporanTerbaru = ref(page.props.reports ?? []);
 const userAvatar = ref(page.props.auth?.user?.avatar ?? '/Default-Profile.png');
 
@@ -54,12 +72,12 @@ const formatRupiah = (jumlah) => {
 };
 
 const aktivitas = computed(() =>
-  props.activityLogs?.map(item => ({
+  (props.activityLogs?.map(item => ({
     id: item.id,
     activity: item.activity,
     description : item.description,
     created_at: item.created_at,
-  })) ?? []
+  })) ?? [])
 )
 </script>
 
