@@ -4,20 +4,37 @@
     <div class="container py-5">
       <template v-if="canViewTopUp">
         <DashboardHeader />
+        <StatusCards :pending-count="statusCounts.pending" :verified-count="statusCounts.verified" :rejected-count="statusCounts.rejected" />
 
-        <StatusCards :pending-count="pendingCount" :verified-count="verifiedCount" :rejected-count="rejectedCount" />
-        <FilterControls :filters="filters" @update-filters="updateFilters" @show-export-modal="showExportModal" />
+        <!-- PERBAIKAN: Menggunakan v-model untuk sinkronisasi filter -->
+        <FilterControls
+          v-model="filters"
+          @show-export-modal="showExportModal"
+        />
+
+        <div v-if="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Memuat data top-up...</p>
+        </div>
+        <div v-else-if="fetchError" class="alert alert-danger">
+            Gagal memuat data: {{ fetchError }}. <button class="btn-link" @click="fetchTopUps">Coba lagi</button>
+        </div>
+
         <TransactionTable
-          :top-ups="topUps"
+          v-else
+          :top-ups="topUpsData"
+          :pagination-data="paginationData"
           :format-currency="formatCurrency"
           :format-date="formatDate"
           :capitalize="capitalize"
           :status-badge-class="statusBadgeClass"
-          :get-proof-url="getProofUrl"
           @show-proof-modal="showProofModal"
           @open-action-modal="openActionModal"
           @go-to-page="goToPage"
         />
+
         <ActionModal
           :selected-top-up="selectedTopUp"
           :loading-ids="loadingIds"
@@ -58,9 +75,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from "vue";
-import { Inertia } from "@inertiajs/inertia";
+import { ref, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { usePage, Head } from "@inertiajs/vue3";
+import axios from 'axios';
+import { debounce } from 'lodash';
 import AppLayout from "@/Layouts/AppLayout.vue";
 import DashboardHeader from "./components/DashboardHeader.vue";
 import FilterControls from "./components/FilterControls.vue";
@@ -76,15 +94,30 @@ import { Modal } from "bootstrap";
 const page = usePage();
 
 const props = defineProps({
-  topUps: Object,
   filters: Object,
-  statusCounts: Object,
   canViewTopUp: {
     type: Boolean,
     default: true,
   },
 });
 
+const topUpsData = ref([]);
+const paginationData = ref({
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
+    total: 0,
+    links: {},
+});
+const statusCounts = ref({
+    pending: 0,
+    verified: 0,
+    rejected: 0
+});
+const isLoading = ref(true);
+const fetchError = ref(null);
+
+// State untuk filter, akan di-update oleh v-model dari FilterControls
 const filters = ref({
   status: props.filters?.status || "",
   search: props.filters?.search || "",
@@ -97,273 +130,240 @@ const exportFilters = ref({
 
 const loadingIds = ref([]);
 const proofModalRef = ref(null);
-const proofModalInstance = ref(null);
+let proofModalInstance = null;
 const proofModalUrl = ref("");
 const actionModalRef = ref(null);
-const exportModalRef = ref(null);
-const exportModalInstance = ref(null);
-const selectedTopUp = ref(null);
-const isModalOpen = ref(false);
-
 let actionModalInstance = null;
+const exportModalRef = ref(null);
+let exportModalInstance = null;
+const selectedTopUp = ref(null);
+
+const API_BASE_URL = '/admin/api/topups';
+
+const fetchTopUps = async () => {
+  isLoading.value = true;
+  fetchError.value = null;
+
+  try {
+    const params = {
+        ...filters.value,
+        page: paginationData.value.current_page || 1,
+    };
+    const response = await axios.get(API_BASE_URL, { params });
+    
+    topUpsData.value = response.data.data;
+
+    if (response.data.meta) {
+        paginationData.value = {
+            current_page: response.data.meta.current_page,
+            last_page: response.data.meta.last_page,
+            per_page: response.data.meta.per_page,
+            total: response.data.meta.total,
+            links: response.data.links,
+        };
+    } else {
+        paginationData.value = { current_page: 1, last_page: 1, per_page: 10, total: topUpsData.value.length, links: {} };
+    }
+
+    if (response.data.app_meta && response.data.app_meta.statusCounts) {
+        statusCounts.value = response.data.app_meta.statusCounts;
+    }
+
+  } catch (error) {
+    console.error("Error fetching top-ups:", error);
+    fetchError.value = error.response?.data?.message || 'Gagal memuat data.';
+    topUpsData.value = [];
+    paginationData.value = { current_page: 1, last_page: 1, per_page: 10, total: 0, links: {} };
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchTopUps();
+
+  let pollingInterval = setInterval(() => {
+    const isAnyModalOpen = (proofModalInstance && proofModalInstance._isShown) ||
+                           (actionModalInstance && actionModalInstance._isShown) ||
+                           (exportModalInstance && exportModalInstance._isShown);
+    if (!isAnyModalOpen && !isLoading.value) {
+      fetchTopUps();
+    }
+  }, 30000);
+
+  onUnmounted(() => {
+    clearInterval(pollingInterval);
+  });
+});
+
+// PERBAIKAN UTAMA: Menggunakan watcher yang di-debounce untuk semua filter.
+// Watcher ini akan terpanggil setiap kali `filters` (yang di-bind dengan v-model) berubah.
+const debouncedFetch = debounce(() => {
+    fetchTopUps();
+}, 300);
+
+watch(filters, (newFilters, oldFilters) => {
+  // Hanya reset halaman jika filter benar-benar berubah, bukan hanya saat pertama kali dimuat
+  if (JSON.stringify(newFilters) !== JSON.stringify(oldFilters)) {
+      paginationData.value.current_page = 1;
+  }
+  debouncedFetch();
+}, { deep: true });
+
+
+const goToPage = (pageNumber) => {
+    if (pageNumber === paginationData.value.current_page || pageNumber < 1 || pageNumber > paginationData.value.last_page) {
+      return;
+    }
+    paginationData.value.current_page = pageNumber;
+    fetchTopUps(); // Fetch langsung saat ganti halaman, tidak perlu debounce
+};
+
+// Method `handleFilterUpdate` tidak lagi diperlukan karena v-model dan watch sudah menanganinya
+// const handleFilterUpdate = (newFilters) => {
+//     filters.value = newFilters;
+//     goToPage(1);
+// };
+
 
 const openActionModal = (topUp) => {
   selectedTopUp.value = topUp;
-  isModalOpen.value = true;
-  if (!actionModalInstance && actionModalRef.value && actionModalRef.value.$el) {
-    actionModalInstance = new Modal(actionModalRef.value.$el);
-    actionModalInstance._element.addEventListener("hidden.bs.modal", () => {
-      isModalOpen.value = false;
-      selectedTopUp.value = null;
+  if (!actionModalInstance) {
+    nextTick(() => {
+      if (actionModalRef.value && actionModalRef.value.$el) {
+        actionModalInstance = new Modal(actionModalRef.value.$el);
+        actionModalInstance.show();
+      }
     });
-  }
-  if (actionModalInstance) {
-    actionModalInstance.show();
   } else {
-    console.error("Bootstrap Action Modal instance could not be initialized.");
+    actionModalInstance.show();
   }
 };
 
 const closeActionModal = () => {
   actionModalInstance?.hide();
+  selectedTopUp.value = null;
 };
 
-const showProofModal = (path) => {
-  proofModalUrl.value = getProofUrl(path);
-  isModalOpen.value = true;
-  if (!proofModalInstance.value && proofModalRef.value && proofModalRef.value.$el) {
-    proofModalInstance.value = new Modal(proofModalRef.value.$el);
-    proofModalInstance.value._element.addEventListener("hidden.bs.modal", () => {
-      isModalOpen.value = false;
-      proofModalUrl.value = "";
+const performAction = async (actionUrl, successMessage) => {
+    if (!selectedTopUp.value) return;
+    const topUpId = selectedTopUp.value.id;
+    loadingIds.value.push(topUpId);
+    try {
+        await axios.post(actionUrl);
+        showToast(successMessage, 'success');
+        fetchTopUps();
+    } catch (error) {
+        const message = error.response?.data?.message || 'Terjadi kesalahan.';
+        showToast(message, 'danger');
+    } finally {
+        loadingIds.value = loadingIds.value.filter(id => id !== topUpId);
+        closeActionModal();
+    }
+}
+
+const confirmVerify = () => {
+  performAction(`${API_BASE_URL}/${selectedTopUp.value.id}/verify`, 'Top up berhasil diverifikasi.');
+};
+
+const confirmSetPending = () => {
+  console.warn("Aksi 'Set Pending' belum memiliki endpoint API.");
+};
+
+const confirmReject = () => {
+  performAction(`${API_BASE_URL}/${selectedTopUp.value.id}/reject`, 'Top up berhasil ditolak.');
+};
+
+const showProofModal = (url) => {
+  proofModalUrl.value = url;
+  if (!proofModalInstance) {
+    nextTick(() => {
+      if (proofModalRef.value && proofModalRef.value.$el) {
+        proofModalInstance = new Modal(proofModalRef.value.$el);
+        proofModalInstance.show();
+      }
     });
-  }
-  if (proofModalInstance.value) {
-    proofModalInstance.value.show();
   } else {
-    console.error("Bootstrap Proof Modal instance could not be initialized.");
+    proofModalInstance.show();
   }
 };
 
 const closeProofModal = () => {
-  proofModalInstance.value?.hide();
+  proofModalInstance?.hide();
 };
 
 const showExportModal = () => {
-  if (!exportModalInstance.value && exportModalRef.value && exportModalRef.value.$el) {
-    exportModalInstance.value = new Modal(exportModalRef.value.$el);
-  }
-  if (exportModalInstance.value) {
-    exportModalInstance.value.show();
+  if (!exportModalInstance) {
+    nextTick(() => {
+      if (exportModalRef.value && exportModalRef.value.$el) {
+        exportModalInstance = new Modal(exportModalRef.value.$el);
+        exportModalInstance.show();
+      }
+    });
   } else {
-    console.error("Bootstrap Export Modal instance could not be initialized.");
+    exportModalInstance.show();
   }
 };
 
 const closeExportModal = () => {
-  exportModalInstance.value?.hide();
-};
-
-const fetchTopUps = () => {
-  if (isModalOpen.value) return;
-  Inertia.get("/admin/top-ups", filters.value, {
-    preserveState: true,
-    replace: true,
-    only: ["topUps"],
-  });
-};
-
-let pollingInterval = null;
-
-onMounted(() => {
-  pollingInterval = setInterval(() => {
-    fetchTopUps();
-  }, 30000);
-});
-
-onUnmounted(() => {
-  clearInterval(pollingInterval);
-});
-
-const confirmVerify = () => {
-  if (!selectedTopUp.value) return;
-  loadingIds.value.push(selectedTopUp.value.id);
-  Inertia.post(`/admin/top-ups/${selectedTopUp.value.id}/verify`, {}, {
-    onFinish: () => {
-      loadingIds.value = loadingIds.value.filter((id) => id !== selectedTopUp.value.id);
-      closeActionModal();
-    },
-  });
-};
-
-const confirmSetPending = () => {
-  if (!selectedTopUp.value) return;
-  loadingIds.value.push(selectedTopUp.value.id);
-  Inertia.post(
-    `/admin/top-ups/${selectedTopUp.value.id}/update-status`,
-    { status: "pending" },
-    {
-      onFinish: () => {
-        loadingIds.value = loadingIds.value.filter((id) => id !== selectedTopUp.value.id);
-        closeActionModal();
-      },
-    }
-  );
-};
-
-const confirmReject = () => {
-  if (!selectedTopUp.value) return;
-  loadingIds.value.push(selectedTopUp.value.id);
-  Inertia.post(`/admin/top-ups/${selectedTopUp.value.id}/reject`, {}, {
-    onFinish: () => {
-      loadingIds.value = loadingIds.value.filter((id) => id !== selectedTopUp.value.id);
-      closeActionModal();
-    },
-  });
-};
-
-const pendingCount = computed(() => props.statusCounts?.pending ?? 0);
-const verifiedCount = computed(() => props.statusCounts?.verified ?? 0);
-const rejectedCount = computed(() => props.statusCounts?.rejected ?? 0);
-
-const updateFilters = () => {
-  Inertia.get("/admin/top-ups", filters.value, {
-    preserveState: true,
-    replace: true,
-  });
-};
-
-const formatCurrency = (value) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-  }).format(value);
-
-const formatDate = (date) => {
-  const dateObj = new Date(date);
-  return {
-    date: new Intl.DateTimeFormat("id-ID", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(dateObj),
-    time: new Intl.DateTimeFormat("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(dateObj),
-  };
-};
-
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
-
-const statusBadgeClass = (status) => {
-  switch (status.toLowerCase()) {
-    case "pending":
-      return "status-badge-warning";
-    case "verified":
-      return "status-badge-success";
-    case "rejected":
-      return "status-badge-danger";
-    default:
-      return "status-badge-secondary";
-  }
-};
-
-const getProofUrl = (path) => `/storage/${path}`;
-
-const goToPage = (page) => {
-  if (page < 1 || page > props.topUps.last_page) return;
-  Inertia.get("/admin/top-ups", { ...filters.value, page }, {
-    preserveState: true,
-  });
-};
-
-const getCurrentDate = () => {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
-};
-
-const formatDatePreview = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(date);
-};
-
-const setQuickDateRange = (range) => {
-  const today = new Date();
-  const todayStr = today.toISOString().split("T")[0];
-
-  switch (range) {
-    case "today":
-      exportFilters.value.start_date = todayStr;
-      exportFilters.value.end_date = todayStr;
-      break;
-    case "yesterday":
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
-      exportFilters.value.start_date = yesterdayStr;
-      exportFilters.value.end_date = yesterdayStr;
-      break;
-    case "week":
-      const weekAgo = new Date(today);
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      exportFilters.value.start_date = weekAgo.toISOString().split("T")[0];
-      exportFilters.value.end_date = todayStr;
-      break;
-    case "month":
-      const monthAgo = new Date(today);
-      monthAgo.setDate(monthAgo.getDate() - 30);
-      exportFilters.value.start_date = monthAgo.toISOString().split("T")[0];
-      exportFilters.value.end_date = todayStr;
-      break;
-  }
-};
-
-const clearDateFilters = () => {
-  exportFilters.value.start_date = "";
-  exportFilters.value.end_date = "";
+  exportModalInstance?.hide();
 };
 
 const exportLogs = () => {
   const params = new URLSearchParams();
   if (exportFilters.value.start_date) params.append("start_date", exportFilters.value.start_date);
   if (exportFilters.value.end_date) params.append("end_date", exportFilters.value.end_date);
-
   const url = `/admin/top-ups/export-logs?${params.toString()}`;
   window.open(url, "_blank");
-
   closeExportModal();
 };
 
-const toast = ref({
-  show: false,
-  message: "",
-  type: "success",
-});
+const formatCurrency = (value) => new Intl.NumberFormat("id-ID", { style: "decimal", minimumFractionDigits: 0 }).format(value || 0);
+const formatDate = (date) => {
+  if (!date) return { date: '-', time: '-' };
+  const d = new Date(date);
+  return {
+    date: new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(d),
+    time: new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(d),
+  };
+};
+const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+const statusBadgeClass = (status) => {
+  const statusMap = { pending: 'status-badge-warning', verified: 'status-badge-success', rejected: 'status-badge-danger' };
+  return statusMap[status?.toLowerCase()] || 'status-badge-secondary';
+};
+const getProofUrl = (path) => path ? `/storage/${path}` : '';
+const getCurrentDate = () => new Date().toISOString().split("T")[0];
+const formatDatePreview = (dateString) => dateString ? new Intl.DateTimeFormat("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" }).format(new Date(dateString)) : "";
+const setQuickDateRange = (range) => {
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+  let startDate = new Date(today);
+  switch (range) {
+    case "today": exportFilters.value.start_date = todayStr; exportFilters.value.end_date = todayStr; break;
+    case "yesterday":
+      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      exportFilters.value.start_date = yesterdayStr; exportFilters.value.end_date = yesterdayStr;
+      break;
+    case "week": startDate.setDate(startDate.getDate() - 7); exportFilters.value.start_date = startDate.toISOString().split("T")[0]; exportFilters.value.end_date = todayStr; break;
+    case "month": startDate.setDate(startDate.getDate() - 30); exportFilters.value.start_date = startDate.toISOString().split("T")[0]; exportFilters.value.end_date = todayStr; break;
+  }
+};
+const clearDateFilters = () => {
+  exportFilters.value.start_date = "";
+  exportFilters.value.end_date = "";
+};
 
-watch(
-  () => page.props.flash,
-  (flash) => {
-    if (flash?.success) {
-      toast.value = { show: true, message: flash.success, type: "success" };
-      setTimeout(() => {
-        toast.value.show = false;
-      }, 5000);
-    } else if (flash?.error) {
-      toast.value = { show: true, message: flash.error, type: "danger" };
-      setTimeout(() => {
-        toast.value.show = false;
-      }, 5000);
-    }
-  },
-  { immediate: true }
-);
+const toast = ref({ show: false, message: "", type: "success" });
+function showToast(message, type = "success") {
+    toast.value = { show: true, message, type };
+    setTimeout(() => { toast.value.show = false; }, 5000);
+}
+watch(() => page.props.flash, (flash) => {
+  if (flash?.success) showToast(flash.success, 'success');
+  else if (flash?.error) showToast(flash.error, 'danger');
+}, { immediate: true });
 </script>
 
 <style scoped>
@@ -371,5 +371,12 @@ watch(
   max-width: 1200px;
   padding-top: 10px;
   margin-top: -30px !important;
+}
+.btn-link {
+    border: none;
+    background: none;
+    color: #0d6efd;
+    text-decoration: underline;
+    padding: 0;
 }
 </style>

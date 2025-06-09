@@ -112,17 +112,21 @@ Route::middleware(['auth','contact.verified'])->group(function () {
 
 Route::middleware(['auth', 'contact.verified', 'role:admin|verifier'])->group(function () {
     Route::get('/admin/top-ups', [TopUpController::class, 'adminIndex'])->name('admin.topups.index');
+    Route::get('/admin/top-ups/export-logs', [TopUpController::class, 'exportTopUpLogsToCsv'])->name('admin.topups.exportLogs');
+    
+    //API TOPUP
+    Route::prefix('admin/api/topups') 
+          ->name('admin.api.topups.')    
+          ->group(function () {
 
-    Route::post('/admin/top-ups/{topUp}/verify', [TopUpController::class, 'verify'])
-        ->middleware('can:verify,topUp')
-        ->name('admin.topups.verify');
-
-    Route::post('/admin/top-ups/{topUp}/reject', [TopUpController::class, 'reject'])
-        ->middleware('can:reject,topUp')
-        ->name('admin.topups.reject');
-
-    Route::get('/admin/top-ups/export-logs', [TopUpController::class, 'exportTopUpLogsToCsv'])
-        ->name('admin.topups.exportLogs');
+        Route::get('/', [TopUpController::class, 'getTopUpData'])->name('data');
+                Route::post('/{topUp}/verify', [TopUpController::class, 'verify'])
+             ->middleware('can:verify,topUp')
+             ->name('verify');
+        Route::post('/{topUp}/reject', [TopUpController::class, 'reject'])
+             ->middleware('can:reject,topUp')
+             ->name('reject');
+    });
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {

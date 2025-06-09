@@ -7,15 +7,12 @@ use App\Models\TopUpStatusLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
-use App\Policies\TopUpPolicy;
 use App\Services\ActivityLoggerService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Jobs\SendTopUpVerifiedMailJob;
 use App\Jobs\SendTopUpRejectedMailJob;
-
+use App\Http\Resources\TopUpResource;
 
 class TopUpController extends Controller
 {
@@ -68,59 +65,46 @@ class TopUpController extends Controller
 
     public function adminIndex(Request $request)
     {
-        $canViewTopUp = $request->user()->can('view_topup');
+        $this->authorize('viewAny', TopUp::class);
 
-        if (!$canViewTopUp) {
-            return Inertia::render('Admin/TopUps/Index', [
-                'canViewTopUp' => false,
-            ]);
-        }
+        return Inertia::render('Admin/TopUps/Index', [
+            'canViewTopUp' => true,
+            'filters' => $request->only(['status', 'search']),
+        ]);
+    }
+
+    public function getTopUpData(Request $request)
+    {
+        $this->authorize('viewAny', TopUp::class);
 
         $query = TopUp::with('user')->orderBy('created_at', 'desc');
 
-        if ($request->has('status') && in_array($request->status, ['pending','verified','rejected'])) {
+        if ($request->filled('status') && in_array($request->status, ['pending','verified','rejected'])) {
             $query->where('status', $request->status);
         }
 
-        if ($request->has('search') && $request->search) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%");
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        $topUps = $query->paginate(10)->withQueryString()->through(function ($topUp) {
-            return [
-                'id' => $topUp->id,
-                'amount' => $topUp->amount,
-                'status' => $topUp->status,
-                'proof' => $topUp->proof,
-                'payment_method' => $topUp->payment_method,
-                'created_at' => $topUp->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $topUp->user->id,
-                    'name' => $topUp->user->name,
-                    'email' => $topUp->user->email,
-                    'avatar_url' => $topUp->user->avatar 
-                        ? asset('storage/' . $topUp->user->avatar) 
-                        : asset('/Default-Profile.png'),
-                ],
-            ];
-        });
+        $perPage = (int) $request->input('per_page', 10);
+        $topUps = $query->paginate($perPage)->withQueryString();
 
-        $pendingCount = TopUp::where('status', 'pending')->count();
-        $verifiedCount = TopUp::where('status', 'verified')->count();
-        $rejectedCount = TopUp::where('status', 'rejected')->count();
+        $statusCounts = [
+            'pending' => TopUp::where('status', 'pending')->count(),
+            'verified' => TopUp::where('status', 'verified')->count(),
+            'rejected' => TopUp::where('status', 'rejected')->count(),
+        ];
 
-        return Inertia::render('Admin/TopUps/Index', [
-            'topUps' => $topUps,
-            'filters' => $request->only('status', 'search'),
-            'statusCounts' => [
-                'pending' => $pendingCount,
-                'verified' => $verifiedCount,
-                'rejected' => $rejectedCount,
-            ],
+        return TopUpResource::collection($topUps)->additional([
+            'app_meta' => [
+                'statusCounts' => $statusCounts,
+                'filters' => $request->only('status', 'search'),
+            ]
         ]);
     }
 
@@ -129,14 +113,14 @@ class TopUpController extends Controller
         $this->authorize('verify', $topUp);
 
         if ($topUp->status !== 'pending') {
-            return redirect()->back()->with('error', 'Top up sudah diproses sebelumnya.');
+            return response()->json(['message' => 'Top up sudah diproses sebelumnya.'], 422);
         }
 
         $topUp->status = 'verified';
         $topUp->save();
 
         $user = $topUp->user;
-        $user->balance += $topUp->amount;  
+        $user->balance += $topUp->amount;
         $user->save();
 
         TopUpStatusLog::create([
@@ -149,15 +133,15 @@ class TopUpController extends Controller
 
         $this->logger->log('Verifikasi Top Up', 'Admin memverifikasi top up ID #' . $topUp->id);
 
-        return redirect()->route('admin.topups.index')->with('success', 'Top up berhasil diverifikasi.');
+        return new TopUpResource($topUp->load('user'));
     }
 
-    public function reject(TopUp $topUp)
+    public function reject(Request $request, TopUp $topUp)
     {
         $this->authorize('reject', $topUp);
 
         if ($topUp->status !== 'pending') {
-            return redirect()->back()->with('error', 'Top up sudah diproses sebelumnya.');
+            return response()->json(['message' => 'Top up sudah diproses sebelumnya.'], 422);
         }
 
         $topUp->status = 'rejected';
@@ -173,11 +157,13 @@ class TopUpController extends Controller
 
         $this->logger->log('Tolak Top Up', 'Admin menolak top up ID #' . $topUp->id);
 
-        return redirect()->route('admin.topups.index')->with('success', 'Top up berhasil ditolak.');
+        return new TopUpResource($topUp->load('user'));
     }
 
     public function exportTopUpLogsToCsv(Request $request)
     {
+        $this->authorize('viewAny', TopUp::class);
+
         $request->validate([
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
@@ -190,7 +176,6 @@ class TopUpController extends Controller
             ->get();
 
         $filename = 'top_up_status_logs_' . now()->format('Ymd_His') . '.csv';
-
         $headers = [
             "Content-Type" => "text/csv",
             "Content-Disposition" => "attachment; filename=\"$filename\"",
@@ -215,7 +200,7 @@ class TopUpController extends Controller
                     $log->changed_by,
                     $log->changedBy->name ?? '',
                     $log->status,
-                    $log->notes,
+                    $log->notes ?? '',
                     $log->created_at->toDateTimeString(),
                 ]);
             }

@@ -3,10 +3,12 @@
     <div class="card-body">
       <div class="filter-controls">
         <div class="filter-item">
-          <label class="form-label text-muted small mb-1">Status Filter</label>
-          <select 
-            v-model="localFilters.status" 
-            @change="applyFilters" 
+          <label for="statusFilter" class="form-label text-muted small mb-1">Status Filter</label>
+          <!-- Perubahan: Menggunakan v-model pada prop `modelValue` -->
+          <select
+            id="statusFilter"
+            :value="modelValue.status"
+            @change="updateFilter('status', $event.target.value)"
             class="form-select form-select-sm"
           >
             <option value="">Semua Status</option>
@@ -17,12 +19,13 @@
         </div>
 
         <div class="filter-item flex-grow-1">
-          <label class="form-label text-muted small mb-1">Cari User</label>
+          <label for="searchFilter" class="form-label text-muted small mb-1">Cari User</label>
           <div class="input-group">
             <input
-              v-model="localFilters.search"
+              id="searchFilter"
+              :value="modelValue.search"
+              @input="onSearchInput($event.target.value)"
               @keyup.enter="applyFilters"
-              @input="onSearchInput"
               type="search"
               placeholder="Cari user (nama/email)..."
               class="form-control form-control-sm"
@@ -34,12 +37,12 @@
         </div>
 
         <div class="filter-item">
-          <label class="form-label text-muted small mb-1">Reset Filter</label>
+          <label class="form-label text-muted small mb-1">&nbsp;</label>
           <button
             @click="resetFilters"
             class="btn btn-outline-secondary btn-sm w-100"
           >
-            <i class="fas fa-refresh me-1"></i> Reset
+            <i class="fas fa-undo-alt me-1"></i> Reset
           </button>
         </div>
 
@@ -53,87 +56,52 @@
           </button>
         </div>
       </div>
-
-      <!-- Hasil pencarian info -->
-      <div v-if="searchInfo" class="mt-3">
-        <small class="text-muted">
-          <i class="fas fa-info-circle me-1"></i>
-          {{ searchInfo }}
-        </small>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref, watch, computed } from "vue";
+import { computed } from "vue";
+import { debounce } from 'lodash';
 
+// Perubahan: Prop `filters` diganti menjadi `modelValue` untuk mendukung v-model
 const props = defineProps({
-  filters: {
+  modelValue: {
     type: Object,
-    default: () => ({})
+    required: true,
+    default: () => ({ status: '', search: '' })
   },
-  totalData: {
-    type: Number,
-    default: 0
-  },
-  filteredCount: {
-    type: Number,
-    default: 0
-  }
 });
 
-const emit = defineEmits(["update-filters", "show-export-modal"]);
+// Perubahan: Emit disesuaikan untuk v-model
+const emit = defineEmits(["update:modelValue", "show-export-modal"]);
 
-// Local reactive filters
-const localFilters = ref({
-  status: props.filters?.status || '',
-  search: props.filters?.search || ''
-});
-
-// Search info untuk menampilkan hasil pencarian
-const searchInfo = computed(() => {
-  if (localFilters.value.search || localFilters.value.status) {
-    return `Menampilkan ${props.filteredCount} dari ${props.totalData} data`;
-  }
-  return '';
-});
-
-// Debounce untuk search input
-let searchTimeout = null;
-const onSearchInput = () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    applyFilters();
-  }, 500); // Delay 500ms setelah user berhenti mengetik
-};
-
-// Apply filters
-const applyFilters = () => {
-  emit('update-filters', {
-    status: localFilters.value.status,
-    search: localFilters.value.search.trim()
+// Fungsi untuk mengupdate satu field filter dan meng-emit perubahan
+const updateFilter = (key, value) => {
+  emit('update:modelValue', {
+    ...props.modelValue, // Salin nilai yang ada
+    [key]: value // Update field yang berubah
   });
 };
 
-// Reset filters
-const resetFilters = () => {
-  localFilters.value = {
-    status: '',
-    search: ''
-  };
-  applyFilters();
+// Fungsi applyFilters sekarang tidak lagi diperlukan di sini karena
+// watcher di parent akan menangani perubahan. Namun, bisa dipertahankan
+// jika tombol "Cari" ingin melakukan fetch segera.
+const applyFilters = () => {
+    // Parent akan menangani fetch melalui watcher
+    // Event ini bisa dihapus jika tidak ada aksi khusus saat klik "Cari"
 };
 
-// Watch for external filter changes
-watch(() => props.filters, (newFilters) => {
-  if (newFilters) {
-    localFilters.value = {
-      status: newFilters.status || '',
-      search: newFilters.search || ''
-    };
-  }
-}, { deep: true });
+const onSearchInput = debounce((value) => {
+    updateFilter('search', value.trim());
+}, 500); // Debounce 500ms
+
+const resetFilters = () => {
+  emit('update:modelValue', {
+    status: '',
+    search: ''
+  });
+};
 </script>
 
 <style scoped>
@@ -157,23 +125,13 @@ watch(() => props.filters, (newFilters) => {
     flex-direction: column;
     align-items: stretch;
   }
-  
   .filter-item {
     width: 100%;
     min-width: auto;
   }
 }
-
-/* Loading state untuk button */
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Highlight search results */
-.search-highlight {
-  background-color: #fff3cd;
-  padding: 0.1rem 0.2rem;
-  border-radius: 0.2rem;
 }
 </style>
