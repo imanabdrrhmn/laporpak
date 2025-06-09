@@ -5,7 +5,7 @@
                 <div class="modal-content" @click.stop>
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            Detail Pelaporan {{ getReportService(item) }}
+                            Detail Pelaporan {{ report.service }}
                         </h5>
                         <button type="button" class="btn-close" @click="closeModal"></button>
                     </div>
@@ -13,55 +13,31 @@
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped">
                                 <tbody>
-                                    <!-- Penipuan Report -->
-                                    <template v-if="isPenipuanReport">
+                                    <!-- Penipuan & Infrastruktur Report -->
+                                    <template v-if="isPenipuanReport || isInfrastrukturReport">
                                         <tr>
                                             <th width="30%">Tanggal</th>
-                                            <td>{{ formatDate(item.created_at) }}</td>
+                                            <td>{{ formatDate(report.created_at) }}</td>
                                         </tr>
                                         <tr>
                                             <th>Kategori</th>
-                                            <td><span class="badge bg-light text-dark border">{{ item.category }}</span></td>
+                                            <td><span class="badge bg-light text-dark border">{{ report.category }}</span></td>
                                         </tr>
-                                        <tr>
+                                        <tr v-if="report.service === 'Penipuan'">
                                             <th>Sumber Penipuan</th>
-                                            <td>{{ item.source || 'SMS' }}</td>
+                                            <td>{{ report.source || 'SMS' }}</td>
                                         </tr>
                                         <tr>
                                             <th>Status</th>
                                             <td>
-                                                <span class="status-badge" :class="getStatusBadgeClass(item.status)">
-                                                    {{ item.status }}
+                                                <span class="status-badge" :class="getStatusBadgeClass(report.status)">
+                                                    {{ report.status }}
                                                 </span>
                                             </td>
                                         </tr>
                                         <tr>
                                             <th>Deskripsi</th>
-                                            <td>{{ item.description }}</td>
-                                        </tr>
-                                    </template>
-
-                                    <!-- Infrastruktur Report -->
-                                    <template v-else-if="isInfrastrukturReport">
-                                        <tr>
-                                            <th width="30%">Tanggal</th>
-                                            <td>{{ formatDate(item.created_at) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Kategori</th>
-                                            <td><span class="badge bg-light text-dark border">{{ item.category }}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Status</th>
-                                            <td>
-                                                <span class="status-badge" :class="getStatusBadgeClass(item.status)">
-                                                    {{ item.status }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Deskripsi</th>
-                                            <td>{{ item.description }}</td>
+                                            <td>{{ report.description }}</td>
                                         </tr>
                                     </template>
 
@@ -69,23 +45,23 @@
                                     <template v-else>
                                         <tr>
                                             <th width="30%">Tanggal</th>
-                                            <td>{{ formatDate(item.tanggal) }}</td>
+                                            <td>{{ formatDate(report.tanggal) }}</td>
                                         </tr>
                                         <tr>
                                             <th>Status</th>
                                             <td>
-                                                <span class="status-badge" :class="getStatusBadgeClass(item.hasil)">
-                                                    {{ item.hasil }}
+                                                <span class="status-badge" :class="getStatusBadgeClass(report.hasil)">
+                                                    {{ report.hasil }}
                                                 </span>
                                             </td>
                                         </tr>
                                         <tr>
                                             <th>Data</th>
-                                            <td>{{ item.data }}</td>
+                                            <td>{{ report.data }}</td>
                                         </tr>
                                         <tr>
                                             <th>Query</th>
-                                            <td>{{ item.query }}</td>
+                                            <td>{{ report.query }}</td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -106,7 +82,7 @@ import { defineProps, defineEmits, computed } from 'vue';
 
 const props = defineProps({
     show: Boolean,
-    item: Object,
+    report: Object,
     formatDate: Function,
 });
 
@@ -116,34 +92,15 @@ const closeModal = () => {
     emit('close');
 };
 
+// Logika penentuan jenis laporan
 const isPenipuanReport = computed(() => {
-    return props.item && 'source' in props.item;
+    return props.report && 'source' in props.report;
 });
 
 const isInfrastrukturReport = computed(() => {
-    return props.item && 'category' in props.item && !('source' in props.item);
+    // Infrastruktur: memiliki 'category' tapi TIDAK memiliki 'source'
+    return props.report && 'category' in props.report && !('source' in props.report);
 });
-
-const getReportService = (item) => {
-    console.log('Modal item:', item); // Debug log
-    console.log('isPenipuanReport:', isPenipuanReport.value);
-    console.log('isInfrastrukturReport:', isInfrastrukturReport.value);
-    
-    if (isPenipuanReport.value) return 'Penipuan';
-    if (isInfrastrukturReport.value) return 'Infrastruktur';
-    return 'Verifikasi';
-};
-
-// Keep the old function for backward compatibility if needed
-const getModalTitle = (item) => {
-    console.log('Modal item:', item); // Debug log
-    console.log('isPenipuanReport:', isPenipuanReport.value);
-    console.log('isInfrastrukturReport:', isInfrastrukturReport.value);
-    
-    if (isPenipuanReport.value) return 'Detail Pelaporan Penipuan';
-    if (isInfrastrukturReport.value) return 'Detail Pelaporan Infrastruktur';
-    return 'Detail Verifikasi';
-};
 
 // Fungsi untuk memberikan kelas status badge berdasarkan status
 const getStatusBadgeClass = (status) => {
@@ -170,8 +127,8 @@ const getStatusBadgeClass = (status) => {
     width: 90%;
     max-width: 700px;
     background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     overflow: hidden;
 }
 
@@ -188,6 +145,7 @@ const getStatusBadgeClass = (status) => {
 .modal-title {
     margin: 0;
     font-weight: 600;
+    font-size: 1.25rem;
 }
 
 .btn-close {
@@ -243,17 +201,29 @@ const getStatusBadgeClass = (status) => {
 .table {
     table-layout: fixed;
     width: 100%;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: white;
 }
 
-.table td {
+.table td, .table th {
     word-wrap: break-word;
     white-space: pre-line;
     vertical-align: top;
+    padding: 1rem;
+    border-color: #e9ecef;
 }
 
 .table th {
     width: 30%;
-    vertical-align: top;
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table td {
+    background-color: white;
 }
 
 .modal-footer {
@@ -346,5 +316,29 @@ const getStatusBadgeClass = (status) => {
 
 .btn:hover {
     opacity: 0.9;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1rem;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
 }
 </style>

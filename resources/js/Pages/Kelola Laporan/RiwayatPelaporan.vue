@@ -5,10 +5,10 @@
     <div class="container-fluid py-4">
       <div class="row mb-4">
         <div class="col-12">
-          <h2 class="text-primary fw-bold mb-0">
+          <h2 class="text-dark fw-bold mb-0">
             <i class="fas fa-chart-line me-2"></i> Laporan Saya
           </h2>
-          <p class="text-muted">Manajemen dan verifikasi laporan sistem</p>
+          <p class="text-muted">Riwayat Pelaporan dan Verifikasi</p>
         </div>
       </div>
 
@@ -29,8 +29,8 @@
         <div class="col-12 col-md-9">
           <div class="card border-0 shadow-sm rounded-3">
             <div class="card-header bg-white py-3">
-              <h5 class="mb-0 fw-bold text-primary">
-                {{ selectedTab === 'penipuan' ? 'Daftar Laporan Penipuan' : selectedTab === 'infrastruktur' ? 'Daftar Laporan Infrastruktur' : 'Daftar Verifikasi' }}
+              <h5 class="mb-0 fw-bold text-dark">
+                {{ selectedTab === 'penipuan' ? 'Riwayat Laporan Penipuan' : selectedTab === 'infrastruktur' ? 'Riwayat Laporan Infrastruktur' : 'Riwayat Verifikasi Data' }}
               </h5>
             </div>
             <div class="card-body p-0">
@@ -63,13 +63,10 @@
     </div>
 
     <!-- Detail Modal -->
-    <DetailModal
-      v-if="selectedItem"
-      :item="selectedItem"
+    <Modals
       :show="showModal"
+      :report="selectedItem"
       :formatDate="formatDate"
-      :getStatusClass="getStatusClass"
-      :getStatusTextClass="getStatusTextClass"
       @close="closeModal"
     />
   </AppLayout>
@@ -79,7 +76,7 @@
 import { ref, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import DetailModal from './Partials/Modals.vue';
+import Modals from './Partials/Modals.vue';
 import SidebarMenu from './Partials/SidebarMenu.vue';
 import QuickStats from './Partials/QuickStats.vue';
 import ReportsTable from './Partials/ReportsTable.vue';
@@ -161,7 +158,10 @@ const showModal = ref(false);
 const selectedItem = ref(null);
 
 const openDetailModal = (item) => {
-  selectedItem.value = item;
+  selectedItem.value = {
+    ...item,
+    service: selectedTab.value.charAt(0).toUpperCase() + selectedTab.value.slice(1)
+  };
   showModal.value = true;
 };
 
@@ -233,7 +233,7 @@ watch(selectedTab, () => {
 <style scoped>
 /* General Styles */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  background: #0d6efd;
 }
 
 .icon-circle {
@@ -265,7 +265,7 @@ watch(selectedTab, () => {
 
 .nav-pills .nav-link.active {
   background-color: rgba(13, 110, 253, 0.1);
-  color: #0d6efd;
+  color: #212529 !important;
   font-weight: 600;
   border-left: 4px solid #0d6efd;
 }
@@ -345,5 +345,10 @@ watch(selectedTab, () => {
 /* Empty State */
 .fa-folder-open {
   color: #dee2e6;
+}
+
+/* Text Colors */
+.text-dark {
+  color: #212529 !important;
 }
 </style>

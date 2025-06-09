@@ -6,9 +6,9 @@
     <div class="card-body p-0">
       <div class="nav flex-column nav-pills">
         <button
-          class="nav-link border-0 rounded-0 py-3 d-flex align-items-center"
+          class="nav-link border-0 rounded-0 py-3 d-flex align-items-center text-dark"
           :class="{
-            'active bg-primary bg-opacity-25 text-primary': selectedTab === 'penipuan',
+            'active bg-primary-soft text-primary': selectedTab === 'penipuan',
           }"
           @click="$emit('update:selectedTab', 'penipuan')"
         >
@@ -17,9 +17,9 @@
           <i class="fas fa-chevron-right ms-auto"></i>
         </button>
         <button
-          class="nav-link border-0 rounded-0 py-3 d-flex align-items-center"
+          class="nav-link border-0 rounded-0 py-3 d-flex align-items-center text-dark"
           :class="{
-            'active bg-primary bg-opacity-25 text-primary': selectedTab === 'infrastruktur',
+            'active bg-primary-soft text-primary': selectedTab === 'infrastruktur',
           }"
           @click="$emit('update:selectedTab', 'infrastruktur')"
         >
@@ -28,9 +28,9 @@
           <i class="fas fa-chevron-right ms-auto"></i>
         </button>
         <button
-          class="nav-link border-0 rounded-0 py-3 d-flex align-items-center"
+          class="nav-link border-0 rounded-0 py-3 d-flex align-items-center text-dark"
           :class="{
-            'active bg-primary bg-opacity-25 text-primary': selectedTab === 'verifikasi',
+            'active bg-primary-soft text-primary': selectedTab === 'verifikasi',
           }"
           @click="$emit('update:selectedTab', 'verifikasi')"
         >
@@ -48,3 +48,9 @@ defineProps({
   selectedTab: String,
 });
 </script>
+
+<style scoped>
+.bg-primary-soft {
+  background-color: rgba(13, 110, 253, 0.1) !important;
+}
+</style>

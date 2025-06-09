@@ -28,107 +28,105 @@
           <th scope="col" class="table-header text-center" width="10%">Detail</th>
         </tr>
       </thead>
+      
       <tbody v-if="selectedTab === 'penipuan'">
-        <tr v-for="(item, index) in displayedData" :key="index" class="border-bottom">
+        <tr v-for="(item, index) in displayedData" :key="index" class="table-row">
           <td class="ps-4 fw-medium">{{ index + 1 }}</td>
           <td>{{ formatDate(item.created_at) }}</td>
           <td>
-            <span class="badge bg-light text-dark border">{{ item.category }}</span>
+            <span class="category-badge">{{ item.category }}</span>
           </td>
           <td>{{ item.source || 'SMS' }}</td>
-          <td class="text-truncate" style="max-width: 250px;">
+          <td class="description-cell">
             {{ truncateText(item.description, 150) }}
           </td>
           <td>
-            <span class="status-badge" :class="getStatusClass(item.status) || 'default'">
+            <span class="status-badge" :class="getStatusClass(item.status)">
               {{ item.status || 'Tidak Diketahui' }}
             </span>
           </td>
           <td class="text-center">
-            <!-- Detail Button Only -->
             <button 
               class="btn btn-primary btn-sm detail-btn" 
               @click="$emit('openDetailModal', item)"
               title="Lihat Detail"
             >
               <i class="fas fa-eye me-1"></i>
-              <span class="btn-text">Detail</span>
+              Detail
             </button>
           </td>
         </tr>
         <tr v-if="displayedData.length === 0">
-          <td colspan="7" class="text-center py-4 text-muted">
-            <i class="fas fa-folder-open mb-2 fa-2x"></i>
+          <td colspan="7" class="empty-state">
+            <i class="fas fa-folder-open mb-2"></i>
             <p>Tidak ada laporan yang tersedia</p>
           </td>
         </tr>
       </tbody>
       
       <tbody v-else-if="selectedTab === 'infrastruktur'">
-        <tr v-for="(item, index) in displayedData" :key="index" class="border-bottom">
+        <tr v-for="(item, index) in displayedData" :key="index" class="table-row">
           <td class="ps-4 fw-medium">{{ index + 1 }}</td>
           <td>{{ formatDate(item.created_at) }}</td>
           <td>
-            <span class="badge bg-light text-dark border">{{ item.category }}</span>
+            <span class="category-badge">{{ item.category }}</span>
           </td>
-          <td class="text-truncate" style="max-width: 250px;">
+          <td class="description-cell">
             {{ truncateText(item.description, 150) }}
           </td>
           <td>
-            <span class="status-badge" :class="getStatusClass(item.status) || 'default'">
+            <span class="status-badge" :class="getStatusClass(item.status)">
               {{ item.status || 'Tidak Diketahui' }}
             </span>
           </td>
           <td class="text-center">
-            <!-- Detail Button Only -->
             <button 
               class="btn btn-primary btn-sm detail-btn" 
               @click="$emit('openDetailModal', item)"
               title="Lihat Detail"
             >
               <i class="fas fa-eye me-1"></i>
-              <span class="btn-text">Detail</span>
+              Detail
             </button>
           </td>
         </tr>
         <tr v-if="displayedData.length === 0">
-          <td colspan="6" class="text-center py-4 text-muted">
-            <i class="fas fa-folder-open mb-2 fa-2x"></i>
+          <td colspan="6" class="empty-state">
+            <i class="fas fa-folder-open mb-2"></i>
             <p>Tidak ada laporan yang tersedia</p>
           </td>
         </tr>
       </tbody>
       
       <tbody v-else>
-        <tr v-for="(item, index) in displayedData" :key="index" class="border-bottom">
+        <tr v-for="(item, index) in displayedData" :key="index" class="table-row">
           <td class="ps-4 fw-medium">{{ index + 1 }}</td>
           <td>{{ formatDate(item.tanggal) }}</td>
-          <td class="text-truncate" style="max-width: 250px;">
+          <td class="description-cell">
             {{ truncateText(item.data, 150) }}
           </td>
-          <td class="text-truncate" style="max-width: 250px;">
+          <td class="description-cell">
             <span class="query-text">{{ truncateText(item.query, 150) }}</span>
           </td>
           <td>
-            <span class="status-badge" :class="getStatusClass(item.hasil) || 'default'">
+            <span class="status-badge" :class="getStatusClass(item.hasil)">
               {{ item.hasil || 'Tidak Diketahui' }}
             </span>
           </td>
           <td class="text-center">
-            <!-- Detail Button Only -->
             <button 
               class="btn btn-primary btn-sm detail-btn" 
               @click="$emit('openDetailModal', item)"
               title="Lihat Detail"
             >
               <i class="fas fa-eye me-1"></i>
-              <span class="btn-text">Detail</span>
+              Detail
             </button>
           </td>
         </tr>
         <tr v-if="displayedData.length === 0">
-          <td colspan="6" class="text-center py-4 text-muted">
-            <i class="fas fa-folder-open mb-2 fa-2x"></i>
+          <td colspan="6" class="empty-state">
+            <i class="fas fa-folder-open mb-2"></i>
             <p>Tidak ada verifikasi yang tersedia</p>
           </td>
         </tr>
@@ -144,53 +142,80 @@ defineProps({
   formatDate: Function,
   truncateText: Function,
   getStatusClass: Function,
-  getStatusTextClass: Function,
 });
 
-// Define only the detail modal event
-defineEmits([
-  'openDetailModal'
-]);
+defineEmits(['openDetailModal']);
 </script>
 
 <style scoped>
+/* Table Header */
 .table-header {
   background-color: #0d6efd !important;
-  color: rgb(255, 255, 255);
-  font-weight: 500;
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 16px 12px;
+  vertical-align: middle;
 }
 
-table {
+/* Table Structure */
+.table {
   border-collapse: separate;
-  border-spacing: 0 15px;
+  border-spacing: 0;
+  margin-bottom: 0;
 }
 
-tbody tr {
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.table-responsive {
   border-radius: 8px;
+  overflow: hidden;
 }
 
-tbody td {
-  padding: 15px !important;
+/* Table Rows */
+.table-row {
+  background: white;
+  transition: all 0.2s ease;
 }
 
-tbody td:first-child {
-  border-radius: 8px 0 0 8px;
+.table-row:hover {
+  background-color: #f8f9fa;
 }
 
-tbody td:last-child {
-  border-radius: 0 8px 8px 0;
+.table-row td {
+  padding: 16px 12px;
+  border-top: 1px solid #e9ecef;
+  vertical-align: middle;
 }
 
+/* Description cells with proper truncation */
+.description-cell {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Category Badge */
+.category-badge {
+  background: #f8f9fa;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #dee2e6;
+  display: inline-block;
+}
+
+/* Status Badge */
 .status-badge {
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
   text-transform: capitalize;
-  background-color: #f0f0f0;
-  color: #333;
+  display: inline-block;
+  min-width: 70px;
+  text-align: center;
 }
 
 .status-badge.pending {
@@ -228,84 +253,112 @@ tbody td:last-child {
   color: #333;
 }
 
-/* Detail button styling */
+/* Detail Button */
 .detail-btn {
   background: #0d6efd;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 6px 12px;
   font-weight: 500;
-  letter-spacing: 0.5px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+  font-size: 12px;
+  transition: all 0.2s ease;
+  box-shadow: none;
   min-width: 80px;
 }
 
 .detail-btn:hover {
-  background: linear-gradient(45deg, #0056b3, #004085);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  background: #0b5ed7;
+  transform: none;
+  box-shadow: none;
 }
 
 .detail-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
-}
-
-.detail-btn .btn-text {
-  font-size: 0.875rem;
-  font-weight: 500;
+  background: #0a58ca;
 }
 
 .detail-btn i {
-  font-size: 0.9rem;
+  font-size: 12px;
 }
 
-/* Dropdown styling */
-.dropdown-menu {
-  border: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.dropdown-item {
-  padding: 8px 16px;
-  transition: background-color 0.2s ease;
-}
-
-.dropdown-item:hover {
-  background-color: #f8f9fa;
-}
-
-.dropdown-item.text-danger:hover {
-  background-color: #ffe6e6;
-  color: #dc3545 !important;
-}
-
-/* Query text styling */
+/* Query Text */
 .query-text {
-  font-family: 'Courier New', monospace;
-  font-size: 0.9em;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
   background: #f8f9fa;
-  padding: 2px 6px;
+  padding: 4px 6px;
   border-radius: 4px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-all;
 }
 
-/* Responsive adjustments */
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  opacity: 0.5;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
+  .table-header {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+  
+  .table-row td {
+    padding: 12px 8px;
+  }
+  
+  .description-cell {
+    max-width: 150px;
+  }
+  
+  .detail-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    min-width: 70px;
+  }
+  
+  .category-badge,
+  .status-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  
+  .query-text {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+}
+
+@media (max-width: 576px) {
+  .table-responsive {
+    font-size: 12px;
+  }
+  
+  .description-cell {
+    max-width: 100px;
+  }
+  
   .detail-btn {
     padding: 4px 8px;
     min-width: 60px;
-  }
-  
-  .detail-btn .btn-text {
-    font-size: 0.8rem;
-  }
-  
-  .detail-btn i {
-    font-size: 0.85rem;
   }
 }
 </style>
