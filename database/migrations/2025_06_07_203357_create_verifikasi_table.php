@@ -3,7 +3,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateVerifikasisTable extends Migration
+class CreateVerifikasiTable extends Migration
 {
     public function up()
     {
@@ -24,6 +24,6 @@ class CreateVerifikasisTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('verifikasis');
+        Schema::dropIfExists('verifikasi');
     }
 }
