@@ -69,34 +69,14 @@
                   <span v-else class="badge no-role-badge">Tidak Ada Role</span>
                 </td>
                 <td class="col-change-role">
-                  <div class="role-select-container">
-                    <div 
-                      v-if="userStates[user.id]?.isSubmitting" 
-                      class="loading-overlay"
-                    >
-                      <div v-if="userStates[user.id]?.submitSuccess" class="success-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="3">
-                          <polyline points="20,6 9,17 4,12"></polyline>
-                        </svg>
-                      </div>
-                      <div v-else class="loading-spinner"></div>
-                    </div>
-                    <select
-                      class="role-select"
-                      @change="(e) => submitRoleChange(e, user.id, user.name)"
-                      :disabled="userStates[user.id]?.isSubmitting"
-                    >
-                      <option disabled selected>Pilih role</option>
-                      <option
-                        v-for="role in roles"
-                        :key="role"
-                        :value="role"
-                        :selected="user.roles === role"
-                      >
-                        {{ role }}
-                      </option>
-                    </select>
-                  </div>
+                  <button
+                    class="btn-icon btn-primary"
+                    @click="openChangeRoleModal(user)"
+                    title="Ubah Role"
+                    :disabled="userStates[user.id]?.isSubmitting"
+                  >
+                    <i class="bi bi-shield-check"></i>
+                  </button>
                 </td>
                 <td class="col-permission">
                   <button
@@ -155,15 +135,14 @@
         </div>
         
         <div class="role-change-section">
-          <label class="role-label"><strong>Ubah Role</strong></label>
-          <select
-            class="role-select-mobile"
-            @change="(e) => submitRoleChange(e, user.id, user.name)"
+          <button 
+            class="btn-action btn-primary" 
+            @click="openChangeRoleModal(user)"
             :disabled="userStates[user.id]?.isSubmitting"
           >
-            <option disabled selected>Pilih role</option>
-            <option v-for="role in roles" :key="role" :value="role" :selected="user.roles === role">{{ role }}</option>
-          </select>
+            <i class="bi bi-shield-check"></i>
+            Ubah Role
+          </button>
         </div>
         
         <div class="user-actions">
@@ -197,6 +176,16 @@
       @close="showDeleteModal = false"
       @confirm="handleDeleteConfirm"
     />
+
+    <!-- Change Role Modal -->
+    <ChangeRoleModal
+      :isOpen="showChangeRoleModal"
+      :user="selectedUser"
+      :roles="roles"
+      :csrf="csrf"
+      @close="closeChangeRoleModal"
+      @role-changed="handleRoleChange"
+    />
   </div>
 </template>
 
@@ -204,6 +193,7 @@
 import { ref, computed, reactive } from 'vue'
 import axios from 'axios'
 import ConfirmDeleteModal from './ConfirmDeleteModal.vue'
+import ChangeRoleModal from './ChangeRoleModal.vue'
 
 const props = defineProps({
   users: Array,
@@ -217,6 +207,8 @@ const userStates = reactive({})
 const showDeleteModal = ref(false)
 const selectedUserName = ref('')
 const selectedFormId = ref(null)
+const showChangeRoleModal = ref(false)
+const selectedUser = ref(null)
 
 const filteredUsers = computed(() => {
   return props.users.filter(user => {
@@ -232,8 +224,17 @@ const filteredUsers = computed(() => {
   })
 })
 
-async function submitRoleChange(e, userId, userName) {
-  const selectedRole = e.target.value
+function openChangeRoleModal(user) {
+  selectedUser.value = user
+  showChangeRoleModal.value = true
+}
+
+function closeChangeRoleModal() {
+  showChangeRoleModal.value = false
+  selectedUser.value = null
+}
+
+async function handleRoleChange({ userId, selectedRole, userName }) {
   if (!selectedRole) return
 
   const user = props.users.find(u => u.id === userId)
@@ -241,27 +242,6 @@ async function submitRoleChange(e, userId, userName) {
 
   if (!userStates[userId]) {
     userStates[userId] = { isSubmitting: false, submitSuccess: false }
-  }
-
-  const result = await Swal.fire({
-    title: `Ubah role untuk ${userName}?`,
-    text: 'Perubahan ini akan langsung disimpan!',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Ya, ubah!',
-    cancelButtonText: 'Batal',
-    customClass: {
-      confirmButton: 'swal-confirm btn btn-primary',
-      cancelButton: 'swal-cancel btn btn-secondary'
-    },
-    buttonsStyling: false
-  })
-
-  if (!result.isConfirmed) {
-    e.target.value = originalRole || ''
-    return
   }
 
   userStates[userId].isSubmitting = true
@@ -298,12 +278,16 @@ async function submitRoleChange(e, userId, userName) {
       },
       buttonsStyling: false
     })
-    e.target.value = originalRole || ''
+    if (user) {
+      user.roles = originalRole
+    }
   } finally {
     userStates[userId].isSubmitting = false
     await new Promise(resolve => setTimeout(resolve, 3000))
     userStates[userId].submitSuccess = false
   }
+
+  closeChangeRoleModal()
 }
 
 function openDeleteModal(userName, userId) {
@@ -314,21 +298,20 @@ function openDeleteModal(userName, userId) {
 
 function handleDeleteConfirm() {
   if (selectedFormId.value) {
-    // Gunakan document.getElementById untuk mendapatkan form yang benar
-    const formId = `delete-form-${selectedFormId.value}`;
-    const form = document.getElementById(formId);
+    const formId = `delete-form-${selectedFormId.value}`
+    const form = document.getElementById(formId)
     if (form) {
-      form.submit();
+      form.submit()
     }
   }
-  showDeleteModal.value = false;
-  selectedFormId.value = null;
-  selectedUserName.value = '';
+  showDeleteModal.value = false
+  selectedFormId.value = null
+  selectedUserName.value = ''
 }
 </script>
 
 <style scoped>
-/* Search Field Styles - New */
+/* Existing styles remain unchanged */
 .search-container {
   max-width: 400px;
   position: relative;
@@ -398,7 +381,6 @@ function handleDeleteConfirm() {
   width: 100%;
 }
 
-/* Base styles */
 .custom-select-container {
   max-width: 200px;
   display: inline-block;
@@ -430,7 +412,6 @@ function handleDeleteConfirm() {
   font-size: 0.9rem;
 }
 
-/* Desktop Table Container - Enhanced for better zoom support */
 .desktop-table-container {
   display: block;
 }
@@ -448,7 +429,6 @@ function handleDeleteConfirm() {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Table Styles - No scroll, fully responsive */
 .user-table {
   width: 100%;
   border-collapse: collapse;
@@ -459,7 +439,7 @@ function handleDeleteConfirm() {
   background: #f8fafc;
   color: #374151;
   font-weight: 600;
-  padding: 18px 12px;
+  padding: 18px;
   text-align: left;
   border-bottom: 2px solid #e5e7eb;
   font-size: 0.875rem;
@@ -467,7 +447,7 @@ function handleDeleteConfirm() {
 }
 
 .user-table td {
-  padding: 16px 12px;
+  padding: 16px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
   font-size: 0.875rem;
@@ -477,7 +457,6 @@ function handleDeleteConfirm() {
   background: #f8fafc;
 }
 
-/* Responsive Column Widths - Percentage based for no scroll */
 .col-no { width: 5%; text-align: center; min-width: 50px; }
 .col-name { width: 20%; min-width: 150px; }
 .col-email { width: 25%; min-width: 180px; }
@@ -487,7 +466,6 @@ function handleDeleteConfirm() {
 .col-permission { width: 7%; text-align: center; min-width: 60px; }
 .col-action { width: 6%; text-align: center; min-width: 60px; }
 
-/* User Info - Enhanced spacing */
 .user-info {
   display: flex;
   align-items: center;
@@ -512,7 +490,6 @@ function handleDeleteConfirm() {
   white-space: nowrap;
 }
 
-/* Email Text - Responsive with better wrapping */
 .email-text {
   font-size: 0.8rem;
   color: #6b7280;
@@ -523,7 +500,6 @@ function handleDeleteConfirm() {
   cursor: help;
 }
 
-/* On smaller screens, allow email to wrap */
 @media (max-width: 1200px) {
   .email-text {
     white-space: normal;
@@ -532,7 +508,6 @@ function handleDeleteConfirm() {
   }
 }
 
-/* Badges - Enhanced design */
 .badge {
   padding: 4px 8px;
   border-radius: 8px;
@@ -551,57 +526,6 @@ function handleDeleteConfirm() {
   color: #6b7280;
 }
 
-/* Role Select - Enhanced */
-.role-select-container {
-  position: relative;
-}
-
-.role-select {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  background: white;
-  cursor: pointer;
-  color: black;
-}
-
-.role-select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-/* Loading Overlay */
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  z-index: 10;
-}
-
-.loading-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #e5e7eb;
-  border-top: 2px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-.success-icon {
-  animation: scaleIn 0.3s ease;
-}
-
-/* Buttons - Enhanced */
 .btn-icon {
   width: 36px;
   height: 36px;
@@ -635,12 +559,10 @@ function handleDeleteConfirm() {
   transform: translateY(-1px);
 }
 
-/* Mobile Card Container - Hidden on desktop */
 .mobile-card-container {
   display: none;
 }
 
-/* Mobile Styles */
 .user-card {
   background: white;
   border: 1px solid #e5e7eb;
@@ -690,27 +612,6 @@ function handleDeleteConfirm() {
   margin-bottom: 20px;
 }
 
-.role-label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 0.875rem;
-}
-
-.role-select-mobile {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  background: white;
-  color: black;
-}
-
-.user-actions {
-  display: flex;
-  gap: 12px;
-}
-
 .btn-action {
   flex: 1;
   padding: 10px 16px;
@@ -730,7 +631,6 @@ function handleDeleteConfirm() {
   flex: 1;
 }
 
-/* No Data Message Styles */
 .no-data-card {
   background: white;
   border: 1px solid #e5e7eb;
@@ -750,7 +650,6 @@ function handleDeleteConfirm() {
   font-size: 0.875rem;
 }
 
-/* Animations */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -760,9 +659,6 @@ function handleDeleteConfirm() {
   to { transform: scale(1); opacity: 1; }
 }
 
-/* Enhanced Responsive breakpoints - No horizontal scroll */
-
-/* Large screens - full spacing */
 @media (min-width: 1200px) {
   .desktop-table-container { display: block; }
   .mobile-card-container { display: none; }
@@ -775,7 +671,6 @@ function handleDeleteConfirm() {
   .btn-icon { width: 36px; height: 36px; font-size: 0.875rem; }
 }
 
-/* Medium screens - compact but readable */
 @media (max-width: 1199px) and (min-width: 900px) {
   .desktop-table-container { display: block; }
   .mobile-card-container { display: none; }
@@ -787,14 +682,12 @@ function handleDeleteConfirm() {
   .email-text { font-size: 0.75rem; }
   .btn-icon { width: 32px; height: 32px; font-size: 0.75rem; }
   
-  /* Adjust column proportions for medium screens */
   .col-name { width: 18%; }
   .col-email { width: 27%; }
   .col-phone { width: 10%; }
   .col-change-role { width: 17%; }
 }
 
-/* Small desktop screens - more compact */
 @media (max-width: 899px) and (min-width: 768px) {
   .desktop-table-container { display: block; }
   .mobile-card-container { display: none; }
@@ -806,7 +699,6 @@ function handleDeleteConfirm() {
   .email-text { font-size: 0.7rem; }
   .btn-icon { width: 28px; height: 28px; font-size: 0.7rem; }
   
-  /* Hide phone column on smaller screens to save space */
   .col-phone { display: none; }
   .col-name { width: 22%; }
   .col-email { width: 30%; }
@@ -814,7 +706,6 @@ function handleDeleteConfirm() {
   .col-change-role { width: 18%; }
 }
 
-/* Mobile and Small Tablet (<768px) */
 @media (max-width: 767px) {
   .desktop-table-container { display: none; }
   .mobile-card-container { display: block; }

@@ -25,7 +25,7 @@ class TopUpVerifiedMail extends Mailable
 
     public function build()
     {
-        return $this->markdown('emails.verified')
+        return $this->markdown('emails.topup.verified')
                     ->subject('Top Up Berhasil - LaporPak.com');
     }
 
