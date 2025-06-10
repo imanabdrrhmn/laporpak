@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -39,33 +38,44 @@ class TokenEmailVerificationController extends Controller
 
         SendVerificationEmailJob::dispatch($user->email, $url);
 
-        return back()->with('status', 'verification-link-sent');
+        return back()->with([
+            'status' => 'verification-link-sent',
+            'message' => 'Link verifikasi telah dikirim ke email Anda. Silakan periksa inbox Anda.',
+            'type' => 'success'
+        ]);
     }
 
     /**
      * Verifikasi email menggunakan token.
      */
-  public function verify(Request $request): RedirectResponse
-  {
-      $token = $request->query('token');
+    public function verify(Request $request): RedirectResponse
+    {
+        $token = $request->query('token');
 
-      $record = EmailVerificationToken::where('token', $token)->first();
+        $record = EmailVerificationToken::where('token', $token)->first();
 
-      if (!$record || $record->isExpired()) {
-          return redirect('/')
-              ->with('error', 'Token tidak valid atau telah kedaluwarsa.');
-      }
+        if (!$record || $record->isExpired()) {
+            return redirect('/')
+                ->with([
+                    'error' => 'Token tidak valid atau telah kedaluwarsa. Silakan minta link verifikasi baru.',
+                    'type' => 'error'
+                ]);
+        }
 
-      $user = $record->user;
+        $user = $record->user;
 
-      if (!$user->hasVerifiedEmail()) {
-          $user->markEmailAsVerified();
-          event(new Verified($user));
-      }
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            event(new Verified($user));
+        }
 
-      $record->delete();
+        $record->delete();
 
-      return redirect('/')
-          ->with('status', 'Email berhasil diverifikasi.');
-  }
+        return redirect('/')
+            ->with([
+                'success' => 'Email berhasil diverifikasi! Sekarang Anda dapat mengakses semua fitur aplikasi.',
+                'message' => 'Selamat! Akun Anda sudah aktif dan siap digunakan.',
+                'type' => 'success'
+            ]);
+    }
 }

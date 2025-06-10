@@ -18,12 +18,15 @@
       <div class="input-group mb-3">
         <span class="input-group-text">Rp</span>
         <input
-          type="text"
+          type="tel"
+          inputmode="numeric"
+          pattern="[0-9]*"
           class="form-control"
           :class="{'is-invalid': (form.errors.amount && customAmountRaw > 0) || customAmountErrorInternal}"
           placeholder="Contoh: 200000"
           :value="customAmountInput"
-          @input="$emit('update:custom-amount', $event)"
+          @input="handleNumericInput"
+          @keypress="validateNumericKeypress"
           @blur="$emit('blur:custom-amount')"
         >
       </div>
@@ -39,7 +42,7 @@
           @click="$emit('proceed')"
           :disabled="!isNominalValid"
         >
-          Lanjutkan <i class="bi bi-arrow-right ms-1"></i>
+          Lanjutkan<i class="bi bi-arrow-right ms-1"></i>
         </button>
       </div>
     </div>
@@ -71,6 +74,8 @@
     },
   });
   
+  const emit = defineEmits(['update:custom-amount', 'blur:custom-amount', 'select-nominal', 'back', 'proceed']);
+  
   const customAmountRaw = computed(() => {
     const value = props.customAmountInput.replace(/[^0-9]/g, '');
     return parseInt(value) || 0;
@@ -92,6 +97,29 @@
       maximumFractionDigits: 0
     }).format(value);
   };
+  
+  const handleNumericInput = (event) => {
+    // Hanya izinkan angka
+    const value = event.target.value.replace(/[^0-9]/g, '');
+    event.target.value = value;
+    emit('update:custom-amount', event);
+  };
+  
+  const validateNumericKeypress = (event) => {
+    // Izinkan: backspace, delete, tab, escape, enter
+    if ([8, 9, 27, 13, 46].indexOf(event.keyCode) !== -1 ||
+        // Izinkan: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (event.keyCode === 65 && event.ctrlKey === true) ||
+        (event.keyCode === 67 && event.ctrlKey === true) ||
+        (event.keyCode === 86 && event.ctrlKey === true) ||
+        (event.keyCode === 88 && event.ctrlKey === true)) {
+      return;
+    }
+    // Pastikan hanya angka (0-9)
+    if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
+      event.preventDefault();
+    }
+  };
   </script>
   
   <style scoped>
@@ -105,6 +133,9 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
   
   .nominal-option:hover {
@@ -191,21 +222,81 @@
     display: block !important;
   }
   
+  /* Media queries untuk mobile */
   @media (max-width: 767.98px) {
     .nominal-option {
       min-height: 70px;
-      padding: 0.75rem !important;
+      padding: 12px 8px !important; /* Memberikan padding yang cukup */
+    }
+    
+    .nominal-option .fw-bold {
+      font-size: 0.9rem !important;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    
+    /* Pastikan button navigation memiliki jarak yang cukup */
+    .btn {
+      padding: 12px 16px !important;
+      min-height: 44px; /* Minimum touch target untuk mobile */
+    }
+    
+    .px-4 {
+      padding-left: 16px !important;
+      padding-right: 16px !important;
     }
   }
   
   @media (max-width: 575.98px) {
     .nominal-option {
-      min-height: 65px;
-      padding: 0.5rem !important;
+      min-height: 75px; /* Sedikit lebih tinggi untuk teks yang panjang */
+      padding: 8px 4px !important; /* Padding yang proporsional untuk layar kecil */
     }
     
     .nominal-option .fs-6 {
-      font-size: 0.95rem !important;
+      font-size: 0.8rem !important;
+      line-height: 1.2;
+      word-break: break-word;
+      hyphens: auto;
+    }
+    
+    .nominal-option .fw-bold {
+      white-space: normal !important; /* Izinkan wrap untuk layar kecil */
+      overflow: visible !important;
+      text-overflow: unset !important;
+    }
+    
+    /* Pastikan button navigation tetap memiliki ukuran yang baik */
+    .btn {
+      padding: 10px 14px !important;
+      font-size: 0.9rem;
+      min-height: 42px;
+    }
+    
+    .px-4 {
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+    }
+    
+    /* Tambahkan margin untuk button container di mobile */
+    .d-flex.justify-content-between {
+      gap: 12px;
+    }
+  }
+  
+  /* Extra small devices */
+  @media (max-width: 400px) {
+    .btn {
+      padding: 8px 12px !important;
+      font-size: 0.85rem;
+    }
+    
+    .px-4 {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
     }
   }
   </style>
