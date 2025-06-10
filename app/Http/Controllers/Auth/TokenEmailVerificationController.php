@@ -74,7 +74,7 @@ class TokenEmailVerificationController extends Controller
         return redirect('/')
             ->with([
                 'success' => 'Email berhasil diverifikasi! Sekarang Anda dapat mengakses semua fitur aplikasi.',
-                'message' => 'Selamat! Akun Anda sudah aktif dan siap digunakan.',
+                // 'message' => 'Selamat! Akun Anda sudah aktif dan siap digunakan.',
                 'type' => 'success'
             ]);
     }
