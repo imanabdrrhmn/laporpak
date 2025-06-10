@@ -108,13 +108,17 @@
                   </button>
                 </td>
                 <td class="col-action">
-                  <form :action="route('admin.users.delete', user.id)" method="POST">
+                  <form 
+                    :id="'delete-form-' + user.id" 
+                    :action="route('admin.users.delete', user.id)" 
+                    method="POST"
+                  >
                     <input type="hidden" name="_method" value="DELETE" />
                     <input type="hidden" name="_token" :value="csrf" />
                     <button
                       class="btn-icon btn-danger"
-                      type="submit"
-                      @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
+                      type="button"
+                      @click="openDeleteModal(user.name, user.id)"
                       title="Hapus Pengguna"
                     >
                       <i class="bi bi-trash"></i>
@@ -170,13 +174,13 @@
             <i class="bi bi-pencil-square"></i>
             Edit Izin
           </button>
-          <form :action="route('admin.users.delete', user.id)" method="POST" class="inline-form">
+          <form :action="route('admin.users.delete', user.id)" method="POST" :ref="'form-' + user.id" class="inline-form">
             <input type="hidden" name="_method" value="DELETE" />
             <input type="hidden" name="_token" :value="csrf" />
             <button 
               class="btn-action btn-danger" 
-              type="submit"
-              @click.prevent="confirmDelete(user.name, $event.target.closest('form'))"
+              type="button"
+              @click="openDeleteModal(user.name, user.id)"
             >
               <i class="bi bi-trash"></i>
               Hapus
@@ -185,13 +189,21 @@
         </div>
       </div>
     </div>
+
+    <!-- Confirm Delete Modal -->
+    <ConfirmDeleteModal
+      :isOpen="showDeleteModal"
+      :userName="selectedUserName"
+      @close="showDeleteModal = false"
+      @confirm="handleDeleteConfirm"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
-import Swal from 'sweetalert2'
 import axios from 'axios'
+import ConfirmDeleteModal from './ConfirmDeleteModal.vue'
 
 const props = defineProps({
   users: Array,
@@ -202,6 +214,9 @@ const props = defineProps({
 const searchQuery = ref('')
 const filterRole = ref('')
 const userStates = reactive({})
+const showDeleteModal = ref(false)
+const selectedUserName = ref('')
+const selectedFormId = ref(null)
 
 const filteredUsers = computed(() => {
   return props.users.filter(user => {
@@ -291,26 +306,24 @@ async function submitRoleChange(e, userId, userName) {
   }
 }
 
-function confirmDelete(userName, form) {
-  Swal.fire({
-    title: `Hapus pengguna ${userName}?`,
-    text: 'Aksi ini tidak bisa dibatalkan!',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#e3342f',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: 'Ya, hapus!',
-    cancelButtonText: 'Batal',
-    customClass: {
-      confirmButton: 'btn btn-danger',
-      cancelButton: 'btn btn-secondary'
-    },
-    buttonsStyling: false
-  }).then((result) => {
-    if (result.isConfirmed) {
-      form.submit()
+function openDeleteModal(userName, userId) {
+  selectedUserName.value = userName
+  selectedFormId.value = userId
+  showDeleteModal.value = true
+}
+
+function handleDeleteConfirm() {
+  if (selectedFormId.value) {
+    // Gunakan document.getElementById untuk mendapatkan form yang benar
+    const formId = `delete-form-${selectedFormId.value}`;
+    const form = document.getElementById(formId);
+    if (form) {
+      form.submit();
     }
-  })
+  }
+  showDeleteModal.value = false;
+  selectedFormId.value = null;
+  selectedUserName.value = '';
 }
 </script>
 
@@ -446,18 +459,18 @@ function confirmDelete(userName, form) {
   background: #f8fafc;
   color: #374151;
   font-weight: 600;
-  padding: 18px 12px; /* Increased padding */
+  padding: 18px 12px;
   text-align: left;
   border-bottom: 2px solid #e5e7eb;
-  font-size: 0.875rem; /* Increased font size */
+  font-size: 0.875rem;
   white-space: nowrap;
 }
 
 .user-table td {
-  padding: 16px 12px; /* Increased padding */
+  padding: 16px 12px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
-  font-size: 0.875rem; /* Increased font size */
+  font-size: 0.875rem;
 }
 
 .user-table tbody tr:hover {
@@ -478,11 +491,11 @@ function confirmDelete(userName, form) {
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px; /* Increased gap */
+  gap: 12px;
 }
 
 .user-avatar {
-  width: 40px; /* Increased size */
+  width: 40px;
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
@@ -493,7 +506,7 @@ function confirmDelete(userName, form) {
 .user-name {
   font-weight: 500;
   color: #1f2937;
-  font-size: 0.875rem; /* Increased font size */
+  font-size: 0.875rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -521,9 +534,9 @@ function confirmDelete(userName, form) {
 
 /* Badges - Enhanced design */
 .badge {
-  padding: 4px 8px; /* Increased padding */
+  padding: 4px 8px;
   border-radius: 8px;
-  font-size: 0.75rem; /* Increased font size */
+  font-size: 0.75rem;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -545,10 +558,10 @@ function confirmDelete(userName, form) {
 
 .role-select {
   width: 100%;
-  padding: 8px 10px; /* Increased padding */
+  padding: 8px 10px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 0.75rem; /* Increased font size */
+  font-size: 0.75rem;
   background: white;
   cursor: pointer;
   color: black;
@@ -590,7 +603,7 @@ function confirmDelete(userName, form) {
 
 /* Buttons - Enhanced */
 .btn-icon {
-  width: 36px; /* Increased size */
+  width: 36px;
   height: 36px;
   border: none;
   border-radius: 6px;
@@ -599,7 +612,7 @@ function confirmDelete(userName, form) {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.875rem; /* Increased font size */
+  font-size: 0.875rem;
 }
 
 .btn-primary {
@@ -835,14 +848,5 @@ function confirmDelete(userName, form) {
   .search-container {
     max-width: 100%;
   }
-}
-
-/* SweetAlert custom styles */
-.swal-confirm {
-  margin-right: 0.5rem !important;
-}
-
-.swal-cancel {
-  margin-left: 0.5rem !important;
 }
 </style>
