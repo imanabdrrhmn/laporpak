@@ -1,4 +1,14 @@
 <x-mail::message>
+{{-- Logo Perusahaan --}}
+<div style="text-align: center; margin: 20px 0;">
+    @if($logoBase64)
+        <img src="{{ $logoBase64 }}" alt="LaporPak.com" style="max-width: 150px; height: auto; margin-bottom: 20px;">
+    @else
+        {{-- Fallback text jika logo tidak tersedia --}}
+        <h1 style="color: #00C896; font-size: 24px; margin-bottom: 20px;">LaporPak.com</h1>
+    @endif
+</div>
+
 # Top Up Berhasil
 
 <div style="text-align: center; margin: 20px 0;">

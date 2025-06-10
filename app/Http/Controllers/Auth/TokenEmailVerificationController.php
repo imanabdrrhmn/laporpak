@@ -55,11 +55,8 @@ class TokenEmailVerificationController extends Controller
         $record = EmailVerificationToken::where('token', $token)->first();
 
         if (!$record || $record->isExpired()) {
-            return redirect('/')
-                ->with([
-                    'error' => 'Token tidak valid atau telah kedaluwarsa. Silakan minta link verifikasi baru.',
-                    'type' => 'error'
-                ]);
+            // Redirect ke halaman dengan parameter query untuk error
+            return redirect('/?flash=error&message=' . urlencode('Token tidak valid atau telah kedaluwarsa. Silakan minta link verifikasi baru.'));
         }
 
         $user = $record->user;
@@ -71,11 +68,7 @@ class TokenEmailVerificationController extends Controller
 
         $record->delete();
 
-        return redirect('/')
-            ->with([
-                'success' => 'Email berhasil diverifikasi! Sekarang Anda dapat mengakses semua fitur aplikasi.',
-                // 'message' => 'Selamat! Akun Anda sudah aktif dan siap digunakan.',
-                'type' => 'success'
-            ]);
+        // Redirect ke halaman dengan parameter query untuk success
+        return redirect('/?flash=success&message=' . urlencode('Email berhasil diverifikasi! Sekarang Anda dapat mengakses semua fitur aplikasi.'));
     }
 }

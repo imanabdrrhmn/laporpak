@@ -4,7 +4,7 @@
     <div 
       v-if="flashMessage.show" 
       :class="flashMessage.alertClass"
-      class="alert alert-dismissible fade show position-fixed"
+      class="alert fade show position-fixed"
       style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;"
       role="alert"
     >
@@ -15,12 +15,6 @@
           <div v-if="flashMessage.message">{{ flashMessage.message }}</div>
         </div>
       </div>
-      <button 
-        type="button" 
-        class="btn-close" 
-        @click="closeFlash"
-        aria-label="Close"
-      ></button>
     </div>
 
     <!-- Demo Buttons untuk Testing -->
@@ -142,16 +136,35 @@ const useFlashMessage = () => {
     }
   }
 
+  // Handle URL query parameters untuk flash messages
+  const handleUrlFlash = () => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const flashType = urlParams.get('flash')
+    const message = urlParams.get('message')
+    
+    if (flashType && message) {
+      const decodedMessage = decodeURIComponent(message)
+      showFlash(flashType, decodedMessage)
+      
+      // Clear URL parameters setelah menampilkan flash message
+      const url = new URL(window.location)
+      url.searchParams.delete('flash')
+      url.searchParams.delete('message')
+      window.history.replaceState({}, document.title, url.toString())
+    }
+  }
+
   return {
     flashMessage,
     showFlash,
     closeFlash,
-    handleLaravelFlash
+    handleLaravelFlash,
+    handleUrlFlash
   }
 }
 
 // Use the composable
-const { flashMessage, showFlash, closeFlash, handleLaravelFlash } = useFlashMessage()
+const { flashMessage, showFlash, closeFlash, handleLaravelFlash, handleUrlFlash } = useFlashMessage()
 
 // Get page props from Inertia
 const page = usePage()
@@ -163,22 +176,27 @@ watch(() => page.props, (newProps) => {
   }
 }, { immediate: true, deep: true })
 
-// Demo functions
-const showSuccess = () => {
-  showFlash('success', 'Email berhasil diverifikasi! Sekarang Anda dapat mengakses semua fitur.', 'Berhasil!')
-}
+// Handle URL flash messages saat component di-mount
+onMounted(() => {
+  handleUrlFlash()
+})
 
-const showError = () => {
-  showFlash('error', 'Token tidak valid atau telah kedaluwarsa.', 'Error!')
-}
+// // Demo functions
+// const showSuccess = () => {
+//   showFlash('success', 'Email berhasil diverifikasi! Sekarang Anda dapat mengakses semua fitur.', 'Berhasil!')
+// }
 
-const showWarning = () => {
-  showFlash('warning', 'Harap periksa kembali data yang Anda masukkan.', 'Peringatan!')
-}
+// const showError = () => {
+//   showFlash('error', 'Token tidak valid atau telah kedaluwarsa.', 'Error!')
+// }
 
-const showInfo = () => {
-  showFlash('info', 'Link verifikasi telah dikirim ke email Anda!', 'Informasi!')
-}
+// const showWarning = () => {
+//   showFlash('warning', 'Harap periksa kembali data yang Anda masukkan.', 'Peringatan!')
+// }
+
+// const showInfo = () => {
+//   showFlash('info', 'Link verifikasi telah dikirim ke email Anda!', 'Informasi!')
+// }
 </script>
 
 <style scoped>
