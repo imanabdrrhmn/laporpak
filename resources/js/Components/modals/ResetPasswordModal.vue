@@ -50,11 +50,14 @@
                 <label class="form-label fw-bold" v-if="isEmailMode">Email</label>
                 <label class="form-label fw-bold" v-else>Nomor HP</label>
                 <input
-                  type="text"
+                  :type="isEmailMode ? 'email' : 'tel'"
                   class="form-control border-primary"
                   v-model="form.phoneEmail"
                   :placeholder="isEmailMode ? 'Masukkan email terdaftar' : 'Masukkan nomor HP terdaftar'"
                   :disabled="isLoading"
+                  :inputmode="isEmailMode ? 'email' : 'numeric'"
+                  @keypress="!isEmailMode && onlyNumbers"
+                  @input="handlePhoneInput"
                 />
               </div>
 
@@ -63,7 +66,12 @@
                 class="btn btn-primary w-100 py-3 fw-bold rounded-pill"
                 :disabled="isLoading || cooldown"
               >
-                <span v-if="isLoading">Mengirim...</span>
+                <span v-if="isLoading" class="d-flex align-items-center justify-content-center">
+                  <div class="spinner-border spinner-border-sm me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  Mengirim...
+                </span>
                 <span v-else-if="cooldown">Tunggu {{ cooldownTimer }} detik...</span>
                 <span v-else>Kirim Link Reset Password</span>
               </button>
@@ -142,7 +150,10 @@ function handleReset() {
     },
     onError: (errors) => {
       if (errors.email || errors.no_hp) {
-        form.setError('phoneEmail', errors.email || errors.no_hp)
+        const errorMessage = isEmailMode.value 
+          ? 'Email tidak terdaftar dalam sistem' 
+          : 'Nomor HP tidak terdaftar dalam sistem'
+        form.setError('phoneEmail', errorMessage)
       } else {
         form.setError('phoneEmail', 'Terjadi kesalahan. Pastikan input sudah benar.')
       }
@@ -168,6 +179,19 @@ function startCooldown() {
       cooldown.value = false
     }
   }, 1000)
+}
+
+function onlyNumbers(e) {
+  const char = String.fromCharCode(e.keyCode);
+  if (/^[0-9]$/.test(char)) return true;
+  e.preventDefault();
+}
+
+function handlePhoneInput(e) {
+  if (!isEmailMode.value) {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    form.phoneEmail = e.target.value;
+  }
 }
 </script>
 
@@ -306,6 +330,30 @@ function startCooldown() {
 .custom-close:hover {
   background-color: #e5e7eb;
   transform: rotate(90deg);
+}
+
+/* Hide number input spinbuttons */
+.no-spinbuttons::-webkit-outer-spin-button,
+.no-spinbuttons::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinbuttons[type=number] {
+  -moz-appearance: textfield;
+}
+
+.spinner-border {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-width: 0.15em;
+  vertical-align: -0.125em;
+}
+
+.spinner-border-sm {
+  --bs-spinner-width: 1rem;
+  --bs-spinner-height: 1rem;
+  --bs-spinner-border-width: 0.15em;
 }
 
 @media (max-width: 576px) {
