@@ -94,7 +94,6 @@ class AuthenticatedSessionController extends Controller
                 $newAvatarPath = 'avatars/' . Str::uuid() . '.jpg';
                 Storage::disk('public')->put($newAvatarPath, $avatarContents);
             } catch (\Exception $e) {
-                \Log::warning('Gagal download avatar dari Google: ' . $e->getMessage());
                 $newAvatarPath = null;
             }
 
@@ -139,9 +138,7 @@ class AuthenticatedSessionController extends Controller
 
             return redirect()->to(session()->pull('url.intended', '/'));
         } catch (\Exception $e) {
-            \Log::error('Error saat login Google: ' . $e->getMessage());
-            return redirect('/login')->with('error', 'Login dengan Google gagal.');
-        }
+            return redirect()->back()->with('error', 'Gagal terhubung dengan Google. Silakan coba lagi.');        }
     }
 
 

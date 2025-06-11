@@ -63,7 +63,7 @@
                 <td class="col-email">
                   <div class="email-text" :title="user.email">{{ user.email }}</div>
                 </td>
-                <td class="col-phone">{{ user.phone || '-' }}</td>
+                <td class="col-phone">{{ user.nomor || '-' }}</td>
                 <td class="col-role">
                   <span v-if="user.roles.length" class="badge role-badge">{{ user.roles }}</span>
                   <span v-else class="badge no-role-badge">Tidak Ada Role</span>
@@ -201,6 +201,7 @@ import { ref, computed, reactive } from 'vue'
 import axios from 'axios'
 import ConfirmDeleteModal from './ConfirmDeleteModal.vue'
 import ChangeRoleModal from './ChangeRoleModal.vue'
+import Swal from 'sweetalert2';
 
 const props = defineProps({
   users: Array,
