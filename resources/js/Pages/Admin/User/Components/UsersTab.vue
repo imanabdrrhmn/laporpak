@@ -41,7 +41,7 @@
                 <th class="col-email">Email</th>
                 <th class="col-phone">Nomor</th>
                 <th class="col-role">Role</th>
-                <th class="col-change-role">Ubah Role</th>
+                <th class="col-change-role">Kelola Role</th>
                 <th class="col-permission">Izin</th>
                 <th class="col-action">Aksi</th>
               </tr>
@@ -70,12 +70,16 @@
                 </td>
                 <td class="col-change-role">
                   <button
-                    class="btn-icon btn-primary"
+                    class="btn-change-role"
                     @click="openChangeRoleModal(user)"
-                    title="Ubah Role"
+                    title="Kelola Role Pengguna"
                     :disabled="userStates[user.id]?.isSubmitting"
                   >
-                    <i class="bi bi-shield-check"></i>
+                    <i class="bi bi-shield-check me-2"></i>
+                    <span class="btn-text">Kelola Role</span>
+                    <div v-if="userStates[user.id]?.isSubmitting" class="spinner-border spinner-sm ms-2" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
                   </button>
                 </td>
                 <td class="col-permission">
@@ -136,12 +140,15 @@
         
         <div class="role-change-section">
           <button 
-            class="btn-action btn-primary" 
+            class="btn-action-mobile btn-primary-mobile" 
             @click="openChangeRoleModal(user)"
             :disabled="userStates[user.id]?.isSubmitting"
           >
-            <i class="bi bi-shield-check"></i>
-            Ubah Role
+            <i class="bi bi-shield-check me-2"></i>
+            <span>Kelola Role Pengguna</span>
+            <div v-if="userStates[user.id]?.isSubmitting" class="spinner-border spinner-sm ms-2" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
           </button>
         </div>
         
@@ -458,13 +465,13 @@ function handleDeleteConfirm() {
 }
 
 .col-no { width: 5%; text-align: center; min-width: 50px; }
-.col-name { width: 20%; min-width: 150px; }
-.col-email { width: 25%; min-width: 180px; }
-.col-phone { width: 12%; min-width: 100px; }
+.col-name { width: 18%; min-width: 150px; }
+.col-email { width: 22%; min-width: 180px; }
+.col-phone { width: 10%; min-width: 100px; }
 .col-role { width: 10%; min-width: 80px; }
-.col-change-role { width: 15%; min-width: 120px; }
-.col-permission { width: 7%; text-align: center; min-width: 60px; }
-.col-action { width: 6%; text-align: center; min-width: 60px; }
+.col-change-role { width: 17%; min-width: 140px; }
+.col-permission { width: 8%; text-align: center; min-width: 60px; }
+.col-action { width: 10%; text-align: center; min-width: 60px; }
 
 .user-info {
   display: flex;
@@ -498,6 +505,82 @@ function handleDeleteConfirm() {
   white-space: nowrap;
   width: 100%;
   cursor: help;
+}
+
+/* Enhanced Change Role Button Styles */
+.btn-change-role {
+  background: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-change-role:hover {
+  background: #0b5ed7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.btn-change-role:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.2);
+}
+
+.btn-change-role:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-change-role .btn-text {
+  white-space: nowrap;
+}
+
+.btn-change-role::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-change-role:hover::before {
+  left: 100%;
+}
+
+/* Mobile Button Styles */
+.btn-primary-mobile {
+  background: #0d6efd;
+  color: white;
+}
+
+.btn-primary-mobile:hover {
+  background: #0b5ed7;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+}
+
+.btn-primary-mobile:disabled {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 @media (max-width: 1200px) {
@@ -650,6 +733,17 @@ function handleDeleteConfirm() {
   font-size: 0.875rem;
 }
 
+.spinner-border {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.1em;
+}
+
+.spinner-sm {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -669,6 +763,7 @@ function handleDeleteConfirm() {
   .user-name { font-size: 0.875rem; }
   .email-text { font-size: 0.875rem; }
   .btn-icon { width: 36px; height: 36px; font-size: 0.875rem; }
+  .btn-change-role { font-size: 0.8rem; min-width: 120px; }
 }
 
 @media (max-width: 1199px) and (min-width: 900px) {
@@ -681,11 +776,12 @@ function handleDeleteConfirm() {
   .user-name { font-size: 0.8rem; }
   .email-text { font-size: 0.75rem; }
   .btn-icon { width: 32px; height: 32px; font-size: 0.75rem; }
+  .btn-change-role { font-size: 0.75rem; min-width: 110px; padding: 6px 12px; }
   
-  .col-name { width: 18%; }
-  .col-email { width: 27%; }
+  .col-name { width: 16%; }
+  .col-email { width: 24%; }
   .col-phone { width: 10%; }
-  .col-change-role { width: 17%; }
+  .col-change-role { width: 18%; }
 }
 
 @media (max-width: 899px) and (min-width: 768px) {
@@ -698,12 +794,13 @@ function handleDeleteConfirm() {
   .user-name { font-size: 0.75rem; }
   .email-text { font-size: 0.7rem; }
   .btn-icon { width: 28px; height: 28px; font-size: 0.7rem; }
+  .btn-change-role { font-size: 0.7rem; min-width: 100px; padding: 5px 10px; }
   
   .col-phone { display: none; }
-  .col-name { width: 22%; }
-  .col-email { width: 30%; }
+  .col-name { width: 20%; }
+  .col-email { width: 26%; }
   .col-role { width: 12%; }
-  .col-change-role { width: 18%; }
+  .col-change-role { width: 20%; }
 }
 
 @media (max-width: 767px) {

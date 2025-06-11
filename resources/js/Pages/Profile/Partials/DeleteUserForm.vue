@@ -307,17 +307,32 @@ const closeModal = () => {
   cursor: not-allowed;
 }
 
-/* Animation for close button */
+/* Updated close button animation */
 .close-animated {
+  position: relative;
+  width: 32px;
+  height: 32px;
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+.close-animated::before {
+  content: "×";
+  font-size: 24px;
+  line-height: 1;
 }
 
 .close-animated:hover {
-  transform: rotate(90deg) scale(1.1);
+  transform: rotate(180deg) scale(1.2);
   background: rgba(255, 255, 255, 0.3);
+  opacity: 1;
+  cursor: pointer;
 }
 
 .modal-dialog-centered {

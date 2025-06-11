@@ -95,7 +95,7 @@ const defaultActions = ref([
     label: 'Tambah Credit',
     iconClass: 'bi bi-credit-card',
     active: false,
-    url: '/top-ups',
+    url: '/top-ups/create',
     color: '#fd7e14',
     iconVariant: 'warning',
     description: 'Top up credit',
