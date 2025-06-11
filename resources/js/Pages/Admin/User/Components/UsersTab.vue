@@ -63,7 +63,7 @@
                 <td class="col-email">
                   <div class="email-text" :title="user.email">{{ user.email }}</div>
                 </td>
-                <td class="col-phone">{{ user.phone || '-' }}</td>
+                <td class="col-phone">{{ user.nomor || '-' }}</td>
                 <td class="col-role">
                   <span v-if="user.roles.length" class="badge role-badge">{{ user.roles }}</span>
                   <span v-else class="badge no-role-badge">Tidak Ada Role</span>

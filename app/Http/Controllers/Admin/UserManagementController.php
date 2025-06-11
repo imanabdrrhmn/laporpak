@@ -19,6 +19,7 @@ class UserManagementController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'nomor' => $user->no_hp,
                 'roles' => $user->roles->pluck('name')->join(', '),
                 'avatar_url' => $user && $user->avatar
                     ? asset('storage/' . $user->avatar)
