@@ -194,6 +194,7 @@ import { ref, computed, reactive } from 'vue'
 import axios from 'axios'
 import ConfirmDeleteModal from './ConfirmDeleteModal.vue'
 import ChangeRoleModal from './ChangeRoleModal.vue'
+import Swal from 'sweetalert2';
 
 const props = defineProps({
   users: Array,
