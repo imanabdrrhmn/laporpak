@@ -150,7 +150,6 @@ class ReportController extends Controller
                                 ->distinct()
                                 ->orderBy('category')
                                 ->pluck('category')
-                                // ->filter() // filter() akan menghapus nilai null atau false, pluck sudah ambil non-null
                                 ->values() 
                                 ->all();
 
