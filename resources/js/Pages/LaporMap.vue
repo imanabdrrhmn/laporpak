@@ -3,7 +3,7 @@
     <AppLayout>
       <Head title="Lapor Map" />
       <HeroSection
-        :report-count="reportCount"
+        :report-count="reportStats.totalReports"
         :location-count="locationCount"
         :user-count="userCount"
         :animate-pins="animatePins"
@@ -11,7 +11,7 @@
       <div class="container-fluid py-5 map-container">
         <div class="row">
           <div class="col-lg-9 map-area">
-            <div> <!-- Add wrapper div to avoid fragment root -->
+            <div> 
               <MapArea
                 ref="mapArea"
                 :loading="loading"
@@ -64,29 +64,14 @@ import Section from '@/Components/Section.vue';
 
 const page = usePage();
 
-const reportCount = ref(page.props.reportCount ?? 0);
+const reportStats = ref(page.props.reportStats ?? { verifiedReports: 0, totalReports: 0, fraudReports: 0 });
+
 const locationCount = ref(page.props.locationCount ?? 0);
 const userCount = ref(page.props.userCount ?? 0);
 const allLocations = ref(page.props.locationItems ?? []);
 const maxReports = ref(page.props.maxReports ?? 0);
 const feedbacks = ref(page.props.feedbacks ?? []);
-
-// Tambahan variabel yang hilang untuk komponen Section
-const showFallbackSectionInfo = ref(true); // atau sesuai kondisi bisnis logic Anda
-
-// Data untuk komponen Section
-const reportStats = computed(() => ({
-  verifiedReports: page.props.verifiedReports ?? Math.floor(reportCount.value * 0.8), // 80% verified
-  totalReports: reportCount.value,
-  fraudReports: page.props.fraudReports ?? Math.floor(reportCount.value * 0.6) // 60% fraud reports
-}));
-
-// Atau jika data berasal dari props terpisah:
-// const reportStats = ref({
-//   verifiedReports: page.props.verifiedReports ?? 0,
-//   totalReports: page.props.totalReports ?? 0,
-//   fraudReports: page.props.fraudReports ?? 0
-// });
+const showFallbackSectionInfo = ref(true); 
 
 const selectedRegion = ref(null);
 
@@ -95,7 +80,6 @@ const filteredLocations = computed(() => {
   return allLocations.value.filter(loc => loc.region === selectedRegion.value);
 });
 
-// Define emits at the top level
 defineEmits(['update:location-items']);
 
 const mapArea = ref(null);
@@ -150,19 +134,12 @@ watch(filteredLocations, async (newLocations) => {
 });
 
 watch(() => page.props, (newProps) => {
-  reportCount.value = newProps.reportCount ?? 0;
+  reportStats.value = newProps.reportStats ?? { verifiedReports: 0, totalReports: 0, fraudReports: 0 };  
   locationCount.value = newProps.locationCount ?? 0;
   userCount.value = newProps.userCount ?? 0;
   allLocations.value = newProps.locationItems ?? [];
   maxReports.value = newProps.maxReports ?? 0;
   feedbacks.value = newProps.feedbacks ?? [];
-  
-  // Update reportStats jika menggunakan ref instead of computed
-  // reportStats.value = {
-  //   verifiedReports: newProps.verifiedReports ?? 0,
-  //   totalReports: newProps.totalReports ?? 0,
-  //   fraudReports: newProps.fraudReports ?? 0
-  // };
 });
 
 const focusLocation = (location) => {
@@ -188,12 +165,10 @@ const focusRegion = (region) => {
   selectedRegion.value = region;
 };
 
-// Fungsi tambahan untuk mengontrol visibility Section component
 const toggleSectionInfo = () => {
   showFallbackSectionInfo.value = !showFallbackSectionInfo.value;
 };
 
-// Expose methods jika diperlukan untuk testing atau debugging
 defineExpose({
   toggleSectionInfo,
   reportStats,

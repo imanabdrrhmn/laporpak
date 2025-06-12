@@ -36,8 +36,16 @@ class LaporMapController extends Controller
 
         $locationItems = $this->getLocationItems($region);
 
+        $reportStats = [
+            'verifiedReports' => Report::whereIn('status', ['published', 'approved'])->count(),
+            'totalReports' => Report::count(),
+            'fraudReports' => Report::where('service', 'Penipuan')->count(),
+        ];
+
+
         return Inertia::render('LaporMap', [
             'reportCount' => $reportCount,
+            'reportStats' => $reportStats,
             'locationCount' => $locationCount,
             'userCount' => $userCount,
             'locationItems' => $locationItems,
@@ -104,7 +112,7 @@ class LaporMapController extends Controller
             'address' => $item->address,
             'fraudTypes' => explode(',', $item->fraudTypes),
             'status' => $status,
-            'victims' => rand(50, 2000),  // contoh dummy data
+            'victims' => rand(50, 2000), 
             'totalLoss' => rand(100000000, 5000000000),
             'recentReports' => []
         ];
