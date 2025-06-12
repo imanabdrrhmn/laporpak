@@ -168,7 +168,7 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { router } from '@inertiajs/vue3';
 import VerificationModal from './Modals/VerificationModal.vue';
 import SuccessModal from './Modals/SuccessModal.vue';
 
@@ -201,9 +201,6 @@ const isModal1Visible = ref(false);
 const isModal2Visible = ref(false);
 const isVerifying = ref(false);
 const biayaVerifikasi = ref(3600); // Default verification cost
-
-// Router for navigation
-const router = useRouter();
 
 const showNpwpField = computed(() => {
   return selectedService.value && (selectedService.value.includes('npwp') || selectedService.value === 'income-tax');
@@ -322,7 +319,7 @@ const handleVerification = () => {
 const navigateToReports = () => {
   isModal2Visible.value = false;
   setTimeout(() => {
-    router.push('/laporan-saya');
+    router.visit('/laporan-saya');
   }, 300);
 };
 

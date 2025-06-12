@@ -2,7 +2,7 @@
   <AppLayout>
     <Head title="Top Up Credit" />
     <div class="top-up-page-container">
-      <TopUpHeader />
+      <TopUpHeader :current-balance="auth.user.balance || 0" />
       <div class="container py-4">
         <div class="card shadow-sm mx-auto" style="max-width: 800px;">
           <div class="card-body p-md-5 p-4">
@@ -63,6 +63,9 @@ import TopUpHeader from './Components/TopUpHeader.vue';
 import NominalSelection from './Components/NominalSelection.vue';
 import PaymentMethodSelection from './Components/PaymentMethodSelection.vue';
 import PaymentConfirmation from './Components/PaymentConfirmation.vue';
+import { usePage } from '@inertiajs/vue3';
+
+const auth = usePage().props.auth;
 
 const currentStep = ref('nominal');
 const currentBalance = ref(250000);

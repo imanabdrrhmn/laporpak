@@ -1,5 +1,6 @@
 <template>
-  <div class="table-responsive">
+  <!-- Desktop/Tablet View - Table -->
+  <div class="table-responsive d-none d-md-block">
     <table class="table table-hover align-middle mb-0">
       <thead>
         <tr v-if="selectedTab === 'penipuan'">
@@ -133,6 +134,106 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Mobile View - Cards -->
+  <div class="mobile-cards d-block d-md-none">
+    <!-- Penipuan Cards -->
+    <div v-if="selectedTab === 'penipuan'" class="cards-container">
+      <div v-for="(item, index) in displayedData" :key="index" class="mobile-card">
+        <div class="card-content">
+          <div class="card-header-simple">
+            <span class="card-number">#{{ index + 1 }}</span>
+            <span class="card-date">{{ formatDate(item.created_at) }}</span>
+          </div>
+          
+          <div class="card-info">
+            <div class="category-badge">{{ item.category }}</div>
+            <div class="source-text">{{ item.source || 'SMS' }}</div>
+          </div>
+          
+          <p class="card-description">{{ truncateText(item.description, 80) }}</p>
+          
+          <div class="card-bottom">
+            <span class="status-badge" :class="getStatusClass(item.status)">
+              {{ item.status || 'Tidak Diketahui' }}
+            </span>
+            <button 
+              class="btn btn-primary btn-sm detail-btn" 
+              @click="$emit('openDetailModal', item)"
+            >
+              Detail
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Infrastruktur Cards -->
+    <div v-else-if="selectedTab === 'infrastruktur'" class="cards-container">
+      <div v-for="(item, index) in displayedData" :key="index" class="mobile-card">
+        <div class="card-content">
+          <div class="card-header-simple">
+            <span class="card-number">#{{ index + 1 }}</span>
+            <span class="card-date">{{ formatDate(item.created_at) }}</span>
+          </div>
+          
+          <div class="card-info">
+            <div class="category-badge">{{ item.category }}</div>
+          </div>
+          
+          <p class="card-description">{{ truncateText(item.description, 80) }}</p>
+          
+          <div class="card-bottom">
+            <span class="status-badge" :class="getStatusClass(item.status)">
+              {{ item.status || 'Tidak Diketahui' }}
+            </span>
+            <button 
+              class="btn btn-primary btn-sm detail-btn" 
+              @click="$emit('openDetailModal', item)"
+            >
+              Detail
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verifikasi Cards -->
+    <div v-else class="cards-container">
+      <div v-for="(item, index) in displayedData" :key="index" class="mobile-card">
+        <div class="card-content">
+          <div class="card-header-simple">
+            <span class="card-number">#{{ index + 1 }}</span>
+            <span class="card-date">{{ formatDate(item.tanggal) }}</span>
+          </div>
+          
+          <p class="card-description">{{ truncateText(item.data, 60) }}</p>
+          
+          <div class="query-simple">{{ truncateText(item.query, 50) }}</div>
+          
+          <div class="card-bottom">
+            <span class="status-badge" :class="getStatusClass(item.hasil)">
+              {{ item.hasil || 'Tidak Diketahui' }}
+            </span>
+            <button 
+              class="btn btn-primary btn-sm detail-btn" 
+              @click="$emit('openDetailModal', item)"
+            >
+              Detail
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State for Mobile -->
+    <div v-if="displayedData.length === 0" class="mobile-empty-state">
+      <i class="fas fa-folder-open"></i>
+      <p v-if="selectedTab === 'penipuan'">Tidak ada laporan penipuan</p>
+      <p v-else-if="selectedTab === 'infrastruktur'">Tidak ada laporan infrastruktur</p>
+      <p v-else>Tidak ada verifikasi</p>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -142,13 +243,14 @@ defineProps({
   formatDate: Function,
   truncateText: Function,
   getStatusClass: Function,
+  getStatusTextClass: Function, // Added this prop
 });
 
 defineEmits(['openDetailModal']);
 </script>
 
 <style scoped>
-/* Table Header */
+/* Original Table Styles (Desktop/Tablet) */
 .table-header {
   background-color: #0d6efd !important;
   color: white;
@@ -158,7 +260,6 @@ defineEmits(['openDetailModal']);
   vertical-align: middle;
 }
 
-/* Table Structure */
 .table {
   border-collapse: separate;
   border-spacing: 0;
@@ -170,7 +271,6 @@ defineEmits(['openDetailModal']);
   overflow: hidden;
 }
 
-/* Table Rows */
 .table-row {
   background: white;
   transition: all 0.2s ease;
@@ -186,7 +286,6 @@ defineEmits(['openDetailModal']);
   vertical-align: middle;
 }
 
-/* Description cells with proper truncation */
 .description-cell {
   max-width: 250px;
   white-space: nowrap;
@@ -194,28 +293,123 @@ defineEmits(['openDetailModal']);
   text-overflow: ellipsis;
 }
 
-/* Category Badge */
-.category-badge {
+/* Mobile Cards Styles */
+.mobile-cards {
+  padding: 0;
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  min-height: 140px; /* Konsisten ukuran card */
+}
+
+.mobile-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card-header-simple {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.card-number {
+  font-weight: 700;
+  font-size: 13px;
+  color: #0d6efd;
+}
+
+.card-date {
+  font-size: 11px;
+  color: #6c757d;
+}
+
+.card-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.source-text {
+  font-size: 11px;
+  color: #6c757d;
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.card-description {
+  font-size: 13px;
+  color: #212529;
+  line-height: 1.3;
+  margin: 0 0 8px 0;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.query-simple {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 10px;
   background: #f8f9fa;
   color: #495057;
-  padding: 4px 8px;
+  padding: 6px 8px;
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  margin-bottom: 8px;
   border: 1px solid #dee2e6;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+/* Category Badge */
+.category-badge {
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
   display: inline-block;
 }
 
 /* Status Badge */
 .status-badge {
-  padding: 4px 8px;
-  border-radius: 20px;
-  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: capitalize;
   display: inline-block;
-  min-width: 70px;
-  text-align: center;
 }
 
 .status-badge.pending {
@@ -253,34 +447,7 @@ defineEmits(['openDetailModal']);
   color: #333;
 }
 
-/* Detail Button */
-.detail-btn {
-  background: #0d6efd;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-weight: 500;
-  font-size: 12px;
-  transition: all 0.2s ease;
-  box-shadow: none;
-  min-width: 80px;
-}
-
-.detail-btn:hover {
-  background: #0b5ed7;
-  transform: none;
-  box-shadow: none;
-}
-
-.detail-btn:active {
-  background: #0a58ca;
-}
-
-.detail-btn i {
-  font-size: 12px;
-}
-
-/* Query Text */
+/* Query Text Desktop */
 .query-text {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 11px;
@@ -294,7 +461,54 @@ defineEmits(['openDetailModal']);
   word-break: break-all;
 }
 
-/* Empty State */
+/* Detail Button */
+.detail-btn {
+  background: #0d6efd;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 600;
+  font-size: 11px;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  color: white;
+}
+
+.detail-btn:hover {
+  background: #0b5ed7;
+  box-shadow: none;
+  color: white;
+}
+
+.detail-btn:active {
+  background: #0a58ca;
+}
+
+/* Mobile Empty State */
+.mobile-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.mobile-empty-state i {
+  font-size: 2rem;
+  opacity: 0.4;
+  display: block;
+  margin-bottom: 8px;
+  color: #adb5bd;
+}
+
+.mobile-empty-state p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Desktop Empty State */
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -314,51 +528,33 @@ defineEmits(['openDetailModal']);
   font-weight: 500;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .table-header {
-    padding: 12px 8px;
-    font-size: 12px;
+/* Responsive adjustments for very small screens */
+@media (max-width: 360px) {
+  .mobile-card {
+    margin: 0 -8px;
+    border-radius: 8px;
   }
   
-  .table-row td {
-    padding: 12px 8px;
+  .card-header {
+    padding: 10px 12px;
   }
   
-  .description-cell {
-    max-width: 150px;
+  .card-body {
+    padding: 12px;
   }
   
-  .detail-btn {
-    padding: 6px 12px;
-    font-size: 11px;
-    min-width: 70px;
+  .card-footer {
+    padding: 10px 12px;
   }
   
-  .category-badge,
-  .status-badge {
-    font-size: 10px;
-    padding: 4px 8px;
-  }
-  
-  .query-text {
-    font-size: 10px;
-    padding: 4px 6px;
-  }
-}
-
-@media (max-width: 576px) {
-  .table-responsive {
-    font-size: 12px;
-  }
-  
-  .description-cell {
-    max-width: 100px;
-  }
-  
-  .detail-btn {
-    padding: 4px 8px;
+  .card-label {
     min-width: 60px;
+    font-size: 11px;
+  }
+  
+  .card-description,
+  .card-value {
+    font-size: 13px;
   }
 }
 </style>

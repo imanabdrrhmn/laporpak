@@ -143,22 +143,27 @@ export default {
           return;
         }
 
-        const script = document.createElement("script");
-        script.src = "https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js";
-        
-        script.onload = () => {
+        // Check if element is already defined
+        if (!customElements.get('lottie-player')) {
+          const script = document.createElement("script");
+          script.src = "https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js";
+          
+          script.onload = () => {
+            resolve();
+          };
+          
+          script.onerror = () => {
+            reject(new Error('Failed to load Lottie player script'));
+          };
+          
+          document.head.appendChild(script);
+          
+          this.loadTimeout = setTimeout(() => {
+            reject(new Error('Lottie script loading timeout'));
+          }, 10000);
+        } else {
           resolve();
-        };
-        
-        script.onerror = () => {
-          reject(new Error('Failed to load Lottie player script'));
-        };
-        
-        document.head.appendChild(script);
-        
-        this.loadTimeout = setTimeout(() => {
-          reject(new Error('Lottie script loading timeout'));
-        }, 10000);
+        }
       });
     },
 

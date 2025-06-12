@@ -81,7 +81,7 @@
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#" 
+                  <a class="dropdown-item" href="" 
                      @click.prevent="toggleCreditSubmenu = !toggleCreditSubmenu">
                     <i class="bi bi-wallet-fill me-2"></i>
                     Credit
@@ -244,6 +244,22 @@
           ></button>
         </div>
 
+        <!-- User Profile Section for Mobile -->
+        <div v-if="isLoggedIn" class="px-4 pb-3 mb-2 border-bottom">
+          <div class="d-flex align-items-center">
+            <div class="avatar-wrapper me-3">
+              <img v-if="user.avatar_url" :src="user.avatar_url" alt="User Avatar" class="user-avatar" />
+              <div v-else class="user-avatar-placeholder">
+                {{ getUserInitials() }}
+              </div>
+            </div>
+            <div>
+              <div class="fw-bold text-dark">{{ user.name }}</div>
+              <div class="small text-muted">{{ user.email }}</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Mobile Navigation Structure -->
         <ul class="nav flex-column mobile-nav">
           <!-- Beranda -->
@@ -308,13 +324,15 @@
                   <i class="bi bi-file-earmark-text-fill me-2"></i>
                   Riwayat Laporan
                 </Link>
-                <Link href="/top-ups" class="nav-link" @click.prevent="toggleCreditMobile = !toggleCreditMobile">
-                  <div>
-                    <i class="bi bi-wallet-fill me-2"></i>
-                    <span>Credit</span>
+                <a class="nav-link" href="#" @click.prevent="toggleCreditMobile = !toggleCreditMobile">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <i class="bi bi-wallet-fill me-2"></i>
+                      <span>Credit</span>
+                    </div>
+                    <i class="bi" :class="toggleCreditMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                   </div>
-                  <i class="bi" :class="toggleCreditMobile ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-                </Link>
+                </a>
                 <div class="collapse" :class="{ show: toggleCreditMobile }">
                   <div class="nav flex-column submenu">
                     <Link href="/top-ups/create" class="nav-link" @click="closeMobileNav">
@@ -898,5 +916,27 @@ export default {
 
 .mobile-nav .nav-item:last-child {
   border-bottom: none;
+}
+
+/* Update this if it exists */
+.mobile-nav {
+  margin-top: 0; /* Update this if it exists */
+}
+
+/* Add these new styles */
+.sidebar-nav .avatar-wrapper .user-avatar,
+.sidebar-nav .avatar-wrapper .user-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+}
+
+.sidebar-nav .fw-bold {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.sidebar-nav .text-muted {
+  font-size: 13px;
+  line-height: 1.2;
 }
 </style>

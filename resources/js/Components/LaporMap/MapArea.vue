@@ -257,7 +257,7 @@ const initMap = async () => {
       center: [-2.5489, 118.0149], // Indonesia center
       zoom: 5,
       zoomControl: false,
-      attributionControl: true,
+      attributionControl: false, // Disable default attribution for custom positioning
       preferCanvas: true
     })
 
@@ -272,6 +272,12 @@ const initMap = async () => {
     })
     
     tileLayer.addTo(map)
+
+    // Add custom attribution control with responsive positioning
+    L.control.attribution({
+      position: 'bottomright',
+      prefix: false
+    }).addTo(map)
 
     // Add scale control
     L.control.scale({ 
@@ -308,7 +314,7 @@ const initMap = async () => {
     
   } catch (error) {
     console.error('Map initialization failed:', error)
-    emit('map-error', error) // Now emit is properly defined
+    emit('map-error', error)
   }
 }
 
@@ -587,7 +593,43 @@ defineExpose({
   transition: transform 0.3s ease-out, opacity 0.3s ease-in;
 }
 
-/* Responsive Design */
+/* Fix untuk responsivitas kontrol Leaflet */
+:global(.leaflet-control-attribution) {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  font-size: 10px !important;
+  padding: 2px 5px !important;
+  border-radius: 3px !important;
+  margin: 0 !important;
+  backdrop-filter: blur(5px);
+}
+
+:global(.leaflet-control-attribution a) {
+  color: #0066cc !important;
+  text-decoration: none !important;
+}
+
+:global(.leaflet-control-scale) {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 3px !important;
+  padding: 2px 5px !important;
+  font-size: 10px !important;
+  backdrop-filter: blur(5px);
+}
+
+:global(.leaflet-control-scale-line) {
+  border: 2px solid #777 !important;
+  border-top: none !important;
+  color: #333 !important;
+  font-size: 10px !important;
+  line-height: 1.1;
+  padding: 2px 5px 1px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+/* Responsive Design - Diperbaiki untuk mencegah tumpang tindih */
 @media (max-width: 1200px) {
   .map { height: 450px; }
 }
@@ -595,31 +637,121 @@ defineExpose({
 @media (max-width: 992px) {
   .map { height: 400px; }
   .card-header h3 { font-size: 1.1rem; }
+  
+  :global(.leaflet-control-attribution) {
+    font-size: 9px !important;
+    max-width: calc(100% - 100px) !important;
+  }
 }
 
 @media (max-width: 768px) {
   .map { height: 350px; }
-  .card-header h3 { font-size: 1rem; }
+  .card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+  .card-header h3 { 
+    font-size: 1rem;
+    text-align: center;
+  }
+  .card-header .d-flex {
+    justify-content: center;
+  }
   .btn-sm {
     font-size: 0.8rem;
     padding: 4px 8px;
+  }
+  
+  /* Kontrol Leaflet untuk mobile */
+  :global(.leaflet-control-attribution) {
+    position: fixed !important;
+    bottom: 5px !important;
+    right: 5px !important;
+    left: auto !important;
+    font-size: 8px !important;
+    max-width: calc(100vw - 120px) !important;
+    padding: 1px 3px !important;
+    z-index: 1000 !important;
+  }
+  
+  :global(.leaflet-control-scale) {
+    position: fixed !important;
+    bottom: 5px !important;
+    left: 5px !important;
+    font-size: 8px !important;
+    padding: 1px 3px !important;
+    z-index: 1000 !important;
+  }
+  
+  :global(.leaflet-control-scale-line) {
+    font-size: 8px !important;
+    padding: 1px 3px !important;
   }
 }
 
 @media (max-width: 576px) {
   .map { height: 300px; }
-  .card-header {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
   .card-header h3 { 
     font-size: 0.9rem;
-    text-align: center;
+  }
+  
+  /* Lebih kompak untuk layar sangat kecil */
+  :global(.leaflet-control-attribution) {
+    font-size: 7px !important;
+    max-width: calc(100vw - 100px) !important;
+    right: 3px !important;
+    bottom: 3px !important;
+    padding: 1px 2px !important;
+    line-height: 1.2 !important;
+  }
+  
+  :global(.leaflet-control-scale) {
+    left: 3px !important;
+    bottom: 3px !important;
+    font-size: 7px !important;
+    padding: 1px 2px !important;
+  }
+  
+  :global(.leaflet-control-scale-line) {
+    font-size: 7px !important;
+    padding: 1px 2px !important;
+    min-width: 40px;
+  }
+}
+
+@media (max-width: 400px) {
+  .map { height: 280px; }
+  
+  /* Sembunyikan kontrol pada layar sangat kecil untuk menghindari tumpang tindih */
+  :global(.leaflet-control-attribution) {
+    display: none !important;
+  }
+  
+  :global(.leaflet-control-scale) {
+    display: none !important;
   }
 }
 
 @media (max-width: 320px) {
   .map { height: 250px; }
+  .card-header h3 {
+    font-size: 0.8rem;
+  }
+  .btn-sm {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
+}
+
+/* Orientasi landscape pada mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .map { height: 250px; }
+  
+  :global(.leaflet-control-attribution),
+  :global(.leaflet-control-scale) {
+    font-size: 7px !important;
+  }
 }
 
 /* Print styles */
@@ -630,8 +762,10 @@ defineExpose({
   }
   
   .map-loading,
-  .card-header .btn {
-    display: none;
+  .card-header .btn,
+  :global(.leaflet-control-attribution),
+  :global(.leaflet-control-scale) {
+    display: none !important;
   }
 }
 
@@ -639,6 +773,13 @@ defineExpose({
 @media (prefers-contrast: high) {
   .legend-marker {
     border: 2px solid currentColor;
+  }
+  
+  :global(.leaflet-control-attribution),
+  :global(.leaflet-control-scale) {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #000 !important;
   }
 }
 
@@ -654,5 +795,29 @@ defineExpose({
   :global(.leaflet-cluster-anim .leaflet-marker-icon, .leaflet-cluster-anim .leaflet-marker-shadow) {
     transition: none;
   }
+}
+
+/* Perbaikan untuk teks yang overlap */
+:global(.leaflet-container) {
+  font-family: inherit;
+}
+
+:global(.leaflet-control-container) {
+  pointer-events: none;
+}
+
+:global(.leaflet-control) {
+  pointer-events: auto;
+}
+
+/* Pastikan kontrol tidak saling menimpa */
+:global(.leaflet-bottom.leaflet-left) {
+  bottom: 0;
+  left: 0;
+}
+
+:global(.leaflet-bottom.leaflet-right) {
+  bottom: 0;
+  right: 0;
 }
 </style>
