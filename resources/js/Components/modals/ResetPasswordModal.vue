@@ -341,6 +341,7 @@ function handlePhoneInput(e) {
 
 .no-spinbuttons[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .spinner-border {

@@ -47,13 +47,13 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="filteredUsers.length === 0">
+              <tr v-if="paginatedUsers.length === 0">
                 <td colspan="8" class="text-center py-4 text-gray-500">
                   Tidak ada data pengguna yang ditemukan
                 </td>
               </tr>
-              <tr v-else v-for="(user, index) in filteredUsers" :key="user.id">
-                <td class="col-no">{{ index + 1 }}</td>
+              <tr v-else v-for="(user, index) in paginatedUsers" :key="user.id">
+                <td class="col-no">{{ ((currentPage - 1) * ITEMS_PER_PAGE) + index + 1 }}</td>
                 <td class="col-name">
                   <div class="user-info">
                     <img :src="user.avatar_url" alt="Avatar" class="user-avatar" />
@@ -115,16 +115,42 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="pagination-info">
+              Menampilkan {{ paginationInfo.from }}-{{ paginationInfo.to }} dari {{ paginationInfo.total }} data
+            </div>
+            <nav aria-label="Page navigation">
+              <ul class="pagination mb-0">
+                <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                  <button class="page-link" @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">
+                    <i class="bi bi-chevron-left"></i>
+                  </button>
+                </li>
+                <li v-for="page in displayedPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
+                  <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+                </li>
+                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                  <button class="page-link" @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">
+                    <i class="bi bi-chevron-right"></i>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Mobile: card layout -->
     <div class="mobile-card-container">
-      <div v-if="filteredUsers.length === 0" class="no-data-card">
+      <div v-if="paginatedUsers.length === 0" class="no-data-card">
         <i class="bi bi-inbox text-gray-400 mb-2"></i>
         <p>Tidak ada data pengguna yang ditemukan</p>
       </div>
-      <div v-else v-for="(user, index) in filteredUsers" :key="user.id" class="user-card">
+      <div v-else v-for="(user, index) in paginatedUsers" :key="user.id" class="user-card">
         <div class="user-header">
           <img :src="user.avatar_url" alt="Avatar" class="user-avatar" />
           <div class="user-details">
@@ -219,6 +245,8 @@ const selectedUserName = ref('')
 const selectedFormId = ref(null)
 const showChangeRoleModal = ref(false)
 const selectedUser = ref(null)
+const currentPage = ref(1)
+const ITEMS_PER_PAGE = 10
 
 const filteredUsers = computed(() => {
   return props.users.filter(user => {
@@ -233,6 +261,20 @@ const filteredUsers = computed(() => {
     return matchesSearch && matchesRole
   })
 })
+
+const paginatedUsers = computed(() => {
+  const start = (currentPage.value - 1) * ITEMS_PER_PAGE
+  const end = start + ITEMS_PER_PAGE
+  return filteredUsers.value.slice(start, end)
+})
+
+const totalPages = computed(() => Math.ceil(filteredUsers.value.length / ITEMS_PER_PAGE))
+
+const paginationInfo = computed(() => ({
+  from: filteredUsers.value.length ? (currentPage.value - 1) * ITEMS_PER_PAGE + 1 : 0,
+  to: Math.min(currentPage.value * ITEMS_PER_PAGE, filteredUsers.value.length),
+  total: filteredUsers.value.length
+}))
 
 function openChangeRoleModal(user) {
   selectedUser.value = user
@@ -317,6 +359,12 @@ function handleDeleteConfirm() {
   showDeleteModal.value = false
   selectedFormId.value = null
   selectedUserName.value = ''
+}
+
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
 }
 </script>
 
@@ -596,6 +644,46 @@ function handleDeleteConfirm() {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+.pagination-container {
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.pagination {
+  gap: 0.25rem;
+}
+
+.page-link {
+  border: none;
+  padding: 0.5rem 0.75rem;
+  color: #374151;
+  background: transparent;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.page-link:hover:not(.disabled) {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.page-item.active .page-link {
+  background: #2563eb;
+  color: white;
+}
+
+.page-item.disabled .page-link {
+  color: #9ca3af;
+  pointer-events: none;
 }
 
 @media (max-width: 1200px) {
