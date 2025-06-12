@@ -90,15 +90,10 @@
 </template>
 
 <script>
-import { Link, router } from '@inertiajs/vue3';
-import LoginModal from './modals/LoginModal.vue';
+import { router } from '@inertiajs/vue3';
 
 export default {
   name: 'HeroSection',
-  components: {
-    Link,
-    LoginModal
-  },
   data() {
     return {
       lottieLoaded: false,
@@ -113,7 +108,6 @@ export default {
     this.setupIntersectionObserver();
   },
   beforeUnmount() {
-    // Cleanup
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect();
     }
@@ -126,12 +120,9 @@ export default {
       this.isLoading = true;
       
       try {
-        // Check if user is logged in
         if (this.$page.props.auth && this.$page.props.auth.user) {
-          // User is logged in, redirect to report page
           router.visit('/pelaporan');
         } else {
-          // User is not logged in, show login modal
           this.$emit('show-login-modal');     
         }
       } catch (error) {
@@ -142,13 +133,11 @@ export default {
     },
 
     handleImageError(event) {
-      // Replace failed image with a placeholder
       event.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23ddd'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='12' fill='%23999' text-anchor='middle' dy='.3em'%3E?%3C/text%3E%3C/svg%3E";
     },
 
     loadLottieScript() {
       return new Promise((resolve, reject) => {
-        // Check if already loaded
         if (window.LottiePlayer) {
           resolve();
           return;
@@ -167,10 +156,9 @@ export default {
         
         document.head.appendChild(script);
         
-        // Set timeout for script loading
         this.loadTimeout = setTimeout(() => {
           reject(new Error('Lottie script loading timeout'));
-        }, 10000); // 10 second timeout
+        }, 10000);
       });
     },
 
@@ -179,7 +167,6 @@ export default {
         await this.loadLottieScript();
         this.lottieLoaded = true;
         
-        // Clear timeout if successful
         if (this.loadTimeout) {
           clearTimeout(this.loadTimeout);
           this.loadTimeout = null;
@@ -202,12 +189,11 @@ export default {
           });
         }, { 
           threshold: 0.3,
-          rootMargin: '50px' // Load slightly before visible
+          rootMargin: '50px'
         });
         
         this.intersectionObserver.observe(this.$refs.lottieContainer);
       } else {
-        // Fallback for browsers without IntersectionObserver
         this.setupLottie();
       }
     },
@@ -216,7 +202,6 @@ export default {
       this.$nextTick(() => {
         const lottiePlayer = document.getElementById('lazyLottie');
         if (lottiePlayer) {
-          // Smooth fade in
           lottiePlayer.style.transition = 'opacity 0.5s ease-in-out';
           lottiePlayer.style.opacity = '1';
           lottiePlayer.play();
@@ -240,7 +225,7 @@ export default {
   min-height: 80vh;
   display: flex;
   align-items: center;
-  will-change: transform; /* Optimize for animations */
+  will-change: transform;
 }
 
 .title-underline {
@@ -258,7 +243,7 @@ export default {
   transition: all 0.3s ease;
   border: none;
   background-color: white;
-  will-change: transform; /* Optimize for hover animations */
+  will-change: transform;
 }
 
 .shadow-button:hover:not(:disabled) {
@@ -273,7 +258,6 @@ export default {
   cursor: not-allowed;
 }
 
-/* Avatar Styles */
 .user-avatars {
   display: flex;
   align-items: center;
@@ -319,13 +303,12 @@ export default {
   z-index: 0;
 }
 
-/* Illustration */
 .illustration-container {
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
   position: relative;
-  min-height: 300px; /* Prevent layout shift */
+  min-height: 300px;
 }
 
 .loading-placeholder {
@@ -333,14 +316,6 @@ export default {
   height: 300px;
   opacity: 0;
   pointer-events: none;
-  /* Completely invisible to user */
-}
-
-.fallback-image,
-.error-state {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
 }
 
 .error-state {
@@ -360,7 +335,6 @@ export default {
   margin-bottom: 1rem;
 }
 
-/* Floating animation - optimized */
 .animate-float {
   animation: float 6s ease-in-out infinite;
   will-change: transform;
@@ -375,7 +349,6 @@ export default {
   }
 }
 
-/* Reduce animations on mobile for better performance */
 @media (prefers-reduced-motion: reduce) {
   .animate-float {
     animation: none;
@@ -390,34 +363,20 @@ export default {
   }
 }
 
-/* Responsive Styles */
 @media (max-width: 1200px) {
   .hero-section {
     padding: 70px 0;
   }
   
-  .loading-placeholder {
-    height: 220px;
-  }
-  
-  .loading-placeholder {
-    height: 200px;
-  }
-  
-  .loading-placeholder {
-    height: 180px;
+  .illustration-container {
+    max-width: 450px;
   }
   
   .loading-placeholder {
     height: 150px;
   }
-  
-  .illustration-container {
-    max-width: 450px;
-  }
 }
 
-/* iPad Air and tablet landscape (1024px - 1180px) */
 @media (min-width: 993px) and (max-width: 1180px) {
   .hero-section {
     text-align: center;
@@ -475,7 +434,6 @@ export default {
   }
 }
 
-/* iPad portrait and smaller tablets (768px - 992px) */
 @media (min-width: 768px) and (max-width: 992px) {
   .hero-section {
     text-align: center;
@@ -531,6 +489,10 @@ export default {
     max-width: 350px;
     min-height: 200px;
   }
+  
+  .hero-section {
+    background: linear-gradient(135deg, #0062cc, #0078e7);
+  }
 }
 
 @media (max-width: 576px) {
@@ -574,14 +536,6 @@ export default {
   
   .illustration-container {
     min-height: 150px;
-  }
-}
-
-/* Performance optimizations */
-@media (max-width: 768px) {
-  /* Reduce gradient complexity on mobile */
-  .hero-section {
-    background: linear-gradient(135deg, #0062cc, #0078e7);
   }
 }
 </style>

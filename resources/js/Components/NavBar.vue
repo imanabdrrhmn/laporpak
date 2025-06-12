@@ -68,11 +68,10 @@
                     Dashboard
                   </a>
                 </li>
-    
                 <li>
                   <a class="dropdown-item" href="/profile">
                     <i class="bi bi-person-fill me-2"></i>
-                    Profil 
+                    Profil
                   </a>
                 </li>
                 <li>
@@ -99,13 +98,12 @@
                     </a>
                   </div>
                 </li>
-                 <li v-if="isAdmin">
+                <li v-if="isAdmin">
                   <a class="dropdown-item" href="/admin/dashboard">
                     <i class="bi bi-shield-fill me-2"></i>
                     Admin Panel
                   </a>
                 </li>
-                <!-- Slot for additional dropdown items -->
                 <li>
                   <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
                     <i class="bi bi-box-arrow-right me-2"></i>
@@ -132,8 +130,6 @@
                 <span>Beranda</span>
               </Link>
             </li>
-
-            <!-- Dropdown Layanan -->
             <li class="nav-item dropdown">
               <a
                 class="nav-link dropdown-toggle py-3"
@@ -188,7 +184,6 @@
                 </li>
               </ul>
             </li>
-
             <li class="nav-item">
               <Link
                 href="/feedback"
@@ -258,7 +253,6 @@
               <span>Beranda</span>
             </Link>
           </li>
-
           <!-- Layanan Dropdown -->
           <li class="nav-item">
             <a class="nav-link d-flex justify-content-between align-items-center"
@@ -290,7 +284,6 @@
               </div>
             </div>
           </li>
-
           <!-- Profile Dropdown -->
           <li v-if="isLoggedIn" class="nav-item">
             <a class="nav-link d-flex justify-content-between align-items-center"
@@ -309,7 +302,7 @@
                 </Link>
                 <Link href="/profile" class="nav-link" @click="closeMobileNav">
                   <i class="bi bi-person-fill me-2"></i>
-                  Profil 
+                  Profil
                 </Link>
                 <Link href="/laporan-saya" class="nav-link" @click="closeMobileNav">
                   <i class="bi bi-file-earmark-text-fill me-2"></i>
@@ -337,7 +330,6 @@
               </div>
             </div>
           </li>
-
           <!-- Feedback -->
           <li class="nav-item">
             <Link href="/feedback" class="nav-link" @click="closeMobileNav">
@@ -345,7 +337,6 @@
               <span>Feedback</span>
             </Link>
           </li>
-
           <!-- Tentang Kami -->
           <li class="nav-item">
             <Link href="/tentang-kami" class="nav-link" @click="closeMobileNav">
@@ -356,7 +347,7 @@
           <li class="nav-item" v-if="isAdmin">
             <Link href="/admin/dashboard" class="nav-link" @click="closeMobileNav">
               <i class="bi bi-shield-fill me-2"></i>
-                Admin Panel
+              Admin Panel
             </Link>
           </li>
           <!-- Logout and Login Buttons -->
@@ -366,7 +357,6 @@
               <span>Keluar</span>
             </a>
           </li>
-
           <li v-else class="nav-item mt-4 mb-2 d-flex justify-content-center">
             <button class="btn btn-primary rounded-pill px-5" 
                     @click="$emit('trigger-login'); closeMobileNav()">
@@ -381,7 +371,7 @@
 
 <script>
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref } from 'vue';
 
 export default {
   name: 'NavbarLaporPak',
@@ -399,7 +389,8 @@ export default {
 
     const isLoggedIn = computed(() => !!page.props.auth?.user);
     const user = computed(() => page.props.auth?.user || {});
-  const isAdmin = computed(() => page.props.auth?.isAdmin)
+    const isAdmin = computed(() => page.props.auth?.isAdmin);
+
     const getUserInitials = () => {
       const name = user.value.name || '';
       return name
@@ -486,7 +477,7 @@ export default {
 }
 
 .user-dropdown-btn {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef); /* Gradient background */
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border: 1px solid #dee2e6;
   color: #333;
   padding: 0.6rem 1.2rem;
@@ -503,7 +494,7 @@ export default {
 .user-dropdown-btn:hover {
   background: linear-gradient(135deg, #e9ecef, #dee2e6);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: scale(1.02); /* Slight scale on hover */
+  transform: scale(1.02);
 }
 
 .avatar-wrapper {
@@ -517,7 +508,7 @@ export default {
   height: 38px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #008cdb; /* Added border for definition */
+  border: 2px solid #008cdb;
 }
 
 .user-avatar-placeholder {
@@ -531,12 +522,12 @@ export default {
   justify-content: center;
   font-weight: bold;
   font-size: 14px;
-  border: 2px solid #006bb3; /* Matching border for placeholder */
+  border: 2px solid #006bb3;
 }
 
 .user-name {
   font-weight: 500;
-  max-width: 90px; /* Adjusted for "Hi" */
+  max-width: 90px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -546,10 +537,9 @@ export default {
 .dropdown-user-info {
   background-color: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
-  padding: 1rem !important; /* Increased padding */
+  padding: 1rem !important;
 }
 
-/* Fix for long email in dropdown */
 .small.text-muted {
   max-width: 200px;
   white-space: nowrap;
@@ -558,25 +548,24 @@ export default {
   color: #6c757d;
 }
 
-/* User dropdown menu styles */
 .user-dropdown .dropdown-menu {
   padding: 0.75rem 0;
-  width: 280px; /* Slightly wider */
+  width: 280px;
   right: 0;
   left: auto;
   z-index: 1050;
   margin-top: 0 !important;
   transform: translateY(0);
   border: none;
-  border-radius: 12px; /* Softer corners */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* Pronounced shadow */
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   opacity: 0;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .user-dropdown .dropdown-menu.show {
   opacity: 1;
-  transform: translateY(4px); /* Slight slide-in effect */
+  transform: translateY(4px);
 }
 
 .user-dropdown .dropdown-item {
@@ -591,7 +580,7 @@ export default {
 .user-dropdown .dropdown-item:hover {
   background-color: #e9ecef;
   color: #0d6efd;
-  transform: translateX(4px); /* Slight slide on hover */
+  transform: translateX(4px);
 }
 
 .user-dropdown .dropdown-item .bi {
@@ -739,7 +728,7 @@ export default {
   margin: 0 8px;
 }
 
-.nav-flex-column.ms-4 .nav-link {
+.nav.flex-column .nav-link {
   padding: 10px 15px 10px 2.5rem;
   font-size: 14px;
 }
@@ -783,8 +772,7 @@ export default {
   .nav-link.active-pelaporan,
   .nav-link.active-LaporMap,
   .nav-link.active-feedback,
-  .nav-link.active-tentang-kami,
-  .nav-link.active-credit {
+  .nav-link.active-tentang-kami {
     color: #0d6efd !important;
     font-weight: 600;
     background-color: rgba(13, 110, 253, 0.1);
@@ -818,14 +806,12 @@ export default {
   }
 
   .nav-link.active,
-  .nav-link.active-Beranda,
   .nav-link.active-CariLaporan,
   .nav-link.active-verifikasi,
   .nav-link.active-pelaporan,
   .nav-link.active-LaporMap,
   .nav-link.active-feedback,
-  .nav-link.active-tentang-kami,
-  .nav-link.active-credit {
+  .nav-link.active-tentang-kami {
     color: #0d6efd !important;
     font-weight: bold;
     border-bottom: 3px solid #0d6efd;
@@ -847,7 +833,7 @@ export default {
   }
 }
 
-.nav-flex-column.ms-4 .nav-link {
+.nav.flex-column .nav-link {
   padding-left: 2.5rem;
   font-size: 14px;
   border-left: 2px solid transparent;
@@ -855,7 +841,7 @@ export default {
   border-radius: 6px;
 }
 
-.nav-flex-column.ms-4 .nav-link.active {
+.nav.flex-column .nav-link.active {
   border-left: 2px solid #0d6efd;
   background-color: rgba(13, 110, 253, 0.08);
 }
