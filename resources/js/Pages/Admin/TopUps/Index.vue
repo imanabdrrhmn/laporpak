@@ -2,7 +2,6 @@
   <AppLayout>
     <Head title="Manajemen Top Up" />
     <div class="container py-5">
-      <!-- PERBAIKAN: Gunakan 'hasAccess' untuk kontrol utama -->
       <template v-if="hasAccess">
         <DashboardHeader />
         <StatusCards :pending-count="statusCounts.pending" :verified-count="statusCounts.verified" :rejected-count="statusCounts.rejected" />
@@ -46,9 +45,9 @@
           ref="actionModalRef"
         />
         <ProofModal
-          :proof-modal-url="proofModalUrl"
-          @close-proof-modal="closeProofModal"
-          ref="proofModalRef"
+            :is-visible="isProofModalVisible"
+            :proof-url="proofModalUrl"
+            @close="closeProofModal"
         />
         <ExportModal
           :export-filters="exportFilters"
@@ -68,7 +67,6 @@
         />
       </template>
       <template v-else>
-        <!-- Komponen ini akan ditampilkan jika hasAccess false -->
         <AccessDenied />
       </template>
     </div>
@@ -96,7 +94,6 @@ const page = usePage();
 
 const props = defineProps({
   filters: Object,
-  // canViewTopUp tidak lagi jadi kontrol utama, tapi bisa tetap ada untuk pengecekan awal
   canViewTopUp: {
     type: Boolean,
     default: true,
@@ -118,7 +115,7 @@ const statusCounts = ref({
 });
 const isLoading = ref(true);
 const fetchError = ref(null);
-const hasAccess = ref(props.canViewTopUp); // PERBAIKAN: State baru untuk kontrol akses
+const hasAccess = ref(props.canViewTopUp); 
 
 const filters = ref({
   status: props.filters?.status || "",
@@ -131,8 +128,7 @@ const exportFilters = ref({
 });
 
 const loadingIds = ref([]);
-const proofModalRef = ref(null);
-let proofModalInstance = null;
+const isProofModalVisible = ref(false);
 const proofModalUrl = ref("");
 const actionModalRef = ref(null);
 let actionModalInstance = null;
@@ -140,10 +136,11 @@ const exportModalRef = ref(null);
 let exportModalInstance = null;
 const selectedTopUp = ref(null);
 
+const modalTriggerElement = ref(null);
+
 const API_BASE_URL = '/admin/api/topups';
 
 const fetchTopUps = async () => {
-  // Hanya fetch jika user punya akses awal
   if (!hasAccess.value) {
       isLoading.value = false;
       return;
@@ -180,9 +177,8 @@ const fetchTopUps = async () => {
   } catch (error) {
     console.error("Error fetching top-ups:", error);
     
-    // PERBAIKAN: Cek jika error adalah 403 Forbidden
     if (error.response && error.response.status === 403) {
-        hasAccess.value = false; // Set hasAccess ke false
+        hasAccess.value = false; 
         fetchError.value = "Anda tidak memiliki izin untuk melihat data ini.";
     } else {
         fetchError.value = error.response?.data?.message || 'Gagal memuat data.';
@@ -197,11 +193,31 @@ const fetchTopUps = async () => {
 
 onMounted(() => {
   fetchTopUps();
+  nextTick(() => {
+      if (actionModalRef.value?.$el) {
+          actionModalRef.value.$el.addEventListener('hidden.bs.modal', () => {
+              if (modalTriggerElement.value) {
+                  modalTriggerElement.value.focus();
+              }
+              selectedTopUp.value = null; 
+              modalTriggerElement.value = null; 
+          });
+      }
+      if (exportModalRef.value?.$el) {
+          exportModalRef.value.$el.addEventListener('hidden.bs.modal', () => {
+              if (modalTriggerElement.value) {
+                  modalTriggerElement.value.focus();
+              }
+              modalTriggerElement.value = null; 
+          });
+      }
+  });
+
 
   let pollingInterval = setInterval(() => {
-    const isAnyModalOpen = (proofModalInstance && proofModalInstance._isShown) ||
-                           (actionModalInstance && actionModalInstance._isShown) ||
-                           (exportModalInstance && exportModalInstance._isShown);
+    const isAnyModalOpen = (actionModalInstance && actionModalInstance._isShown) ||
+                           (exportModalInstance && exportModalInstance._isShown) ||
+                           isProofModalVisible.value; 
     if (!isAnyModalOpen && !isLoading.value) {
       fetchTopUps();
     }
@@ -232,8 +248,10 @@ const goToPage = (pageNumber) => {
     fetchTopUps();
 };
 
-const openActionModal = (topUp) => {
+const openActionModal = (topUp, event) => {
   selectedTopUp.value = topUp;
+  if (event) modalTriggerElement.value = event.currentTarget;
+
   if (!actionModalInstance) {
     nextTick(() => {
       if (actionModalRef.value && actionModalRef.value.$el) {
@@ -248,7 +266,6 @@ const openActionModal = (topUp) => {
 
 const closeActionModal = () => {
   actionModalInstance?.hide();
-  selectedTopUp.value = null;
 };
 
 const performAction = async (actionUrl, successMessage) => {
@@ -282,23 +299,16 @@ const confirmReject = () => {
 
 const showProofModal = (url) => {
   proofModalUrl.value = url;
-  if (!proofModalInstance) {
-    nextTick(() => {
-      if (proofModalRef.value && proofModalRef.value.$el) {
-        proofModalInstance = new Modal(proofModalRef.value.$el);
-        proofModalInstance.show();
-      }
-    });
-  } else {
-    proofModalInstance.show();
-  }
+  isProofModalVisible.value = true;
 };
 
 const closeProofModal = () => {
-  proofModalInstance?.hide();
+  isProofModalVisible.value = false;
 };
 
-const showExportModal = () => {
+const showExportModal = (event) => {
+  if (event) modalTriggerElement.value = event.currentTarget;
+  
   if (!exportModalInstance) {
     nextTick(() => {
       if (exportModalRef.value && exportModalRef.value.$el) {

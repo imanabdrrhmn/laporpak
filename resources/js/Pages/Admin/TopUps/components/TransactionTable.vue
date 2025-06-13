@@ -32,7 +32,7 @@
                                         <i class="fas fa-question"></i>
                                     </div>
                                 </div>
-                                <div>
+                                <div class="profile-name">
                                     <div class="fw-semibold">{{ topUp.user?.name || 'User Dihapus' }}</div>
                                     <small class="text-muted">{{ topUp.user?.email || '-' }}</small>
                                 </div>
@@ -49,7 +49,6 @@
                         </td>
                         <td data-label="Bukti">
                             <div v-if="topUp.proof" class="proof-container">
-                                <!-- PERBAIKAN: Gunakan topUp.proof secara langsung -->
                                 <img
                                     :src="topUp.proof"
                                     alt="Bukti"
@@ -227,6 +226,7 @@ const totalPages = computed(() => {
     border-bottom: 1px solid #f1f1f1;
   }
 
+
   .table td:last-child {
     border-bottom: none;
   }
@@ -242,6 +242,9 @@ const totalPages = computed(() => {
   .table td:nth-child(1) {
     flex-direction: column;
     align-items: flex-start;
+    border-bottom: none; 
+    padding: 0  !important;
+    margin-bottom: 0.5rem; 
   }
 
   .table td:nth-child(1) .d-flex {
@@ -264,6 +267,10 @@ const totalPages = computed(() => {
     width: 32px;
     height: 32px;
     font-size: 0.8rem;
+  }
+  
+  .profile-name {
+    margin-left: 1rem;
   }
 
   .proof-container {
