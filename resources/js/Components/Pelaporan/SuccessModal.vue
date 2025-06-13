@@ -289,7 +289,7 @@ onUnmounted(() => {
 .close-button:hover,
 .close-button:focus {
   color: var(--text-primary);
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(180deg);
   outline-offset: 2px;
 }
 
@@ -313,7 +313,7 @@ onUnmounted(() => {
   font-weight: 700;
   margin-bottom: 1rem;
   color: var(--text-primary);
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: #0d6efd;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -349,7 +349,7 @@ onUnmounted(() => {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: #0d6efd;
   color: white;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }

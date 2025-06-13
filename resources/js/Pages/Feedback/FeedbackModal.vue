@@ -1,11 +1,23 @@
 <template>
-  <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true" ref="modal">
-    <div class="modal-dialog modal-dialog-centered modal-sm mx-auto">
+  <div 
+    class="modal fade" 
+    id="feedbackModal" 
+    tabindex="-1" 
+    role="dialog"
+    aria-labelledby="feedbackModalLabel" 
+    ref="modal"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-sm mx-auto" role="document">
       <div class="modal-content">
         <div class="modal-body p-3 p-md-4 position-relative">
           <!-- Close Button -->
-          <button type="button" class="close-btn" @click="hideModal" aria-label="Close">
-            <i class="bi bi-x-lg"></i>
+          <button 
+            type="button" 
+            class="close-btn" 
+            @click="hideModal" 
+            aria-label="Close"
+          >
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
           </button>
 
           <!-- Title and Subtitle with Icon -->

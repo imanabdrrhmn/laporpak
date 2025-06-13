@@ -27,11 +27,16 @@
 // Menggunakan <script setup> untuk sintaks yang lebih modern dan ringkas
 import { onMounted, onUnmounted } from 'vue';
 
-// Mendefinisikan props yang diterima dari parent
+/**
+ * @typedef {Object} Props
+ * @property {boolean} [isVisible=false] - Controls the visibility of the modal
+ * @property {string} [proofUrl=''] - URL of the proof image to display
+ */
+
 const props = defineProps({
   isVisible: {
     type: Boolean,
-    required: true,
+    default: false
   },
   proofUrl: {
     type: String,
@@ -88,9 +93,7 @@ onUnmounted(() => {
   flex-direction: column;
 }
 
-.modal-content {
-  /* Tidak perlu style khusus jika modal-container sudah di-styling */
-}
+
 
 .modal-header {
   border-bottom: 1px solid #dee2e6;

@@ -12,7 +12,7 @@
         </button>
         <button
           @click="$emit('update:viewMode', 'list')"
-          :class="['toggle-btn', viewMode === 'list' ? 'active' : '']"
+          :class="['toggle-btn list-view-btn', viewMode === 'list' ? 'active' : '']"
           title="List View"
         >
           <i class="fas fa-list"></i>
@@ -98,12 +98,12 @@
         <i class="fas fa-chevron-down dropdown-icon"></i>
       </div>
 
-      <button @click="$emit('resetFilters')" class="reset-btn" :disabled="!hasActiveFilters">
+      <button @click="$emit('resetFilters')" class="reset-btn" :disabled="!computedHasActiveFilters">
         <i class="fas fa-sync-alt"></i> Reset
       </button>
     </div>
 
-    <div v-if="hasActiveFilters" class="active-filters">
+    <div v-if="computedHasActiveFilters" class="active-filters">
       <div class="filter-chips">
         <div v-if="selectedCategory" class="filter-chip">
           Kategori: {{ selectedCategory }}
@@ -123,13 +123,13 @@
         </div>
       </div>
       <p class="results-count" v-if="totalResults > 0">{{ totalResults }} laporan ditemukan</p>
-      <p class="results-count" v-else-if="!totalResults && hasActiveFilters">Tidak ada laporan yang cocok dengan filter Anda.</p>
+      <p class="results-count" v-else-if="!totalResults && computedHasActiveFilters">Tidak ada laporan yang cocok dengan filter Anda.</p>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   searchQuery: String,
   selectedCategory: String,
   selectedService: String,
@@ -144,11 +144,16 @@ defineProps({
     type: Array,
     default: () => []
   },
-  hasActiveFilters: Boolean,
   totalResults: {
     type: Number,
     default: 0
   }
+});
+
+import { computed } from 'vue';
+
+const computedHasActiveFilters = computed(() => {
+  return !!(props.searchQuery || props.selectedCategory || props.selectedService || props.selectedStatus);
 });
 
 defineEmits([
@@ -363,6 +368,12 @@ const capitalize = (str) => {
   font-size: 14px;
   color: #4b6cb7;
   margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .list-view-btn {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {

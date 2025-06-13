@@ -15,7 +15,7 @@
     </thead>
     <tbody>
       <tr v-for="(report, index) in reports" :key="report.id" :class="['report-row', report.status]">
-        <td class="number-cell">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+        <td class="number-cell">{{ index + 1 }}</td>
         <td>
           <div class="user-info">
             <img :src="report.user.avatar_url" alt="User Avatar" class="user-avatar-small" />
@@ -74,10 +74,14 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-  reports: Array,
-  currentPage: Number,
-  itemsPerPage: Number,
-  loading: Object
+  reports: {
+    type: Array,
+    required: true
+  },
+  loading: {
+    type: Object,
+    default: () => ({})
+  }
 });
 
 const emit = defineEmits(['viewReport', 'quickAction']);
@@ -85,8 +89,10 @@ const emit = defineEmits(['viewReport', 'quickAction']);
 const formatDateShort = (iso) => {
   const d = new Date(iso);
   return d.toLocaleString('id-ID', {
-    day: 'numeric', month: 'short',
-    hour: '2-digit', minute: '2-digit'
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
   });
 };
 
@@ -206,13 +212,13 @@ const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 .status-badge.unpublished {
- background-color: #e2e3e5;
-color: #41464b;
+  background-color: #e2e3e5;
+  color: #41464b;
 }
 
 .status-badge.solved {
- background: #d4edda;
-color: #155724;
+  background: #d4edda;
+  color: #155724;
 }
 
 .description-cell {
@@ -225,6 +231,7 @@ color: #155724;
 .table-actions {
   display: flex;
   gap: 6px;
+  min-height: 30px;
 }
 
 .table-action {
@@ -232,7 +239,7 @@ color: #155724;
   border: none;
   border-radius: 4px;
   padding: 6px 12px;
-  min-width: 70px;
+  min-width: 85px;
   height: 30px;
   display: flex;
   align-items: center;
@@ -242,6 +249,7 @@ color: #155724;
   font-weight: 600;
   transition: all 0.2s;
   position: relative;
+  gap: 6px;
 }
 
 .table-action:hover {
@@ -294,7 +302,8 @@ color: #155724;
   border-radius: 50%;
   border-top-color: transparent;
   animation: spin 1s linear infinite;
-  margin-right: 6px;
+  flex-shrink: 0;
+  margin: 0;
 }
 
 @keyframes spin {
@@ -321,7 +330,7 @@ color: #155724;
   }
   
   .table-action {
-    min-width: 60px;
+    min-width: 75px;
     padding: 6px 8px;
   }
   

@@ -1,46 +1,52 @@
 <template>
-  <div class="pagination-wrapper mt-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-      <div class="text-muted small">
+  <div class="pagination-container p-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="pagination-info">
         Menampilkan {{ startIndex }}–{{ endIndex }} dari {{ totalItems }} ulasan
       </div>
-      <div class="d-flex align-items-center gap-2">
-        <button
-          class="btn btn-outline-primary btn-sm"
-          :disabled="currentPage === 1"
-          @click="$emit('go-to-previous-page')"
-          aria-label="Halaman sebelumnya"
-        >
-          <i class="bi bi-chevron-left"></i> Sebelumnya
-        </button>
-        <div class="input-group input-group-sm page-jumper">
-          <span class="input-group-text">Halaman</span>
-          <input
-            type="number"
-            class="form-control"
-            :value="currentPage"
-            @input="$emit('jump-to-page', $event)"
-            min="1"
-            :max="totalPages"
-            aria-label="Nomor halaman"
-          />
-          <span class="input-group-text">/ {{ totalPages }}</span>
-        </div>
-        <button
-          class="btn btn-outline-primary btn-sm"
-          :disabled="currentPage === totalPages"
-          @click="$emit('go-to-next-page')"
-          aria-label="Halaman berikutnya"
-        >
-          Selanjutnya <i class="bi bi-chevron-right"></i>
-        </button>
-      </div>
+      <nav aria-label="Page navigation">
+        <ul class="pagination mb-0">
+          <li class="page-item" :class="{ disabled: currentPage === 1 }">
+            <button
+              class="page-link"
+              @click="$emit('go-to-previous-page')"
+              :disabled="currentPage === 1"
+            >
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </li>
+          <li
+            v-for="page in displayedPages"
+            :key="page"
+            class="page-item"
+            :class="{ active: page === currentPage }"
+          >
+            <button
+              class="page-link"
+              @click="$emit('jump-to-page', { target: { value: page } })"
+            >
+              {{ page }}
+            </button>
+          </li>
+          <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+            <button
+              class="page-link"
+              @click="$emit('go-to-next-page')"
+              :disabled="currentPage === totalPages"
+            >
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   currentPage: Number,
   totalPages: Number,
   startIndex: Number,
@@ -48,60 +54,71 @@ defineProps({
   totalItems: Number,
 });
 
-defineEmits(['go-to-previous-page', 'go-to-next-page', 'jump-to-page']);
+const displayedPages = computed(() => {
+  const maxVisiblePages = 5;
+  const halfVisible = Math.floor(maxVisiblePages / 2);
+  let startPage = Math.max(props.currentPage - halfVisible, 1);
+  let endPage = startPage + maxVisiblePages - 1;
+
+  if (endPage > props.totalPages) {
+    endPage = props.totalPages;
+    startPage = Math.max(endPage - maxVisiblePages + 1, 1);
+  }
+
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+});
 </script>
 
 <style scoped>
-.pagination-wrapper {
-  padding: 1rem 0;
+.pagination-container {
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
 }
 
-.page-jumper {
-  max-width: 150px;
-}
-
-.page-jumper .form-control {
-  text-align: center;
-  padding: 0.25rem;
+.pagination-info {
+  color: #6b7280;
   font-size: 0.875rem;
 }
 
-.page-jumper .input-group-text {
+.pagination {
+  gap: 0.25rem;
+}
+
+.page-link {
+  border: none;
+  padding: 0.5rem 0.75rem;
+  color: #374151;
+  background: transparent;
+  border-radius: 0.5rem;
   font-size: 0.875rem;
-  background-color: #f8f9fa;
+  line-height: 1.25rem;
+  transition: all 0.2s ease;
 }
 
-.btn-sm {
-  padding: 0.375rem 0.75rem;
+.page-link:hover:not(.disabled) {
+  background: #f3f4f6;
+  color: #1f2937;
 }
 
-.btn-outline-primary:hover:not(:disabled) {
-  background-color: #0a58ca;
+.page-item.active .page-link {
+  background: #2563eb;
   color: white;
-  transform: translateY(-1px);
 }
 
-.btn-outline-primary:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+.page-item.disabled .page-link {
+  color: #9ca3af;
+  pointer-events: none;
 }
 
-@media (max-width: 575.98px) {
-  .pagination-wrapper {
-    padding: 0.5rem 0;
+@media (max-width: 767px) {
+  .pagination-container {
+    padding: 16px;
   }
+}
 
-  .page-jumper {
-    max-width: 120px;
-  }
-
-  .text-muted {
-    font-size: 0.8rem;
-  }
-
-  .btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
+@media (min-width: 768px) and (max-width: 1199px) {
+  .pagination-container {
+    padding: 20px;
   }
 }
 </style>
