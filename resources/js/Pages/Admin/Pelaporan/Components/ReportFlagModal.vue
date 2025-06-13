@@ -55,7 +55,7 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 4000;
-  padding: 2rem;
+  padding: clamp(1rem, 4vw, 2rem);
   animation: fadeInBackdrop 0.3s ease forwards;
 }
 
@@ -75,7 +75,9 @@ export default {
   position: relative;
   font-family: 'Inter', system-ui, sans-serif;
   color: #333;
-  padding: 2rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  width: calc(100% - 2rem);
+  margin: 1rem;
   transform: translateY(-20px);
   opacity: 0;
   animation: slideInModal 0.3s ease forwards;
@@ -90,11 +92,11 @@ export default {
 
 .close-btn {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 48px;
-  height: 48px;
-  font-size: 36px;
+  top: 10px;
+  right: 10px;
+  width: clamp(36px, 8vw, 48px);
+  height: clamp(36px, 8vw, 48px);
+  font-size: clamp(24px, 6vw, 36px);
   background: transparent;
   border: none;
   color: #666;
@@ -114,7 +116,7 @@ h3 {
   margin-top: 0;
   margin-bottom: 1.5rem;
   font-weight: 600;
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
   text-align: center;
   color: #0d6efd;
 }
@@ -123,7 +125,7 @@ h3 {
   font-style: italic;
   color: #666;
   margin-bottom: 1.5rem;
-  font-size: 1rem;
+  font-size: 0.9rem;
   text-align: center;
 }
 
@@ -134,17 +136,19 @@ ul {
 }
 
 .category-count-item {
-  padding: 12px 16px;
+  padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
   margin-bottom: 8px;
   border-radius: 8px;
   background: white;
   border: 1px solid #e9ecef;
-  font-size: 0.95rem;
+  font-size: clamp(0.875rem, 2.5vw, 0.95rem);
   color: #333;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: all 0.2s ease;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .category-count-item:hover {
@@ -167,6 +171,34 @@ ul {
   padding-top: 1rem;
   margin-top: 1rem;
   text-align: right;
-  font-size: 1rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    max-height: 85vh;
+  }
+
+  .category-count-item {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .total-flags {
+    text-align: center;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .modal-content {
+    max-width: 90%;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .modal-content {
+    max-width: 80%;
+  }
 }
 </style>

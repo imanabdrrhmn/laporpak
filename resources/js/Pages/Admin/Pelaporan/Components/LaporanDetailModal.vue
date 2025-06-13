@@ -229,7 +229,7 @@ const closeFlagModal = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 16px;
   animation: fadeIn 0.3s ease;
 }
 
@@ -238,7 +238,7 @@ const closeFlagModal = () => {
   border-radius: 12px;
   width: 100%;
   max-width: 600px;
-  max-height: 90vh;
+  max-height: 85vh;
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   animation: slideIn 0.3s ease;
@@ -489,36 +489,225 @@ color: #155724;
   }
 }
 
-/* Responsive */
-@media (max-width: 640px) {
+/* Enhanced Responsive Styles - Smaller Modals */
+
+/* iPad/Tablet - Smaller modal */
+@media (max-width: 1024px) and (min-width: 769px) {
   .modal-overlay {
-    padding: 10px;
+    padding: 20px;
   }
   
   .modal-content {
-    max-height: 95vh;
+    max-width: 500px; /* Reduced from 90% */
+    max-height: 80vh; /* Reduced from 90vh */
+    border-radius: 10px;
   }
-  
+
+  .modal-body {
+    padding: 18px; /* Reduced padding */
+  }
+
+  .evidence-image-container {
+    max-height: 150px; /* Smaller image */
+  }
+
+  .modal-title {
+    font-size: 18px; /* Smaller title */
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px; /* Reduced gap */
+  }
+
+  .info-grid > div {
+    padding: 10px; /* Reduced padding */
+    font-size: 13px; /* Smaller font */
+  }
+
+  .description {
+    padding: 12px; /* Reduced padding */
+    font-size: 14px;
+  }
+
+  .btn {
+    padding: 8px 16px; /* Smaller buttons */
+    font-size: 13px;
+  }
+
+  .close-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+  }
+}
+
+/* Mobile Large - Even smaller modal */
+@media (max-width: 768px) and (min-width: 481px) {
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  .modal-content {
+    max-width: 400px; /* Much smaller */
+    max-height: 75vh; /* Reduced height */
+    border-radius: 8px;
+  }
+
   .modal-body {
     padding: 16px;
   }
-  
-  .modal-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+
+  .evidence-image-container {
+    max-height: 120px; /* Very small image */
   }
-  
+
+  .modal-title {
+    font-size: 16px;
+  }
+
   .info-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Single column */
+    gap: 10px;
   }
-  
+
+  .info-grid > div {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .description {
+    padding: 10px;
+    font-size: 13px;
+  }
+
   .modal-actions {
-    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 12px;
   }
-  
+
   .btn {
-    width: 100%;
+    padding: 7px 14px;
+    font-size: 12px;
+    min-width: 70px;
+  }
+
+  .close-btn {
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+/* Mobile Small - Minimal modal */
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-content {
+    max-width: 320px; /* Very small */
+    max-height: 70vh; /* Even smaller height */
+    border-radius: 6px;
+  }
+
+  .modal-body {
+    padding: 12px;
+  }
+
+  .evidence-image-container {
+    max-height: 100px; /* Tiny image */
+  }
+
+  .close-btn {
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+
+  .modal-title {
+    font-size: 14px;
+  }
+
+  .info-grid > div {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .description {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    min-width: 60px;
+  }
+
+  .modal-actions {
+    margin-top: 12px;
+    padding-top: 10px;
+  }
+
+  .status-badge {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .modal-section {
+    margin: 12px 0;
+    font-size: 13px;
+  }
+
+  .flag-info {
+    margin: 12px 0;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 360px) {
+  .modal-content {
+    max-width: 280px; /* Even tinier */
+    max-height: 65vh;
+  }
+
+  .modal-body {
+    padding: 10px;
+  }
+
+  .evidence-image-container {
+    max-height: 80px;
+  }
+
+  .modal-title {
+    font-size: 13px;
+  }
+
+  .info-grid > div {
+    padding: 5px;
+    font-size: 10px;
+  }
+
+  .description {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .btn {
+    padding: 5px 10px;
+    font-size: 10px;
+    min-width: 50px;
   }
 }
 </style>

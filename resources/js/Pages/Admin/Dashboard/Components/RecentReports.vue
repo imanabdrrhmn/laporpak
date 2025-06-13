@@ -10,7 +10,7 @@
               <p class="card-text"><strong>Pelapor:</strong> {{ report.user?.name }}</p>
               <p class="card-text">
                 <strong>Status:</strong>
-                <span :class="'badge badge-' + getStatusClass(report.status)">
+                <span class="badge status-badge" :class="getStatusClass(report.status)">
                   {{ formatStatus(report.status) }}
                 </span>
               </p>
@@ -57,12 +57,13 @@ export default {
     },
     getStatusClass(status) {
       switch (status.toLowerCase()) {
-        case 'pending': return 'warning';
-        case 'in progress': return 'primary';
-        case 'approved': return 'success';
-        case 'rejected': return 'danger';
-        case 'published': return 'info';
-        default: return 'secondary';
+        case 'pending': return 'pending';
+        case 'approved': return 'approved';
+        case 'rejected': return 'rejected';
+        case 'published': return 'published';
+        case 'unpublished': return 'unpublished';
+        case 'solved': return 'solved';
+        default: return 'unpublished';
       }
     }
   },
@@ -93,30 +94,34 @@ export default {
   text-transform: capitalize;
 }
 
-.badge-warning {
-  background-color: #f6c23e;
-  color: #212529;
+.status-badge.pending {
+  background-color: #fff8e1;
+  color: #ffa000;
 }
 
-.badge-primary {
-  background-color: #4e73df;
+.status-badge.approved {
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
-.badge-success {
-  background-color: #1cc88a;
+.status-badge.rejected {
+  background-color: #ffebee;
+  color: #c62828;
 }
 
-.badge-danger {
-  background-color: #e74a3b;
-}
-
-.badge-info {
+.status-badge.published {
   background-color: #e3f2fd;
   color: #1565c0;
 }
 
-.badge-secondary {
-  background-color: #858796;
+.status-badge.unpublished {
+  background-color: #e2e3e5;
+  color: #41464b;
+}
+
+.status-badge.solved {
+  background: #d4edda;
+  color: #155724;
 }
 
 @media (max-width: 576px) {

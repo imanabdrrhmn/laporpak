@@ -23,10 +23,16 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue';
 
+/**
+ * @typedef {Object} Props
+ * @property {boolean} [isVisible=false] - Controls the visibility of the modal
+ * @property {string} [proofUrl=''] - URL of the proof image to display
+ */
+
 const props = defineProps({
   isVisible: {
     type: Boolean,
-    required: true,
+    default: false
   },
   proofUrl: {
     type: String,

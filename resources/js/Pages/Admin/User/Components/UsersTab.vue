@@ -144,7 +144,7 @@
       </div>
     </div>
 
-    <!-- Mobile: card layout -->
+    <!-- Mobile & iPad: card layout -->
     <div class="mobile-card-container">
       <div v-if="paginatedUsers.length === 0" class="no-data-card">
         <i class="bi bi-inbox text-gray-400 mb-2"></i>
@@ -156,7 +156,7 @@
           <div class="user-details">
             <div class="user-name">{{ user.name }}</div>
             <div class="user-email">{{ user.email }}</div>
-            <div class="user-phone">{{ user.phone || '-' }}</div>
+            <div class="user-phone">{{ user.nomor || '-' }}</div>
           </div>
         </div>
         
@@ -168,7 +168,7 @@
         
         <div class="role-change-section">
           <button 
-            class="btn-action-mobile btn-primary-mobile" 
+            class="btn-action-mobile btn-primary-mobile w-100" 
             @click="openChangeRoleModal(user)"
             :disabled="userStates[user.id]?.isSubmitting"
           >
@@ -185,10 +185,10 @@
             class="btn-action btn-primary" 
             @click="$emit('open-permission-modal', user)"
           >
-            <i class="bi bi-pencil-square"></i>
+            <i class="bi bi-pencil-square me-2"></i>
             Edit Izin
           </button>
-          <form :action="route('admin.users.delete', user.id)" method="POST" :ref="'form-' + user.id" class="inline-form">
+          <form :action="route('admin.users.delete', user.id)" method="POST" class="inline-form">
             <input type="hidden" name="_method" value="DELETE" />
             <input type="hidden" name="_token" :value="csrf" />
             <button 
@@ -196,10 +196,36 @@
               type="button"
               @click="openDeleteModal(user.name, user.id)"
             >
-              <i class="bi bi-trash"></i>
+              <i class="bi bi-trash me-2"></i>
               Hapus
             </button>
           </form>
+        </div>
+      </div>
+
+      <!-- Pagination for mobile & iPad -->
+      <div class="pagination-container p-4 bg-white rounded-lg shadow-sm mt-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div class="pagination-info">
+            Menampilkan {{ paginationInfo.from }}-{{ paginationInfo.to }} dari {{ paginationInfo.total }} data
+          </div>
+          <nav aria-label="Page navigation">
+            <ul class="pagination mb-0">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button class="page-link" @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              <li v-for="page in displayedPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
+                <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <button class="page-link" @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
       </div>
     </div>
@@ -246,7 +272,7 @@ const selectedFormId = ref(null)
 const showChangeRoleModal = ref(false)
 const selectedUser = ref(null)
 const currentPage = ref(1)
-const ITEMS_PER_PAGE = 10
+const ITEMS_PER_PAGE = 10; // Change to 10 if not already set
 
 const filteredUsers = computed(() => {
   return props.users.filter(user => {
@@ -263,9 +289,9 @@ const filteredUsers = computed(() => {
 })
 
 const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * ITEMS_PER_PAGE
-  const end = start + ITEMS_PER_PAGE
-  return filteredUsers.value.slice(start, end)
+  const start = (currentPage.value - 1) * ITEMS_PER_PAGE;
+  const end = start + ITEMS_PER_PAGE;
+  return filteredUsers.value.slice(start, Math.min(end, start + 10)); // Ensure max 10 items
 })
 
 const totalPages = computed(() => Math.ceil(filteredUsers.value.length / ITEMS_PER_PAGE))
@@ -275,6 +301,20 @@ const paginationInfo = computed(() => ({
   to: Math.min(currentPage.value * ITEMS_PER_PAGE, filteredUsers.value.length),
   total: filteredUsers.value.length
 }))
+
+const displayedPages = computed(() => {
+  const maxVisiblePages = 5
+  const halfVisible = Math.floor(maxVisiblePages / 2)
+  let startPage = Math.max(currentPage.value - halfVisible, 1)
+  let endPage = startPage + maxVisiblePages - 1
+
+  if (endPage > totalPages.value) {
+    endPage = totalPages.value
+    startPage = Math.max(endPage - maxVisiblePages + 1, 1)
+  }
+
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
+})
 
 function openChangeRoleModal(user) {
   selectedUser.value = user
@@ -865,88 +905,153 @@ function goToPage(page) {
 @media (min-width: 1200px) {
   .desktop-table-container { display: block; }
   .mobile-card-container { display: none; }
-  
-  .user-table th { padding: 16px 12px; font-size: 0.875rem; }
-  .user-table td { padding: 14px 12px; font-size: 0.875rem; }
-  .user-avatar { width: 40px; height: 40px; }
-  .user-name { font-size: 0.875rem; }
-  .email-text { font-size: 0.875rem; }
-  .phone-text { font-size: 0.875rem; }
-  .btn-icon { width: 36px; height: 36px; font-size: 0.875rem; }
-  .btn-change-role { font-size: 0.8rem; min-width: 120px; }
 }
 
-@media (max-width: 1199px) and (min-width: 900px) {
-  .desktop-table-container { display: block; }
-  .mobile-card-container { display: none; }
-  
-  .user-table th { padding: 14px 8px; font-size: 0.8rem; }
-  .user-table td { padding: 12px 8px; font-size: 0.8rem; }
-  .user-avatar { width: 36px; height: 36px; }
-  .user-name { font-size: 0.8rem; }
-  .email-text { font-size: 0.75rem; }
-  .phone-text { font-size: 0.8rem; }
-  .btn-icon { width: 32px; height: 32px; font-size: 0.75rem; }
-  .btn-change-role { font-size: 0.75rem; min-width: 110px; padding: 6px 12px; }
-  
-  .col-name { width: 15%; }
-  .col-email { width: 22%; }
-  .col-phone { width: 13%; }
-  .col-change-role { width: 18%; }
-}
-
-@media (max-width: 899px) and (min-width: 768px) {
-  .desktop-table-container { display: block; }
-  .mobile-card-container { display: none; }
-  
-  .user-table th { padding: 12px 6px; font-size: 0.75rem; }
-  .user-table td { padding: 10px 6px; font-size: 0.75rem; }
-  .user-avatar { width: 32px; height: 32px; }
-  .user-name { font-size: 0.75rem; }
-  .email-text { font-size: 0.7rem; }
-  .phone-text { font-size: 0.75rem; }
-  .btn-icon { width: 28px; height: 28px; font-size: 0.7rem; }
-  .btn-change-role { font-size: 0.7rem; min-width: 100px; padding: 5px 10px; }
-  
-  .col-name { width: 18%; }
-  .col-email { width: 24%; }
-  .col-phone { width: 12%; }
-  .col-role { width: 12%; }
-  .col-change-role { width: 20%; }
-}
-
-@media (max-width: 767px) {
+@media (max-width: 1199px) {
   .desktop-table-container { display: none; }
   .mobile-card-container { display: block; }
   
   .user-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .user-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .user-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .user-details {
+    flex: 1;
+  }
+
+  .user-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .user-email, .user-phone {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 2px;
+  }
+
+  .user-role-section {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+
+  .role-change-section {
+    margin-bottom: 20px;
+  }
+
+  .btn-action-mobile {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .user-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .btn-action {
+    padding: 12px;
+    width: 100%;
+  }
+
+  .inline-form {
+    width: 100%;
+  }
+}
+
+/* Additional iPad-specific refinements */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .user-card {
+    padding: 24px;
+  }
+
+  .user-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .user-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pagination-container {
+    padding: 20px;
+  }
+}
+
+/* Mobile-specific refinements */
+@media (max-width: 767px) {
+  .user-card {
+    padding: 16px;
+  }
+
+  .user-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination-container {
     padding: 16px;
   }
   
-  .user-header {
-    gap: 12px;
-  }
-  
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .user-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .btn-action {
+  /* Add these new styles */
+  .btn-action-mobile {
+    display: inline-flex;
     justify-content: center;
+    align-items: center;
+    gap: 8px;  /* Reduce gap between icon and text */
+    width: 100%;
+    padding: 12px;
+  }
+
+  .btn-action-mobile i {
+    margin-right: 4px; /* Add small margin to icon */
+    flex-shrink: 0; /* Prevent icon from shrinking */
+  }
+
+  .btn-action-mobile span {
+    flex-shrink: 0; /* Prevent text from wrapping/shrinking */
+    font-size: 0.875rem; /* Slightly reduce font size */
+  }
+}
+
+/* Add specific iPhone SE handling */
+@media (max-width: 375px) {
+  .btn-action-mobile {
+    gap: 4px; /* Further reduce gap for very small screens */
+    padding: 12px 8px; /* Reduce horizontal padding */
   }
   
-  .custom-select-container {
-    max-width: 100%;
-  }
-  
-  .search-container {
-    max-width: 100%;
+  .btn-action-mobile span {
+    font-size: 0.8rem; /* Further reduce font size */
   }
 }
 </style>

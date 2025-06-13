@@ -1,38 +1,28 @@
 <template>
-  <nav aria-label="Page navigation">
-    <ul class="pagination pagination-sm mb-0">
-      <li class="page-item" :class="{ disabled: currentPage === 1 }">
-        <a class="page-link" href="#" @click.prevent="goTo(currentPage - 1)">
-          <span aria-hidden="true">«</span>
-        </a>
-      </li>
-
-      <li v-if="showFirstPage" class="page-item">
-        <a class="page-link" href="#" @click.prevent="goTo(1)">1</a>
-      </li>
-      <li v-if="showStartEllipsis" class="page-item disabled">
-        <span class="page-link">...</span>
-      </li>
-
-      <li v-for="page in visiblePages" :key="page" class="page-item" :class="{ active: page === currentPage }">
-        <a class="page-link" href="#" @click.prevent="goTo(page)">{{ page }}</a>
-      </li>
-
-      <li v-if="showEndEllipsis" class="page-item disabled">
-        <span class="page-link">...</span>
-      </li>
-
-      <li v-if="showLastPage" class="page-item">
-        <a class="page-link" href="#" @click.prevent="goTo(totalPages)">{{ totalPages }}</a>
-      </li>
-
-      <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-        <a class="page-link" href="#" @click.prevent="goTo(currentPage + 1)">
-          <span aria-hidden="true">»</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
+  <div class="pagination-container p-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="pagination-info">
+        Menampilkan {{ from }}-{{ to }} dari {{ total }} data
+      </div>
+      <nav aria-label="Page navigation">
+        <ul class="pagination mb-0">
+          <li class="page-item" :class="{ disabled: currentPage === 1 }">
+            <button class="page-link" @click="goTo(currentPage - 1)" :disabled="currentPage === 1">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </li>
+          <li v-for="page in displayedPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
+            <button class="page-link" @click="goTo(page)">{{ page }}</button>
+          </li>
+          <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+            <button class="page-link" @click="goTo(currentPage + 1)" :disabled="currentPage === totalPages">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -41,30 +31,33 @@ import { computed } from 'vue';
 const props = defineProps({
   totalPages: Number,
   currentPage: Number,
+  total: Number,
+  perPage: Number,
 });
 
 const emit = defineEmits(['goToPage']);
 
-const pagesToShow = 5;
-
-const visiblePages = computed(() => {
-  const pages = [];
-  const startPage = Math.max(1, props.currentPage - Math.floor(pagesToShow / 2));
-  const endPage = Math.min(props.totalPages, startPage + pagesToShow - 1);
-  
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(i);
-  }
-  return pages;
+const from = computed(() => {
+  return props.total ? (props.currentPage - 1) * props.perPage + 1 : 0;
 });
 
-const showFirstPage = computed(() => visiblePages.value[0] > 1);
+const to = computed(() => {
+  return Math.min(props.currentPage * props.perPage, props.total);
+});
 
-const showLastPage = computed(() => visiblePages.value[visiblePages.value.length - 1] < props.totalPages);
+const displayedPages = computed(() => {
+  const maxVisiblePages = 5;
+  const halfVisible = Math.floor(maxVisiblePages / 2);
+  let startPage = Math.max(props.currentPage - halfVisible, 1);
+  let endPage = startPage + maxVisiblePages - 1;
 
-const showStartEllipsis = computed(() => visiblePages.value[0] > 2);
+  if (endPage > props.totalPages) {
+    endPage = props.totalPages;
+    startPage = Math.max(endPage - maxVisiblePages + 1, 1);
+  }
 
-const showEndEllipsis = computed(() => visiblePages.value[visiblePages.value.length - 1] < props.totalPages - 1);
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+});
 
 function goTo(page) {
   if (page >= 1 && page <= props.totalPages) {
@@ -74,18 +67,53 @@ function goTo(page) {
 </script>
 
 <style scoped>
+.pagination-container {
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
 .pagination {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
+  gap: 0.25rem;
+}
+
+.page-link {
+  border: none;
+  padding: 0.5rem 0.75rem;
+  color: #374151;
+  background: transparent;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.page-link:hover:not(.disabled) {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.page-item.active .page-link {
+  background: #2563eb;
+  color: white;
 }
 
 .page-item.disabled .page-link {
-  cursor: not-allowed;
+  color: #9ca3af;
+  pointer-events: none;
 }
 
-.page-item.disabled .page-link {
-  cursor: not-allowed;
+@media (max-width: 767px) {
+  .pagination-container {
+    padding: 16px;
+  }
+  
+  .pagination-info {
+    font-size: 0.813rem;
+  }
 }
 </style>

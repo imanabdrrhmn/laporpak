@@ -265,6 +265,9 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
 .avatar-image {
@@ -425,8 +428,6 @@ onUnmounted(() => {
   color: white;
 }
 
-
-
 .info-cards-section {
   margin-top: 1rem;
 }
@@ -483,7 +484,23 @@ onUnmounted(() => {
   color: #333;
 }
 
-/* Responsive Design */
+/* Responsive Design - iPad Specific Fix */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* iPad Portrait & Landscape */
+  .user-profile-section {
+    justify-content: flex-end !important;
+    margin-top: 0 !important;
+  }
+  
+  .welcome-title {
+    font-size: 2rem;
+  }
+  
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
+}
+
 @media (max-width: 992px) {
   .welcome-title {
     font-size: 2rem;
@@ -505,16 +522,44 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .welcome-title {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
   }
 
   .welcome-subtitle {
-    font-size: 1rem;
+    font-size: 0.85rem;
+  }
+
+  /* Mobile Layout: Avatar di kiri, welcome message di kanan */
+  .welcome-header-card .row {
+    flex-direction: row-reverse;
+    align-items: flex-start;
+  }
+  
+  .welcome-header-card .col-md-8 {
+    flex: 1;
+    padding-left: 1rem;
+    padding-top: 0;
+  }
+  
+  .welcome-header-card .col-md-4 {
+    flex: 0 0 auto;
+    width: auto;
   }
 
   .user-profile-section {
     justify-content: flex-start;
-    margin-top: 1rem;
+    margin-top: 0;
+    align-items: flex-start;
+  }
+  
+  .user-avatar {
+    width: 60px;
+    height: 60px;
+    margin-top: -5px;
+  }
+
+  .welcome-content {
+    padding-top: 5px;
   }
 
   .welcome-header-card,
@@ -548,7 +593,33 @@ onUnmounted(() => {
   }
 
   .welcome-title {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .welcome-subtitle {
+    font-size: 0.75rem;
+  }
+
+  /* Mobile kecil: tetap avatar di kiri, text di kanan */
+  .welcome-header-card .row {
+    flex-direction: row-reverse;
+    align-items: flex-start;
+  }
+  
+  .welcome-header-card .col-md-8 {
+    padding-left: 0.75rem;
+    padding-top: 0;
+  }
+  
+  .user-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+    margin-top: -8px;
+  }
+
+  .welcome-content {
+    padding-top: 8px;
   }
 
   .saldo-title {
@@ -569,5 +640,4 @@ onUnmounted(() => {
     font-size: 0.9rem;
   }
 }
-
 </style>

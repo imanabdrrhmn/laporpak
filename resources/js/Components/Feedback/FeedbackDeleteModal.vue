@@ -1,14 +1,19 @@
 <template>
-  <div class="modal fade" ref="modal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+  <div class="modal fade" ref="modal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel">
+    <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content border-0 shadow-lg">
         <div class="modal-header border-0 pb-2 position-relative">
           <h5 class="modal-title fw-semibold text-dark w-100 text-center" id="deleteModalLabel">
-            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+            <i class="bi bi-exclamation-triangle-fill text-primary me-2"></i>
             Konfirmasi Penghapusan
           </h5>
-          <button type="button" class="btn-close-custom position-absolute" data-bs-dismiss="modal" aria-label="Close">
-            <i class="bi bi-x-lg"></i>
+          <button 
+            type="button" 
+            class="btn-close-custom position-absolute" 
+            data-bs-dismiss="modal" 
+            aria-label="Close"
+          >
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
           </button>
         </div>
         <div class="modal-body py-4">
@@ -35,101 +40,115 @@ defineEmits(['confirm-delete']);
 </script>
 
 <style scoped>
-/* Modal styling */
+/* Modal styling with blue theme */
 .modal-content {
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 20px 40px rgba(13, 110, 253, 0.15);
 }
 
 .modal-header {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #f8faff 0%, #e3f2fd 100%);
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(13, 110, 253, 0.1);
 }
 
 .modal-title {
-  font-size: 1.1rem;
-  color: #495057;
+  font-size: 1.2rem;
+  color: #0d6efd;
+  font-weight: 600;
+}
+
+.text-primary {
+  color: #0d6efd !important;
 }
 
 .modal-body {
-  padding: 1.5rem;
+  padding: 2rem;
   background-color: #fff;
 }
 
 .modal-footer {
-  padding: 1rem 1.5rem 1.5rem;
+  padding: 1rem 2rem 2rem;
   background-color: #fff;
   justify-content: flex-end;
+  gap: 0.75rem;
 }
 
-/* Custom close button */
+/* Custom close button with blue theme */
 .btn-close-custom {
   background: none;
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #6c757d;
-  font-size: 1rem;
+  font-size: 1.1rem;
   transition: all 0.3s ease;
-  top: 1.25rem;
-  right: 1.5rem;
+  top: 1.5rem;
+  right: 2rem;
 }
 
 .btn-close-custom:hover {
-  color: #dc3545;
+  color: #0d6efd;
+  background-color: rgba(13, 110, 253, 0.1);
   transform: rotate(90deg);
-  
 }
 
 .btn-close-custom:active {
   transform: rotate(90deg) scale(0.95);
 }
 
-/* Custom primary button */
+/* Custom primary button with red theme */
 .btn-primary-custom {
   background: #dc3545;
   border: none;
   color: white;
-  padding: 0.5rem 1.25rem;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 0.9rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  min-width: 100px;
 }
 
 .btn-primary-custom:hover {
-  background: #fc0000;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
   color: white;
 }
 
 .btn-primary-custom:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
-/* Light button styling */
+.btn-primary-custom:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+/* Light button styling with blue accents */
 .btn-light {
   background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
+  border: 2px solid #e9ecef;
   color: #6c757d;
-  padding: 0.5rem 1.25rem;
-  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
+  min-width: 100px;
 }
 
 .btn-light:hover {
-  background-color: #e9ecef;
-  border-color: #dee2e6;
-  color: #495057;
+  background-color: rgba(13, 110, 253, 0.05);
+  border-color: #0d6efd;
+  color: #0d6efd;
   transform: translateY(-1px);
 }
 
@@ -137,52 +156,190 @@ defineEmits(['confirm-delete']);
   transform: translateY(0);
 }
 
-/* Responsive design */
+.btn-light:focus {
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+
+/* Tablet responsive design (iPad) */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .modal-dialog {
+    max-width: 500px;
+    margin: 2rem auto;
+  }
+  
+  .modal-header {
+    padding: 1.25rem 1.75rem;
+  }
+  
+  .modal-body {
+    padding: 1.75rem;
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.75rem 1.75rem;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+  
+  .modal-title {
+    font-size: 1.1rem;
+  }
+  
+  .btn-close-custom {
+    top: 1.25rem;
+    right: 1.75rem;
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* Mobile responsive design */
 @media (max-width: 767.98px) {
   .modal-dialog {
     margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .modal-content {
+    border-radius: 12px;
   }
   
   .modal-header {
     padding: 1rem 1.25rem;
+    text-align: center;
   }
   
   .modal-body {
     padding: 1.25rem;
+    text-align: center;
   }
   
   .modal-footer {
     padding: 0.75rem 1.25rem 1.25rem;
-    justify-content: center;
+    flex-direction: column-reverse;
     gap: 0.5rem;
   }
 
   .modal-footer .btn {
-    flex: 1;
-    min-width: 100px;
+    width: 100%;
+    margin: 0;
   }
   
   .modal-title {
     font-size: 1rem;
+    padding-right: 40px;
+  }
+  
+  .btn-close-custom {
+    top: 1rem;
+    right: 1.25rem;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  
+  .btn-primary-custom,
+  .btn-light {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100vw - 1rem);
+  }
+  
+  .modal-header {
+    padding: 0.875rem 1rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-footer {
+    padding: 0.5rem 1rem 1rem;
+  }
+  
+  .btn-close-custom {
+    top: 0.875rem;
+    right: 1rem;
+  }
+  
+  .modal-title {
+    font-size: 0.95rem;
+    padding-right: 35px;
   }
 }
 
 /* Animation enhancements */
 .modal.fade .modal-dialog {
-  transition: transform 0.3s ease-out;
-  transform: translate(0, -50px);
+  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+  transform: translate(0, -30px) scale(0.95);
+  opacity: 0;
 }
 
 .modal.show .modal-dialog {
-  transform: none;
+  transform: translate(0, 0) scale(1);
+  opacity: 1;
 }
 
-/* Icon animations */
+/* Icon animations with blue theme */
 .bi {
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .btn:hover .bi {
   transform: scale(1.1);
+}
+
+.text-primary .bi {
+  filter: drop-shadow(0 2px 4px rgba(13, 110, 253, 0.2));
+}
+
+/* Focus improvements for accessibility */
+.btn:focus {
+  outline: none;
+}
+
+.btn-close-custom:focus {
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+  outline: none;
+}
+
+/* Loading state (optional) */
+.btn-primary-custom:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .modal-content {
+    border: 2px solid #0d6efd;
+  }
+  
+  .btn-primary-custom {
+    border: 2px solid #fff;
+  }
+  
+  .btn-light {
+    border: 2px solid #0d6efd;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .modal.fade .modal-dialog,
+  .btn,
+  .btn-close-custom,
+  .bi {
+    transition: none;
+  }
 }
 </style>
