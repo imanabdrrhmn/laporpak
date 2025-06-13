@@ -47,6 +47,7 @@
         v-if="!loading && !searchError"
         :loading="loading"
         :reportsToDisplay="reports"
+        :is-flagging-in-progress="isFlaggingInProgress"
         @reset-filters="resetAllFilters"
         @open-detail="openDetailModal"
         @open-flag="openFlagModalFromList"
@@ -66,19 +67,21 @@
         :isOpen="detailModalOpen"
         :report="selectedReport"
         :user="user"
+        :is-flagging-in-progress="isFlaggingInProgress"
         @close="closeDetailModal"
         @open-flag-modal="openFlagModalFromDetail"
       />
 
       <ReportFlagModal
+        v-if="selectedReport && flagModalOpen"
         :isOpen="flagModalOpen"
-        :reportId="selectedReport?.id"
+        :reportId="selectedReport.id"
         @close="closeFlagModal"
         @reported="handleFlagSubmitted"
+        @submitting="handleFlagSubmitting"
       />
     </div>
 
-    <!-- Pindahkan Section dan Feedback keluar dari search-container -->
     <Section 
       v-if="showFallbackSectionInfo"
       :verifiedReports="reportStats.verifiedReports"
@@ -91,7 +94,6 @@
     <button v-if="showScrollTopButton" @click="scrollToTop" class="scroll-top-button" aria-label="Kembali ke atas">
       <i class="fas fa-arrow-up"></i>
     </button>
-
   </AppLayout>
 </template>
 
@@ -112,23 +114,13 @@ import ReportFlagModal from '@/Components/CariLaporan/ReportFlagModal.vue';
 export default {
   name: 'CariLaporanPage',
   components: {
-    AppLayout,
-    Feedback,
-    Section,
-    Head,
-    SearchBar,
-    ResultsStats,
-    ReportList,
-    Pagination,
-    ReportDetailModal,
-    ReportFlagModal,
+    AppLayout, Feedback, Section, Head, SearchBar, ResultsStats, ReportList, Pagination, ReportDetailModal, ReportFlagModal,
   },
   props: {
     reportStats: { type: Object, default: () => ({ verifiedReports: 0, totalReports: 0, fraudReports: 0 }) },
     feedbacks: { type: Array, default: () => [] },
     initialCategories: { type: Array, default: () => [] },
     user: { type: Object },
-
   },
   data() {
     return {
@@ -139,228 +131,85 @@ export default {
       loading: false,
       searchError: '',
       itemsPerPage: 12,
-      paginationData: {
-        current_page: 1,
-        last_page: 1,
-        per_page: 12,
-        total: 0,
-        links: {},
-      },
+      paginationData: { current_page: 1, last_page: 1, per_page: 12, total: 0, links: {} },
       detailModalOpen: false,
       flagModalOpen: false,
       selectedReport: null,
       firstLoadDone: false,
       showScrollTopButton: false,
+      isFlaggingInProgress: false, // State utama untuk mengunci UI
     };
   },
   computed: {
-    hasActiveFilters() {
-      return this.searchQuery || (this.categoryFilter && this.categoryFilter !== 'all');
-    },
+    hasActiveFilters() { return this.searchQuery || (this.categoryFilter && this.categoryFilter !== 'all'); },
     visiblePageNumbers() {
-      const maxPagesToShow = 5;
-      const currentPage = this.paginationData.current_page;
-      const totalPages = this.paginationData.last_page;
-      const pages = [];
-      if (!totalPages || totalPages <= 0) return [];
-      if (totalPages <= maxPagesToShow) {
-        for (let i = 1; i <= totalPages; i++) pages.push(i);
-      } else {
-        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-        if (endPage - startPage + 1 < maxPagesToShow) {
-          if (currentPage < (totalPages / 2)) {
-            endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-          } else {
-            startPage = Math.max(1, endPage - maxPagesToShow + 1);
-          }
-        }
-        for (let i = startPage; i <= endPage; i++) pages.push(i);
-      }
-      return pages;
+        const maxPagesToShow = 5; let pages = []; const currentPage = this.paginationData.current_page; const totalPages = this.paginationData.last_page; if (!totalPages || totalPages <= 0) return [];
+        if (totalPages <= maxPagesToShow) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
+        else { let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2)); let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+            if (endPage - startPage + 1 < maxPagesToShow) { if (currentPage < (totalPages / 2)) { endPage = Math.min(totalPages, startPage + maxPagesToShow - 1); } else { startPage = Math.max(1, endPage - maxPagesToShow + 1); } }
+            for (let i = startPage; i <= endPage; i++) pages.push(i);
+        } return pages;
     },
-    showStartEllipsis() {
-      return this.visiblePageNumbers.length > 0 && this.visiblePageNumbers[0] > 1;
-    },
-    showEndEllipsis() {
-      return this.visiblePageNumbers.length > 0 && this.visiblePageNumbers[this.visiblePageNumbers.length - 1] < this.paginationData.last_page;
-    },
-    showFallbackSectionInfo() {
-      return !this.loading && !this.searchError && this.firstLoadDone && (!this.hasActiveFilters || (this.hasActiveFilters && this.reports.length === 0));
-    }
+    showStartEllipsis() { return this.visiblePageNumbers.length > 0 && this.visiblePageNumbers[0] > 1; },
+    showEndEllipsis() { return this.visiblePageNumbers.length > 0 && this.visiblePageNumbers[this.visiblePageNumbers.length - 1] < this.paginationData.last_page; },
+    showFallbackSectionInfo() { return !this.loading && !this.searchError && this.firstLoadDone && (!this.hasActiveFilters || (this.hasActiveFilters && this.reports.length === 0)); }
   },
   methods: {
     async searchReports() {
-      if (this.searchQuery && this.searchQuery.length > 0 && this.searchQuery.length < 3) {
-        this.searchError = 'Kata kunci pencarian minimal 3 karakter.';
-        this.reports = [];
-        this.paginationData = { ...this.paginationData, total: 0, last_page: 1, current_page: 1 };
-        return;
-      }
-      this.searchError = '';
-      this.loading = true;
-
+      if (this.searchQuery && this.searchQuery.length > 0 && this.searchQuery.length < 3) { this.searchError = 'Kata kunci pencarian minimal 3 karakter.'; this.reports = []; this.paginationData = { ...this.paginationData, total: 0, last_page: 1, current_page: 1 }; return; }
+      this.searchError = ''; this.loading = true;
       try {
-        const params = {
-          query: this.searchQuery,
-          category: (this.categoryFilter && this.categoryFilter !== 'all') ? this.categoryFilter : '',
-          sortOrder: this.sortOrder,
-          page: this.paginationData.current_page,
-          perPage: this.itemsPerPage,
-        };
+        const params = { query: this.searchQuery, category: (this.categoryFilter && this.categoryFilter !== 'all') ? this.categoryFilter : '', sortOrder: this.sortOrder, page: this.paginationData.current_page, perPage: this.itemsPerPage };
         const response = await axios.get('/api/laporan/search', { params });
-
         this.reports = response.data.data || [];
-
-        if (response.data.meta) {
-          this.paginationData = {
-            current_page: response.data.meta.current_page,
-            last_page: response.data.meta.last_page,
-            per_page: response.data.meta.per_page,
-            total: response.data.meta.total,
-            links: response.data.links || {},
-          };
-          this.itemsPerPage = response.data.meta.per_page || this.itemsPerPage;
-        } else {
-          this.paginationData = {
-            current_page: response.data.current_page || 1,
-            last_page: response.data.last_page || 1,
-            per_page: response.data.per_page || this.itemsPerPage,
-            total: response.data.total || this.reports.length,
-            links: response.data.links || {},
-          };
-          this.itemsPerPage = response.data.per_page || this.itemsPerPage;
-        }
+        if (response.data.meta) { this.paginationData = { current_page: response.data.meta.current_page, last_page: response.data.meta.last_page, per_page: response.data.meta.per_page, total: response.data.meta.total, links: response.data.links || {} }; this.itemsPerPage = response.data.meta.per_page || this.itemsPerPage; }
+        else { this.paginationData = { current_page: response.data.current_page || 1, last_page: response.data.last_page || 1, per_page: response.data.per_page || this.itemsPerPage, total: response.data.total || this.reports.length, links: response.data.links || {} }; this.itemsPerPage = response.data.per_page || this.itemsPerPage; }
         this.firstLoadDone = true;
-
       } catch (error) {
-        console.error("Error fetching search results:", error);
-        this.searchError = error.response?.data?.message || error.message || 'Terjadi kesalahan saat pencarian.';
-        this.reports = [];
-        this.paginationData = { current_page: 1, last_page: 1, per_page: this.itemsPerPage, total: 0, links: {} };
-      } finally {
-        this.loading = false;
-      }
+        console.error("Error fetching search results:", error); this.searchError = error.response?.data?.message || error.message || 'Terjadi kesalahan saat pencarian.'; this.reports = []; this.paginationData = { current_page: 1, last_page: 1, per_page: this.itemsPerPage, total: 0, links: {} };
+      } finally { this.loading = false; }
     },
-    debouncedSearch: debounce(function () {
-      if (this.paginationData.current_page !== 1) {
-        this.paginationData.current_page = 1;
-      } else {
-        this.searchReports();
-      }
-    }, 500),
-    clearSearch() {
-      this.searchQuery = '';
-      this.searchError = '';
-      if (this.paginationData.current_page !== 1) {
-        this.paginationData.current_page = 1;
-      } else {
-        this.searchReports();
-      }
-    },
-    clearCategoryFilter() {
-      this.categoryFilter = 'all';
-    },
-    resetAllFilters() {
-      this.searchQuery = '';
-      this.categoryFilter = 'all';
-      this.sortOrder = 'newest';
-      this.searchError = '';
-      if (this.paginationData.current_page !== 1) {
-        this.paginationData.current_page = 1;
-      } else {
-        this.searchReports();
-      }
-    },
-    changePage(page) {
-      if (page >= 1 && page <= this.paginationData.last_page && page !== this.paginationData.current_page) {
-        this.paginationData.current_page = page;
-      }
-    },
-    openDetailModal(report) {
-      this.selectedReport = report;
-      this.detailModalOpen = true;
-      document.body.style.overflow = 'hidden';
-    },
-    closeDetailModal() {
-      this.detailModalOpen = false;
-      this.selectedReport = null;
-      document.body.style.overflow = '';
-    },
-    openFlagModalFromList(report) {
-      this.selectedReport = report;
-      this.flagModalOpen = true;
-      document.body.style.overflow = 'hidden';
-    },
+    debouncedSearch: debounce(function () { if (this.paginationData.current_page !== 1) { this.paginationData.current_page = 1; } else { this.searchReports(); } }, 500),
+    clearSearch() { this.searchQuery = ''; this.searchError = ''; if (this.paginationData.current_page !== 1) { this.paginationData.current_page = 1; } else { this.searchReports(); } },
+    clearCategoryFilter() { this.categoryFilter = 'all'; },
+    resetAllFilters() { this.searchQuery = ''; this.categoryFilter = 'all'; this.sortOrder = 'newest'; this.searchError = ''; if (this.paginationData.current_page !== 1) { this.paginationData.current_page = 1; } else { this.searchReports(); } },
+    changePage(page) { if (page >= 1 && page <= this.paginationData.last_page && page !== this.paginationData.current_page) { this.paginationData.current_page = page; } },
+    openDetailModal(report) { this.selectedReport = report; this.detailModalOpen = true; document.body.style.overflow = 'hidden'; },
+    closeDetailModal() { if (this.isFlaggingInProgress) return; this.detailModalOpen = false; if (!this.flagModalOpen) { this.selectedReport = null; } document.body.style.overflow = ''; },
+    openFlagModalFromList(report) { if (this.isFlaggingInProgress) return; this.selectedReport = report; this.flagModalOpen = true; document.body.style.overflow = 'hidden'; },
     openFlagModalFromDetail(reportId) {
-      const reportToFlag = this.reports.find(r => r.id === reportId) || this.selectedReport;
-      if (reportToFlag) {
-        this.selectedReport = reportToFlag;
-        this.flagModalOpen = true;
-        if (!this.detailModalOpen) {
-          document.body.style.overflow = 'hidden';
-        }
-      } else {
-        console.error("Laporan untuk di-flag tidak ditemukan:", reportId);
-      }
+      if (this.isFlaggingInProgress) return; const reportToFlag = this.reports.find(r => r.id === reportId) || this.selectedReport;
+      if (reportToFlag) { this.selectedReport = reportToFlag; this.flagModalOpen = true; if (!this.detailModalOpen) { document.body.style.overflow = 'hidden'; } }
+      else { console.error("Laporan untuk di-flag tidak ditemukan:", reportId); }
     },
-    closeFlagModal() {
-      this.flagModalOpen = false;
-      if (!this.detailModalOpen) {
-        this.selectedReport = null;
-        document.body.style.overflow = '';
-      }
-    },
+    closeFlagModal() { if (this.isFlaggingInProgress) return; this.flagModalOpen = false; if (!this.detailModalOpen) { this.selectedReport = null; document.body.style.overflow = ''; } },
     handleFlagSubmitted() {
-      console.log('Flag telah dikirim.');
+      if (this.selectedReport) {
+        const index = this.reports.findIndex(r => r.id === this.selectedReport.id);
+        if (index !== -1) {
+          this.reports[index].has_been_flagged_by_user = true;
+        }
+        // Update juga state di selectedReport agar ReportDetailModal ikut terupdate
+        this.selectedReport.has_been_flagged_by_user = true;
+      }
     },
-    handleScroll() {
-      this.showScrollTopButton = window.scrollY > 300;
+    handleScroll() { this.showScrollTopButton = window.scrollY > 300; },
+    scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
+    handleFlagSubmitting(status) {
+      this.isFlaggingInProgress = status;
     },
-    scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   },
   watch: {
-    categoryFilter(newVal, oldVal) {
-      if (newVal !== oldVal && this.firstLoadDone) {
-        if (this.paginationData.current_page !== 1) this.paginationData.current_page = 1;
-        else this.searchReports();
-      }
-    },
-    sortOrder(newVal, oldVal) {
-      if (newVal !== oldVal && this.firstLoadDone) {
-        if (this.paginationData.current_page !== 1) this.paginationData.current_page = 1;
-        else this.searchReports();
-      }
-    },
-    'paginationData.current_page'(newPage, oldPage) {
-      if (newPage !== oldPage && this.firstLoadDone) {
-        this.searchReports();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    },
-    itemsPerPage(newVal, oldVal) {
-      if (newVal !== oldVal && this.firstLoadDone) {
-        if (this.paginationData.current_page !== 1) this.paginationData.current_page = 1;
-        else this.searchReports();
-      }
-    }
+    'paginationData.current_page'(newPage, oldPage) { if (newPage !== oldPage && this.firstLoadDone) { this.searchReports(); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+    categoryFilter(newVal, oldVal) { if (newVal !== oldVal && this.firstLoadDone) { if (this.paginationData.current_page !== 1) this.paginationData.current_page = 1; else this.searchReports(); } },
+    sortOrder(newVal, oldVal) { if (newVal !== oldVal && this.firstLoadDone) { if (this.paginationData.current_page !== 1) this.paginationData.current_page = 1; else this.searchReports(); } },
+    itemsPerPage(newVal, oldVal) { if (newVal !== oldVal && this.firstLoadDone) { if (this.paginationData.current_page !== 1) this.paginationData.current_page = 1; else this.searchReports(); } }
   },
   mounted() {
-    const urlParams = new URLSearchParams(window.location.search);
-    this.searchQuery = urlParams.get('query') || '';
-    this.categoryFilter = urlParams.get('category') || 'all';
-    this.sortOrder = urlParams.get('sortOrder') || 'newest';
-    this.paginationData.current_page = parseInt(urlParams.get('page')) || 1;
-    this.itemsPerPage = parseInt(urlParams.get('perPage')) || 12;
-
-    this.searchReports();
-    window.addEventListener('scroll', this.handleScroll);
+    const urlParams = new URLSearchParams(window.location.search); this.searchQuery = urlParams.get('query') || ''; this.categoryFilter = urlParams.get('category') || 'all'; this.sortOrder = urlParams.get('sortOrder') || 'newest'; this.paginationData.current_page = parseInt(urlParams.get('page')) || 1; this.itemsPerPage = parseInt(urlParams.get('perPage')) || 12;
+    this.searchReports(); window.addEventListener('scroll', this.handleScroll);
   },
-  beforeUnmount() {
-    window.removeEventListener('scroll', this.handleScroll);
-  }
+  beforeUnmount() { window.removeEventListener('scroll', this.handleScroll); }
 };
 </script>
 
@@ -499,7 +348,6 @@ export default {
   transform: translateY(0);
 }
 
-/* CSS tambahan untuk responsive jika diperlukan */
 @media (max-width: 768px) {
   .search-container {
     margin: 1rem auto;

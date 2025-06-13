@@ -42,6 +42,10 @@ class ReportResource extends JsonResource
                             : null,
             'flags_count' => $this->whenCounted('flags', $this->flags_count, 0), 
             'reason' => $this->when($this->status === 'unpublished', $this->reason), 
+            'has_been_flagged_by_user' => $this->when(
+                isset($this->has_been_flagged_by_user), 
+                (bool) $this->has_been_flagged_by_user  
+            ),
         ];
     }
 }

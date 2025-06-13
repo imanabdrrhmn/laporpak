@@ -434,6 +434,7 @@ const displayedPages = computed(() => {
     min-height: 48px;
   }
 
+
   .table td:last-child {
     border-bottom: none;
     justify-content: space-between;
