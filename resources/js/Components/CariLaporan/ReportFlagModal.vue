@@ -1,40 +1,15 @@
 <template>
-  <div
-    class="modal-overlay"
-    :class="{ active: isOpen }"
-    v-if="isOpen"
-    @click.self="handleClose"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="flagModalTitle"
-  >
+  <div class="modal-overlay" :class="{ active: isOpen }" v-if="isOpen" @click.self="handleClose" role="dialog" aria-modal="true" aria-labelledby="flagModalTitle">
     <div class="modal-container" :class="{ active: isOpen }" role="document">
       <div class="modal-content">
         <header class="modal-header">
           <h2 id="flagModalTitle">Laporkan Konten</h2>
-          <button
-            type="button"
-            class="close-button"
-            aria-label="Close modal"
-            @click="handleClose"
-            :disabled="isLoading"
-          >
-            ✕
-          </button>
+          <button type="button" class="close-button" aria-label="Close modal" @click="handleClose" :disabled="isLoading">✕</button>
         </header>
-
         <section class="modal-body">
-          <p v-if="reportId" class="report-info">
-            Anda akan melaporkan konten dengan ID: <strong>{{ reportId }}</strong>
-          </p>
+          <p v-if="reportId" class="report-info">Anda akan melaporkan konten dengan ID: <strong>{{ reportId }}</strong></p>
           <label for="reasonSelect" class="form-label">Alasan Pelaporan</label>
-          <select
-            id="reasonSelect"
-            v-model="reason"
-            :disabled="isLoading"
-            class="form-control"
-            aria-describedby="reasonError"
-          >
+          <select id="reasonSelect" v-model="reason" :disabled="isLoading" class="form-control" aria-describedby="reasonError">
             <option disabled value="">-- Pilih alasan --</option>
             <option value="Hoax">Hoax</option>
             <option value="Spam">Spam</option>
@@ -45,19 +20,9 @@
           </select>
           <p v-if="validationError" id="reasonError" class="error-message">{{ validationError }}</p>
         </section>
-
         <footer class="modal-footer">
-          <button
-            class="btn btn-secondary"
-            @click="handleClose"
-            :disabled="isLoading"
-          >Batal</button>
-
-          <button
-            class="btn btn-primary"
-            @click="submitReport"
-            :disabled="isLoading || !reason"
-          >
+          <button class="btn btn-secondary" @click="handleClose" :disabled="isLoading">Batal</button>
+          <button class="btn btn-primary" @click="submitReport" :disabled="isLoading || !reason">
             <span v-if="isLoading">Mengirim...</span>
             <span v-else>Laporkan</span>
           </button>
@@ -75,16 +40,17 @@ export default {
   props: {
     isOpen: Boolean,
     reportId: {
-      type: [String, Number],
-      required: true,
+      type: [String, Number, null],
+      required: false,
+      default: null,
     },
   },
-  emits: ['close', 'reported', 'error'], // Menambahkan emit 'error'
+  emits: ['close', 'reported', 'error', 'submitting'],
   data() {
     return {
       reason: '',
       isLoading: false,
-      validationError: '', // Untuk pesan error validasi spesifik
+      validationError: '',
     };
   },
   methods: {
@@ -98,67 +64,26 @@ export default {
       this.validationError = '';
     },
     submitReport() {
-      this.validationError = ''; // Reset error validasi
-      if (!this.reportId) {
-        this.validationError = 'ID laporan tidak valid untuk dilaporkan.';
-        this.$emit('error', 'ID laporan tidak valid.');
-        return;
-      }
-      if (!this.reason) {
-        this.validationError = 'Silakan pilih alasan pelaporan.';
-        // Tidak perlu emit error di sini karena tombol sudah disabled
-        return;
-      }
+      this.validationError = '';
+      if (!this.reportId) { this.validationError = 'ID laporan tidak valid.'; this.$emit('error', 'ID laporan tidak valid.'); return; }
+      if (!this.reason) { this.validationError = 'Silakan pilih alasan pelaporan.'; return; }
 
       this.isLoading = true;
+      this.$emit('submitting', true);
 
-      Inertia.post(
-        route('laporan.flag'), // Pastikan route backend 'laporan.flag' sudah ada
-        {
-          user_id: this.user_id,
+      Inertia.post(route('laporan.flag'), {
           report_id: this.reportId,
           reason: this.reason,
-        },
-        {
-          onSuccess: (page) => {
-            // 'page.props.flash.success' adalah cara umum Inertia mengirim pesan flash
-            // Sesuaikan jika backend Anda mengirim pesan sukses dengan cara berbeda
-            const successMessage = page.props.flash && page.props.flash.success
-              ? page.props.flash.success
-              : 'Laporan berhasil dikirim, terima kasih.';
-            alert(successMessage); // Menampilkan pesan sukses dari server jika ada, atau default
-            this.$emit('reported', { reportId: this.reportId, reason: this.reason });
-            // onSuccess tidak langsung menutup, onFinish akan menangani penutupan
-          },
+        }, {
+          preserveScroll: true,
+          onSuccess: (page) => { this.$emit('reported'); },
           onError: (errors) => {
-            // 'errors' adalah objek yang berisi pesan error dari backend
-            // Jika backend mengembalikan JSON dengan key 'message' untuk error umum (seperti 409)
-            // atau key spesifik field jika itu error validasi.
-            let errorMessage = 'Terjadi kesalahan saat mengirim laporan.';
-            if (errors) {
-              if (errors.message) { // Untuk pesan error umum dari server (misal untuk 409)
-                errorMessage = errors.message;
-              } else if (errors.reason) { // Jika ada error validasi spesifik untuk field 'reason'
-                errorMessage = errors.reason;
-                this.validationError = errors.reason;
-              } else {
-                // Jika 'errors' adalah string atau format lain
-                const firstErrorKey = Object.keys(errors)[0];
-                if (firstErrorKey && typeof errors[firstErrorKey] === 'string') {
-                    errorMessage = errors[firstErrorKey];
-                } else if (typeof errors === 'string') {
-                    errorMessage = errors;
-                }
-              }
-            }
-            alert(errorMessage);
-            this.$emit('error', errorMessage);
+            const firstErrorKey = Object.keys(errors)[0];
+            this.$emit('error', firstErrorKey ? errors[firstErrorKey] : 'Terjadi kesalahan.');
           },
           onFinish: () => {
+            this.$emit('submitting', false);
             this.isLoading = false;
-            // Selalu panggil close di onFinish agar modal tertutup setelah sukses atau error,
-            // kecuali jika Anda ingin modal tetap terbuka pada kasus error tertentu.
-            // Jika onSuccess sudah memicu penutupan via parent, ini mungkin jadi redundan tapi aman.
             this.handleClose();
           },
         }
@@ -167,9 +92,7 @@ export default {
   },
   watch: {
     isOpen(newVal) {
-      if (newVal) {
-        this.resetForm(); // Reset form ketika modal dibuka
-      }
+      if (newVal) { this.resetForm(); }
     },
   },
 };
@@ -183,7 +106,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1060; /* Pastikan z-index lebih tinggi dari modal detail jika tumpang tindih */
+  z-index: 1060;
   padding: 1rem;
   backdrop-filter: blur(5px);
   opacity: 0;
@@ -192,7 +115,6 @@ export default {
 .modal-overlay.active {
   opacity: 1;
 }
-
 .modal-container {
   background: white;
   border-radius: 12px;
@@ -206,45 +128,40 @@ export default {
   flex-direction: column;
   opacity: 0;
 }
-
 .modal-container.active {
   transform: scale(1) translateY(0);
   opacity: 1;
 }
-
 .modal-header {
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e9ecef; /* Slightly softer border */
+  border-bottom: 1px solid #e9ecef;
 }
 #flagModalTitle {
-  font-size: 1.25rem; /* Slightly larger title */
+  font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
-  color: #343a40; /* Darker title */
+  color: #343a40;
 }
-
 .close-button {
   background: transparent;
   border: none;
-  font-size: 1.5rem; /* Larger close button */
-  font-weight: 300; /* Lighter X */
+  font-size: 1.5rem;
+  font-weight: 300;
   cursor: pointer;
   line-height: 1;
-  color: #6c757d; /* Softer color */
+  color: #6c757d;
   padding: 0.25rem 0.5rem;
 }
 .close-button:hover {
   color: #343a40;
 }
-
-
 .modal-body {
-  padding: 1.5rem; /* More padding */
+  padding: 1.5rem;
   flex: 1;
-  overflow-y: auto; /* Jika kontennya panjang */
+  overflow-y: auto;
 }
 .report-info {
   font-size: 0.9rem;
@@ -258,16 +175,15 @@ export default {
 .form-label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 500; /* Slightly lighter label weight */
-  color: #495057; /* Softer label color */
+  font-weight: 500;
+  color: #495057;
   font-size: 0.9rem;
 }
-
 .form-control {
   width: 100%;
-  padding: 0.75rem; /* More padding in select */
+  padding: 0.75rem;
   border-radius: 6px;
-  border: 1px solid #ced4da; /* Standard bootstrap border color */
+  border: 1px solid #ced4da;
   font-size: 1rem;
   font-family: inherit;
   background-color: #fff;
@@ -279,24 +195,22 @@ export default {
   box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
 }
 .error-message {
-  color: #dc3545; /* Bootstrap danger color */
+  color: #dc3545;
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
-
 .modal-footer {
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem; /* Slightly smaller gap */
-  border-top: 1px solid #e9ecef; /* Softer border */
-  background-color: #f8f9fa; /* Light background for footer */
+  gap: 0.75rem;
+  border-top: 1px solid #e9ecef;
+  background-color: #f8f9fa;
 }
-
 .btn {
   padding: 0.6rem 1.3rem;
   border-radius: 6px;
-  font-weight: 500; /* Standard button weight */
+  font-weight: 500;
   cursor: pointer;
   border: none;
   transition: background-color 0.2s ease, transform 0.1s ease;
@@ -310,24 +224,20 @@ export default {
 .btn:hover:not(:disabled) {
   transform: translateY(-1px);
 }
-
 .btn-secondary {
   background-color: #6c757d;
   color: white;
   border: 1px solid #6c757d;
 }
-
 .btn-secondary:hover:not(:disabled) {
   background-color: #5a6268;
   border-color: #545b62;
 }
-
 .btn-primary {
   background-color: #007bff;
   color: white;
   border: 1px solid #007bff;
 }
-
 .btn-primary:hover:not(:disabled) {
   background-color: #0056b3;
   border-color: #0056b3;

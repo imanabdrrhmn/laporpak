@@ -184,6 +184,12 @@ class ReportController extends Controller
 
         $reportsQueryBuilder = Report::with('user')
             ->where('status', 'published');
+        if (auth()->check()) {
+        $userId = auth()->id();
+        $reportsQueryBuilder->withExists(['flags as has_been_flagged_by_user' => function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        }]);
+    }
 
         if ($searchQuery) {
             $reportsQueryBuilder->where(function ($q) use ($searchQuery) {
@@ -216,6 +222,7 @@ class ReportController extends Controller
     }
 
 
+
     public function flagReport(Request $request)
     {
         $request->validate([
@@ -225,7 +232,7 @@ class ReportController extends Controller
 
         $user = $request->user();
         if (!$user) {
-            return redirect()->route('login')->with('error', 'Silakan login untuk melaporkan laporan.');
+            return back()->with('error', 'Silakan login untuk melaporkan laporan.');
         }
 
         $reportToFlag = Report::find($request->report_id);
@@ -233,33 +240,21 @@ class ReportController extends Controller
             return back()->with('error', 'Hanya laporan yang sudah dipublikasi yang bisa Anda laporkan.');
         }
 
-        $exists = ReportFlag::where('report_id', $request->report_id)
-            ->where('user_id', $user->id)
-            ->exists();
-
-        if ($exists) {
-            return back()->with('error', 'Kamu sudah pernah menandai laporan ini.');
-        }
-
-        try {
-            ReportFlag::create([
+        $flag = ReportFlag::firstOrCreate(
+            [
+                'user_id'   => $user->id,
                 'report_id' => $request->report_id,
-                'user_id' => $user->id,
+            ],
+            [
                 'reason' => $request->reason,
-            ]);
+            ]
+        );
 
-            if (property_exists($this, 'logger') && method_exists($this->logger, 'log')) {
-                $this->logger->log('Menandai Laporan', 'Pengguna menandai laporan ID #' . $request->report_id);
-            } else {
-                Log::info('User #' . $user->id . ' menandai laporan ID #' . $request->report_id);
-            }
-
+        if ($flag->wasRecentlyCreated) {
+            $this->logger->log('Menandai Laporan', 'Pengguna menandai laporan ID #' . $request->report_id);
             return back()->with('success', 'Laporan berhasil ditandai.');
-
-        } catch (\Illuminate\Database\QueryException $e) {
-            return back()->with('error', 'Kamu sudah pernah menandai laporan ini.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat menandai laporan. Coba lagi nanti.');
+        } else {
+            return back()->with('error', 'Anda sudah pernah menandai laporan ini.');
         }
     }
 
