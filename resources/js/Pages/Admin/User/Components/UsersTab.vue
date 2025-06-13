@@ -271,21 +271,22 @@ const selectedFormId = ref(null)
 const showChangeRoleModal = ref(false)
 const selectedUser = ref(null)
 const currentPage = ref(1)
-const ITEMS_PER_PAGE = 10; // Change to 10 if not already set
+const ITEMS_PER_PAGE = 10; 
 
 const filteredUsers = computed(() => {
   return props.users.filter(user => {
+    const query = searchQuery.value.toLowerCase();
     const matchesSearch = searchQuery.value === '' || 
-      user.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      (user.phone && user.phone.toLowerCase().includes(searchQuery.value.toLowerCase()))
-    
+      user.name?.toLowerCase().includes(query) ||
+      user.email?.toLowerCase().includes(query) ||
+      user.phone?.toLowerCase().includes(query);
+
     const matchesRole = filterRole.value === '' || 
-      (user.roles.length && user.roles === filterRole.value)
-    
-    return matchesSearch && matchesRole
-  })
-})
+      (user.roles.length && user.roles === filterRole.value);
+
+    return matchesSearch && matchesRole;
+  });
+});
 
 const paginatedUsers = computed(() => {
   const start = (currentPage.value - 1) * ITEMS_PER_PAGE;
@@ -359,7 +360,6 @@ async function handleRoleChange({ userId, selectedRole, userName }) {
       showConfirmButton: false
     })
   } catch (error) {
-    console.error('Error mengubah role:', error)
     Swal.fire({
       title: 'Gagal',
       text: 'Gagal mengubah role. Silakan coba lagi.',
