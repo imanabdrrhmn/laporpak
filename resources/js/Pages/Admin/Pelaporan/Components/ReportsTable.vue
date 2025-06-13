@@ -15,7 +15,7 @@
     </thead>
     <tbody>
       <tr v-for="(report, index) in reports" :key="report.id" :class="['report-row', report.status]">
-        <td class="number-cell">{{ index + 1 }}</td>
+        <td class="number-cell">{{ ((currentPage - 1) * perPage) + index + 1 }}</td>
         <td>
           <div class="user-info">
             <img :src="report.user.avatar_url" alt="User Avatar" class="user-avatar-small" />
@@ -81,6 +81,14 @@ const props = defineProps({
   loading: {
     type: Object,
     default: () => ({})
+  },
+  currentPage: {
+    type: Number,
+    default: 1
+  },
+  perPage: {
+    type: Number,
+    default: 10
   }
 });
 

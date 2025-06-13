@@ -46,10 +46,13 @@
           <button @click="resetFiltersAndFetch" class="reset-btn-empty">Reset Filter</button>
         </div>
 
+        <!-- Pagination hanya ditampilkan jika viewMode adalah 'list' atau 'table' -->
         <Pagination
-          v-if="!isLoading && reports.length > 0 && paginationData.last_page > 1"
+          v-if="!isLoading && reports.length > 0 && paginationData.last_page > 1 && (viewMode === 'list' || viewMode === 'table')"
           v-model:currentPage="paginationData.current_page"
           :total-pages="paginationData.last_page"
+          :total="paginationData.total"
+          :per-page="paginationData.per_page"
         />
 
         <LaporanDetailModal
@@ -78,11 +81,9 @@
           :type="toast.type"
           :message="toast.message"
           @close="toast.visible = false"
-          
         />
         
       </div>
-
     </div>
   </AppLayout>
 </template>
@@ -132,12 +133,17 @@ const selectedCategory = ref('');
 const selectedService = ref('');
 const selectedStatus = ref('');
 const sortDirection = ref('desc');
-const viewMode = ref('grid');
+const viewMode = ref('grid'); // default grid mode
 
 const categoriesForFilter = ref([]);
 const servicesForFilter = ref([]);
 
-const itemsPerPage = ref(15);
+// Conditional itemsPerPage based on viewMode
+const itemsPerPage = computed(() => {
+  // Untuk grid mode, tampilkan lebih banyak item (misal 12 atau 15)
+  // Untuk list/table mode, gunakan pagination normal (10 atau 15)
+  return viewMode.value === 'grid' ? 12 : 10;
+});
 
 const hasActiveFilters = computed(() =>
   searchQuery.value || selectedCategory.value || selectedService.value || selectedStatus.value
@@ -184,8 +190,7 @@ const fetchReports = async () => {
         per_page: metaFromServer.per_page,
         total: metaFromServer.total,
         links: metaFromServer.links,
-      };    
-      itemsPerPage.value = paginationData.value.per_page || 15;
+      };
 
     if (metaFromServer && metaFromServer.stats) {
       reportStatsFromServer.value = metaFromServer.stats;
@@ -226,6 +231,15 @@ watch(searchQuery, () => {
 watch([selectedCategory, selectedService, selectedStatus, sortDirection], () => {
   if (paginationData.value.current_page !== 1) paginationData.value.current_page = 1;
   else fetchReports();
+});
+
+// Watch viewMode changes to reset pagination and refetch
+watch(viewMode, () => {
+  if (paginationData.value.current_page !== 1) {
+    paginationData.value.current_page = 1;
+  } else {
+    fetchReports();
+  }
 });
 
 watch(() => paginationData.value.current_page, (newPage, oldPage) => {

@@ -133,7 +133,10 @@ const props = defineProps({
         current_page: 1,
         last_page: 1,
         links: {},
-        per_page: 10 // Add per_page property
+        per_page: 10,
+        total: 0,
+        from: null,
+        to: null
     })
   },
   formatCurrency: Function,
@@ -168,11 +171,32 @@ const totalPages = computed(() => {
   return pages;
 });
 
-const paginationInfo = computed(() => ({
-  from: props.paginationData.from || 0,
-  to: props.paginationData.to || 0,
-  total: props.paginationData.total || 0
-}));
+// Perbaikan perhitungan pagination info
+const paginationInfo = computed(() => {
+  const currentPage = props.paginationData.current_page || 1;
+  const perPage = props.paginationData.per_page || 10;
+  const total = props.paginationData.total || 0;
+  const currentDataLength = props.topUps?.length || 0;
+  
+  // Jika ada data from dan to dari backend, gunakan itu
+  if (props.paginationData.from && props.paginationData.to) {
+    return {
+      from: props.paginationData.from,
+      to: props.paginationData.to,
+      total: total
+    };
+  }
+  
+  // Jika tidak ada, hitung manual berdasarkan current page dan per page
+  const from = total === 0 ? 0 : ((currentPage - 1) * perPage) + 1;
+  const to = Math.min(from + currentDataLength - 1, total);
+  
+  return {
+    from: from,
+    to: to,
+    total: total
+  };
+});
 
 const displayedPages = computed(() => {
   if (!props.paginationData?.last_page) return [];
