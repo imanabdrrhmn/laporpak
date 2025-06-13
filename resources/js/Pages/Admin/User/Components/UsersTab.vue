@@ -12,7 +12,6 @@
               placeholder="Cari pengguna..."
             >
             <i class="bi bi-search search-icon"></i>
-            <div class="search-highlight"></div>
           </div>
         </div>
       </div>
@@ -53,7 +52,7 @@
                 </td>
               </tr>
               <tr v-else v-for="(user, index) in paginatedUsers" :key="user.id">
-                <td class="col-no">{{ ((currentPage - 1) * ITEMS_PER_PAGE) + index + 1 }}</td>
+                <td class="col-no">{{ ((currentPage - 1) * ITEMS_PER_PAGE) + index + 1}}</td>
                 <td class="col-name">
                   <div class="user-info">
                     <img :src="user.avatar_url" alt="Avatar" class="user-avatar" />
@@ -409,7 +408,6 @@ function goToPage(page) {
 </script>
 
 <style scoped>
-/* Existing styles remain unchanged */
 .search-container {
   max-width: 400px;
   position: relative;
@@ -420,7 +418,7 @@ function goToPage(page) {
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease;
   border: 2px solid #e5e7eb;
 }
 
@@ -456,29 +454,9 @@ function goToPage(page) {
   color: #3b82f6;
   font-size: 16px;
   pointer-events: none;
-  transition: all 0.3s ease;
 }
 
-.custom-search-field:focus-within .search-icon {
-  color: #2563eb;
-  transform: translateY(-50%) scale(1.1);
-}
-
-.search-highlight {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background: #3b82f6;
-  transition: all 0.3s ease;
-  transform: translateX(-50%);
-}
-
-.custom-search-field:focus-within .search-highlight {
-  width: 100%;
-}
-
+/* ...existing styles remain unchanged */
 .custom-select-container {
   max-width: 200px;
   display: inline-block;
@@ -556,7 +534,7 @@ function goToPage(page) {
 }
 
 /* Updated column widths - made phone column wider */
-.col-no { width: 4%; text-align: center; min-width: 50px; }
+.col-no { width: 5%; text-align: center; min-width: 50px; }
 .col-name { width: 16%; min-width: 150px; }
 .col-email { width: 20%; min-width: 180px; }
 .col-phone { width: 14%; min-width: 130px; } /* Increased from 10% to 14% */
