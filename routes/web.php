@@ -65,6 +65,12 @@ Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.cre
 // Public Feedback
 Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
 
+//Public Populasi
+Route::get('/populasi', function () {
+    return Inertia::render('Populasi/CekPopulasi');
+})->name('populasi');
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
