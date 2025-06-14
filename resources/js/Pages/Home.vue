@@ -99,7 +99,7 @@ watch(
     min-height: 100vh;
     max-width: 100vw;
     background-color: #f8f9fa;
-    font-family: 'poppins', sans-serif;
+    font-family: 'poppins';
   }
 
   .main-container {

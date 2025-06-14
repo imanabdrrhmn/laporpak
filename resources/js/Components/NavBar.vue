@@ -184,7 +184,7 @@
                 </li>
                 <li>
                   <Link
-                    href="/CekPopulasi"
+                    href="/Populasi"
                     class="dropdown-item"
                     :class="{ active: $page.url === '/CekPopulasi' }"
                   >
@@ -307,7 +307,7 @@
                   <i class="bi bi-search me-2"></i>
                   Cari Laporan
                 </Link>
-                <Link href="/C" class="nav-link" @click="closeMobileNav">
+                <Link href="/Populasi" class="nav-link" @click="closeMobileNav">
                   <i class="bi bi-people me-2"></i>
                   Cek Populasi
                 </Link>

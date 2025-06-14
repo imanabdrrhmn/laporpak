@@ -464,6 +464,8 @@ export default {
 <style scoped>
 .about-section {
     background-color: #ffffff;
+    padding: 20px;
+
 }
 
 .bg-light {
