@@ -655,7 +655,7 @@ defineExpose({
     font-size: 1rem;
     text-align: center;
   }
-  .card-header .d-flex {
+  .card-header   {
     justify-content: center;
   }
   .btn-sm {

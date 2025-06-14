@@ -784,13 +784,16 @@ function goToPage(page) {
 
 .user-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   margin-bottom: 16px;
+  width: 100%;
+  overflow: hidden; /* Add overflow control */
 }
 
 .user-details {
   flex: 1;
+  min-width: 0; /* Add this to enable text truncation */
 }
 
 .user-details .user-name {
@@ -798,24 +801,20 @@ function goToPage(page) {
   color: #1f2937;
   font-size: 1rem;
   margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.user-email {
-  color: #6b7280;
+.user-details .user-email,
+.user-details .user-phone {
   font-size: 0.875rem;
+  color: #6b7280;
   margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
   word-break: break-all;
-}
-
-.user-phone {
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
-.user-role-section {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f1f5f9;
 }
 
 .role-change-section {

@@ -1,7 +1,7 @@
 <template>
   <div class="col-lg-6 d-flex align-items-center justify-content-center p-3 p-md-4 bg-light">
     <div class="form-container p-3 p-sm-4 p-lg-5 w-100">
-      <h2 class="text-center mb-3 mb-md-4">Form Verifikasi Data</h2>
+          <h2 class="text-center mb-3 mb-md-4"><i class="bi bi-person-vcard me-2"></i>Formulir Verifikasi Data</h2>
       <p class="text-center text-muted mb-4">Pilih jenis layanan terlebih dahulu untuk melanjutkan pengisian formulir.</p>
       
       <div class="alert alert-danger alert-dismissible fade show" role="alert" v-if="formError" aria-live="polite">
@@ -68,7 +68,7 @@
                 aria-describedby="idNumberError"
                 required 
                 maxlength="16"
-                @input="restrictToNumbers"
+                @input="(e) => restrictToNumbers(e, 'idNumber')"
               >
               <div id="idNumberError" class="invalid-feedback" v-if="validation.idNumber">{{ validation.idNumber }}</div>
             </div>
@@ -87,6 +87,7 @@
                 :class="{ 'is-invalid': validation.phoneNumber }"
                 aria-describedby="phoneNumberError"
                 required
+                @input="(e) => restrictToNumbers(e, 'phoneNumber')"
               >
               <div id="phoneNumberError" class="invalid-feedback" v-if="validation.phoneNumber">{{ validation.phoneNumber }}</div>
             </div>
@@ -105,6 +106,7 @@
                 :class="{ 'is-invalid': validation.npwpNumber }"
                 aria-describedby="npwpNumberError"
                 required
+                @input="(e) => restrictToNumbers(e, 'npwpNumber')"
               >
               <div id="npwpNumberError" class="invalid-feedback" v-if="validation.npwpNumber">{{ validation.npwpNumber }}</div>
             </div>
@@ -212,8 +214,8 @@ const isServiceComingSoon = computed(() => {
 });
 
 // Restrict NIK input to numbers only
-const restrictToNumbers = (event) => {
-  formData.value.idNumber = event.target.value.replace(/[^0-9]/g, '');
+const restrictToNumbers = (event, field) => {
+  formData.value[field] = event.target.value.replace(/[^0-9]/g, '');
 };
 
 const validateAndSubmit = () => {

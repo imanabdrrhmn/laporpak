@@ -26,7 +26,7 @@
             </div>
             
             <!-- Report Check Form -->
-            <div v-if="showSearch" class="row justify-content-center mt-5 pt-4">
+            <div v-if="showSearch && showReportCheck" class="row justify-content-center mt-5 pt-4">
                 <div class="col-lg-8 col-md-10 text-center">
                     <h2 class="fw-bold fs-2 mb-4">Sudah Ada yang Melaporkan? Cek di Sini!</h2>
                     <div class="search-container mt-3 mb-4">
@@ -51,8 +51,8 @@
                 </div>
             </div>
 
-            <!-- Statistics Section in Triangular Layout -->
-            <div class="statistics-triangular mt-5 pt-4" ref="statsSection">
+            <!-- report Statistics Section -->
+            <div v-if="showReportStats" class="statistics-triangular mt-5 pt-4" ref="statsSection">
                 <div class="row">
                     <!-- Left Side: Mission Statement -->
                     <div class="col-lg-6 col-md-12 mb-4 mb-lg-0">
@@ -116,6 +116,55 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Verification Statistics Section -->
+            <div v-if="showVerificationStats" class="statistics-triangular mt-5 pt-4" ref="statsSectionTwo">
+                <div class="row">
+                    <!-- Left Side: Mission Statement -->
+                    <div class="col-lg-6 col-md-12 mb-4 mb-lg-0">
+                        <div class="mission-statement mt-4">
+                            <h2 class="fw-bold fs-3 mt-3 text-center text-lg-start">Solusi verifikasi data untuk keputusan yang lebih cerdas</h2>
+                            <p class="text-dark fs-6 text-center text-lg-start">
+                                Memberikan akses cepat dan akurat untuk memvalidasi informasi penting melalui sistem yang terintegrasi dan terpercaya.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 col-md-12">
+                        <div class="stats-triangle">
+                            <div class="stat-row justify-content-between">
+                                <!-- Left Stat -->
+                                <div class="stat-item text-center" :class="{ 'animate-stat': animateStatsTwo }">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <div class="stat-icon text-primary me-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clipboard-check" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd" d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                                                <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                                                <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="fw-bold fs-2 mb-0 counter-number">{{ displayTotalReportsTwo }}</h3>
+                                    </div>
+                                    <p class="text-muted mt-2">Total data yang telah diverifikasi</p>
+                                </div>
+                                
+                                <!-- Right Stat -->
+                                <div class="stat-item text-center" :class="{ 'animate-stat': animateStatsTwo }">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <div class="stat-icon text-primary me-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
+                                                <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="fw-bold fs-2 mb-0 counter-number">{{ displayFraudReportsTwo }}</h3>
+                                    </div>
+                                    <p class="text-muted mt-2">Pengguna yang telah menggunakan layanan verifikasi</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 </template>
@@ -127,6 +176,18 @@ export default {
         showSearch: {
             type: Boolean,
             default: true
+        },
+        showReportCheck: {
+            type: Boolean,
+            default: true
+        },
+        showReportStats: {
+            type: Boolean,
+            default: true
+        },
+        showVerificationStats: {
+            type: Boolean,
+            default: false
         },
         verifiedReports: {
             type: Number,
@@ -147,9 +208,15 @@ export default {
             displayVerifiedReports: 0,
             displayTotalReports: 0,
             displayFraudReports: 0,
+            // Data terpisah untuk verification stats
+            displayTotalReportsTwo: 0,
+            displayFraudReportsTwo: 0,
             animateStats: false,
+            animateStatsTwo: false,
             observer: null,
+            observerTwo: null,
             hasAnimated: false,
+            hasAnimatedTwo: false,
             animationFrameId: null
         }
     },
@@ -159,14 +226,12 @@ export default {
         }
     },
     mounted() {
-        // Use passive listeners for better performance
         this.setupIntersectionObserver();
     },
     beforeUnmount() {
         this.cleanup();
     },
     methods: {
-        // Navigation method untuk better performance
         navigateToSearch() {
             if (this.searchQuery.trim()) {
                 window.location.href = `/CariLaporan?query=${this.encodedSearchQuery}`;
@@ -174,26 +239,40 @@ export default {
         },
 
         setupIntersectionObserver() {
-            // Gunakan passive listeners dan threshold yang lebih optimized
             const options = {
                 root: null,
-                rootMargin: '50px', // Preload animation sedikit lebih awal
-                threshold: 0.2 // Reduce threshold untuk trigger lebih cepat
+                rootMargin: '50px',
+                threshold: 0.2
             };
 
-            this.observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && !this.hasAnimated) {
-                        // Debounce untuk mencegah multiple calls
-                        this.debounceAnimation();
-                    }
-                });
-            }, options);
+            // Observer untuk report stats
+            if (this.showReportStats) {
+                this.observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !this.hasAnimated) {
+                            this.debounceAnimation();
+                        }
+                    });
+                }, options);
+            }
 
-            // Check if element exists before observing
+            // Observer untuk verification stats
+            if (this.showVerificationStats) {
+                this.observerTwo = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !this.hasAnimatedTwo) {
+                            this.debounceAnimationTwo();
+                        }
+                    });
+                }, options);
+            }
+
             this.$nextTick(() => {
-                if (this.$refs.statsSection) {
+                if (this.$refs.statsSection && this.observer) {
                     this.observer.observe(this.$refs.statsSection);
+                }
+                if (this.$refs.statsSectionTwo && this.observerTwo) {
+                    this.observerTwo.observe(this.$refs.statsSectionTwo);
                 }
             });
         },
@@ -208,18 +287,46 @@ export default {
             });
         },
 
+        debounceAnimationTwo() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            
+            this.animationFrameId = requestAnimationFrame(() => {
+                this.startCountingAnimationTwo();
+            });
+        },
+
         startCountingAnimation() {
             if (this.hasAnimated) return;
             
             this.hasAnimated = true;
             this.animateStats = true;
 
-            // Use Set timeout dengan delay yang lebih optimal
             const delays = [0, 150, 300];
             const counters = [
                 { prop: 'displayVerifiedReports', target: this.verifiedReports, duration: 1800 },
                 { prop: 'displayTotalReports', target: this.totalReports, duration: 2000 },
                 { prop: 'displayFraudReports', target: this.fraudReports, duration: 1900 }
+            ];
+
+            counters.forEach((counter, index) => {
+                setTimeout(() => {
+                    this.animateCounter(counter.prop, counter.target, counter.duration);
+                }, delays[index]);
+            });
+        },
+
+        startCountingAnimationTwo() {
+            if (this.hasAnimatedTwo) return;
+            
+            this.hasAnimatedTwo = true;
+            this.animateStatsTwo = true;
+
+            const delays = [0, 150];
+            const counters = [
+                { prop: 'displayTotalReportsTwo', target: this.totalReports, duration: 2000 },
+                { prop: 'displayFraudReportsTwo', target: this.fraudReports, duration: 1900 }
             ];
 
             counters.forEach((counter, index) => {
@@ -235,7 +342,6 @@ export default {
                 return;
             }
 
-            // Optimize duration calculation
             const maxDuration = 3000;
             const minDuration = 1000;
             const adjustedDuration = Math.min(maxDuration, Math.max(minDuration, duration));
@@ -250,7 +356,6 @@ export default {
                 const easedProgress = this.easeOutCubic(progress);
                 const currentValue = Math.floor(startValue + (difference * easedProgress));
                 
-                // Format angka dengan lebih efisien
                 this[property] = this.formatNumber(currentValue, targetValue, progress === 1);
 
                 if (progress < 1) {
@@ -264,6 +369,17 @@ export default {
         },
 
         formatNumber(value, finalValue, isFinal) {
+            // Special formatting for verification stats section
+            if (this.showVerificationStats) {
+                if (value >= 1000000) {
+                    return (value / 1000000).toFixed(1) + 'M';
+                } else if (value >= 1000) {
+                    return (value / 1000).toFixed(0) + 'K';
+                }
+                return value.toString();
+            }
+            
+            // Original formatting for other sections
             if (isFinal) {
                 return finalValue.toLocaleString('id-ID');
             }
@@ -277,16 +393,19 @@ export default {
             }
         },
 
-        // Easing function yang lebih ringan
         easeOutCubic(t) {
             return 1 - Math.pow(1 - t, 3);
         },
 
-        // Cleanup method untuk prevent memory leaks
         cleanup() {
             if (this.observer) {
                 this.observer.disconnect();
                 this.observer = null;
+            }
+            
+            if (this.observerTwo) {
+                this.observerTwo.disconnect();
+                this.observerTwo = null;
             }
             
             if (this.animationFrameId) {
@@ -295,64 +414,49 @@ export default {
             }
         },
 
-        // Optimized reset method
         resetAnimation() {
             this.cleanup();
             this.hasAnimated = false;
+            this.hasAnimatedTwo = false;
             this.animateStats = false;
+            this.animateStatsTwo = false;
             this.displayVerifiedReports = 0;
             this.displayTotalReports = 0;
             this.displayFraudReports = 0;
+            this.displayTotalReportsTwo = 0;
+            this.displayFraudReportsTwo = 0;
             
             this.$nextTick(() => {
                 this.setupIntersectionObserver();
             });
-        },
-        // Utility debounce function
-        debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
         }
     },
 
     watch: {
-        // Optimized watchers dengan debouncing
         verifiedReports: {
             handler(newVal, oldVal) {
-                if (newVal !== oldVal && this.hasAnimated) {
-                    this.debouncedReset();
+                if (newVal !== oldVal && (this.hasAnimated || this.hasAnimatedTwo)) {
+                    this.resetAnimation();
                 }
             },
             immediate: false
         },
         totalReports: {
             handler(newVal, oldVal) {
-                if (newVal !== oldVal && this.hasAnimated) {
-                    this.debouncedReset();
+                if (newVal !== oldVal && (this.hasAnimated || this.hasAnimatedTwo)) {
+                    this.resetAnimation();
                 }
             },
             immediate: false
         },
         fraudReports: {
             handler(newVal, oldVal) {
-                if (newVal !== oldVal && this.hasAnimated) {
-                    this.debouncedReset();
+                if (newVal !== oldVal && (this.hasAnimated || this.hasAnimatedTwo)) {
+                    this.resetAnimation();
                 }
             },
             immediate: false
         }
-    },
-
-    // Setup debounced reset saat component dibuat
-    created() {
-        this.debouncedReset = this.debounce(this.resetAnimation, 300);
     }
 }
 </script>

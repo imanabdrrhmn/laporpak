@@ -2,7 +2,7 @@
 <template>
   <section class="flow-section py-5">
     <div class="container">
-      <h2 class="text-center fw-bold mb-5">Alur Verifikasi</h2>
+      <h2 class="text-center fw-bold mb-5">Alur Verifikasi Data</h2>
       
       <div class="row justify-content-center">
         <!-- Step 1: Masuk -->
@@ -25,9 +25,11 @@
             <div class="flow-icon bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center">
               <i class="bi bi-pencil-square fs-4"></i>
             </div>
-            <h5 class="fw-bold">Tulis Laporan</h5>
+            <h5 class="fw-bold">Isi Formulir Verifikasi</h5>
             <p class="text-muted mb-0">
-              Laporan harus disampaikan dengan jelas dan lengkap, mencakup informasi terkait modus penipuan serta bukti pendukung.
+             Pilih jenis layanan verifikasi yang diinginkan, lalu isi data yang akan diverifikasi (seperti Nama, NIK, NPWP, atau nomor HP) dengan lengkap dan benar agar hasil valid.
+
+
             </p>
             <div class="flow-arrow d-none d-lg-block"></div>
           </div>
@@ -37,11 +39,13 @@
         <div class="col-lg-3 col-md-6 mb-4">
           <div class="flow-card h-100 p-4 text-center position-relative">
             <div class="flow-icon bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center">
-              <i class="bi bi-shield-check fs-4"></i>
+              <i class="bi bi-file-earmark-check fs-4"></i>
             </div>
             <h5 class="fw-bold">Proses Verifikasi</h5>
             <p class="text-muted mb-0">
-              Tim verifikasi akan memastikan validitas laporan. Setelah diverifikasi, laporan akan diteruskan ke instansi berwenang untuk tindak lanjut.
+              Sistem akan memproses permintaan verifikasi secara otomatis melalui mitra penyedia layanan. Proses ini biasanya berlangsung cepat dan tergantung pada jenis data yang diverifikasi.
+
+
             </p>
             <div class="flow-arrow d-none d-lg-block"></div>
           </div>
@@ -55,7 +59,7 @@
             </div>
             <h5 class="fw-bold">Selesai</h5>
             <p class="text-muted mb-0">
-              Masuk terlebih dahulu, jika belum memiliki akun silahkan mendaftar terlebih dahulu menggunakan nomor hp atau email.
+             Hasil verifikasi akan ditampilkan setelah proses selesai. Riwayat dan detail hasil dapat dilihat melalui menu Riwayat Verifikasi. Informasi juga akan dikirimkan melalui email jika diperlukan.
             </p>
           </div>
         </div>

@@ -95,7 +95,7 @@ const serviceInfo = {
     title: 'Pelaporan Penipuan',
     description: 'Laporkan nomor HP, email, atau akun yang terindikasi mencurigakan untuk verifikasi lebih lanjut.',
     icon: 'bi bi-shield-check',
-    formTitle: 'Form Pelaporan',
+    formTitle: 'Formulir Pelaporan Penipuan',
     descriptionPlaceholder: 'Ceritakan bagaimana kejadian yang mencurigakan terjadi dan modus yang digunakan...',
   },
   Infrastruktur: {
@@ -103,7 +103,7 @@ const serviceInfo = {
     title: 'Pelaporan Infrastruktur',
     description: 'Laporkan fasilitas umum dan infrastruktur yang rusak untuk perbaikan yang lebih cepat.',
     icon: 'bi bi-building-gear',
-    formTitle: 'Form Infrastruktur',
+    formTitle: 'Formulir Pelaporan  Infrastruktur',
     descriptionPlaceholder: 'Jelaskan detail kerusakan dan dampaknya terhadap lingkungan...',
   }
 };

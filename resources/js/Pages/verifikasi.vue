@@ -10,7 +10,14 @@
       </div>
     </div>
     <Alur />
-    <Section />
+    <Section 
+      :showReportCheck="false"
+      :showReportStats="false"
+      :showVerificationStats="true"
+      :verifiedReports="verificationStats.totalVerified"
+      :totalReports="verificationStats.totalData"
+      :fraudReports="verificationStats.totalUsers"
+    />
     <Feedback :feedbacks="feedbacks" />
   </AppLayout>
 </template>
@@ -26,6 +33,13 @@ import HeroContent from '@/Components/Verifikasi/HeroContent.vue';
 import VerificationForm from '@/Components/Verifikasi/VerificationForm.vue';
 
 const feedbacks = ref([]);
+
+// Tambahkan data statistik verifikasi
+const verificationStats = ref({
+  totalVerified: 15420,  // Total data yang telah diverifikasi
+  totalData: 15420,      // Total data yang telah diverifikasi (sama dengan totalVerified)
+  totalUsers: 8750       // Pengguna yang telah menggunakan layanan verifikasi
+});
 
 const services = ref([
   // Available services
@@ -46,12 +60,25 @@ const services = ref([
 
 onMounted(() => {
   fetchFeedbacks();
+  // Jika data statistik dari backend, fetch di sini
+  // fetchVerificationStats();
 });
 
 const fetchFeedbacks = () => {
   const page = usePage();
   feedbacks.value = page.props.feedbacks;
 };
+
+// Uncomment jika data dari backend
+// const fetchVerificationStats = async () => {
+//   try {
+//     const response = await fetch('/api/verification-stats');
+//     const data = await response.json();
+//     verificationStats.value = data;
+//   } catch (error) {
+//     console.error('Error fetching verification stats:', error);
+//   }
+// };
 </script>
 
 <style scoped>

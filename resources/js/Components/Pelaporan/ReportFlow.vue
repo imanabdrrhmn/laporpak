@@ -41,7 +41,7 @@
             </div>
             <h5 class="fw-bold">Proses Verifikasi</h5>
             <p class="text-muted mb-0">
-              Tim verifikasi akan memastikan validitas laporan. Setelah diverifikasi, laporan akan diteruskan ke instansi berwenang untuk tindak lanjut.
+              Setelah terkirim, Tim verifikasi akan memastikan validitas laporan. Setelah diverifikasi, laporan akan diteruskan ke instansi berwenang untuk tindak lanjut.
             </p>
             <div class="flow-arrow d-none d-lg-block"></div>
           </div>
@@ -55,7 +55,7 @@
             </div>
             <h5 class="fw-bold">Selesai</h5>
             <p class="text-muted mb-0">
-              Masuk terlebih dahulu, jika belum memiliki akun silahkan mendaftar terlebih dahulu menggunakan nomor hp atau email.
+              Perkembangan laporan dapat dipantau melalui menu Riwayat Laporan. Informasi lanjutan akan dikirim melalui email yang terdaftar.
             </p>
           </div>
         </div>
