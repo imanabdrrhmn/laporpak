@@ -78,17 +78,23 @@ export default {
       currentMarker: null,
       currentCircle: null,
       selectedLocation: null,
-      resizeObserver: null
+      resizeObserver: null,
+      isMapReady: false
     }
   },
   mounted() {
-    this.initializeMap()
-    this.setupResizeObserver()
+    // Delay initialization untuk memastikan DOM ready
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.initializeMap()
+        this.setupResizeObserver()
+      }, 100)
+    })
   },
   watch: {
     populationData: {
       handler(newData) {
-        if (newData) {
+        if (newData && this.isMapReady) {
           this.updateMapWithPopulationData(newData)
         }
       },
@@ -97,15 +103,22 @@ export default {
   },
   methods: {
     initializeMap() {
-      // Batas koordinat Indonesia
+      const mapElement = document.getElementById('map')
+      if (!mapElement) {
+        console.error('Map element not found')
+        return
+      }
+
+      // Batas koordinat Indonesia yang lebih akurat
       const indonesiaBounds = [
-        [-11.5, 95], // Southwest coordinates (Rote Island)
-        [6.2, 141]   // Northeast coordinates (Papua)
+        [-11.008694, 95.009003], // Southwest (Rote Island)
+        [6.216968, 141.019555]   // Northeast (Papua)
       ]
       
-      // Inisialisasi peta dengan center di Indonesia dan batas wilayah
+      // Inisialisasi peta dengan pengaturan yang lebih baik
       this.map = L.map('map', {
-        zoomControl: true,
+        preferCanvas: true, // Untuk performa yang lebih baik
+        zoomControl: false, // Kita akan menambahkan custom zoom control
         attributionControl: true,
         scrollWheelZoom: true,
         doubleClickZoom: true,
@@ -115,51 +128,78 @@ export default {
         tap: true,
         touchZoom: true,
         maxBounds: indonesiaBounds,
-        maxBoundsViscosity: 0.8, // Membuat batas lebih fleksibel
+        maxBoundsViscosity: 1.0,
         minZoom: 4,
-        maxZoom: 18
-      }).setView([-2.5, 118], 5)
-      
-      // Fit view ke batas Indonesia
-      this.map.fitBounds(indonesiaBounds, { padding: [10, 10] })
-      
-      // Tambahkan tile layer
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
         maxZoom: 18,
-        tileSize: 256,
-        zoomOffset: 0
+        zoomSnap: 0.5,
+        zoomDelta: 0.5
+      })
+      
+      // Set initial view
+      this.map.setView([-2.5, 118], 5)
+      
+      // Tambahkan custom zoom control
+      L.control.zoom({
+        position: 'bottomright'
       }).addTo(this.map)
       
-      // Event listener untuk klik pada peta
-      this.map.on('click', this.onMapClick)
-      
-      // Event listener untuk mencegah drag keluar Indonesia
-      this.map.on('dragend', () => {
-        const center = this.map.getCenter()
-        if (!this.isInIndonesia(center)) {
-          this.centerToIndonesia()
-        }
+      // Tambahkan tile layer dengan kualitas yang lebih baik
+      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18,
+        tileSize: 256,
+        zoomOffset: 0,
+        detectRetina: true, // Untuk display retina
+        crossOrigin: true
       })
       
-      // Pastikan map terinisialisasi dengan benar
-      this.$nextTick(() => {
+      tileLayer.addTo(this.map)
+      
+      // Event listener untuk tile loading
+      tileLayer.on('loading', () => {
+        this.isMapReady = false
+      })
+      
+      tileLayer.on('load', () => {
+        this.isMapReady = true
         this.map.invalidateSize()
       })
+      
+      // Fit view ke Indonesia dengan smooth animation
+      this.map.fitBounds(indonesiaBounds, { 
+        padding: [20, 20],
+        animate: true,
+        duration: 1
+      })
+      
+      // Event listeners
+      this.map.on('click', this.onMapClick)
+      this.map.on('dragend', this.handleDragEnd)
+      this.map.on('zoomend', this.handleZoomEnd)
+      
+      // Ensure proper sizing setelah initialization
+      setTimeout(() => {
+        this.map.invalidateSize()
+        this.isMapReady = true
+      }, 500)
     },
     
     setupResizeObserver() {
-      // Observer untuk mendeteksi perubahan ukuran container
       if (window.ResizeObserver) {
-        this.resizeObserver = new ResizeObserver(() => {
-          if (this.map) {
-            this.map.invalidateSize()
+        this.resizeObserver = new ResizeObserver(entries => {
+          if (this.map && this.isMapReady) {
+            // Debounce resize
+            clearTimeout(this.resizeTimeout)
+            this.resizeTimeout = setTimeout(() => {
+              this.map.invalidateSize({ animate: true })
+            }, 150)
           }
         })
         
         const mapElement = document.getElementById('map')
         if (mapElement) {
           this.resizeObserver.observe(mapElement)
+          this.resizeObserver.observe(mapElement.parentElement)
         }
       }
       
@@ -168,20 +208,35 @@ export default {
     },
     
     handleWindowResize() {
-      if (this.map) {
-        setTimeout(() => {
-          this.map.invalidateSize()
-        }, 100)
+      if (this.map && this.isMapReady) {
+        clearTimeout(this.resizeTimeout)
+        this.resizeTimeout = setTimeout(() => {
+          this.map.invalidateSize({ animate: true })
+        }, 200)
+      }
+    },
+    
+    handleDragEnd() {
+      const center = this.map.getCenter()
+      if (!this.isInIndonesia(center)) {
+        this.centerToIndonesia()
+      }
+    },
+    
+    handleZoomEnd() {
+      // Pastikan view tetap dalam batas Indonesia
+      const bounds = this.map.getBounds()
+      if (!this.isViewInIndonesia(bounds)) {
+        this.centerToIndonesia()
       }
     },
     
     onMapClick(e) {
       const location = {
-        lat: e.latlng.lat,
-        lng: e.latlng.lng
+        lat: parseFloat(e.latlng.lat.toFixed(6)),
+        lng: parseFloat(e.latlng.lng.toFixed(6))
       }
       
-      // Cek apakah lokasi masih dalam batas Indonesia
       if (!this.isInIndonesia(location)) {
         this.showNotification('Pilih lokasi dalam wilayah Indonesia', 'warning')
         return
@@ -193,12 +248,11 @@ export default {
     },
     
     isInIndonesia(location) {
-      // Approximate bounds of Indonesia (more precise)
       const bounds = {
-        north: 6.2,   // Sabang, Aceh
-        south: -11.5, // Rote Island, NTT
-        east: 141,    // Merauke, Papua
-        west: 95      // Sabang, Aceh
+        north: 6.22,
+        south: -11.01,
+        east: 141.02,
+        west: 95.01
       }
       
       return location.lat <= bounds.north && 
@@ -207,74 +261,165 @@ export default {
              location.lng >= bounds.west
     },
     
+    isViewInIndonesia(bounds) {
+      const indonesiaBounds = {
+        north: 6.22,
+        south: -11.01,
+        east: 141.02,
+        west: 95.01
+      }
+      
+      return bounds.getNorth() <= indonesiaBounds.north + 2 &&
+             bounds.getSouth() >= indonesiaBounds.south - 2 &&
+             bounds.getEast() <= indonesiaBounds.east + 2 &&
+             bounds.getWest() >= indonesiaBounds.west - 2
+    },
+    
     showNotification(message, type = 'info') {
-      // Simple notification - bisa diganti dengan toast library
       const notification = document.createElement('div')
-      notification.className = `alert alert-${type} position-fixed`
+      notification.className = `alert alert-${type} position-fixed notification-toast`
       notification.style.cssText = `
-        top: 20px;
+        top: 80px;
         right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        animation: slideIn 0.3s ease-out;
+        z-index: 10000;
+        min-width: 280px;
+        max-width: 350px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        border: none;
+        backdrop-filter: blur(10px);
+        animation: slideInNotification 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
       `
       notification.innerHTML = `
-        <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-        ${message}
+        <div class="d-flex align-items-center">
+          <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+          <span>${message}</span>
+        </div>
       `
       
       document.body.appendChild(notification)
       
-      // Auto remove after 3 seconds
       setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-in'
+        notification.style.animation = 'slideOutNotification 0.3s ease-in forwards'
         setTimeout(() => {
           if (notification.parentNode) {
             notification.parentNode.removeChild(notification)
           }
         }, 300)
-      }, 3000)
+      }, 3500)
     },
     
     addMarkerAndCircle(location, radius = 2000) {
-      // Hapus marker dan circle sebelumnya
       this.clearMapElements()
       
-      // Tambahkan marker
-      this.currentMarker = L.marker([location.lat, location.lng])
-        .addTo(this.map)
-        .bindPopup('Menganalisis populasi...')
-        .openPopup()
+      // Custom marker icon
+      const customIcon = L.divIcon({
+        className: 'custom-marker',
+        html: `
+          <div class="marker-pin">
+            <div class="marker-icon">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+          </div>
+        `,
+        iconSize: [30, 40],
+        iconAnchor: [15, 40],
+        popupAnchor: [0, -40]
+      })
       
-      // Tambahkan circle
+      // Tambahkan marker dengan animasi
+      this.currentMarker = L.marker([location.lat, location.lng], {
+        icon: customIcon,
+        riseOnHover: true
+      }).addTo(this.map)
+      
+      // Popup dengan styling yang lebih baik
+      const popupContent = `
+        <div class="custom-popup">
+          <div class="popup-header">
+            <i class="fas fa-location-dot text-primary me-2"></i>
+            <strong>Lokasi Terpilih</strong>
+          </div>
+          <div class="popup-content">
+            <small class="text-muted">Lat: ${location.lat.toFixed(4)}, Lng: ${location.lng.toFixed(4)}</small>
+            <div class="mt-2">
+              <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+              <small>Menganalisis populasi...</small>
+            </div>
+          </div>
+        </div>
+      `
+      
+      this.currentMarker.bindPopup(popupContent, {
+        className: 'custom-popup-container',
+        maxWidth: 280,
+        closeButton: true,
+        autoClose: false,
+        closeOnClick: false
+      }).openPopup()
+      
+      // Tambahkan circle dengan gradient effect
       this.currentCircle = L.circle([location.lat, location.lng], {
         color: '#0078e7',
         fillColor: '#0078e7',
-        fillOpacity: 0.2,
-        radius: radius
+        fillOpacity: 0.15,
+        weight: 2,
+        radius: radius,
+        className: 'analysis-circle'
       }).addTo(this.map)
       
-      // Sesuaikan view untuk menampilkan circle dengan padding yang responsif
-      const padding = window.innerWidth < 768 ? [10, 10] : [20, 20]
-      this.map.fitBounds(this.currentCircle.getBounds(), { padding })
+      // Smooth zoom ke area yang dipilih
+      const bounds = this.currentCircle.getBounds()
+      const padding = window.innerWidth < 768 ? [30, 30] : [50, 50]
+      
+      this.map.fitBounds(bounds, {
+        padding: padding,
+        animate: true,
+        duration: 0.8
+      })
     },
     
     updateMapWithPopulationData(data) {
       if (this.currentMarker && data) {
         const popupContent = `
-          <div class="popup-content">
-            <h6 class="mb-2"><i class="fas fa-users text-primary"></i> Estimasi Populasi</h6>
-            <p class="mb-1"><strong>${data.total_population?.toLocaleString('id-ID') || 'N/A'}</strong> jiwa</p>
-            <small class="text-muted">dalam radius ${(data.radius/1000).toFixed(1)} km</small>
+          <div class="custom-popup">
+            <div class="popup-header">
+              <i class="fas fa-users text-primary me-2"></i>
+              <strong>Estimasi Populasi</strong>
+            </div>
+            <div class="popup-content">
+              <div class="population-number">
+                ${data.total_population ? data.total_population.toLocaleString('id-ID') : 'N/A'} jiwa
+              </div>
+              <small class="text-muted">
+                dalam radius ${data.radius ? (data.radius/1000).toFixed(1) : '2.0'} km
+              </small>
+            </div>
           </div>
         `
+        
         this.currentMarker.setPopupContent(popupContent)
         
-        // Update circle radius jika berbeda
-        if (this.currentCircle && data.radius) {
-          this.currentCircle.setRadius(data.radius)
+        // Update circle radius dengan animasi
+        if (this.currentCircle && data.radius && data.radius !== this.currentCircle.getRadius()) {
+          const steps = 20
+          const currentRadius = this.currentCircle.getRadius()
+          const targetRadius = data.radius
+          const stepSize = (targetRadius - currentRadius) / steps
+          
+          let step = 0
+          const animateRadius = () => {
+            if (step < steps) {
+              const newRadius = currentRadius + (stepSize * step)
+              this.currentCircle.setRadius(newRadius)
+              step++
+              requestAnimationFrame(animateRadius)
+            } else {
+              this.currentCircle.setRadius(targetRadius)
+            }
+          }
+          
+          animateRadius()
         }
       }
     },
@@ -294,29 +439,41 @@ export default {
       this.clearMapElements()
       this.selectedLocation = null
       this.$emit('location-selected', null)
+      this.centerToIndonesia()
     },
     
     centerToIndonesia() {
-      // Fit view ke Indonesia dengan padding
+      if (!this.map) return
+      
       const indonesiaBounds = [
-        [-11.5, 95], // Southwest
-        [6.2, 141]   // Northeast
+        [-11.008694, 95.009003],
+        [6.216968, 141.019555]
       ]
+      
       this.map.fitBounds(indonesiaBounds, { 
         padding: [20, 20],
-        maxZoom: 5 
+        animate: true,
+        duration: 1,
+        maxZoom: 5
       })
     }
   },
+  
   beforeUnmount() {
     // Cleanup
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout)
+    }
+    
     if (this.resizeObserver) {
       this.resizeObserver.disconnect()
     }
+    
     window.removeEventListener('resize', this.handleWindowResize)
     
     if (this.map) {
       this.map.remove()
+      this.map = null
     }
   }
 }
@@ -331,22 +488,24 @@ export default {
 }
 
 .card {
-  border-radius: 0.75rem;
+  border-radius: 16px;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
 }
 
 .card-header {
-  padding: 1rem 1.25rem 0.75rem;
+  padding: 1.25rem 1.5rem 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
 }
 
 .map-wrapper {
   position: relative;
   width: 100%;
-  height: 0;
-  padding-bottom: 60%; /* Aspect ratio 5:3 */
+  height: 500px; /* Fixed height untuk konsistensi */
   overflow: hidden;
+  background: #f8f9fa;
 }
 
 .leaflet-map {
@@ -358,6 +517,7 @@ export default {
   border-radius: 0;
   max-width: none;
   max-height: none;
+  z-index: 1;
 }
 
 .map-loading-overlay {
@@ -366,7 +526,8 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -376,129 +537,265 @@ export default {
 
 .map-controls {
   flex-shrink: 0;
+  gap: 8px;
 }
 
 .map-controls .btn {
   border-radius: 50%;
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   line-height: 1;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.map-controls .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .card-title {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Custom marker styles */
+:deep(.custom-marker) {
+  background: transparent;
+  border: none;
+}
+
+:deep(.marker-pin) {
+  position: relative;
+  animation: markerBounce 0.6s ease-out;
+}
+
+:deep(.marker-icon) {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #0078e7 0%, #0056b3 100%);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 120, 231, 0.4);
+  border: 3px solid white;
+}
+
+:deep(.marker-icon i) {
+  color: white;
+  font-size: 14px;
+  transform: rotate(45deg);
+}
+
+/* Custom popup styles */
+:deep(.custom-popup-container) {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+
+:deep(.custom-popup-container .leaflet-popup-content-wrapper) {
+  border-radius: 12px;
+  padding: 0;
+  background: white;
+}
+
+:deep(.custom-popup-container .leaflet-popup-tip) {
+  background: white;
+}
+
+:deep(.custom-popup) {
+  padding: 0;
+  margin: 0;
+  min-width: 200px;
+}
+
+:deep(.popup-header) {
+  background: linear-gradient(135deg, #0078e7 0%, #0056b3 100%);
+  color: white;
+  padding: 12px 16px;
+  font-size: 14px;
   font-weight: 600;
 }
 
-/* Responsive breakpoints */
+:deep(.popup-content) {
+  padding: 16px;
+}
+
+:deep(.population-number) {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0078e7;
+  margin-bottom: 4px;
+}
+
+/* Leaflet control customization */
+:deep(.leaflet-control-zoom) {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: none;
+}
+
+:deep(.leaflet-control-zoom a) {
+  width: 40px;
+  height: 40px;
+  line-height: 38px;
+  font-size: 18px;
+  border: none;
+  background: white;
+  color: #0078e7;
+  transition: all 0.2s ease;
+}
+
+:deep(.leaflet-control-zoom a:hover) {
+  background: #0078e7;
+  color: white;
+}
+
+:deep(.leaflet-control-attribution) {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 8px;
+  font-size: 10px;
+  margin: 8px;
+  padding: 4px 8px;
+}
+
+/* Analysis circle animation */
+:deep(.analysis-circle) {
+  animation: circleAppear 0.8s ease-out;
+}
+
+/* Responsive design */
 @media (max-width: 576px) {
   .map-wrapper {
-    padding-bottom: 70%; /* Lebih tinggi untuk mobile */
+    height: 400px;
   }
   
   .card-header {
-    padding: 0.75rem 1rem 0.5rem;
+    padding: 1rem;
   }
   
   .map-controls .btn {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     font-size: 0.875rem;
   }
   
   .card-title {
-    font-size: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  :deep(.leaflet-control-zoom a) {
+    width: 36px;
+    height: 36px;
+    line-height: 34px;
+    font-size: 16px;
   }
 }
 
 @media (max-width: 768px) {
   .map-wrapper {
-    padding-bottom: 65%;
+    height: 450px;
   }
 }
 
 @media (min-width: 992px) {
   .map-wrapper {
-    padding-bottom: 50%; /* Lebih lebar untuk desktop */
+    height: 550px;
   }
 }
 
 @media (min-width: 1200px) {
   .map-wrapper {
-    padding-bottom: 45%;
-  }
-}
-
-/* Leaflet popup customization */
-:deep(.leaflet-popup-content) {
-  margin: 8px 12px;
-  font-size: 0.875rem;
-}
-
-:deep(.popup-content h6) {
-  color: #0062cc;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-}
-
-:deep(.leaflet-popup-content-wrapper) {
-  border-radius: 8px;
-}
-
-:deep(.leaflet-container) {
-  font-family: inherit;
-}
-
-/* Perbaikan untuk kontroler zoom */
-:deep(.leaflet-control-zoom) {
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-:deep(.leaflet-control-zoom a) {
-  width: 30px;
-  height: 30px;
-  line-height: 28px;
-  font-size: 16px;
-}
-
-/* Responsif untuk attribution */
-:deep(.leaflet-control-attribution) {
-  font-size: 10px;
-  background: rgba(255, 255, 255, 0.8);
-}
-
-@media (max-width: 576px) {
-  :deep(.leaflet-control-attribution) {
-    font-size: 8px;
-    max-width: 200px;
+    height: 600px;
   }
 }
 
 /* Notification animations */
-@keyframes slideIn {
+@keyframes slideInNotification {
   from {
-    transform: translateX(100%);
+    transform: translateX(100%) scale(0.8);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
 }
 
-@keyframes slideOut {
+@keyframes slideOutNotification {
   from {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
   to {
-    transform: translateX(100%);
+    transform: translateX(100%) scale(0.8);
     opacity: 0;
   }
 }
-</style>
+
+/* Marker animations */
+@keyframes markerBounce {
+  0% {
+    transform: translateY(-20px) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-5px) scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Circle animation */
+@keyframes circleAppear {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Loading states */
+.leaflet-map.loading {
+  filter: blur(1px);
+  transition: filter 0.3s ease;
+}
+
+/* Notification toast styling */
+:global(.notification-toast) {
+  border-left: 4px solid currentColor;
+  font-weight: 500;
+}
+
+:global(.notification-toast.alert-warning) {
+  background: rgba(255, 193, 7, 0.1);
+  color: #856404;
+  border-left-color: #ffc107;
+}
+
+:global(.notification-toast.alert-info) {
+  background: rgba(13, 202, 240, 0.1);
+  color: #055160;
+  border-left-color: #0dcaf0;
+}
+</style>  

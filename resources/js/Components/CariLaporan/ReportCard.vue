@@ -417,7 +417,7 @@ export default {
   right: 15px;
   width: 50px;
   height: 50px;
-  background: rgba(255, 255, 255, 0.9);
+
   border: none;
   border-radius: 8px;
   color: #333;
@@ -432,11 +432,7 @@ export default {
   line-height: 1;
 }
 
-.image-modal__close:hover {
-  background: white;
-  color: #000;
-  transform: rotate(180deg) scale(1.1);
-}
+
 
 .image-modal__content {
   overflow: auto;

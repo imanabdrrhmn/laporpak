@@ -50,8 +50,13 @@
     
     <div v-if="imageModalOpen" class="image-modal-overlay" @click="closeImageModal" @keyup.esc="closeImageModal">
       <div class="image-modal-content" @click.stop>
-        <button class="image-close-btn" @click="closeImageModal" aria-label="Close image view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         <img :src="report.evidence" alt="Bukti Laporan - Tampilan Penuh" class="full-image" />
+        <button class="image-close-btn" @click="closeImageModal" aria-label="Close image view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -235,11 +240,50 @@ export default {
 .btn-danger { background: #dc3545; color: white; border: 1px solid #dc3545; }
 .btn-danger:hover:not(:disabled) { background: #c82333; border-color: #bd2130; }
 .image-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 1100; display: flex; justify-content: center; align-items: center; padding: 1rem; }
-.image-modal-content { position: relative; max-width: 95vw; max-height: 95vh; display: flex; justify-content: center; align-items: center; }
-.image-close-btn { position: absolute; top: -2.5rem; right: -0.5rem; background: rgba(255, 255, 255, 0.15); border: none; padding: 0.75rem; border-radius: 50%; color: white; cursor: pointer; backdrop-filter: blur(5px); transition: background-color 0.2s ease, transform 0.2s ease; line-height: 0; }
-.image-close-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.1); }
-.image-close-btn svg { width: 20px; height: 20px; stroke: white; }
-.full-image { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.image-modal-content {
+  position: relative;
+  max-width: 800px;
+  max-height: 80vh;
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+}
+.image-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  padding: 0.75rem;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  transition: all 0.2s ease;
+  line-height: 0;
+  z-index: 2;
+}
+.image-close-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
+}
+.image-close-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: white;
+  stroke-width: 2;
+}
+.full-image {
+  max-width: 100%;
+  max-height: 70vh; /* Limit height to 70% of viewport height */
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
 
 @media (max-width: 768px) {
   .modal-overlay { padding: 0.5rem; }
@@ -249,6 +293,23 @@ export default {
   .footer-actions { flex-direction: column; gap: 0.75rem; }
   .btn { width: 100%; justify-content: center; }
   .image-modal-overlay { padding: 0.5rem; }
-  .image-close-btn { top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.5); }
+  .image-close-btn {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.5rem;
+  }
+  
+  .image-close-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  .image-modal-content {
+    width: 95%;
+    padding: 0.5rem;
+  }
+  
+  .full-image {
+    max-height: 60vh; /* Slightly smaller on mobile */
+  }
 }
 </style>
