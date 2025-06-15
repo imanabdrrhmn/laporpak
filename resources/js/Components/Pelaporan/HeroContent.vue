@@ -245,4 +245,24 @@ defineProps({
     padding: clamp(0.8rem, 2vw, 1.2rem);
   }
 }
+
+/* Add this new media query for the specific range */
+@media (min-width: 527px) and (max-width: 800px) {
+  .highlight-bar {
+    width: clamp(160px, 65vw, 360px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-content {
+    padding: 2rem !important;
+    text-align: center;
+  }
+  .display-4 {
+    font-size: clamp(2.2rem, 5.5vw, 2.6rem) !important;
+    justify-content: center;
+  }
+  .text-section {
+    text-align: center;
+  }
+}
 </style>
