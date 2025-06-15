@@ -1,65 +1,96 @@
 <!-- resources/js/Components/Pelaporan/ReportsContainer.vue -->
 <template>
-  <div v-if="reports.length" :class="['reports-container', viewMode]">
-    <template v-if="viewMode === 'grid'">
-      <div class="reports-grid">
-        <ReportCard
-          v-for="report in reports"
-          :key="report.id"
-          :report="report"
-          :loading="loading[report.id]"
-          :can="can"
-          @view-report="$emit('viewReport', report)"
-          @quick-action="$emit('quickAction', $event)"
-        />
+  <div class="reports-container">
+    <!-- Container untuk table/list/grid -->
+    <div class="content-wrapper bg-white rounded-t-lg shadow">
+      <div v-if="reports.length" :class="['reports-container', viewMode]">
+        <template v-if="viewMode === 'grid'">
+          <div class="reports-grid">
+            <ReportCard
+              v-for="report in reports"
+              :key="report.id"
+              :report="report"
+              :loading="loading[report.id]"
+              :can="can"
+              @view-report="$emit('viewReport', report)"
+              @quick-action="$emit('quickAction', $event)"
+            />
+          </div>
+        </template>
+        <template v-else>
+          <ReportsTable
+            :reports="reports"
+            :current-page="currentPage"
+            :items-per-page="itemsPerPage"
+            :loading="loading"
+            @view-report="$emit('viewReport', $event)"
+            @quick-action="$emit('quickAction', $event)"
+          />
+        </template>
       </div>
-    </template>
-    <template v-else>
-      <ReportsTable
-        :reports="reports"
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :loading="loading"
-        @view-report="$emit('viewReport', $event)"
-        @quick-action="$emit('quickAction', $event)"
-      />
-    </template>
-  </div>
-  <div v-else class="no-results">
-    <div class="empty-state">
-      <i class="fas fa-folder-open empty-icon"></i>
-      <h3>Tidak ada laporan ditemukan</h3>
-      <p>Coba ubah filter pencarian atau reset filter</p>
-      <button @click="$emit('resetFilters')" class="reset-btn-empty">Reset Filter</button>
+      <div v-else class="no-results">
+        <div class="empty-state">
+          <i class="fas fa-folder-open empty-icon"></i>
+          <h3>Tidak ada laporan ditemukan</h3>
+          <p>Coba ubah filter pencarian atau reset filter</p>
+          <button @click="$emit('resetFilters')" class="reset-btn-empty">Reset Filter</button>
+        </div>
+      </div>
     </div>
+
+    <!-- Pagination yang terintegrasi -->
+    <Pagination
+      v-if="viewMode === 'list' || viewMode === 'table'"
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      :total="total"
+      :per-page="perPage"
+      @update:currentPage="$emit('update:currentPage', $event)"
+      class="rounded-b-lg shadow"
+    />
   </div>
 </template>
 
 <script setup>
 import ReportCard from './ReportCard.vue';
 import ReportsTable from './ReportsTable.vue';
+import Pagination from './Pagination.vue';
 
 defineProps({
   reports: Array,
   viewMode: String,
-  currentPage: Number,
-  itemsPerPage: Number,
   loading: Object,
-  can: Object
+  can: Object,
+  currentPage: Number,
+  totalPages: Number,
+  total: Number,
+  perPage: Number,
+  itemsPerPage: Number
 });
 
-defineEmits(['viewReport', 'quickAction', 'resetFilters']);
+defineEmits(['viewReport', 'quickAction', 'resetFilters', 'update:currentPage']);
 </script>
 
 <style scoped>
 .reports-container {
-  margin-bottom: 24px;
+  margin-top: 1.5rem;
 }
 
 .reports-container.grid .reports-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
+}
+
+.content-wrapper {
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Jika menggunakan grid mode */
+.content-wrapper:has(.grid-view) {
+  border-radius: 0.5rem;
 }
 
 .no-results {

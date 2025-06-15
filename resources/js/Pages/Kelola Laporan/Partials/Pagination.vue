@@ -1,8 +1,8 @@
 <template>
-  <div class="pagination-container p-4">
-    <div class="d-flex justify-content-between align-items-center">
+  <div class="pagination-container">
+    <div class="pagination-wrapper">
       <div class="pagination-info">
-        Menampilkan {{ from }}-{{ to }} dari {{ total }} data
+        
       </div>
       <nav aria-label="Page navigation">
         <ul class="pagination mb-0">
@@ -70,6 +70,15 @@ function goTo(page) {
 .pagination-container {
   background: #fff;
   border-top: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .pagination-info {
@@ -79,6 +88,7 @@ function goTo(page) {
 
 .pagination {
   gap: 0.25rem;
+  flex-wrap: wrap;
 }
 
 .page-link {
@@ -90,6 +100,8 @@ function goTo(page) {
   font-size: 0.875rem;
   line-height: 1.25rem;
   transition: all 0.2s ease;
+  min-width: 2.5rem;
+  text-align: center;
 }
 
 .page-link:hover:not(.disabled) {
@@ -107,13 +119,37 @@ function goTo(page) {
   pointer-events: none;
 }
 
-@media (max-width: 767px) {
-  .pagination-container {
-    padding: 16px;
+@media (max-width: 640px) {
+  .pagination-wrapper {
+    justify-content: center;
+    text-align: center;
   }
-  
+
   .pagination-info {
+    width: 100%;
     font-size: 0.813rem;
+  }
+
+  .pagination {
+    gap: 0.15rem;
+  }
+
+  .page-link {
+    padding: 0.375rem 0.5rem;
+    min-width: 2rem;
+    font-size: 0.813rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .pagination {
+    gap: 0.1rem;
+  }
+
+  .page-link {
+    padding: 0.25rem 0.375rem;
+    min-width: 1.75rem;
+    font-size: 0.75rem;
   }
 }
 </style>

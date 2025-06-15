@@ -36,6 +36,7 @@
               :final-selected-amount="finalSelectedAmount"
               :proof-preview="proofPreview"
               :form="form"
+              :timer-display="timerDisplay"
               @copy-to-clipboard="copyToClipboard"
               @upload-proof="handleProofUpload"
               @back="goToStep('method')"
@@ -201,10 +202,35 @@ const proceedToPaymentMethod = () => {
   }
 };
 
+const timerDisplay = ref('');
+
+const startPaymentTimer = (seconds) => {
+  clearInterval(timerInterval);
+  const endTime = Date.now() + seconds * 1000;
+
+  const updateTimer = () => {
+    const now = Date.now();
+    const timeLeft = Math.max(0, endTime - now);
+    
+    if (timeLeft === 0) {
+      clearInterval(timerInterval);
+      timerDisplay.value = 'Waktu habis';
+      return;
+    }
+
+    const minutes = Math.floor(timeLeft / 60000);
+    const seconds = Math.floor((timeLeft % 60000) / 1000);
+    timerDisplay.value = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  updateTimer();
+  timerInterval = setInterval(updateTimer, 1000);
+};
+
 const goToStep = (stepName) => {
   currentStep.value = stepName;
   if (stepName === 'confirmation' && selectedPaymentMethodDetails.value?.id === 'BCA') {
-    startPaymentTimer(59 * 60 + 15);
+    startPaymentTimer(59 * 60 + 15); // 59 minutes and 15 seconds
   } else {
     clearInterval(timerInterval);
   }

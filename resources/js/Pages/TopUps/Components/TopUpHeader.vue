@@ -1,7 +1,7 @@
 <template>
     <div class="top-up-header-bar">
-      <div class="container d-flex justify-content-between align-items-center py-3">
-        <h2 class="text-white fw-bold mb-0 h5">Top Up Credit</h2>
+      <div class="container d-flex justify-content-center align-items-center py-3">
+        <h2 class="text-white fw-bold mb-0 h3">Top Up Credit</h2>
       </div>
     </div>
   </template>
@@ -35,7 +35,11 @@
   @media (max-width: 767.98px) {
     .top-up-header-bar .container {
       flex-direction: column;
-      align-items: flex-start !important;
+      align-items: center !important;
+    }
+    
+    .top-up-header-bar h2 {
+      font-size: 2rem;
     }
   }
   </style>

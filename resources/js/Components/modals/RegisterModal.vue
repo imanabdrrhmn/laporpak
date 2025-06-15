@@ -72,25 +72,22 @@
               </div>
 
               <!-- No HP -->
-              <div class="mb-3" v-if="mode === 'no_hp'">
-                <label for="phone" class="form-label">Nomor HP <span class="text-danger">*</span></label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light border-end-0">+62</span>
-                  <input
-                    type="tel"
-                    id="phone"
-                    class="form-control border-start-0"
-                    :class="errors.no_hp ? 'is-invalid' : ''"
-                    v-model="phoneNumber"
-                    placeholder="8123456789"
-                    required
-                    @focus="clearError('no_hp')"
-                    @input="validatePhoneNumber"
-                    @blur="validateField('no_hp')"
-                  />
-                </div>
+              <div class="form-floating mb-3" v-if="mode === 'no_hp'">
+                <input
+                  type="tel"
+                  id="phone"
+                  class="form-control"
+                  :class="errors.no_hp ? 'is-invalid' : ''"
+                  v-model="phoneNumber"
+                  placeholder="Nomor HP"
+                  required
+                  @focus="clearError('no_hp')"
+                  @input="validatePhoneNumber"
+                  @blur="validateField('no_hp')"
+                />
+                <label for="phone">Nomor HP <span class="text-danger">*</span></label>
                 <div v-if="errors.no_hp" class="error-message text-danger">{{ errors.no_hp }}</div>
-                <small class="text-muted d-block mt-1" v-if="mode === 'no_hp'">Contoh: 81234567890 (tanpa awalan 0)</small>
+                <small class="text-muted d-block mt-1">Contoh: 81234567890 (tanpa awalan 0)</small>
               </div>
 
               <!-- Password -->
@@ -287,8 +284,10 @@ function switchMode(newMode) {
 }
 
 function validatePhoneNumber() {
+  // Remove non-digits
   phoneNumber.value = phoneNumber.value.replace(/\D/g, '')
-  form.no_hp = phoneNumber.value ? `+62${phoneNumber.value}` : ''
+  // Set the form value without +62 prefix
+  form.no_hp = phoneNumber.value
 }
 
 function clearError(field) {
@@ -517,13 +516,27 @@ function handleRegister() {
 /* Password toggle icon */
 .toggle-password-icon {
   position: absolute;
-  top: 50%;
+  top: 20px;
   right: 12px;
-  transform: translateY(-50%);
   cursor: pointer;
   color: #6c757d;
   font-size: 16px;
-  z-index: 10;
+  z-index: 4;
+}
+
+/* Remove input group styles since we're not using them anymore */
+.form-floating {
+  position: relative;
+}
+
+.form-floating > .form-control {
+  height: 56px;
+}
+
+/* Delete these styles as they're no longer needed */
+.input-group .input-group-text,
+.input-group .form-control {
+  border-radius: 10px;
 }
 
 /* Toggle button styling */
@@ -585,10 +598,6 @@ function handleRegister() {
 
 .form-floating > label {
   padding: 0.75rem 1rem;
-}
-
-.form-floating > .form-control {
-  height: 56px;
 }
 
 /* Submit button */
@@ -683,18 +692,5 @@ function handleRegister() {
 
 .modal-backdrop {
   animation: fadeIn 0.3s ease-out forwards;
-}
-
-/* Input group styling for phone number */
-.input-group .input-group-text {
-  border-radius: 10px 0 0 10px;
-  border: 1.5px solid #e2e8f0;
-  border-right: none;
-  color: #6c757d;
-  font-weight: 500;
-}
-
-.input-group .form-control {
-  border-radius: 0 10px 10px 0;
 }
 </style>

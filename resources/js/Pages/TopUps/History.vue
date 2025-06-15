@@ -1,17 +1,25 @@
 <template>
   <AppLayout>
     <Head title="Riwayat Top Up" />
+    <div class="top-up-header-bar">
+      <div class="container d-flex justify-content-center align-items-center py-3">
+        <h2 class="text-white fw-bold mb-0 h3">Riwayat Top Up</h2>
+      </div>
+    </div>
     <div class="container py-4">
       <div class="topup-history-container mx-auto">
-        <h1 class="mb-4 fw-bold" >Riwayat Top Up</h1>
+        <!-- Remove the h1 here since we now have the header bar above -->
 
         <div class="d-flex flex-column flex-md-row justify-content-between gap-5 mb-4">
           <input
-            type="text"
+            type="number"
             v-model="searchTerm"
             class="form-control w-auto"
             placeholder="Cari jumlah deposit..."
             @input="goToPage(1)"
+            @keypress="onlyNumbers"
+            min="0"
+            step="1"
           />
           <select v-model="selectedStatus" class="form-select w-auto">
             <option value="">Semua Status</option>
@@ -111,13 +119,11 @@ const filteredTopUps = computed(() => {
     const statusMatch =
       !selectedStatus.value || t.status.toLowerCase() === selectedStatus.value.toLowerCase();
 
-    const searchValue = searchTerm.value.trim();
+    const searchValue = searchTerm.value.toString().trim();
     if (!searchValue) return statusMatch;
 
-    const searchNumber = Number(searchValue.replace(/\D/g, ''));
-    const amountMatch = !isNaN(searchNumber)
-      ? t.amount.toString().includes(searchNumber.toString())
-      : t.amount.toString().includes(searchValue);
+    // Since input is now numeric, directly compare with amount
+    const amountMatch = t.amount.toString().includes(searchValue);
 
     return statusMatch && amountMatch;
   });
@@ -170,6 +176,24 @@ const capitalize = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
+// Function to ensure only numbers can be typed
+const onlyNumbers = (event) => {
+  const charCode = event.which ? event.which : event.keyCode;
+  // Allow: backspace, delete, tab, escape, enter, period
+  if ([46, 8, 9, 27, 13, 110, 190].indexOf(charCode) !== -1 ||
+      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      (charCode === 65 && event.ctrlKey === true) ||
+      (charCode === 67 && event.ctrlKey === true) ||
+      (charCode === 86 && event.ctrlKey === true) ||
+      (charCode === 88 && event.ctrlKey === true)) {
+    return;
+  }
+  // Ensure that it is a number and stop the keypress
+  if (charCode < 48 || charCode > 57) {
+    event.preventDefault();
+  }
+};
+
 const goToPage = (page) => {
   if (page < 1 || page > pageCount.value) return;
   currentPage.value = page;
@@ -189,14 +213,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.topup-history-container {
-  max-width: 1000px;
-}
-
-.topup-history-container h1 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #0d6efd 
+.top-up-header-bar {
+  background: linear-gradient(135deg, #0062cc, #0078e7, #003f8a);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .topup-item.card {
@@ -244,5 +263,25 @@ onMounted(() => {
 .status-badge.rejected {
   background-color: #ffebee;
   color: #c62828;
+}
+
+/* Hide number input spinners/arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+@media (max-width: 767.98px) {
+  .top-up-header-bar h2 {
+    font-size: 1.5rem;
+  }
 }
 </style>

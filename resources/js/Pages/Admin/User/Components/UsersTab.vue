@@ -60,7 +60,7 @@
                   </div>
                 </td>
                 <td class="col-email">
-                  <div class="email-text" :title="user.email">{{ user.email }}</div>
+                  <div class="email-text" :title="user.email">{{ user.email || '-' }}</div>
                 </td>
                 <td class="col-phone">
                   <div class="phone-text">{{ user.nomor || '-' }}</div>

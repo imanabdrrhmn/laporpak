@@ -1,5 +1,5 @@
 <template>
-  <Head title="Profile" />
+  <Head title="Profil" />
   <AppLayout>
     <template #header>
       <div class="bg-primary bg-gradient py-5 rounded-bottom position-relative overflow-hidden">
@@ -150,18 +150,18 @@ defineProps({
 
 <style scoped>
 .btn-primary {
-  background-color: #4361ee;
-  border-color: #4361ee;
+  background-color: #0d6efd;
+
 }
 .btn-primary:hover {
   background-color: #3a56d4;
   border-color: #3a56d4;
 }
 .text-primary {
-  color: #4361ee !important;
+  color: #0d6efd !important;
 }
 .bg-primary {
-  background-color: #4361ee !important;
+  background-color: #0d6efd !important;
 }
 .bg-primary-subtle {
   background-color: #eef0ff !important;

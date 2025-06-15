@@ -8,35 +8,26 @@
       Hapus Akun
     </button>
 
-    <!-- Modal -->
-    <div v-if="confirmingUserDeletion" class="modal fade show d-block" style="background-color: rgba(13, 110, 253, 0.1);" tabindex="-1">
+    <!-- Simple Modal -->
+    <div v-if="confirmingUserDeletion" class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content custom-modal-design border-0 shadow-lg rounded-4">
-          <div class="modal-header custom-header border-0">
-            <div class="header-icon">
-              <i class="bi bi-shield-exclamation text-white"></i>
-            </div>
-            <div class="header-content">
-              <h5 class="modal-title fw-bold text-white mb-1">Konfirmasi Penghapusan Akun</h5>
-              <p class="modal-subtitle text-white-50 mb-0 small">Tindakan ini tidak dapat dibatalkan</p>
-            </div>
-            <button type="button" class="btn-close btn-close-white close-animated" @click="closeModal"></button>
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Konfirmasi Penghapusan Akun
+            </h5>
+            <button type="button" class="btn-close btn-close-white rotate-on-hover" @click="closeModal"></button>
           </div>
-          <div class="modal-body custom-body bg-white">
-            <div class="warning-card mb-4">
-              <div class="warning-icon">
-                <i class="bi bi-exclamation-triangle-fill text-warning"></i>
-              </div>
-              <div class="warning-content">
-                <h6 class="fw-bold mb-2 text-dark">Peringatan Penting</h6>
-                <p class="text-muted mb-0 small">
-                  Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.
-                </p>
-              </div>
+          
+          <div class="modal-body">
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <strong>Peringatan:</strong> Setelah akun dihapus, semua data akan hilang permanen dan tidak dapat dikembalikan.
             </div>
 
             <!-- Alert untuk password salah -->
-            <div v-if="showPasswordError" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            <div v-if="showPasswordError" class="alert alert-danger alert-dismissible fade show" role="alert">
               <i class="bi bi-exclamation-triangle-fill me-2"></i>
               <strong>Kata sandi salah!</strong> Silakan periksa kembali kata sandi Anda.
               <button type="button" class="btn-close" @click="showPasswordError = false"></button>
@@ -44,26 +35,25 @@
             
             <form @submit.prevent="deleteUser">
               <div class="mb-3">
-                <label for="password" class="form-label fw-bold text-dark">
-                  <i class="bi bi-key me-2 text-primary"></i>
+                <label for="password" class="form-label fw-bold">
                   Konfirmasi Kata Sandi
                 </label>
                 <div class="input-group">
-                  <span class="input-group-text bg-light border-end-0">
-                    <i class="bi bi-lock text-muted"></i>
+                  <span class="input-group-text">
+                    <i class="bi bi-lock"></i>
                   </span>
                   <input
                     id="password"
                     ref="passwordInput"
                     v-model="form.password"
                     :type="showPassword ? 'text' : 'password'"
-                    class="form-control custom-input border-start-0 border-end-0"
+                    class="form-control"
                     placeholder="Masukkan kata sandi Anda"
                     @keyup.enter="deleteUser"
                   />
                   <button
                     type="button"
-                    class="btn btn-outline-secondary password-toggle"
+                    class="btn btn-outline-secondary"
                     @click="togglePasswordVisibility"
                   >
                     <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
@@ -72,14 +62,14 @@
               </div>
             </form>
           </div>
-          <div class="modal-footer custom-footer bg-light border-0">
-            <button type="button" class="btn btn-outline-secondary custom-btn-cancel" @click="closeModal">
-              <i class="bi bi-x-circle me-2"></i>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="closeModal">
               Batal
             </button>
             <button
               type="submit"
-              class="btn btn-danger custom-btn-delete"
+              class="btn btn-danger"
               :disabled="form.processing"
               @click="deleteUser"
             >
@@ -144,252 +134,25 @@ const closeModal = () => {
 </script>
 
 <style scoped>
+/* Primary color using #0d6efd */
+.bg-primary {
+  background-color: #0d6efd !important;
+}
+
 .btn-outline-danger:hover {
-  background-color: #ef476f;
-  border-color: #ef476f;
+  background-color: #dc3545;
+  border-color: #dc3545;
 }
 
-/* Custom Modal Design */
-.custom-modal-design {
-  background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
-  overflow: hidden;
+/* Modal animations */
+.modal-content {
+  animation: fadeInUp 0.3s ease-out;
 }
 
-.custom-header {
-  background: transparent;
-  padding: 2rem 2rem 1rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.header-icon {
-  width: 50px;
-  height: 50px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.header-icon i {
-  font-size: 1.5rem;
-}
-
-.header-content {
-  flex: 1;
-}
-
-.modal-title {
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.modal-subtitle {
-  font-size: 0.875rem;
-  opacity: 0.8;
-}
-
-.custom-body {
-  padding: 2rem;
-  border-radius: 20px 20px 0 0;
-  margin-top: -10px;
-  position: relative;
-}
-
-.warning-card {
-  background: #fff8e1;
-  border: 1px solid #ffecb3;
-  border-radius: 12px;
-  padding: 1.25rem;
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-.warning-icon {
-  width: 40px;
-  height: 40px;
-  background: #fff3cd;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.warning-icon i {
-  font-size: 1.25rem;
-}
-
-.warning-content h6 {
-  color: #856404;
-  margin: 0;
-}
-
-.custom-input {
-  border: 2px solid #e9ecef;
-  padding: 0.75rem 1rem;
-  border-radius: 0;
-  transition: all 0.3s ease;
-}
-
-.custom-input:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
-  background-color: #f8f9ff;
-}
-
-.input-group-text {
-  border: 2px solid #e9ecef;
-  border-radius: 8px 0 0 8px;
-  background: #f8f9fa;
-}
-
-.password-toggle {
-  border: 2px solid #e9ecef;
-  border-radius: 0 8px 8px 0;
-  background: #f8f9fa;
-  transition: all 0.3s ease;
-}
-
-.password-toggle:hover {
-  background: #e9ecef;
-  border-color: #adb5bd;
-}
-
-.password-toggle:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
-}
-
-.custom-footer {
-  padding: 1.5rem 2rem;
-  border-radius: 0 0 20px 20px;
-  gap: 1rem;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.custom-btn-cancel {
-  border: 2px solid #6c757d;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.custom-btn-cancel:hover {
-  background: #6c757d;
-  color: white;
-  transform: translateY(-2px);
-}
-
-.custom-btn-delete {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.custom-btn-delete:hover:not(:disabled) {
-  background: linear-gradient(135deg, #c82333 0%, #a02834 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
-}
-
-.custom-btn-delete:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* Updated close button animation */
-.close-animated {
-  position: relative;
-  width: 32px;
-  height: 32px;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  opacity: 0.8;
-}
-
-.close-animated::before {
-  content: "×";
-  font-size: 24px;
-  line-height: 1;
-}
-
-.close-animated:hover {
-  transform: rotate(180deg) scale(1.2);
-  background: rgba(255, 255, 255, 0.3);
-  opacity: 1;
-  cursor: pointer;
-}
-
-.modal-dialog-centered {
-  display: flex;
-  align-items: center;
-  min-height: calc(100% - 2rem);
-}
-
-.form-label {
-  color: #0d6efd;
-  font-size: 0.95rem;
-}
-
-.text-primary {
-  color: #0d6efd !important;
-}
-
-/* Alert styling */
-.alert {
-  border-radius: 10px;
-  border: none;
-  box-shadow: 0 2px 10px rgba(220, 53, 69, 0.1);
-}
-
-.alert-danger {
-  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-  color: #721c24;
-}
-
-/* Responsive */
-@media (max-width: 576px) {
-  .custom-header {
-    padding: 1.5rem 1.5rem 1rem;
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .custom-body {
-    padding: 1.5rem;
-  }
-  
-  .custom-footer {
-    padding: 1rem 1.5rem;
-    flex-direction: column;
-  }
-  
-  .warning-card {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-/* Additional animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(-30px);
   }
   to {
     opacity: 1;
@@ -397,7 +160,22 @@ const closeModal = () => {
   }
 }
 
-.modal-content {
-  animation: fadeInUp 0.3s ease-out;
+/* Focus states */
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Rotate animation for close button */
+.rotate-on-hover {
+  transition: transform 0.3s ease;
+}
+
+.rotate-on-hover:hover {
+  transform: rotate(90deg);
 }
 </style>

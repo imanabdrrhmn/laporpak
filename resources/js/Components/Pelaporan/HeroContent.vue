@@ -40,7 +40,7 @@ defineProps({
   height: 4px;
   background-color: #ffc107;
   border-radius: 2px;
-  width: clamp(120px, 60vw, 400px); /* Responsive width with clamp */
+  width: clamp(120px, 60vw, 400px);
   margin-left: auto;
   margin-right: auto;
 }
@@ -116,6 +116,26 @@ defineProps({
   }
 }
 
+/* Surface Duo (540px) */
+@media screen and (width: 540px) {
+  .highlight-bar {
+    width: clamp(160px, 65vw, 360px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-content {
+    padding: 2rem !important;
+    text-align: center;
+  }
+  .display-4 {
+    font-size: clamp(2.2rem, 5.5vw, 2.6rem) !important;
+    justify-content: center;
+  }
+  .text-section {
+    text-align: center;
+  }
+}
+
 @media (min-width: 576px) and (max-width: 767.98px) {
   .highlight-bar {
     width: clamp(160px, 65vw, 360px);
@@ -131,18 +151,27 @@ defineProps({
 @media (min-width: 768px) and (max-width: 991.98px) {
   .highlight-bar {
     width: clamp(180px, 60vw, 380px);
+    margin-left: auto;
+    margin-right: auto;
   }
   .hero-content {
     padding: 2.5rem !important;
+    text-align: center;
   }
   .display-4 {
     font-size: clamp(2.6rem, 5vw, 3rem) !important;
+    justify-content: center;
+  }
+  .text-section {
+    text-align: center;
   }
 }
 
 @media (min-width: 992px) {
   .highlight-bar {
     width: clamp(200px, 55vw, 400px);
+    margin-left: 0; /* Reset margin for desktop */
+    margin-right: 0; /* Reset margin for desktop */
   }
   .hero-content {
     padding: 3rem !important;

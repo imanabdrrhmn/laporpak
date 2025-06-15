@@ -67,7 +67,7 @@
                 aria-label="Buka menu aksi untuk transaksi ini"
                 type="button"
               >
-                <i class="fas fa-ellipsis-v action-icon" aria-hidden="true"></i>
+                <i class="bi bi-three-dots" aria-hidden="true"></i>
               </button>
             </td>
           </tr>
@@ -221,16 +221,20 @@ const displayedPages = computed(() => {
 <style scoped>
 .table-container {
     background: white;
-    border-radius: 12px;
+    border-radius: 12px 12px 0 0;  /* Ubah border radius */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
     overflow: hidden;
     border: 1px solid #e5e7eb;
+    border-bottom: none;  /* Hapus border bottom */
 }
 
 .pagination-container {
     background: #fff;
-    border-top: 1px solid #e5e7eb;
+    border: 1px solid #e5e7eb;
+    border-top: none;  /* Hapus border top */
     padding: 1rem;
+    border-radius: 0 0 12px 12px;  /* Tambah border radius di bawah */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
 }
 
 .pagination-info {
@@ -505,6 +509,10 @@ const displayedPages = computed(() => {
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
     min-width: 120px;
+  }
+
+  .table td:last-child .btn .bi-three-dots {
+    display: none;
   }
 
   .table td:last-child .btn:after {

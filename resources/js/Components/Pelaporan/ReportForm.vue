@@ -253,7 +253,7 @@
 
 <script setup>
 import MapContainer from './MapContainer.vue';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { allCountries } from 'country-telephone-data';
 
 const props = defineProps({
@@ -270,7 +270,7 @@ const props = defineProps({
 const emit = defineEmits(['select-service', 'submit-report', 'file-upload', 'validate-description', 'get-current-location']);
 
 // Fungsi country code
-const selectedCountry = ref(allCountries.find(c => c.iso2 === 'id'));
+const selectedCountry = ref(allCountries.find(c => c.iso2 === 'id') || allCountries[0]);
 const localPhoneNumber = ref('');
 const showDropdown = ref(false);
 const countrySearch = ref('');
@@ -396,7 +396,7 @@ const resetForm = () => {
     props.formData[key] = '';
   });
   localPhoneNumber.value = '';
-  selectedCountry.value = allCountries.find(c => c.iso2 === 'id');
+  selectedCountry.value = allCountries.find(c => c.iso2 === 'id') || allCountries[0];
   countrySearch.value = '';
   filteredCountries.value = sortedCountries.value;
   showDropdown.value = false;
@@ -418,7 +418,7 @@ const submitForm = () => {
   emit('submit-report');
 };
 
-// Fungsi filter negara
+// Fungsi filter negara - FIXED
 const filterCountries = () => {
   const search = countrySearch.value.toLowerCase();
   if (!search) {
@@ -427,24 +427,37 @@ const filterCountries = () => {
   }
   
   filteredCountries.value = sortedCountries.value.filter(country => 
-    country.dialCode.includes(search)
+    country.dialCode.includes(search) ||
+    country.name.toLowerCase().includes(search)
   );
 };
 
-const toggleDropdown = () => {
+// FIXED: Toggle dropdown dengan proper event handling
+const toggleDropdown = async (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  
   showDropdown.value = !showDropdown.value;
+  
   if (showDropdown.value) {
     countrySearch.value = '';
     filteredCountries.value = sortedCountries.value;
-    setTimeout(() => {
-      if (searchInput.value) {
-        searchInput.value.focus();
-      }
-    }, 100);
+    
+    // Pastikan dropdown muncul dengan benar
+    await nextTick();
+    if (searchInput.value) {
+      searchInput.value.focus();
+    }
   }
 };
 
-const selectCountry = (country) => {
+// FIXED: Select country dengan proper event handling
+const selectCountry = (country, event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
   selectedCountry.value = country;
   showDropdown.value = false;
   countrySearch.value = '';
@@ -456,6 +469,7 @@ const selectCountry = (country) => {
   }
 };
 
+// FIXED: Handle click outside dengan proper event handling
 const handleClickOutside = (event) => {
   if (countryDropdown.value && !countryDropdown.value.contains(event.target)) {
     showDropdown.value = false;
@@ -538,7 +552,8 @@ defineExpose({
   max-width: 100%;
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-  overflow: hidden;
+  overflow: visible; /* FIXED: Changed from hidden */
+  position: relative;
 }
 
 .form-control,
@@ -546,12 +561,15 @@ defineExpose({
   font-size: 1rem;
   padding: 0.75rem;
   border-radius: 6px;
+  position: relative;
+  z-index: 1; /* FIXED: Added z-index */
 }
 
 .form-control:focus,
 .form-select:focus {
   border-color: #0d6efd;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  z-index: 5; /* FIXED: Higher z-index on focus */
 }
 
 .custom-select {
@@ -564,12 +582,15 @@ defineExpose({
   height: auto;
   overflow-x: hidden;
   word-wrap: break-word;
+  position: relative;
+  z-index: 1; /* FIXED: Added z-index */
 }
 
 .country-select-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+  z-index: 10; /* FIXED: Added higher z-index */
 }
 
 .flag-icon {
@@ -585,6 +606,7 @@ defineExpose({
   position: relative;
   min-width: clamp(80px, 10vw, 100px);
   max-width: clamp(100px, 15vw, 120px);
+  z-index: 15; /* FIXED: Added higher z-index */
 }
 
 .selected-country {
@@ -602,6 +624,8 @@ defineExpose({
   background-color: white;
   border-top-left-radius: 6px;
   border-bottom-left-radius: 6px;
+  position: relative;
+  z-index: 10; /* FIXED: Added z-index */
 }
 
 .selected-country:hover {
@@ -618,15 +642,18 @@ defineExpose({
   border: 1px solid #ced4da;
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  z-index: 9999; /* FIXED: Much higher z-index */
   max-height: 280px;
   overflow: hidden;
+  min-width: 200px; /* FIXED: Added min-width */
 }
 
 .search-input-wrapper {
   position: relative;
   padding: 0.5rem;
   border-bottom: 1px solid #dee2e6;
+  background: white;
+  z-index: 10000; /* FIXED: Higher z-index */
 }
 
 .search-input {
@@ -635,12 +662,15 @@ defineExpose({
   border-radius: 4px;
   padding: 0.5rem 2rem 0.5rem 0.75rem;
   font-size: 0.875rem;
+  position: relative;
+  z-index: 10001; /* FIXED: Highest z-index */
 }
 
 .search-input:focus {
   border-color: #0d6efd;
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
   outline: none;
+  z-index: 10002; /* FIXED: Even higher on focus */
 }
 
 .search-icon {
@@ -650,6 +680,7 @@ defineExpose({
   transform: translateY(-50%);
   color: #6c757d;
   pointer-events: none;
+  z-index: 10003; /* FIXED: High z-index */
 }
 
 .country-list {
@@ -658,6 +689,8 @@ defineExpose({
   margin: 0;
   max-height: 200px;
   overflow-y: auto;
+  background: white;
+  z-index: 9998; /* FIXED: High z-index */
 }
 
 .country-item {
@@ -670,6 +703,9 @@ defineExpose({
   gap: 0.5rem;
   transition: background-color 0.15s ease;
   justify-content: flex-start;
+  cursor: pointer; /* FIXED: Added cursor pointer */
+  position: relative;
+  z-index: 9999; /* FIXED: High z-index */
 }
 
 .country-item:hover {
@@ -697,6 +733,12 @@ defineExpose({
   min-height: 100px;
   word-break: break-word;
   hyphens: auto;
+  position: relative;
+  z-index: 1; /* FIXED: Added z-index */
+}
+
+.custom-textarea:focus {
+  z-index: 5; /* FIXED: Higher z-index on focus */
 }
 
 .custom-textarea.border-danger {
@@ -707,6 +749,8 @@ defineExpose({
 .custom-file-input {
   border-radius: 6px;
   overflow: hidden;
+  position: relative;
+  z-index: 1; /* FIXED: Added z-index */
 }
 
 .custom-file-input .form-control {
@@ -717,6 +761,10 @@ defineExpose({
 .custom-file-input .form-control:disabled {
   background-color: #e9ecef;
   opacity: 0.65;
+}
+
+.custom-file-input .form-control:focus {
+  z-index: 5; /* FIXED: Higher z-index on focus */
 }
 
 .image-preview {
@@ -733,6 +781,8 @@ defineExpose({
   transition: all 0.3s ease;
   padding: 0.75rem 1rem;
   min-height: 48px;
+  position: relative;
+  z-index: 1; /* FIXED: Added z-index */
 }
 
 .service-btn:hover:not(.btn-primary) {
@@ -753,6 +803,8 @@ defineExpose({
   transition: all 0.3s ease;
   padding: 1rem;
   min-height: 52px;
+  position: relative;
+  z-index: 1; /* FIXED: Added z-index */
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -772,6 +824,11 @@ defineExpose({
   padding-bottom: 1rem;
 }
 
+.input-group {
+  position: relative;
+  z-index: 1; /* FIXED: Added z-index */
+}
+
 .input-group .country-select-wrapper {
   flex: 0 0 auto;
 }
@@ -779,6 +836,12 @@ defineExpose({
 .input-group .form-control {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  position: relative;
+  z-index: 2; /* FIXED: Added z-index */
+}
+
+.input-group .form-control:focus {
+  z-index: 5; /* FIXED: Higher z-index on focus */
 }
 
 .spinner-border-sm {
@@ -786,7 +849,7 @@ defineExpose({
   height: 1rem;
 }
 
-/* Custom Scrollbar untuk daftar negara, dropdown wilayah, dan textarea deskripsi */
+/* FIXED: Improved scrollbar styling */
 .country-list,
 .custom-select,
 .custom-textarea {
@@ -845,7 +908,7 @@ defineExpose({
   animation: btn-wave 2s infinite;
 }
 
-/* Media queries responsif */
+/* FIXED: Media queries with better z-index handling */
 @media (min-width: 576px) {
   .form-container {
     max-width: 90%;
@@ -928,5 +991,35 @@ defineExpose({
     width: clamp(14px, 2vw, 16px);
     height: clamp(10px, 1.5vw, 12px);
   }
+  
+  /* FIXED: Mobile specific fixes */
+  .dropdown-menu-custom {
+    min-width: 250px;
+    left: -50px;
+  }
+}
+
+/* FIXED: Additional fixes for better interaction */
+* {
+  box-sizing: border-box;
+}
+
+input, select, textarea, button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* FIXED: Ensure all interactive elements are clickable */
+.form-control,
+.form-select,
+.btn,
+.selected-country,
+.country-item {
+  pointer-events: auto !important;
+  user-select: auto !important;
+  -webkit-user-select: auto !important;
+  -moz-user-select: auto !important;
+  -ms-user-select: auto !important;
 }
 </style>

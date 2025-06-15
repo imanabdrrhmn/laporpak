@@ -34,10 +34,14 @@
           :loading="quickActionLoading"
           :can="userPermissions"
           :current-page="paginationData.current_page"
+          :total-pages="paginationData.last_page"
+          :total="paginationData.total"
+          :per-page="paginationData.per_page"
           :items-per-page="itemsPerPage"
           @view-report="prepareViewReport"
           @quick-action="onQuickAction"
           @reset-filters="resetFiltersAndFetch"
+          @update:currentPage="updatePage"
         />
         <div v-else class="no-reports-found">
           <i class="fas fa-folder-open empty-icon"></i>
@@ -45,15 +49,6 @@
           <p>Silakan coba ubah filter pencarian Anda atau reset semua filter.</p>
           <button @click="resetFiltersAndFetch" class="reset-btn-empty">Reset Filter</button>
         </div>
-
-        <!-- Pagination hanya ditampilkan jika viewMode adalah 'list' atau 'table' -->
-        <Pagination
-          v-if="!isLoading && reports.length > 0 && paginationData.last_page > 1 && (viewMode === 'list' || viewMode === 'table')"
-          v-model:currentPage="paginationData.current_page"
-          :total-pages="paginationData.last_page"
-          :total="paginationData.total"
-          :per-page="paginationData.per_page"
-        />
 
         <LaporanDetailModal
           :report="currentReportForModal"
@@ -97,7 +92,6 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import DashboardHeader from './Components/DashboardHeader.vue';
 import FilterSection from './Components/FilterSection.vue';
 import ReportsContainer from './Components/ReportsContainer.vue';
-import Pagination from './Components/Pagination.vue';
 import LaporanDetailModal from './Components/LaporanDetailModal.vue';
 import ReportFlagSummaryModal from './Components/ReportFlagModal.vue';
 import UnpublishModal from './Components/UnpublishModal.vue';
@@ -355,6 +349,10 @@ const performReportAction = async (reportId, action, payload = {}, successMessag
   } finally {
     quickActionLoading.value = { ...quickActionLoading.value, [reportId]: false };
   }
+};
+
+const updatePage = (newPage) => {
+  paginationData.value.current_page = newPage;
 };
 
 const onQuickAction = ({ report, action: frontendAction }) => {

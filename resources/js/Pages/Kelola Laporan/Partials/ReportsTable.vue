@@ -1,6 +1,6 @@
 <template>
-  <!-- Desktop/Tablet View - Table -->
-  <div class="table-responsive d-none d-md-block">
+  <!-- Desktop View - Table -->
+  <div class="table-responsive d-none d-xxxl-block">
     <table class="table table-hover align-middle mb-0">
       <thead>
         <tr v-if="selectedTab === 'penipuan'">
@@ -135,8 +135,8 @@
     </table>
   </div>
 
-  <!-- Mobile View - Cards -->
-  <div class="mobile-cards d-block d-md-none">
+  <!-- Tablet/Mobile View - Cards -->
+  <div class="mobile-cards d-block d-xxxl-none">
     <!-- Penipuan Cards -->
     <div v-if="selectedTab === 'penipuan'" class="cards-container">
       <div v-for="(item, index) in displayedData" :key="index" class="mobile-card">
@@ -291,6 +291,134 @@ defineEmits(['openDetailModal']);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Nest Hub and large tablet card layout */
+@media (min-width: 992px) and (max-width: 1599.98px) {
+  .cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    padding: 0 16px;
+  }
+
+  .mobile-card {
+    margin: 0;
+    height: 100%;
+    min-height: 160px;
+  }
+
+  .card-content {
+    padding: 16px;
+  }
+
+  .card-description {
+    font-size: 14px;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .card-number {
+    font-size: 15px;
+  }
+
+  .card-date {
+    font-size: 13px;
+  }
+
+  .category-badge,
+  .status-badge {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  .query-simple {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .detail-btn {
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+}
+
+/* iPad/iPad Pro card layout */
+@media (min-width: 768px) and (max-width: 1399.98px) {
+  .cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 0 12px;
+  }
+
+  .mobile-card {
+    margin: 0;
+    height: 100%;
+  }
+
+  .card-content {
+    height: 100%;
+  }
+
+  .card-description {
+    font-size: 14px;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .card-number {
+    font-size: 14px;
+  }
+
+  .card-date {
+    font-size: 12px;
+  }
+
+  .category-badge,
+  .status-badge {
+    font-size: 11px;
+  }
+
+  .query-simple {
+    font-size: 11px;
+  }
+
+  .detail-btn {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+}
+
+/* Tablet-specific card adjustments */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .cards-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 0 8px;
+  }
+
+  .mobile-card {
+    margin: 0;
+    height: 100%;
+  }
+
+  .card-content {
+    height: 100%;
+  }
+
+  .card-description {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+/* Adjust mobile cards for smaller screens */
+@media (max-width: 767.98px) {
+  .cards-container {
+    padding: 0 8px;
+  }
 }
 
 /* Mobile Cards Styles */

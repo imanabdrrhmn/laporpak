@@ -357,4 +357,77 @@ defineEmits(['close', 'submit']);
 .modal-backdrop.show {
   opacity: 1;
 }
+
+/* Responsive Styles */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-content {
+    border-radius: 8px;
+  }
+
+  .modal-header {
+    padding: 1rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .modal-footer {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  .data-summary {
+    padding: 1rem;
+  }
+
+  .data-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .data-value {
+    text-align: left;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .modal-dialog {
+    margin: 1rem;
+  }
+  
+  .modal-content {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 769px) {
+  .modal-dialog {
+    max-width: 600px;
+    margin: 1.75rem auto;
+  }
+}
+
+/* Adjust backdrop for mobile */
+@media (max-width: 576px) {
+  .modal-backdrop {
+    opacity: 0.7;
+  }
+}
 </style>

@@ -34,7 +34,7 @@
         <td>
           <div class="table-actions">
             <button @click="$emit('viewReport', report)" class="table-action view" title="Lihat Detail">
-              <i class="fas fa-eye"></i>
+              <i class="bi bi-three-dots"></i>
             </button>
             <button
               @click="$emit('quickAction', { report, action: 'approved' })"
@@ -112,14 +112,12 @@ const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
   width: 100%;
   border-collapse: collapse;
   background-color: #fff;
-  border-radius: 12px;
+
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.reports-table thead {
-  background-color: #f5f7fa;
-}
+
 
 .reports-table th {
   padding: 16px;

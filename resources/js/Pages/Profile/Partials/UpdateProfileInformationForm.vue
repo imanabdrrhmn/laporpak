@@ -1,4 +1,3 @@
-
 <template>
   <div>
     <!-- Profile Information Section -->
@@ -27,6 +26,7 @@
                   required
                   maxlength="30"
                   autocomplete="given-name"
+                  placeholder="Masukkan nama lengkap"
                   @input="handleNameInput"
                 />
               </div>
@@ -57,6 +57,7 @@
                   :readonly="isEmailReadonly"
                   :required="!user.email || user.email.length === 0"
                   autocomplete="username"
+                  placeholder="Masukkan alamat email"
                 />
                 <span v-if="isEmailReadonly" class="input-group-text bg-secondary">
                   <i class="bi bi-lock-fill text-white"></i>
@@ -86,6 +87,7 @@
                   v-model="profileForm.no_hp"
                   :readonly="isPhoneReadonly"
                   autocomplete="tel"
+                  placeholder="Masukkan nomor telepon"
                   @input="restrictToNumbers"
                 />
                 <span v-if="isPhoneReadonly" class="input-group-text bg-secondary">
@@ -104,30 +106,34 @@
             </div>
             <div class="col-md-6">
               <label class="form-label small fw-medium">Jenis Kelamin</label>
-              <div class="d-flex gap-4 mt-2">
-                <div class="form-check">
+              <div class="d-flex gap-3">
+                <div class="gender-option" :class="{ 'active': profileForm.gender === 'male' }">
                   <input
-                    class="form-check-input"
-                    :class="{ 'is-invalid': validationErrors.gender }"
+                    class="gender-input"
                     type="radio"
                     name="gender"
                     id="male"
                     value="male"
                     v-model="profileForm.gender"
                   />
-                  <label class="form-check-label" for="male">Laki-laki</label>
+                  <label class="gender-label" for="male">
+                    <i class="bi bi-gender-male me-2"></i>
+                    Laki-laki
+                  </label>
                 </div>
-                <div class="form-check">
+                <div class="gender-option" :class="{ 'active': profileForm.gender === 'female' }">
                   <input
-                    class="form-check-input"
-                    :class="{ 'is-invalid': validationErrors.gender }"
+                    class="gender-input"
                     type="radio"
                     name="gender"
                     id="female"
                     value="female"
                     v-model="profileForm.gender"
                   />
-                  <label class="form-check-label" for="female">Perempuan</label>
+                  <label class="gender-label" for="female">
+                    <i class="bi bi-gender-female me-2"></i>
+                    Perempuan
+                  </label>
                 </div>
               </div>
               <div v-if="profileForm.errors.gender" class="mt-2 text-sm text-red-600">
@@ -205,7 +211,6 @@
                   v-model="passwordForm.password"
                   :type="showNewPassword ? 'text' : 'password'"
                   class="form-control"
-                  :class="{ 'is-invalid': !isPasswordValid && passwordForm.password.length > 0 }"
                   placeholder="Masukkan password baru"
                   autocomplete="new-password"
                   @input="validatePassword"
@@ -232,7 +237,6 @@
                   v-model="passwordForm.password_confirmation"
                   :type="showConfirmPassword ? 'text' : 'password'"
                   class="form-control"
-                  :class="{ 'is-invalid': !isPasswordMatch && passwordForm.password_confirmation.length > 0 }"
                   placeholder="Konfirmasi password baru"
                   autocomplete="new-password"
                   @input="validatePasswordMatch"
@@ -589,8 +593,8 @@ const handleNameInput = (e) => {
 
 <style scoped>
 .btn-primary {
-  background-color: #4361ee;
-  border-color: #4361ee;
+  background-color: #0d6efd;
+  
 }
 .btn-primary:hover {
   background-color: #3a56d4;
@@ -601,7 +605,7 @@ const handleNameInput = (e) => {
   border-color: #6c757d;
 }
 .text-primary {
-  color: #4361ee !important;
+  color: #0d6efd !important; 
 }
 .form-control {
   background-color: #ffffff;
@@ -635,7 +639,7 @@ const handleNameInput = (e) => {
   color: #2d3748;
 }
 .text-indigo-600 {
-  color: #5a67d8;
+  color: #0d6efd;
 }
 .text-green-600 {
   color: #059669;
@@ -652,5 +656,68 @@ const handleNameInput = (e) => {
 .spinner-border-sm {
   width: 1rem;
   height: 1rem;
+}
+.gender-option {
+  flex: 1 1 auto;
+  min-width: 140px; /* Minimal width untuk mobile */
+  position: relative;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+  margin-bottom: 0.5rem; /* Spacing untuk mobile */
+}
+
+/* Media query untuk layar kecil */
+@media (max-width: 576px) {
+  .d-flex.gap-3 {
+    flex-wrap: wrap;
+  }
+  
+  .gender-option {
+    flex: 1 1 100%;
+    margin-right: 0;
+  }
+}
+
+.gender-option:hover {
+  border-color: #0d6efd;;
+}
+
+.gender-option.active {
+  border-color: #0d6efd;;
+  background-color: #eef1ff;
+}
+
+.gender-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.gender-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: #495057;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.gender-option.active .gender-label {
+  color: #0d6efd;;
+}
+
+.gender-option:has(.gender-input:focus-visible) {
+  outline: 2px solid #0d6efd;
+  outline-offset: 2px;
 }
 </style>

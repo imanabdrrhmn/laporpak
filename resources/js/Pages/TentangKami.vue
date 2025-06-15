@@ -32,13 +32,15 @@
                   <p class="text-muted">
                     Kami berkomitmen menciptakan lingkungan yang aman, baik online maupun offline. LaporPak menyediakan platform transparan untuk berbagi informasi, meningkatkan kesadaran tentang penipuan, dan membangun komunitas yang saling mendukung.
                   </p>
-                  <a
-                    href="/pelaporan"
-                    class="btn btn-primary btn-lg mt-3 animate__animated"
-                    data-animation="animate__pulse animate__infinite animate__slower"
-                  >
-                    Lapor Sekarang
-                  </a>
+                  <div class="text-center text-md-start">
+                    <a
+                      href="/pelaporan"
+                      class="btn btn-primary btn-lg mt-3 animate__animated"
+                      data-animation="animate__pulse animate__infinite animate__slower"
+                    >
+                      Lapor Sekarang
+                    </a>
+                  </div>
                 </div>
               </div>
             </section>
