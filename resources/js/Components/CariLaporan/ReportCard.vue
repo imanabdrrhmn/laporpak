@@ -1,8 +1,8 @@
 <template>
   <div v-if="showImageModal" class="image-modal-overlay" @click="closeImageModal">
       <div class="image-modal-container" @click.stop>
-        <button class="image-modal__close" @click="closeImageModal" aria-label="Tutup pratinjau gambar">
-          ×
+        <button class="custom-close" @click="closeImageModal" aria-label="Tutup pratinjau gambar">
+          <i class="bi bi-x"></i>
         </button>
         <div class="image-modal__content">
           <img 
@@ -411,28 +411,35 @@ export default {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.image-modal__close {
+.custom-close {
   position: absolute;
   top: 15px;
   right: 15px;
-  width: 50px;
-  height: 50px;
-
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  padding: 6px;
+  background-color: #f3f4f6;
   border: none;
-  border-radius: 8px;
-  color: #333;
+  opacity: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
-  font-weight: bold;
   z-index: 10;
-  transition: all 0.3s ease;
-  line-height: 1;
+  transition: all 0.2s ease;
 }
 
+.custom-close:hover {
+  background-color: #e5e7eb;
+  transform: rotate(90deg);
+}
 
+.custom-close i {
+  font-size: 20px;
+  line-height: 1;
+  color: #374151;
+}
 
 .image-modal__content {
   overflow: auto;
@@ -498,12 +505,15 @@ export default {
     padding: 7px 12px;
   }
   
-  .image-modal__close {
+  .custom-close {
     top: 10px;
     right: 10px;
-    width: 44px;
-    height: 44px;
-    font-size: 26px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .custom-close i {
+    font-size: 18px;
   }
 }
 </style>

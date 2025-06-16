@@ -44,7 +44,7 @@ defineEmits(['confirm-delete']);
 .modal-content {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(13, 110, 253, 0.15);
+
 }
 
 .modal-header {
@@ -94,7 +94,6 @@ defineEmits(['confirm-delete']);
 
 .btn-close-custom:hover {
   color: red;
- 
   transform: rotate(90deg);
 }
 
@@ -112,25 +111,23 @@ defineEmits(['confirm-delete']);
   font-weight: 600;
   font-size: 0.95rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  
   min-width: 100px;
 }
 
 .btn-primary-custom:hover {
   background: #c82333;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
+  
   color: white;
 }
 
 .btn-primary-custom:active {
   transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+
 }
 
-.btn-primary-custom:focus {
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
-}
+
 
 /* Light button styling with blue accents */
 .btn-light {
@@ -147,7 +144,7 @@ defineEmits(['confirm-delete']);
 
 .btn-light:hover {
   background-color: rgba(13, 110, 253, 0.05);
-  border-color: #0d6efd;
+
   color: #0d6efd;
   transform: translateY(-1px);
 }
@@ -321,7 +318,6 @@ defineEmits(['confirm-delete']);
 }
 
 .btn-close-custom:focus {
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
   outline: none;
 }
 

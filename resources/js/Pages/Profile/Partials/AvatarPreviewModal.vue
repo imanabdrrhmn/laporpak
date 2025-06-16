@@ -5,7 +5,9 @@
         <div class="modal-container">
           <div class="modal-header">
             <h5 class="modal-title">Ubah Foto Profil</h5>
-            <button type="button" class="btn-close" @click="onClose"></button>
+            <button type="button" class="custom-close" @click="onClose">
+              <i class="bi bi-x"></i>
+            </button>
           </div>
           
           <div class="modal-body">
@@ -230,6 +232,32 @@ const saveChanges = () => {
   border-color: #4361ee;
   padding: 6px 12px;
   font-size: 0.9rem;
+}
+
+.custom-close {
+  border-radius: 50%;
+  padding: 6px;
+  background-color: #f3f4f6;
+  border: none;
+  opacity: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  transition: all 0.2s ease;
+}
+
+.custom-close:hover {
+  background-color: #e5e7eb;
+  transform: rotate(90deg);
+}
+
+.custom-close i {
+  font-size: 20px;
+  line-height: 1;
+  color: #374151;
 }
 
 @media (max-width: 575.98px) {

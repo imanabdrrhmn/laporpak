@@ -1,7 +1,7 @@
 <template>
   <div v-if="isOpen" class="modal-overlay" @click.self="close" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-content" @click.stop>
-      <button class="close-btn" @click="close" aria-label="Tutup modal">×</button>
+      <button class="btn-close custom-close" @click="close" aria-label="Tutup"></button>
       <h3 id="modalTitle">Ringkasan Pelaporan</h3>
 
       <p v-if="flags.length === 0" class="no-flags-text">Tidak ada laporan.</p>
@@ -90,26 +90,21 @@ export default {
   }
 }
 
-.close-btn {
+.btn-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: clamp(36px, 8vw, 48px);
-  height: clamp(36px, 8vw, 48px);
-  font-size: clamp(24px, 6vw, 36px);
-  background: transparent;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+  top: 20px;
+  right: 20px;
+  border-radius: 50%;
+  padding: 6px;
+  background-color: #f3f4f6;
+  opacity: 1;
   transition: all 0.2s ease;
+  z-index: 10;
 }
 
-.close-btn:hover {
-  color: red;
+.btn-close:hover {
+  background-color: #e5e7eb;
+  transform: rotate(90deg);
 }
 
 h3 {
@@ -174,19 +169,17 @@ ul {
   font-size: 0.9rem;
 }
 
+@media (max-width: 768px) {
+  .custom-close {
+    top: 12px;
+    right: 12px;
+  }
+}
+
 @media (max-width: 480px) {
-  .modal-content {
-    max-height: 85vh;
-  }
-
-  .category-count-item {
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .total-flags {
-    text-align: center;
+  .custom-close {
+    top: 10px;
+    right: 10px;
   }
 }
 

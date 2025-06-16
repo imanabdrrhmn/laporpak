@@ -4,7 +4,9 @@
     <div class="modal-container">
       <div class="modal-header">
         <h5 class="modal-title">Konfirmasi Hapus</h5>
-        <button class="close-button" @click="close">×</button>
+        <button class="custom-close" @click="close">
+          <i class="bi bi-x"></i>
+        </button>
       </div>
       <div class="modal-body">
         <p>Hapus pengguna <strong>{{ userName }}</strong>?</p>
@@ -78,19 +80,30 @@ const confirm = () => {
   color: white;
 }
 
-.close-button {
-  background: none;
+.custom-close {
+  border-radius: 50%;
+  padding: 6px;
+  background-color: #f3f4f6;
   border: none;
-  font-size: 1.5rem;
+  opacity: 1;
   cursor: pointer;
-  color: white;
-  opacity: 0.8;
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  transition: all 0.2s ease;
 }
 
-.close-button:hover {
-  opacity: 1;
+.custom-close:hover {
+  background-color: #e5e7eb;
   transform: rotate(90deg);
+}
+
+.custom-close i {
+  font-size: 20px;
+  line-height: 1;
+  color: #374151;
 }
 
 .modal-body {

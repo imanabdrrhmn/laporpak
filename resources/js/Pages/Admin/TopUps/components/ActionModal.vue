@@ -13,11 +13,13 @@
           <h6 class="modal-title fw-bold text-dark" id="actionModalLabel">Pilih Aksi</h6>
           <button 
             type="button" 
-            class="btn-close btn-close-custom" 
+            class="custom-close" 
             data-bs-dismiss="modal" 
             aria-label="Close" 
             @click="emit('close-action-modal')"
-          ></button>
+          >
+            <i class="bi bi-x"></i>
+          </button>
         </div>
         <div class="modal-body pt-0">
           <div class="user-info mb-3">
@@ -83,15 +85,30 @@ const emit = defineEmits(["confirm-verify", "confirm-set-pending", "confirm-reje
   padding: 0.5rem 1.25rem 1.25rem;
 }
 
-.btn-close-custom {
-  background-size: 1em;
-  opacity: 0.6;
-  transition: all 0.3s ease;
+.custom-close {
+  border-radius: 50%;
+  padding: 6px;
+  background-color: #f3f4f6;
+  border: none;
+  opacity: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  transition: all 0.2s ease;
 }
 
-.btn-close-custom:hover {
-  opacity: 1;
+.custom-close:hover {
+  background-color: #e5e7eb;
   transform: rotate(90deg);
+}
+
+.custom-close i {
+  font-size: 20px;
+  line-height: 1;
+  color: #374151;
 }
 
 .user-info {

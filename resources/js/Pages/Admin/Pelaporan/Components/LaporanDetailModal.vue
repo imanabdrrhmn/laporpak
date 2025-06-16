@@ -1,7 +1,7 @@
 <template>
   <div v-if="isVisible" class="modal-overlay" @click="closeModal">
     <div class="modal-content" @click.stop>
-      <button class="close-btn" @click="closeModal">×</button>
+      <button class="btn-close custom-close" @click="closeModal" aria-label="Tutup"></button>
 
       <div v-if="report && report.id" class="modal-body">
         <div class="evidence-section">
@@ -253,27 +253,37 @@ const closeFlagModal = () => {
   min-height: 0; /* Penting untuk flexbox scroll */
 }
 
-.close-btn {
+.custom-close {
   position: absolute;
   top: 20px;
   right: 20px;
-  width: 48px;
-  height: 48px;
-  font-size: 36px;
-  background: transparent;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 50%;
+  padding: 6px;
+  background-color: #f3f4f6;
+  opacity: 1;
   transition: all 0.2s ease;
   z-index: 10;
 }
 
-.close-btn:hover {
+.custom-close:hover {
+  background-color: #e5e7eb;
   transform: rotate(90deg);
-  color: #dc3545;
+}
+
+/* Remove old close-btn styles */
+/* Update responsive styles for close button */
+@media (max-width: 768px) {
+  .custom-close {
+    top: 12px;
+    right: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-close {
+    top: 10px;
+    right: 10px;
+  }
 }
 
 .evidence-section {

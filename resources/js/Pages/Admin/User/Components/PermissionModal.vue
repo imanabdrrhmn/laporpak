@@ -30,27 +30,10 @@
           </div>
           <button 
             type="button" 
-            class="modal-close-btn"
+            class="btn-close custom-close"
             @click="handleClose"
-            @mouseenter="startHoverAnimation"
-            @mouseleave="stopHoverAnimation"
-            aria-label="Tutup modal"
-            :class="{ 'modal-close-btn--rotating': isRotating }"
-          >
-            <svg 
-              class="close-icon"
-              :class="{ 'close-icon--rotating': isRotating }"
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              stroke-width="2"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+            aria-label="Tutup"
+          ></button>
         </div>
 
         <!-- Body -->
@@ -80,13 +63,16 @@
           </div>
           
           <form @submit.prevent="handleSubmit" class="permission-form">
-            <!-- Loading Overlay -->
-            <div v-if="isSubmitting" class="loading-overlay">
+            <!-- Loading Overlay with Success Animation -->
+            <div v-if="isSubmitting || showSuccess" class="loading-overlay">
               <div class="loading-content">
-                <div v-if="submitSuccess" class="success-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="3">
-                    <polyline points="20,6 9,17 4,12"></polyline>
+                <div v-if="submitSuccess" class="success-animation">
+                  <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
                   </svg>
+                  <h4 class="success-title">Berhasil Disimpan!</h4>
+                  <p class="success-message">Izin pengguna telah diperbarui</p>
                 </div>
                 <div v-else class="loading-spinner-container">
                   <div class="loading-spinner-large"></div>
@@ -260,6 +246,7 @@ const showFallback = ref(false)
 const submitSuccess = ref(false)
 const errorMessage = ref('')
 const isRotating = ref(false)
+const showSuccess = ref(false)
 
 onMounted(async () => {
   await nextTick()
@@ -349,6 +336,7 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   errorMessage.value = ''
   submitSuccess.value = false
+  showSuccess.value = false
 
   try {
     await emit('submit', {
@@ -356,14 +344,25 @@ const handleSubmit = async () => {
       permissions: props.selectedPermissions,
       allowed_regions: selectedRegions.value, 
     })
+    
+    // Set success state
     submitSuccess.value = true
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    showSuccess.value = true
+    
+    // Stop loading spinner first
+    isSubmitting.value = false
+    
+    // Wait for success animation to complete
+    await new Promise(resolve => setTimeout(resolve, 2500))
+    
+    // Then close modal
+    handleClose()
+    
   } catch (error) {
     console.error('Error menyimpan izin:', error)
     errorMessage.value = 'Gagal menyimpan izin. Silakan coba lagi.'
-  } finally {
     isSubmitting.value = false
-    await new Promise(resolve => setTimeout(resolve, 3000))
+    showSuccess.value = false
     submitSuccess.value = false
   }
 }
@@ -493,29 +492,20 @@ const clearAllRegions = () => {
   color: #6b7280;
 }
 
-.modal-close-btn {
-  background: none;
-  border: none;
-  padding: 8px;
-  border-radius: 8px;
-  color: #6b7280;
-  cursor: pointer;
+.btn-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  border-radius: 50%;
+  padding: 6px;
+  background-color: #f3f4f6;
+  opacity: 1;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 10;
 }
 
-.modal-close-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.close-icon {
-  transition: transform 0.3s ease;
-}
-
-.close-icon--rotating {
+.btn-close:hover {
+  background-color: #e5e7eb;
   transform: rotate(90deg);
 }
 
@@ -636,11 +626,52 @@ const clearAllRegions = () => {
   left: 0;
 }
 
-.success-icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 20px;
-  animation: scaleIn 0.3s ease;
+.success-animation {
+  text-align: center;
+}
+
+.checkmark {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 2;
+  stroke: #4CAF50;
+  stroke-miterlimit: 10;
+  animation: scale 0.3s ease-in-out;
+}
+
+.checkmark__circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 2;
+  stroke-miterlimit: 10;
+  stroke: #4CAF50;
+  fill: none;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark__check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke: #4CAF50;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+.success-title {
+  color: #4CAF50;
+  font-size: 1.25rem;
+  margin: 8px 0;
+  animation: fadeIn 0.5s ease-in-out 1s forwards;
+}
+
+.success-message {
+  color: #6B7280;
+  font-size: 0.875rem;
+  margin: 0;
+  animation: fadeIn 0.5s ease-in-out 1.2s forwards;
 }
 
 .loading-title {
@@ -723,14 +754,18 @@ const clearAllRegions = () => {
   }
 }
 
-@keyframes scaleIn {
-  from {
-    transform: scale(0);
-    opacity: 0;
+@keyframes scale {
+  0%, 100% {
+    transform: none;
   }
-  to {
-    transform: scale(1);
-    opacity: 1;
+  50% {
+    transform: scale3d(1.1, 1.1, 1);
+  }
+}
+
+@keyframes stroke {
+  100% {
+    stroke-dashoffset: 0;
   }
 }
 
