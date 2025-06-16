@@ -2,7 +2,7 @@
   <div class="card main-card">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h5 class="fw-bold mb-0">Ulasan Saya</h5>
-      <a href="#" class="text-primary text-decoration-none small">Lihat Semua ></a>
+      <a href="/feedback" class="text-primary text-decoration-none small">Lihat Semua ></a>
     </div>
     <div class="card-body text-center">
       <div v-if="!feedbacks || feedbacks.length === 0" class="empty-state">
