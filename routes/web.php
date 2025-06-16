@@ -11,12 +11,14 @@ use App\Http\Controllers\UserHistoryReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TopUpController;
 // use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\GisController; 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Feedback;
 use App\Models\Report;
 use Illuminate\Support\Facades\Auth;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +73,8 @@ Route::get('/Populasi', function () {
 })->name('populasi');
 
 
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -82,6 +86,9 @@ Route::get('/api/laporan/search', [ReportController::class, 'search'])->name('la
 Route::get('/api/dashboard-data', [DashboardAdminController::class, 'getDashboardData'])
     ->middleware(['auth', 'contact.verified', 'role:admin||verifier'])
     ->name('admin.api.dashboard.data');
+
+Route::post('api/population', [GisController::class, 'getPopulationStats']); 
+Route::get('api/population', [GisController::class, 'getPopulationStats']); 
 
 /*
 |--------------------------------------------------------------------------

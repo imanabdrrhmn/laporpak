@@ -1,9 +1,9 @@
 <?php
 use Illuminate\Http\Request;
 use App\Http\Controllers\GeocodeController;
+use App\Http\Controllers\GisController;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 Route::post('/reverse-geocode', [GeocodeController::class, 'reverseGeocode']);
+
+Route::post('/population', [GisController::class, 'getPopulationStats']);
