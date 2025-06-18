@@ -51,10 +51,20 @@ Route::middleware('auth')->group(function () {
     ->middleware('auth')
     ->name('email.verify.send');
 
-    Route::get('/verify-phone', function () {
-        return Inertia::render('VerifyPhone');
-    })->name('verification.phone.notice')
-    ->middleware('phone.not.verified');
+ Route::get('/verify-phone', function (Request $request) {
+    return Inertia::render('VerifyPhone', [ 
+        'auth' => [
+            'user' => $request->user() ? [
+                'id' => $request->user()->id,
+                'name' => $request->user()->name,
+                'email' => $request->user()->email,
+                'no_hp' => $request->user()->no_hp,
+            ] : null,
+        ],
+        'status' => session('status'),
+    ]);
+})->name('verification.phone.notice')
+  ->middleware(['auth', 'phone.not.verified']);
 
 
     Route::post('/phone/send-verification', [PhoneVerificationController::class, 'send'])->name('phone.send');
