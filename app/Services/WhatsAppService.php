@@ -3,45 +3,71 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class WhatsAppService
 {
-    protected static function authHeader()
+    /**
+     * Mengirim pesan balasan (free-form) ke pengguna WhatsApp.
+     * Digunakan untuk membalas dalam 24-hour service window.
+     *
+     * @param string $to Nomor telepon tujuan dengan format internasional (misal: 62812xxxx)
+     * @param string $message Isi pesan yang akan dikirim
+     * @return bool True jika berhasil, false jika gagal.
+     */
+    public static function sendReply(string $to, string $message): bool
     {
-        $token = config('services.wablas.token');
-        $secret = config('services.wablas.secret_key');
-        return $token . '.' . $secret;
-    }
+        // Ambil kredensial dari file .env
+        $token = env('WHATSAPP_API_TOKEN');
+        $phoneNumberId = env('WHATSAPP_PHONE_NUMBER_ID');
 
-    public static function sendVerificationCode(string $phoneNumber, string $code): ?array
-    {
-        $cleanPhone = preg_replace('/[^0-9]/', '', $phoneNumber);
+        // Jika salah satu kredensial tidak ada, catat error dan gagalkan proses
+        if (!$token || !$phoneNumberId) {
+            Log::error('WHATSAPP_SERVICE: Missing API Token or Phone Number ID in .env file.');
+            return false;
+        }
 
-        $message = "Halo! Berikut adalah kode verifikasi akun Anda di Lapor Pak: {$code}. Jangan berikan kode ini kepada siapa pun. Kode ini berlaku selama 5 menit.";
+        // Buat URL endpoint API WhatsApp Cloud
+        $url = "https://graph.facebook.com/v19.0/{$phoneNumberId}/messages";
 
-        $response = Http::withHeaders([
-            'Authorization' => self::authHeader(),
-        ])->asForm()->post(config('services.wablas.base_url') . '/api/send-message', [
-            'phone' => $cleanPhone,
-            'message' => $message,
-            'secret' => false,
-            'priority' => 1,
-        ]);
-        return $response->json();
-    }
+        // Siapkan data payload sesuai format yang diminta WhatsApp API
+        $data = [
+            'messaging_product' => 'whatsapp',
+            'to' => $to,
+            'type' => 'text',
+            'text' => [
+                'preview_url' => false, // Set false agar URL tidak membuat preview
+                'body' => $message,
+            ],
+        ];
 
-    public static function sendMessage(string $phoneNumber, string $message): ?array
-    {
-        $cleanPhone = preg_replace('/[^0-9]/', '', $phoneNumber);
+        try {
+            // Kirim request POST menggunakan Laravel HTTP Client
+            $response = Http::withToken($token)->post($url, $data);
 
-        $response = Http::withHeaders([
-            'Authorization' => self::authHeader(),
-        ])->asForm()->post(config('services.wablas.base_url') . '/api/send-message', [
-            'phone' => $cleanPhone,
-            'message' => $message,
-            'secret' => false,
-            'priority' => 1,
-        ]);
-        return $response->json();
+            // Periksa apakah request berhasil (status code 2xx)
+            if ($response->successful()) {
+                Log::info('WHATSAPP_SERVICE: Message sent successfully.', [
+                    'to' => $to, 
+                    'response' => $response->json()
+                ]);
+                return true;
+            } else {
+                // Jika gagal, catat error beserta response dari server
+                Log::error('WHATSAPP_SERVICE: Failed to send message.', [
+                    'to' => $to,
+                    'status_code' => $response->status(),
+                    'response_body' => $response->body()
+                ]);
+                return false;
+            }
+        } catch (\Exception $e) {
+            // Tangkap jika ada error koneksi atau lainnya
+            Log::critical('WHATSAPP_SERVICE: Critical error on sending message.', [
+                'error_message' => $e->getMessage(),
+                'to' => $to
+            ]);
+            return false;
+        }
     }
 }

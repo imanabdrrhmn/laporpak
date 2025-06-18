@@ -10,6 +10,7 @@ use App\Http\Controllers\LaporMapController;
 use App\Http\Controllers\UserHistoryReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TopUpController;
+use App\Http\Controllers\Api\WhatsAppTriggerController;
 // use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\GisController; 
 use Illuminate\Foundation\Application;
@@ -123,7 +124,7 @@ Route::middleware(['auth', 'contact.verified'])->group(function () {
     });
     
     // Verification
-    Route::post('/verify/{featureType}', [VerificationController::class, 'handleVerification']);
+    // Route::post('/verify/{featureType}', [VerificationController::class, 'handleVerification']);
 });
 
 /*
@@ -214,5 +215,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 | Authentication Routes
 |--------------------------------------------------------------------------
 */
+
+
+Route::middleware('auth')->post('/whatsapp/generate-trigger', [WhatsAppTriggerController::class, 'generate']);
+
 
 require __DIR__.'/auth.php';
