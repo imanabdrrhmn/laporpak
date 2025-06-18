@@ -609,12 +609,17 @@ defineExpose({
   text-decoration: none !important;
 }
 
+/* Update scale control styles */
 :global(.leaflet-control-scale) {
   background: rgba(255, 255, 255, 0.9) !important;
   border-radius: 3px !important;
   padding: 2px 5px !important;
   font-size: 10px !important;
   backdrop-filter: blur(5px);
+  margin-bottom: 10px !important;
+  margin-left: 10px !important;
+  position: relative !important;
+  z-index: 1000;
 }
 
 :global(.leaflet-control-scale-line) {
@@ -626,7 +631,9 @@ defineExpose({
   padding: 2px 5px 1px !important;
   white-space: nowrap;
   overflow: hidden;
-  background: transparent !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  margin-top: 0 !important;
+  box-sizing: content-box;
 }
 
 /* Responsive Design - Diperbaiki untuk mencegah tumpang tindih */
@@ -676,17 +683,18 @@ defineExpose({
   }
   
   :global(.leaflet-control-scale) {
-    position: fixed !important;
-    bottom: 5px !important;
-    left: 5px !important;
+    position: absolute !important;
+    bottom: 25px !important;
+    left: 10px !important;
     font-size: 8px !important;
     padding: 1px 3px !important;
-    z-index: 1000 !important;
+    margin-bottom: 0 !important;
   }
   
   :global(.leaflet-control-scale-line) {
-    font-size: 8px !important;
-    padding: 1px 3px !important;
+    border-width: 1px !important;
+    padding: 2px 4px !important;
+    min-width: 50px;
   }
 }
 
@@ -707,10 +715,8 @@ defineExpose({
   }
   
   :global(.leaflet-control-scale) {
-    left: 3px !important;
-    bottom: 3px !important;
-    font-size: 7px !important;
-    padding: 1px 2px !important;
+    bottom: 20px !important;
+    left: 8px !important;
   }
   
   :global(.leaflet-control-scale-line) {
@@ -729,7 +735,15 @@ defineExpose({
   }
   
   :global(.leaflet-control-scale) {
-    display: none !important;
+    display: block !important;
+    bottom: 15px !important;
+    left: 5px !important;
+  }
+  
+  :global(.leaflet-control-scale-line) {
+    font-size: 7px !important;
+    padding: 1px 2px !important;
+    min-width: 40px;
   }
 }
 
