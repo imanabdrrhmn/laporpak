@@ -11,7 +11,6 @@ use App\Http\Controllers\UserHistoryReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TopUpController;
 use App\Http\Controllers\Api\WhatsAppTriggerController;
-use App\Http\Controllers\Api\WhatsAppWebhookController;
 // use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\GisController; 
 use Illuminate\Foundation\Application;
@@ -224,7 +223,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::middleware('auth')->post('/whatsapp/generate-trigger', [WhatsAppTriggerController::class, 'generate']);
 
-Route::get ('/whatsapp/webhook', [WhatsAppWebhookController::class, 'handle']);
-Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'handleIncomingMessage']);
+
 
 require __DIR__.'/auth.php';

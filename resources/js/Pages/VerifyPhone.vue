@@ -88,18 +88,16 @@ const form = useForm({ code: '' });
 const successMessage = ref('');
 const errorMessage = ref('');
 
-// === FUNGSI BARU: Untuk mendapatkan link pemicu dari backend ===
 const getWhatsAppTrigger = async () => {
   isLoading.value = true;
   errorMessage.value = '';
   successMessage.value = '';
 
   try {
-    const response = await axios.post('whatsapp/generate-trigger');
+    const response = await axios.post('/whatsapp/generate-trigger');
     const { token, phone_number } = response.data;
 
-    const text = `Verifikasi akun saya dengan kode: ${token}`;
-    
+    const text = token;
     whatsAppUrl.value = `https://wa.me/${phone_number}?text=${encodeURIComponent(text)}`;
 
     componentState.value = 'wating_for_code';
