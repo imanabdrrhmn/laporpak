@@ -65,7 +65,7 @@ export default {
     async fetchPopulationData(location, radius) {
       this.loading = true
       try {
-        const response = await axios.post('/api/population', {
+        const response = await axios.post('http://127.0.0.1:8001/api/population', {
           latitude: location.lat,
           longitude: location.lng,
           radius: radius

@@ -13,66 +13,62 @@ use Exception;
 class WhatsAppWebhookController extends Controller
 {
     public function handle(Request $request)
+        {
+        $verifyToken = env('WHATSAPP_VERIFY_TOKEN'); 
+
+        $mode = $request->query('hub_mode');
+        $token = $request->query('hub_verify_token');
+        $challenge = $request->query('hub_challenge');
+
+        if ($mode === 'subscribe' && $token === $verifyToken) {
+            // Respond with the challenge token
+            return response($challenge, 200);
+        } else {
+            return response('Verification failed', 403);
+        }
+    }
+    public function handleIncomingMessage(Request $request)
     {
-        if ($request->isMethod('get') && $request->has('hub.mode')) {
+        Log::info('NEW_MESSAGE: Menerima pesan baru.', ['payload' => $request->all()]);
 
-            $mode = $request->input('hub.mode');
-            $token = $request->input('hub.verify_token');
-            $challenge = $request->input('hub.challenge');
+        try {
+            $messageObject = $request->input('entry.0.changes.0.value.messages.0');
 
-            $verifyToken = env('WHATSAPP_VERIFY_TOKEN');
-
-            if ($mode === 'subscribe' && $token === $verifyToken) {
-                Log::info('WEBHOOK_VERIFICATION: Verifikasi berhasil!');
-                return response($challenge, 200);
-            } else {
-                Log::error('WEBHOOK_VERIFICATION: Verifikasi Gagal. Token tidak cocok atau parameter hilang.');
-                return response('Forbidden: Verify token does not match.', 403);
+            if (!$messageObject || !isset($messageObject['type']) || $messageObject['type'] !== 'text') {
+                return response('OK - Not a text message payload.', 200);
             }
-        }
 
-        if ($request->isMethod('post')) {
-            Log::info('NEW_MESSAGE: Menerima pesan baru via webhook.', ['payload' => $request->all()]);
+            $from = $messageObject['from'];
+            $messageText = $messageObject['text']['body'];
 
-            try {
-                $messageObject = $request->input('entry.0.changes.0.value.messages.0');
-
-                if (!$messageObject || !isset($messageObject['type']) || $messageObject['type'] !== 'text') {
-                    return response('OK - Not a text message payload.', 200);
-                }
-
-                $from = $messageObject['from'];
-                $messageText = $messageObject['text']['body'];
-
-                if (!str_contains($messageText, 'WAV-')) {
-                    return response('OK - Ignored, no trigger token.', 200);
-                }
-
-                $triggerToken = substr($messageText, strpos($messageText, 'WAV-'));
-
-                $trigger = DB::table('whatsapp_trigger_tokens')->where('token', $triggerToken)->first();
-
-                if (!$trigger || $trigger->used_at || now()->gt($trigger->expires_at)) {
-                    Log::warning('OTP_PROCESS: Percobaan menggunakan token tidak valid, sudah dipakai, atau kedaluwarsa.', ['token' => $triggerToken]);
-                    return response('OK - Invalid, used, or expired token.', 200);
-                }
-                
-                $otp = rand(100000, 999999);
-                Cache::put('wa_verify_' . $trigger->user_id, $otp, now()->addMinutes(5));
-
-                $replyMessage = "Kode verifikasi Anda adalah: *$otp*. Jangan berikan kode ini kepada siapapun.";
-                WhatsAppService::sendReply($from, $replyMessage);
-                
-                DB::table('whatsapp_trigger_tokens')->where('id', $trigger->id)->update(['used_at' => now()]);
-                
-            } catch (Exception $e) {
-                Log::critical('WEBHOOK_ERROR: Terjadi error kritis.', [
-                    'error_message' => $e->getMessage(),
-                ]);
-                return response('Internal Server Error', 500);
+            if (!str_contains($messageText, 'WAV-')) {
+                return response('OK - Ignored, no trigger token.', 200);
             }
+
+            $triggerToken = substr($messageText, strpos($messageText, 'WAV-'));
+            $trigger = DB::table('whatsapp_trigger_tokens')->where('token', $triggerToken)->first();
+
+            if (!$trigger || $trigger->used_at || now()->gt($trigger->expires_at)) {
+                Log::warning('OTP_PROCESS: Percobaan menggunakan token tidak valid/kadaluarsa.', ['token' => $triggerToken]);
+                return response('OK - Invalid or expired token.', 200);
+            }
+            
+            $otp = rand(100000, 999999);
+            Cache::put('wa_verify_' . $trigger->user_id, $otp, now()->addMinutes(5));
+
+            $replyMessage = "Kode verifikasi Anda adalah: *$otp*. Jangan berikan kode ini kepada siapapun.";
+            WhatsAppService::sendReply($from, $replyMessage);
+            
+            DB::table('whatsapp_trigger_tokens')->where('id', $trigger->id)->update(['used_at' => now()]);
+            
+            return response('OK', 200);
+
+        } catch (Exception $e) {
+            Log::critical('WEBHOOK_ERROR: Terjadi error kritis.', [
+                'error_message' => $e->getMessage()
+            ]);
+            return response('Internal Server Error', 500);
         }
-        
-        return response('OK', 200);
     }
 }
+

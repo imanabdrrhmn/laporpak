@@ -59,7 +59,7 @@
       <div class="footer-bottom-content">
         <p class="mb-0">© 2025 Sistem Anti-Penipuan. Semua hak dilindungi.</p>
         <div class="footer-links">
-          <a href="#">Kebijakan Privasi</a>
+          <a href="/privacy-policy">Kebijakan Privasi</a>
           <a href="#">Syarat & Ketentuan</a>
           <a href="#">Bantuan</a>
         </div>

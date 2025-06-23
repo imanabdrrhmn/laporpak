@@ -22,3 +22,4 @@ yarn-error.log
 /.vscode
 /.zed
 /python_env
+/venv_api
