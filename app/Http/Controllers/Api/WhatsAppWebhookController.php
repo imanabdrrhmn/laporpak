@@ -70,5 +70,41 @@ class WhatsAppWebhookController extends Controller
             return response('Internal Server Error', 500);
         }
     }
+       private function processPasswordReset($from, $messageText)
+    {
+        $triggerToken = substr($messageText, strpos($messageText, 'RESET-'));
+        $trigger = DB::table('whatsapp_trigger_tokens')->where('token', $triggerToken)->first();
+
+        if (!$trigger || $trigger->used_at || now()->gt($trigger->expires_at)) {
+            WhatsAppService::sendReply($from, 'Maaf, link reset password ini tidak valid atau sudah kedaluwarsa. Silakan coba lagi dari halaman Lupa Password.');
+            return response('OK - Invalid trigger token', 200);
+        }
+
+        $user = User::find($trigger->user_id);
+        if (!$user) {
+            return response('OK - User not found', 200);
+        }
+
+        $rawToken = Str::random(60);
+        $hashedToken = Hash::make($rawToken);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['identifier' => $user->no_hp, 'via' => 'phone'],
+            [
+                'token' => $hashedToken,
+                'created_at' => Carbon::now(),
+                'expires_at' => Carbon::now()->addMinutes(10)
+            ]
+        );
+
+        $resetLink = url("/reset-password?no_hp={$user->no_hp}&token={$rawToken}");
+
+        $replyMessage = "Halo {$user->name}, klik link berikut untuk mereset password Anda (berlaku 10 menit):\n\n{$resetLink}";
+        WhatsAppService::sendReply($from, $replyMessage);
+        
+        DB::table('whatsapp_trigger_tokens')->where('id', $trigger->id)->update(['used_at' => now()]);
+
+        return response('OK', 200);
+    }
 }
 

@@ -9,12 +9,11 @@
             <div class="d-flex justify-content-between align-items-start mb-3">
               <div>
                 <h4 class="fw-bold modal-title">Reset Kata Sandi</h4>
-                <p class="text-muted mb-4">Masukkan email atau nomor HP terdaftar</p>
+                <p class="text-muted mb-4">Pilih metode reset password Anda</p>
               </div>
               <button type="button" class="btn-close custom-close" @click="closeModal" aria-label="Tutup"></button>
             </div>
 
-            <!-- Toggle Button for Email / No HP -->
             <div class="mb-4 login-toggle d-flex p-1 bg-light rounded-pill">
               <button
                 type="button"
@@ -34,31 +33,25 @@
               </button>
             </div>
 
-            <!-- Success Message -->
             <div v-if="successMessage" class="alert alert-success">
               {{ successMessage }}
             </div>
-
-            <!-- Error Message -->
-            <div v-if="form.errors.phoneEmail" class="alert alert-danger">
-              {{ form.errors.phoneEmail }}
+            <div v-if="errorMessage" class="alert alert-danger">
+              {{ errorMessage }}
             </div>
-
-            <!-- Form -->
-            <form @submit.prevent="handleReset" novalidate>
+            
+            <form v-if="componentState === 'input'" @submit.prevent="handleReset" novalidate>
               <div class="mb-3">
-                <label class="form-label fw-bold" v-if="isEmailMode">Email</label>
-                <label class="form-label fw-bold" v-else>Nomor HP</label>
+                <label class="form-label fw-bold">{{ isEmailMode ? 'Email' : 'Nomor HP' }}</label>
                 <input
                   :type="isEmailMode ? 'email' : 'tel'"
                   class="form-control border-primary"
-                  v-model="form.phoneEmail"
-                  :placeholder="isEmailMode ? 'Masukkan email terdaftar' : 'Masukkan nomor HP terdaftar'"
+                  v-model="form.identifier"
+                  :placeholder="isEmailMode ? 'Masukkan email terdaftar' : 'Cth: 081234567890'"
                   :disabled="isLoading"
-                  :inputmode="isEmailMode ? 'email' : 'numeric'"
-                  @keypress="!isEmailMode && onlyNumbers"
-                  @input="handlePhoneInput"
+                  @input="isEmailMode ? null : handlePhoneInput"
                 />
+                 <div v-if="form.errors.identifier" class="text-danger mt-1 small">{{ form.errors.identifier }}</div>
               </div>
 
               <button
@@ -67,15 +60,21 @@
                 :disabled="isLoading || cooldown"
               >
                 <span v-if="isLoading" class="d-flex align-items-center justify-content-center">
-                  <div class="spinner-border spinner-border-sm me-2" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
+                  <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                   Mengirim...
                 </span>
                 <span v-else-if="cooldown">Tunggu {{ cooldownTimer }} detik...</span>
-                <span v-else>Kirim Link Reset Password</span>
+                <span v-else>Kirim Link Reset</span>
               </button>
             </form>
+
+            <div v-if="componentState === 'show_whatsapp_link'" class="text-center">
+                <p>Silakan klik tombol di bawah untuk membuka WhatsApp dan kirim pesan yang telah disiapkan untuk menerima link reset password.</p>
+                <a :href="whatsAppUrl" target="_blank" class="btn btn-success w-100 py-3 fw-bold rounded-pill">
+                    <i class="bi bi-whatsapp me-2"></i> Buka WhatsApp
+                </a>
+                <button @click="resetComponentState" class="btn btn-link mt-2">Kirim ke nomor lain</button>
+            </div>
 
             <p class="text-center text-muted mt-4">
               Ingat kata sandi?
@@ -91,106 +90,132 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useForm, router as Inertia } from '@inertiajs/vue3'
+import { ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 
-const props = defineProps({ visible: Boolean })
-const emit = defineEmits(['update:visible', 'open-login'])
+// Props dan Emits
+const props = defineProps({ visible: Boolean });
+const emit = defineEmits(['update:visible', 'open-login']);
 
-const isEmailMode = ref(true)
-const successMessage = ref('')
-const isLoading = ref(false)
+// State untuk UI
+const isEmailMode = ref(true);
+const isLoading = ref(false);
+const successMessage = ref('');
+const errorMessage = ref('');
 
+// State baru untuk alur dinamis
+const componentState = ref('input'); // 'input', 'show_whatsapp_link', 'email_sent'
+const whatsAppUrl = ref('');
+
+// Form state
 const form = useForm({
-  phoneEmail: '',
-})
+  identifier: '',
+});
 
+// Fungsi untuk mengganti mode (Email/HP)
 function setMode(mode) {
-  isEmailMode.value = mode === 'email'
-  form.phoneEmail = ''
-  form.clearErrors()
-  successMessage.value = ''
+  isEmailMode.value = mode === 'email';
+  componentState.value = 'input'; // Reset ke state input
+  form.reset();
+  form.clearErrors();
+  successMessage.value = '';
+  errorMessage.value = '';
+}
+
+// Fungsi utama yang di-trigger oleh form
+const handleReset = async () => {
+  form.clearErrors();
+  successMessage.value = '';
+  errorMessage.value = '';
+
+  if (!form.identifier) {
+    form.setError('identifier', isEmailMode.value ? 'Email wajib diisi.' : 'Nomor HP wajib diisi.');
+    return;
+  }
+
+  isLoading.value = true;
+
+  try {
+    // Panggil endpoint "pintar" kita menggunakan Axios
+    const response = await axios.post('/forgot-password', {
+      identifier: form.identifier
+    });
+
+    // Cek respons dari backend
+    if (response.data.type === 'whatsapp') {
+      // --- ALUR WHATSAPP ---
+      const { trigger_token, business_phone_number } = response.data;
+      const text = trigger_token;
+      whatsAppUrl.value = `https://wa.me/${business_phone_number}?text=${encodeURIComponent(text)}`;
+      
+      successMessage.value = "Link pemicu berhasil dibuat!";
+      componentState.value = 'show_whatsapp_link'; // Ubah UI untuk menampilkan tombol WhatsApp
+    } else {
+      // --- ALUR EMAIL ---
+      successMessage.value = response.data.message || 'Petunjuk reset password telah dikirim ke email Anda.';
+      componentState.value = 'email_sent'; // Tandai email sudah dikirim
+      form.reset();
+    }
+    startCooldown(); // Mulai cooldown setelah berhasil
+
+  } catch (error) {
+    // Tangani error validasi atau error server lainnya
+    if (error.response && error.response.status === 422) {
+      form.setError('identifier', error.response.data.errors.identifier[0]);
+    } else {
+      errorMessage.value = 'Terjadi kesalahan. Silakan coba beberapa saat lagi.';
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Fungsi untuk kembali ke state awal
+function resetComponentState() {
+    componentState.value = 'input';
+    successMessage.value = '';
+    errorMessage.value = '';
+    form.reset();
+}
+
+
+// --- FUNGSI UTILITAS (COOLDOWN, MODAL, INPUT) ---
+
+const cooldown = ref(false);
+const cooldownTimer = ref(60);
+let cooldownInterval = null;
+
+function startCooldown() {
+  cooldown.value = true;
+  cooldownTimer.value = 60;
+  cooldownInterval = setInterval(() => {
+    cooldownTimer.value--;
+    if (cooldownTimer.value <= 0) {
+      clearInterval(cooldownInterval);
+      cooldown.value = false;
+    }
+  }, 1000);
 }
 
 function closeModal() {
-  form.reset()
-  form.clearErrors()
-  successMessage.value = ''
-  cooldown.value = false
-  clearInterval(cooldownInterval)
-  emit('update:visible', false)
+  form.reset();
+  form.clearErrors();
+  successMessage.value = '';
+  errorMessage.value = '';
+  if (cooldownInterval) clearInterval(cooldownInterval);
+  cooldown.value = false;
+  emit('update:visible', false);
 }
 
 function triggerLogin() {
-  emit('update:visible', false)
-  emit('open-login')
+  closeModal();
+  emit('open-login');
 }
 
-function handleReset() {
-  form.clearErrors()
-  successMessage.value = ''
-
-  if (!form.phoneEmail) {
-    form.setError('phoneEmail', isEmailMode.value ? 'Email wajib diisi' : 'Nomor HP wajib diisi')
-    return
-  }
-
-  const payload = isEmailMode.value
-    ? { email: form.phoneEmail }
-    : { no_hp: form.phoneEmail }
-
-  isLoading.value = true
-
-  Inertia.post('/forgot-password', payload, {
-    preserveScroll: true,
-    onSuccess: (response) => {
-      successMessage.value = response.props?.message || 'Link reset password berhasil dikirim.'
-      form.reset()
-      startCooldown()
-    },
-    onError: (errors) => {
-      if (errors.email || errors.no_hp) {
-        const errorMessage = isEmailMode.value 
-          ? 'Email tidak terdaftar dalam sistem' 
-          : 'Nomor HP tidak terdaftar dalam sistem'
-        form.setError('phoneEmail', errorMessage)
-      } else {
-        form.setError('phoneEmail', 'Terjadi kesalahan. Pastikan input sudah benar.')
-      }
-    },
-    onFinish: () => {
-      isLoading.value = false
-    },
-  })
-}
-
-const cooldown = ref(false)
-const cooldownTimer = ref(60)
-let cooldownInterval = null
-
-function startCooldown() {
-  cooldown.value = true
-  cooldownTimer.value = 60
-
-  cooldownInterval = setInterval(() => {
-    cooldownTimer.value--
-    if (cooldownTimer.value <= 0) {
-      clearInterval(cooldownInterval)
-      cooldown.value = false
-    }
-  }, 1000)
-}
-
-function onlyNumbers(e) {
-  const char = String.fromCharCode(e.keyCode);
-  if (/^[0-9]$/.test(char)) return true;
-  e.preventDefault();
-}
-
-function handlePhoneInput(e) {
+function handlePhoneInput() {
   if (!isEmailMode.value) {
-    e.target.value = e.target.value.replace(/[^0-9]/g, '');
-    form.phoneEmail = e.target.value;
+    form.identifier = form.identifier.replace(/[^0-9]/g, '');
   }
 }
 </script>
