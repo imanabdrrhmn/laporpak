@@ -126,7 +126,9 @@ Route::middleware(['auth', 'contact.verified'])->group(function () {
     // Verification
     // Route::post('/verify/{featureType}', [VerificationController::class, 'handleVerification']);
 });
-
+Route::get('/privacy-policy', function () {
+    return Inertia::render('Privacy/PrivacyPolicy');
+});
 /*
 |--------------------------------------------------------------------------
 | Admin & Verifier Routes

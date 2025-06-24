@@ -232,6 +232,7 @@ export default {
       this.scrollSpeed1 = this.isMobile ? 0.3 : 0.5;
       this.scrollSpeed2 = this.isMobile ? 0.2 : 0.3;
     },
+
     getCategoryClassMethod(kategori) {
       switch (kategori) {
         case 'Pelaporan':

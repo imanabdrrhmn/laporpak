@@ -71,21 +71,26 @@
                 <div v-if="errors.email" class="error-message text-danger">{{ errors.email }}</div>
               </div>
 
-              <!-- No HP -->
-              <div class="form-floating mb-3" v-if="mode === 'no_hp'">
-                <input
-                  type="tel"
-                  id="phone"
-                  class="form-control"
-                  :class="errors.no_hp ? 'is-invalid' : ''"
-                  v-model="phoneNumber"
-                  placeholder="Nomor HP"
-                  required
-                  @focus="clearError('no_hp')"
-                  @input="validatePhoneNumber"
-                  @blur="validateField('no_hp')"
-                />
-                <label for="phone">Nomor HP <span class="text-danger">*</span></label>
+              <!-- No HP dengan Prefix +62 -->
+              <div class="mb-3" v-if="mode === 'no_hp'">
+                <div class="input-group phone-input-group">
+                  <span class="input-group-text phone-prefix">+62</span>
+                  <div class="form-floating">
+                    <input
+                      type="tel"
+                      id="phone"
+                      class="form-control phone-input"
+                      :class="errors.no_hp ? 'is-invalid' : ''"
+                      v-model="phoneNumber"
+                      placeholder="81234567890"
+                      required
+                      @focus="clearError('no_hp')"
+                      @input="validatePhoneNumber"
+                      @blur="validateField('no_hp')"
+                    />
+                    <label for="phone">Nomor HP <span class="text-danger">*</span></label>
+                  </div>
+                </div>
                 <div v-if="errors.no_hp" class="error-message text-danger">{{ errors.no_hp }}</div>
                 <small class="text-muted d-block mt-1">Contoh: 81234567890 (tanpa awalan 0)</small>
               </div>
@@ -284,10 +289,19 @@ function switchMode(newMode) {
 }
 
 function validatePhoneNumber() {
-  // Remove non-digits
-  phoneNumber.value = phoneNumber.value.replace(/\D/g, '')
-  // Set the form value without +62 prefix
-  form.no_hp = phoneNumber.value
+  // Remove non-digits and limit input
+  let cleanNumber = phoneNumber.value.replace(/\D/g, '')
+  
+  // Prevent starting with 0
+  if (cleanNumber.startsWith('0')) {
+    cleanNumber = cleanNumber.substring(1)
+  }
+  
+  // Update the display value
+  phoneNumber.value = cleanNumber
+  
+  // Set the form value with +62 prefix for backend
+  form.no_hp = cleanNumber ? `+62${cleanNumber}` : ''
 }
 
 function clearError(field) {
@@ -483,6 +497,54 @@ function handleRegister() {
   padding: 0 15px;
 }
 
+/* Phone input group styling */
+.phone-input-group {
+  position: relative;
+}
+
+.phone-prefix {
+  background-color: #f8f9fa;
+  border: 1.5px solid #e2e8f0;
+  border-right: none;
+  color: #495057;
+  font-weight: 600;
+  border-radius: 10px 0 0 10px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.phone-input {
+  border-left: none !important;
+  border-radius: 0 10px 10px 0 !important;
+  padding-left: 1rem !important;
+}
+
+.phone-input-group .form-floating {
+  flex: 1;
+}
+
+.phone-input-group .form-floating > label {
+  left: 1rem;
+  padding-left: 0;
+}
+
+.phone-input:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+.phone-input:focus + label {
+  color: #2563EB;
+}
+
+.phone-input-group:focus-within .phone-prefix {
+  border-color: #2563EB;
+  background-color: rgba(37, 99, 235, 0.05);
+  color: #2563EB;
+}
+
 .form-control.is-invalid {
   background-image: none !important;
   padding-right: 1rem !important;
@@ -533,10 +595,11 @@ function handleRegister() {
   height: 56px;
 }
 
-/* Delete these styles as they're no longer needed */
-.input-group .input-group-text,
-.input-group .form-control {
-  border-radius: 10px;
+/* Tambahan CSS agar label lebih ke bawah */
+.form-floating > label {
+  padding: 0.75rem 1rem;
+  top: 55%;
+  transform: translateY(-50%);
 }
 
 /* Toggle button styling */
@@ -598,6 +661,8 @@ function handleRegister() {
 
 .form-floating > label {
   padding: 0.75rem 1rem;
+  top: 55%;
+  transform: translateY(-50%);
 }
 
 /* Submit button */
