@@ -27,7 +27,7 @@
               <div class="col-md-8">
                 <div class="animate__animated" data-animation="animate__fadeInRight">
                   <p class="text-muted mb-3">
-                    <strong>LaporPak</strong> adalah platform digital inovatif yang memungkinkan masyarakat melaporkan masalah infrastruktur, layanan publik, dan penipuan dengan mudah melalui nomor HP. Kami mengubah laporan masyarakat menjadi data berharga untuk meningkatkan kinerja pemerintah dan perusahaan.
+                    <strong>LaporPak</strong> adalah platform digital yang dirancang untuk memudahkan masyarakat dalam melaporkan berbagai bentuk penipuan, khususnya yang dilakukan melalui nomor telepon. Tidak hanya terbatas pada kasus penipuan, <strong>LaporPak</strong> juga memungkinkan masyarakat untuk melaporkan kerusakan infrastruktur dan permasalahan layanan publik lainnya. Dengan sistem yang mudah digunakan dan responsif, setiap laporan yang masuk akan membantu membangun lingkungan yang lebih aman, transparan, dan berdaya guna bagi semua pihak.
                   </p>
                   <p class="text-muted">
                     Kami berkomitmen menciptakan lingkungan yang aman, baik online maupun offline. LaporPak menyediakan platform transparan untuk berbagi informasi, meningkatkan kesadaran tentang penipuan, dan membangun komunitas yang saling mendukung.
@@ -49,7 +49,7 @@
             <section class="mb-5 reveal-section">
               <h2 class="text-center mb-4 fw-bold text-dark animate__animated" data-animation="animate__fadeInUp">Visi Kami</h2>
               <div class="card bg-primary text-white shadow-lg rounded-3 text-center vision-card p-4 animate__animated" data-animation="animate__zoomIn" data-delay="0.2s">
-                <p class="h5 mb-0">Menjadi platform pelaporan terpercaya yang melindungi masyarakat dari kejahatan digital dan offline.</p>
+                <p class="h5 mb-0">Menjadi platform pelaporan terpercaya yang melindungi masyarakat dari kejahatan digital.</p>
               </div>
             </section>
 
@@ -87,7 +87,7 @@
                       Mengapa Memilih Kami
                     </h3>
                     <p class="text-muted">
-                      Kami menawarkan keamanan, kecepatan, dan transparansi dalam setiap laporan. Didukung teknologi AI dan tim verifikasi profesional, kami memastikan laporan Anda diproses dengan akurat dan efisien.
+                      "Kami menawarkan keamanan, kecepatan, dan transparansi dalam setiap laporan. Dengan dukungan sistem terintegrasi dan tim verifikasi yang profesional, kami memastikan setiap laporan diproses secara akurat dan efisien."
                     </p>
                   </div>
                 </div>
@@ -100,7 +100,7 @@
                       Apa yang Kami Lakukan
                     </h3>
                     <p class="text-muted">
-                      Kami memproses laporan penipuan, mendidik masyarakat, dan berkolaborasi dengan pihak berwenang untuk menciptakan ekosistem yang lebih aman dan terpercaya.
+                      "Kami memproses laporan penipuan, mendidik masyarakat, dan berkolaborasi dengan pihak berwenang untuk menciptakan ekosistem yang lebih aman dan terpercaya."
                     </p>
                   </div>
                 </div>
@@ -210,11 +210,31 @@ const missions = ref([
 
 // Services data
 const services = ref([
-  { title: 'Pelaporan Penipuan Online & Offline', icon: 'bi bi-exclamation-circle', colClass: 'col-md-4' },
-  { title: 'Verifikasi Laporan dengan AI dan Tim Khusus', icon: 'bi bi-shield-check', colClass: 'col-md-4' },
-  { title: 'Pencarian Database Pelaku Terlapor', icon: 'bi bi-search', colClass: 'col-md-4' },
-  { title: 'Edukasi dan Tips Mencegah Penipuan', icon: 'bi bi-lightbulb', colClass: 'col-md-6' },
-  { title: 'Dukungan Komunitas dan Kolaborasi', icon: 'bi bi-people', colClass: 'col-md-6' },
+  { 
+    title: 'Pelaporan Penipuan dan Kerusakan Infrastruktur Secara Online', 
+    icon: 'bi bi-exclamation-triangle', 
+    colClass: 'col-md-4' 
+  },
+  { 
+    title: 'Verifikasi Data Digital(NPWP, NIK, Telco, Blacklist, Pajak, dll)', 
+    icon: 'bi bi-shield-lock', 
+    colClass: 'col-md-4' 
+  },
+  { 
+    title: 'Pemetaan Lokasi Laporan Secara Real-time', 
+    icon: 'bi bi-geo-alt', 
+    colClass: 'col-md-4' 
+  },
+  { 
+    title: 'Pencarian dan Filter Laporan yang Telah Dipublikasikan', 
+    icon: 'bi bi-search', 
+    colClass: 'col-md-6' 
+  },
+  { 
+    title: 'Visualisasi Populasi Penduduk Indonesia', 
+    icon: 'bi bi-bar-chart-line', 
+    colClass: 'col-md-6' 
+  },
 ]);
 
 // Intersection Observer untuk animasi scroll

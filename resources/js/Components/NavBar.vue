@@ -235,7 +235,7 @@
         >
           <Link
             href="/"
-            class="d-flex align-items-center text-decoration-none"
+            class="d-flex align-items-center text-decoration-none justify-content-start" 
             @click="closeMobileNav"
           >
             <img
