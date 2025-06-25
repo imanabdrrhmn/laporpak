@@ -33,11 +33,11 @@
           </button>
         </div>
 
-        <!-- Category Dropdown -->
+        <!-- Category Dropdown - PERBAIKAN UTAMA -->
         <div class="col-12 col-md-6 col-xl-3 order-3">
           <div class="input-group filter-input-group">
-            <span class="input-group-text bg-primary text-white">
-              <i class="bi bi-filter me-2"></i> Kategori
+            <span class="input-group-text bg-primary text-white category-label">
+              <span class="category-text">Kategori</span>
             </span>
             <select v-model="localSelectedCategory" class="form-select filter-select" @change="$emit('handle-category-change')">
               <option value="">Semua Kategori</option>
@@ -50,7 +50,7 @@
           </div>
         </div>
 
-        <!-- Sort Buttons - PERBAIKAN UTAMA -->
+        <!-- Sort Buttons -->
         <div class="col-12 col-md-6 col-xl-3 order-4">
           <div class="btn-group w-100 filter-btn-group">
             <button
@@ -59,7 +59,7 @@
               :class="sortBy === 'latest' ? 'btn-primary active' : 'btn-outline-primary'"
               @click.prevent="handleSortChange('latest')"
             >
-              <i class="bi bi-clock-history me-1"></i> Terbaru
+              <i></i> Terbaru
             </button>
             <button
               type="button"
@@ -129,8 +129,8 @@ const handleSortChange = (sortType) => {
   font-weight: 500;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer; /* Tambahkan cursor pointer */
-  user-select: none; /* Mencegah text selection */
+  cursor: pointer;
+  user-select: none;
 }
 
 .filter-btn:hover:not(:disabled) {
@@ -152,12 +152,26 @@ const handleSortChange = (sortType) => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.filter-input-group .input-group-text {
+/* PERBAIKAN UTAMA - Category Label Styling */
+.category-label {
   background-color: #0d6efd;
   color: white;
   border: none;
   font-size: 0.9rem;
   padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: fit-content;
+  white-space: nowrap;
+}
+
+.category-label i {
+  flex-shrink: 0;
+}
+
+.category-text {
+  display: inline-block;
 }
 
 .filter-select {
@@ -166,6 +180,7 @@ const handleSortChange = (sortType) => {
   font-size: 0.9rem;
   padding: 0.5rem;
   transition: all 0.2s ease;
+  flex: 1;
 }
 
 .filter-select:focus {
@@ -184,8 +199,8 @@ const handleSortChange = (sortType) => {
   font-size: 0.9rem;
   padding: 0.5rem;
   transition: all 0.2s ease;
-  cursor: pointer; /* Pastikan cursor pointer */
-  pointer-events: auto; /* Pastikan pointer events aktif */
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .filter-btn-group .btn-outline-primary {
@@ -222,43 +237,12 @@ const handleSortChange = (sortType) => {
   color: white;
 }
 
-/* Pastikan tidak ada overlay yang menghalangi */
 .btn-group {
   position: relative;
   z-index: 1;
 }
 
-@media (max-width: 767.98px) {
-  .card-body {
-    padding: 1rem;
-  }
-
-  .filter-btn {
-    font-size: 0.85rem;
-    padding: 0.4rem 0.75rem;
-  }
-
-  .filter-input-group .input-group-text {
-    font-size: 0.85rem;
-    padding: 0.4rem 0.75rem;
-  }
-
-  .filter-select {
-    font-size: 0.85rem;
-    padding: 0.4rem;
-  }
-
-  .filter-btn-group .btn {
-    font-size: 0.85rem;
-    padding: 0.4rem;
-  }
-
-  .filter-alert {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.75rem;
-  }
-}
-
+/* Responsive Design - Mobile First */
 @media (max-width: 575.98px) {
   .card-body {
     padding: 0.75rem;
@@ -269,51 +253,78 @@ const handleSortChange = (sortType) => {
     padding: 0.35rem 0.5rem;
   }
 
-  .filter-input-group .input-group-text {
+  .category-label {
     font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+    gap: 0.25rem;
+  }
+
+  .category-text {
+    display: none; /* Sembunyikan text "Kategori" di mobile */
   }
 
   .filter-select {
     font-size: 0.8rem;
+    padding: 0.4rem;
   }
 
   .filter-btn-group .btn {
     font-size: 0.8rem;
+    padding: 0.4rem;
   }
 
   .filter-alert {
     font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
   }
 }
 
-@media (max-width: 767.98px) {
-  .btn {
-    padding: 0.5rem 0.75rem;
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .card-body {
+    padding: 1rem;
   }
 
-  .input-group-text {
-    font-size: 0.875rem;
+  .filter-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
   }
 
-  .input-group .form-select {
-    font-size: 0.875rem;
+  .category-label {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.7rem;
+    gap: 0.4rem;
   }
 
-  .card {
-    margin-bottom: 0.75rem;
+  .filter-select {
+    font-size: 0.85rem;
+    padding: 0.45rem;
+  }
+
+  .filter-btn-group .btn {
+    font-size: 0.85rem;
+    padding: 0.45rem;
+  }
+
+  .filter-alert {
+    font-size: 0.8rem;
+    padding: 0.45rem 0.75rem;
   }
 }
 
-@media (max-width: 991.98px) {
+@media (min-width: 768px) and (max-width: 991.98px) {
   .row {
     margin: 0 -0.5rem;
   }
 
   .col-12,
-  .col-sm-6,
-  .col-md-4,
-  .col-lg-4 {
+  .col-md-6 {
     padding: 0 0.5rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .category-text {
+    display: inline-block; /* Tampilkan text "Kategori" di desktop */
   }
 }
 </style>

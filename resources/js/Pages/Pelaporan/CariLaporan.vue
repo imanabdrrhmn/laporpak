@@ -111,105 +111,506 @@ import Pagination from '@/Components/CariLaporan/Pagination.vue';
 import ReportDetailModal from '@/Components/CariLaporan/ReportDetailModal.vue';
 import ReportFlagModal from '@/Components/CariLaporan/ReportFlagModal.vue';
 
+// Constants
+const SEARCH_CONFIG = {
+  MIN_QUERY_LENGTH: 3,
+  DEFAULT_ITEMS_PER_PAGE: 12,
+  DEBOUNCE_DELAY: 500,
+  SCROLL_THRESHOLD: 300,
+  MAX_VISIBLE_PAGES: 5
+};
+
+const DEFAULT_FILTERS = {
+  searchQuery: '',
+  categoryFilter: 'all',
+  sortOrder: 'newest'
+};
+
+const MODAL_TYPES = {
+  DETAIL: 'detail',
+  FLAG: 'flag'
+};
+
 export default {
   name: 'CariLaporanPage',
+  
   components: {
-    AppLayout, Feedback, Section, Head, SearchBar, ResultsStats, ReportList, Pagination, ReportDetailModal, ReportFlagModal,
+    AppLayout,
+    Feedback,
+    Section,
+    Head,
+    SearchBar,
+    ResultsStats,
+    ReportList,
+    Pagination,
+    ReportDetailModal,
+    ReportFlagModal,
   },
+  
   props: {
-    reportStats: { type: Object, default: () => ({ verifiedReports: 0, totalReports: 0, fraudReports: 0 }) },
-    feedbacks: { type: Array, default: () => [] },
-    initialCategories: { type: Array, default: () => [] },
-    user: { type: Object },
+    reportStats: {
+      type: Object,
+      default: () => ({
+        verifiedReports: 0,
+        totalReports: 0,
+        fraudReports: 0
+      })
+    },
+    feedbacks: {
+      type: Array,
+      default: () => []
+    },
+    initialCategories: {
+      type: Array,
+      default: () => []
+    },
+    user: {
+      type: Object
+    },
   },
+  
   data() {
     return {
-      searchQuery: '',
-      categoryFilter: 'all',
-      sortOrder: 'newest',
+      searchQuery: DEFAULT_FILTERS.searchQuery,
+      categoryFilter: DEFAULT_FILTERS.categoryFilter,
+      sortOrder: DEFAULT_FILTERS.sortOrder,
       reports: [],
       loading: false,
       searchError: '',
-      itemsPerPage: 12,
-      paginationData: { current_page: 1, last_page: 1, per_page: 12, total: 0, links: {} },
+      itemsPerPage: SEARCH_CONFIG.DEFAULT_ITEMS_PER_PAGE,
+      paginationData: this.getDefaultPaginationData(),
       detailModalOpen: false,
       flagModalOpen: false,
       selectedReport: null,
       firstLoadDone: false,
       showScrollTopButton: false,
-      isFlaggingInProgress: false, // State utama untuk mengunci UI
+      isFlaggingInProgress: false,
     };
   },
+  
   computed: {
-    hasActiveFilters() { return this.searchQuery || (this.categoryFilter && this.categoryFilter !== 'all'); },
+    hasSearchQuery() {
+      return Boolean(this.searchQuery?.trim());
+    },
+
+    hasCategoryFilter() {
+      return this.categoryFilter && this.categoryFilter !== 'all';
+    },
+
+    hasActiveFilters() {
+      return this.hasSearchQuery || this.hasCategoryFilter;
+    },
+
     visiblePageNumbers() {
-        const maxPagesToShow = 5; let pages = []; const currentPage = this.paginationData.current_page; const totalPages = this.paginationData.last_page; if (!totalPages || totalPages <= 0) return [];
-        if (totalPages <= maxPagesToShow) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
-        else { let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2)); let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-            if (endPage - startPage + 1 < maxPagesToShow) { if (currentPage < (totalPages / 2)) { endPage = Math.min(totalPages, startPage + maxPagesToShow - 1); } else { startPage = Math.max(1, endPage - maxPagesToShow + 1); } }
-            for (let i = startPage; i <= endPage; i++) pages.push(i);
-        } return pages;
+      return this.calculateVisiblePageNumbers();
     },
-    showStartEllipsis() { return this.visiblePageNumbers.length > 0 && this.visiblePageNumbers[0] > 1; },
-    showEndEllipsis() { return this.visiblePageNumbers.length > 0 && this.visiblePageNumbers[this.visiblePageNumbers.length - 1] < this.paginationData.last_page; },
-    showFallbackSectionInfo() { return !this.loading && !this.searchError && this.firstLoadDone && (!this.hasActiveFilters || (this.hasActiveFilters && this.reports.length === 0)); }
+
+    showStartEllipsis() {
+      return this.visiblePageNumbers.length > 0 && 
+             this.visiblePageNumbers[0] > 1;
+    },
+
+    showEndEllipsis() {
+      const lastVisible = this.visiblePageNumbers[this.visiblePageNumbers.length - 1];
+      return this.visiblePageNumbers.length > 0 && 
+             lastVisible < this.paginationData.last_page;
+    },
+
+    shouldShowFallbackSection() {
+      return !this.loading && 
+             !this.searchError && 
+             this.firstLoadDone && 
+             this.shouldShowEmptyState();
+    }
   },
-  methods: {
-    async searchReports() {
-      if (this.searchQuery && this.searchQuery.length > 0 && this.searchQuery.length < 3) { this.searchError = 'Kata kunci pencarian minimal 3 karakter.'; this.reports = []; this.paginationData = { ...this.paginationData, total: 0, last_page: 1, current_page: 1 }; return; }
-      this.searchError = ''; this.loading = true;
-      try {
-        const params = { query: this.searchQuery, category: (this.categoryFilter && this.categoryFilter !== 'all') ? this.categoryFilter : '', sortOrder: this.sortOrder, page: this.paginationData.current_page, perPage: this.itemsPerPage };
-        const response = await axios.get('/api/laporan/search', { params });
-        this.reports = response.data.data || [];
-        if (response.data.meta) { this.paginationData = { current_page: response.data.meta.current_page, last_page: response.data.meta.last_page, per_page: response.data.meta.per_page, total: response.data.meta.total, links: response.data.links || {} }; this.itemsPerPage = response.data.meta.per_page || this.itemsPerPage; }
-        else { this.paginationData = { current_page: response.data.current_page || 1, last_page: response.data.last_page || 1, per_page: response.data.per_page || this.itemsPerPage, total: response.data.total || this.reports.length, links: response.data.links || {} }; this.itemsPerPage = response.data.per_page || this.itemsPerPage; }
-        this.firstLoadDone = true;
-      } catch (error) {
-        console.error("Error fetching search results:", error); this.searchError = error.response?.data?.message || error.message || 'Terjadi kesalahan saat pencarian.'; this.reports = []; this.paginationData = { current_page: 1, last_page: 1, per_page: this.itemsPerPage, total: 0, links: {} };
-      } finally { this.loading = false; }
-    },
-    debouncedSearch: debounce(function () { if (this.paginationData.current_page !== 1) { this.paginationData.current_page = 1; } else { this.searchReports(); } }, 500),
-    clearSearch() { this.searchQuery = ''; this.searchError = ''; if (this.paginationData.current_page !== 1) { this.paginationData.current_page = 1; } else { this.searchReports(); } },
-    clearCategoryFilter() { this.categoryFilter = 'all'; },
-    resetAllFilters() { this.searchQuery = ''; this.categoryFilter = 'all'; this.sortOrder = 'newest'; this.searchError = ''; if (this.paginationData.current_page !== 1) { this.paginationData.current_page = 1; } else { this.searchReports(); } },
-    changePage(page) { if (page >= 1 && page <= this.paginationData.last_page && page !== this.paginationData.current_page) { this.paginationData.current_page = page; } },
-    openDetailModal(report) { this.selectedReport = report; this.detailModalOpen = true; document.body.style.overflow = 'hidden'; },
-    closeDetailModal() { if (this.isFlaggingInProgress) return; this.detailModalOpen = false; if (!this.flagModalOpen) { this.selectedReport = null; } document.body.style.overflow = ''; },
-    openFlagModalFromList(report) { if (this.isFlaggingInProgress) return; this.selectedReport = report; this.flagModalOpen = true; document.body.style.overflow = 'hidden'; },
-    openFlagModalFromDetail(reportId) {
-      if (this.isFlaggingInProgress) return; const reportToFlag = this.reports.find(r => r.id === reportId) || this.selectedReport;
-      if (reportToFlag) { this.selectedReport = reportToFlag; this.flagModalOpen = true; if (!this.detailModalOpen) { document.body.style.overflow = 'hidden'; } }
-      else { console.error("Laporan untuk di-flag tidak ditemukan:", reportId); }
-    },
-    closeFlagModal() { if (this.isFlaggingInProgress) return; this.flagModalOpen = false; if (!this.detailModalOpen) { this.selectedReport = null; document.body.style.overflow = ''; } },
-    handleFlagSubmitted() {
-      if (this.selectedReport) {
-        const index = this.reports.findIndex(r => r.id === this.selectedReport.id);
-        if (index !== -1) {
-          this.reports[index].has_been_flagged_by_user = true;
+  
+  watch: {
+    'paginationData.current_page': {
+      handler(newPage, oldPage) {
+        if (newPage !== oldPage && this.firstLoadDone) {
+          this.searchReports();
+          this.scrollToTop();
         }
-        // Update juga state di selectedReport agar ReportDetailModal ikut terupdate
-        this.selectedReport.has_been_flagged_by_user = true;
       }
     },
-    handleScroll() { this.showScrollTopButton = window.scrollY > 300; },
-    scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
+
+    categoryFilter: {
+      handler(newVal, oldVal) {
+        if (newVal !== oldVal && this.firstLoadDone) {
+          this.resetToFirstPage();
+        }
+      }
+    },
+
+    sortOrder: {
+      handler(newVal, oldVal) {
+        if (newVal !== oldVal && this.firstLoadDone) {
+          this.resetToFirstPage();
+        }
+      }
+    },
+
+    itemsPerPage: {
+      handler(newVal, oldVal) {
+        if (newVal !== oldVal && this.firstLoadDone) {
+          this.resetToFirstPage();
+        }
+      }
+    }
+  },
+  
+  created() {
+    this.debouncedSearch = debounce(this.handleDebouncedSearch, SEARCH_CONFIG.DEBOUNCE_DELAY);
+  },
+  
+  mounted() {
+    this.initializeFromUrl();
+    this.performInitialSearch();
+    this.setupScrollListener();
+  },
+  
+  beforeUnmount() {
+    this.removeScrollListener();
+    this.unlockBodyScroll();
+  },
+  
+  methods: {
+    // =================
+    // INITIALIZATION
+    // =================
+    initializeFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      this.searchQuery = urlParams.get('query') || DEFAULT_FILTERS.searchQuery;
+      this.categoryFilter = urlParams.get('category') || DEFAULT_FILTERS.categoryFilter;
+      this.sortOrder = urlParams.get('sortOrder') || DEFAULT_FILTERS.sortOrder;
+      this.paginationData.current_page = parseInt(urlParams.get('page')) || 1;
+      this.itemsPerPage = parseInt(urlParams.get('perPage')) || SEARCH_CONFIG.DEFAULT_ITEMS_PER_PAGE;
+    },
+
+    performInitialSearch() {
+      this.searchReports();
+    },
+
+    // =================
+    // SEARCH METHODS
+    // =================
+    async searchReports() {
+      if (!this.isValidSearchQuery()) {
+        this.handleInvalidSearch();
+        return;
+      }
+
+      await this.performSearch();
+    },
+
+    isValidSearchQuery() {
+      return !this.searchQuery || 
+             this.searchQuery.length === 0 || 
+             this.searchQuery.length >= SEARCH_CONFIG.MIN_QUERY_LENGTH;
+    },
+
+    handleInvalidSearch() {
+      this.searchError = `Kata kunci pencarian minimal ${SEARCH_CONFIG.MIN_QUERY_LENGTH} karakter.`;
+      this.resetSearchResults();
+    },
+
+    async performSearch() {
+      this.setLoadingState(true);
+      
+      try {
+        const response = await this.fetchSearchResults();
+        this.handleSearchSuccess(response.data);
+      } catch (error) {
+        this.handleSearchError(error);
+      } finally {
+        this.setLoadingState(false);
+      }
+    },
+
+    setLoadingState(loading) {
+      this.loading = loading;
+      if (loading) {
+        this.searchError = '';
+      }
+    },
+
+    async fetchSearchResults() {
+      const params = this.buildSearchParams();
+      return await axios.get('/api/laporan/search', { params });
+    },
+
+    buildSearchParams() {
+      return {
+        query: this.searchQuery,
+        category: this.getActiveCategory(),
+        sortOrder: this.sortOrder,
+        page: this.paginationData.current_page,
+        perPage: this.itemsPerPage
+      };
+    },
+
+    getActiveCategory() {
+      return this.hasCategoryFilter ? this.categoryFilter : '';
+    },
+
+    handleSearchSuccess(data) {
+      this.reports = data.data || [];
+      this.updatePaginationData(data);
+      this.firstLoadDone = true;
+    },
+
+    handleSearchError(error) {
+      console.error("Error fetching search results:", error);
+      this.searchError = this.extractErrorMessage(error);
+      this.resetSearchResults();
+    },
+
+    extractErrorMessage(error) {
+      return error.response?.data?.message || 
+             error.message || 
+             'Terjadi kesalahan saat pencarian.';
+    },
+
+    // =================
+    // SEARCH CONTROLS
+    // =================
+    handleDebouncedSearch() {
+      this.resetToFirstPage();
+    },
+
+    clearSearch() {
+      this.searchQuery = '';
+      this.searchError = '';
+      this.resetToFirstPage();
+    },
+
+    clearCategoryFilter() {
+      this.categoryFilter = 'all';
+    },
+
+    resetAllFilters() {
+      this.searchQuery = DEFAULT_FILTERS.searchQuery;
+      this.categoryFilter = DEFAULT_FILTERS.categoryFilter;
+      this.sortOrder = DEFAULT_FILTERS.sortOrder;
+      this.searchError = '';
+      this.resetToFirstPage();
+    },
+
+    resetToFirstPage() {
+      if (this.paginationData.current_page !== 1) {
+        this.paginationData.current_page = 1;
+      } else {
+        this.searchReports();
+      }
+    },
+
+    // =================
+    // DATA MANAGEMENT
+    // =================
+    resetSearchResults() {
+      this.reports = [];
+      this.paginationData = this.getDefaultPaginationData();
+    },
+
+    getDefaultPaginationData() {
+      return {
+        current_page: 1,
+        last_page: 1,
+        per_page: this.itemsPerPage,
+        total: 0,
+        links: {}
+      };
+    },
+
+    updatePaginationData(data) {
+      if (data.meta) {
+        this.updateFromMetaData(data);
+      } else {
+        this.updateFromLegacyData(data);
+      }
+    },
+
+    updateFromMetaData(data) {
+      this.paginationData = {
+        current_page: data.meta.current_page,
+        last_page: data.meta.last_page,
+        per_page: data.meta.per_page,
+        total: data.meta.total,
+        links: data.links || {}
+      };
+      this.itemsPerPage = data.meta.per_page || this.itemsPerPage;
+    },
+
+    updateFromLegacyData(data) {
+      this.paginationData = {
+        current_page: data.current_page || 1,
+        last_page: data.last_page || 1,
+        per_page: data.per_page || this.itemsPerPage,
+        total: data.total || this.reports.length,
+        links: data.links || {}
+      };
+      this.itemsPerPage = data.per_page || this.itemsPerPage;
+    },
+
+    // =================
+    // PAGINATION
+    // =================
+    changePage(page) {
+      if (this.isValidPageChange(page)) {
+        this.paginationData.current_page = page;
+      }
+    },
+
+    isValidPageChange(page) {
+      return page >= 1 && 
+             page <= this.paginationData.last_page && 
+             page !== this.paginationData.current_page;
+    },
+
+    calculateVisiblePageNumbers() {
+      const { current_page: currentPage, last_page: totalPages } = this.paginationData;
+      const maxPages = SEARCH_CONFIG.MAX_VISIBLE_PAGES;
+
+      if (!totalPages || totalPages <= 0) return [];
+      if (totalPages <= maxPages) {
+        return Array.from({ length: totalPages }, (_, i) => i + 1);
+      }
+
+      return this.calculatePageRange(currentPage, totalPages, maxPages);
+    },
+
+    calculatePageRange(currentPage, totalPages, maxPages) {
+      let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+      let endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+      if (endPage - startPage + 1 < maxPages) {
+        startPage = Math.max(1, endPage - maxPages + 1);
+      }
+
+      return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+    },
+
+    // =================
+    // MODAL MANAGEMENT
+    // =================
+    openDetailModal(report) {
+      this.openModal(MODAL_TYPES.DETAIL, report);
+    },
+
+    closeDetailModal() {
+      this.closeModal(MODAL_TYPES.DETAIL);
+    },
+
+    openFlagModalFromList(report) {
+      this.openModal(MODAL_TYPES.FLAG, report);
+    },
+
+    openFlagModalFromDetail(reportId) {
+      if (this.isFlaggingInProgress) return;
+      
+      const reportToFlag = this.findReportById(reportId);
+      if (reportToFlag) {
+        this.selectedReport = reportToFlag;
+        this.flagModalOpen = true;
+        if (!this.detailModalOpen) {
+          this.lockBodyScroll();
+        }
+      } else {
+        console.error("Laporan untuk di-flag tidak ditemukan:", reportId);
+      }
+    },
+
+    closeFlagModal() {
+      this.closeModal(MODAL_TYPES.FLAG);
+    },
+
+    openModal(modalType, report = null) {
+      if (this.isFlaggingInProgress) return;
+      
+      this.selectedReport = report;
+      this[`${modalType}ModalOpen`] = true;
+      this.lockBodyScroll();
+    },
+
+    closeModal(modalType) {
+      if (this.isFlaggingInProgress) return;
+      
+      this[`${modalType}ModalOpen`] = false;
+      
+      if (!this.hasOpenModals()) {
+        this.selectedReport = null;
+        this.unlockBodyScroll();
+      }
+    },
+
+    hasOpenModals() {
+      return this.detailModalOpen || this.flagModalOpen;
+    },
+
+    lockBodyScroll() {
+      document.body.style.overflow = 'hidden';
+    },
+
+    unlockBodyScroll() {
+      document.body.style.overflow = '';
+    },
+
+    // =================
+    // FLAG HANDLING
+    // =================
+    handleFlagSubmitted() {
+      if (!this.selectedReport) return;
+      
+      this.updateReportFlagStatus(this.selectedReport.id, true);
+    },
+
     handleFlagSubmitting(status) {
       this.isFlaggingInProgress = status;
     },
-  },
-  watch: {
-    'paginationData.current_page'(newPage, oldPage) { if (newPage !== oldPage && this.firstLoadDone) { this.searchReports(); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
-    categoryFilter(newVal, oldVal) { if (newVal !== oldVal && this.firstLoadDone) { if (this.paginationData.current_page !== 1) this.paginationData.current_page = 1; else this.searchReports(); } },
-    sortOrder(newVal, oldVal) { if (newVal !== oldVal && this.firstLoadDone) { if (this.paginationData.current_page !== 1) this.paginationData.current_page = 1; else this.searchReports(); } },
-    itemsPerPage(newVal, oldVal) { if (newVal !== oldVal && this.firstLoadDone) { if (this.paginationData.current_page !== 1) this.paginationData.current_page = 1; else this.searchReports(); } }
-  },
-  mounted() {
-    const urlParams = new URLSearchParams(window.location.search); this.searchQuery = urlParams.get('query') || ''; this.categoryFilter = urlParams.get('category') || 'all'; this.sortOrder = urlParams.get('sortOrder') || 'newest'; this.paginationData.current_page = parseInt(urlParams.get('page')) || 1; this.itemsPerPage = parseInt(urlParams.get('perPage')) || 12;
-    this.searchReports(); window.addEventListener('scroll', this.handleScroll);
-  },
-  beforeUnmount() { window.removeEventListener('scroll', this.handleScroll); }
+
+    updateReportFlagStatus(reportId, flagged) {
+      const reportIndex = this.reports.findIndex(r => r.id === reportId);
+      if (reportIndex !== -1) {
+        this.reports[reportIndex].has_been_flagged_by_user = flagged;
+      }
+      
+      if (this.selectedReport && this.selectedReport.id === reportId) {
+        this.selectedReport.has_been_flagged_by_user = flagged;
+      }
+    },
+
+    // =================
+    // UTILITY METHODS
+    // =================
+    findReportById(reportId) {
+      return this.reports.find(r => r.id === reportId) || this.selectedReport;
+    },
+
+    shouldShowEmptyState() {
+      return !this.hasActiveFilters || 
+             (this.hasActiveFilters && this.reports.length === 0);
+    },
+
+    // =================
+    // SCROLL HANDLING
+    // =================
+    setupScrollListener() {
+      window.addEventListener('scroll', this.handleScroll);
+    },
+
+    removeScrollListener() {
+      window.removeEventListener('scroll', this.handleScroll);
+    },
+
+    handleScroll() {
+      this.showScrollTopButton = window.scrollY > SEARCH_CONFIG.SCROLL_THRESHOLD;
+    },
+
+    scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 };
 </script>
 

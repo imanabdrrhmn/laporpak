@@ -58,8 +58,8 @@ defineProps({
   background-color: #ffffff;
   overflow: hidden;
   transition: all 0.3s ease;
-  width: 100%; /* Mengganti nilai tetap dengan 100% */
-  max-width: 100%; /* Membatasi lebar maksimum */
+  width: 100%; 
+  max-width: 100%; 
 }
 
 .main-card:hover {
