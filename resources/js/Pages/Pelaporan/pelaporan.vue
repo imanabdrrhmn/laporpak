@@ -1,11 +1,15 @@
 <template>
   <AppLayout>
     <Head title="Pelaporan" />
+    
     <section class="hero-section py-4">
       <div class="hero-overlay"></div>
       <div class="container-fluid px-0">
         <div class="row g-0">
-          <HeroContent :selected-service="selectedService" :service-info="serviceInfo" />
+          <HeroContent 
+            :selected-service="selectedService" 
+            :service-info="serviceInfo" 
+          />
           <ReportForm
             ref="reportForm"
             :provinces="provinces"
@@ -16,101 +20,94 @@
             :form-data="formData"
             :validation-errors="validationErrors"
             :is-form-valid="isFormValid"
-            @select-service="selectService"
-            @submit-report="handleSubmitReport"
+            @select-service="handleServiceSelection"
+            @submit-report="handleReportSubmission"
             @file-upload="handleFileUpload"
-            @validate-description="validateDescription"
-            @get-current-location="getCurrentLocation"
+            @validate-description="handleDescriptionValidation"
+            @get-current-location="handleLocationRequest"
           />
         </div>
       </div>
     </section>
+
     <Alur />
     <Section 
-      :verifiedReports="verifiedReports"
-      :totalReports="totalReports"
-      :fraudReports="fraudReports"
+      :verified-reports="verifiedReports"
+      :total-reports="totalReports"
+      :fraud-reports="fraudReports"
     />
     <Feedback :feedbacks="feedbacks" />
+    
+    <!-- Modals -->
     <SuccessModal
       :show="showSuccessModal"
-      @close="showSuccessModal = false"
+      @close="closeSuccessModal"
     />
-    <LoginModal v-model:visible="showLoginModal" :is-from-report="true" />
-    <RegisterModal v-model:visible="showRegisterModal" :is-from-report="true" />
+    <LoginModal 
+      v-model:visible="showLoginModal" 
+      :is-from-report="true" 
+    />
+    <RegisterModal 
+      v-model:visible="showRegisterModal" 
+      :is-from-report="true" 
+    />
   </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed, reactive, watch } from 'vue';
-import { Head, usePage, router as Inertia } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
-import Alur from '@/Components/Pelaporan/ReportFlow.vue';
-import Section from '@/Components/Section.vue';
-import Feedback from '@/Components/Feedback.vue';
-import SuccessModal from '@/Components/Pelaporan/SuccessModal.vue';
-import LoginModal from '@/Components/modals/LoginModal.vue';
-import RegisterModal from '@/Components/modals/RegisterModal.vue';
-import HeroContent from '@/Components/Pelaporan/HeroContent.vue';
-import ReportForm from '@/Components/Pelaporan/ReportForm.vue';
+import { ref, computed, reactive, watch } from 'vue'
+import { Head, usePage, router as Inertia } from '@inertiajs/vue3'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import Alur from '@/Components/Pelaporan/ReportFlow.vue'
+import Section from '@/Components/Section.vue'
+import Feedback from '@/Components/Feedback.vue'
+import SuccessModal from '@/Components/Pelaporan/SuccessModal.vue'
+import LoginModal from '@/Components/modals/LoginModal.vue'
+import RegisterModal from '@/Components/modals/RegisterModal.vue'
+import HeroContent from '@/Components/Pelaporan/HeroContent.vue'
+import ReportForm from '@/Components/Pelaporan/ReportForm.vue'
 
-const page = usePage();
-const feedbacks = page.props.feedbacks;
-const showSuccessModal = ref(false);
-const showLoginModal = ref(false);
-const showRegisterModal = ref(false);
-const provinces = page.props.provinces;
-const verifiedReports = page.props.verifiedReports || 0;
-const totalReports = page.props.totalReports || 0;
-const fraudReports = page.props.fraudReports || 0;
+// Constants
+const VALIDATION_CONSTANTS = {
+  MAX_DESCRIPTION_LENGTH: 1500,
+  MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+  MIN_PHONE_LENGTH: 9,
+  EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  PHONE_PREFIX: '+',
+  BORDER_HIGHLIGHT_DURATION: 800
+}
 
-const userIsLoggedIn = computed(() => !!page.props.auth.user);
+const SERVICE_TYPES = {
+  FRAUD: 'Penipuan',
+  INFRASTRUCTURE: 'Infrastruktur'
+}
 
-// Referensi untuk mengakses ReportForm
-const reportForm = ref(null);
+const CATEGORY_TYPES = {
+  PHONE: 'Nomor Hp',
+  EMAIL: 'Email'
+}
 
-// Opsi layanan dengan ikon
-const services = [
-  { label: 'Penipuan', value: 'Penipuan', icon: 'bi bi-shield-exclamation' },
-  { label: 'Infrastruktur', value: 'Infrastruktur', icon: 'bi bi-building-gear' }
-];
+// Props from Inertia
+const page = usePage()
+const {
+  feedbacks,
+  provinces,
+  verifiedReports = 0,
+  totalReports = 0,
+  fraudReports = 0
+} = page.props
 
-// Kategori untuk setiap jenis layanan
-const fraudCategories = [
-  { label: 'Nomor Telepon', value: 'Nomor Hp' },
-  { label: 'Email', value: 'Email' }
-];
+// Computed properties
+const userIsLoggedIn = computed(() => !!page.props.auth.user)
 
-const infrastructureCategories = [
-  { label: 'Jalan Rusak', value: 'Jalan' },
-  { label: 'Lampu Penerangan', value: 'Lampu' },
-  { label: 'Saluran Air', value: 'Saluran Air' },
-  { label: 'Fasilitas Umum', value: 'Fasilitas Umum' },
-  { label: 'Lainnya', value: 'Lainnya' }
-];
+// Reactive state
+const selectedService = ref(SERVICE_TYPES.FRAUD)
+const showSuccessModal = ref(false)
+const showLoginModal = ref(false)
+const showRegisterModal = ref(false)
+const reportForm = ref(null)
 
-// Informasi layanan
-const serviceInfo = {
-  Penipuan: {
-    badge: 'Platform Pelaporan',
-    title: 'Pelaporan Penipuan',
-    description: 'Laporkan nomor HP, email, atau akun yang terindikasi mencurigakan untuk verifikasi lebih lanjut.',
-    icon: 'bi bi-shield-check',
-    formTitle: 'Formulir Pelaporan Penipuan',
-    descriptionPlaceholder: 'Ceritakan bagaimana kejadian yang mencurigakan terjadi dan modus yang digunakan...',
-  },
-  Infrastruktur: {
-    badge: 'Lapor Infrastruktur',
-    title: 'Pelaporan Infrastruktur',
-    description: 'Laporkan fasilitas umum dan infrastruktur yang rusak untuk perbaikan yang lebih cepat.',
-    icon: 'bi bi-building-gear',
-    formTitle: 'Formulir Pelaporan  Infrastruktur',
-    descriptionPlaceholder: 'Jelaskan detail kerusakan dan dampaknya terhadap lingkungan...',
-  }
-};
-
-// Data reaktif
-const selectedService = ref('Penipuan');
+// Form data
 const formData = reactive({
   category: '',
   description: '',
@@ -119,253 +116,376 @@ const formData = reactive({
   address: '',
   source: '',
   region: '',
-  email: '',
-});
+  email: ''
+})
 
-// Pelacak error validasi
+// Validation errors
 const validationErrors = reactive({
   category: false,
   description: false,
   source: false,
   location: false,
   region: false,
-  email: false,
-});
+  email: false
+})
 
-// Validasi form yang ditingkatkan
-const isFormValid = computed(() => {
-  const baseValid =
-    formData.category &&
-    formData.category.trim() !== '' &&
-    formData.description &&
-    formData.description.trim() !== '' &&
-    formData.description.length <= 1500 &&
-    formData.location !== null &&
-    formData.region &&
-    formData.region.trim() !== '';
-
-  if (selectedService.value === 'Penipuan') {
-    if (formData.category === 'Email') {
-      return baseValid && formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
-    }
-    return baseValid && formData.source && formData.source.startsWith('+') && formData.source.length >= 9;
+// Service configuration
+const services = [
+  { 
+    label: 'Penipuan', 
+    value: SERVICE_TYPES.FRAUD, 
+    icon: 'bi bi-shield-exclamation' 
+  },
+  { 
+    label: 'Infrastruktur', 
+    value: SERVICE_TYPES.INFRASTRUCTURE, 
+    icon: 'bi bi-building-gear' 
   }
-  return baseValid;
-});
+]
 
-// Hitung kategori berdasarkan layanan yang dipilih
-const currentCategories = computed(() =>
-  selectedService.value === 'Penipuan' ? fraudCategories : infrastructureCategories
-);
+const fraudCategories = [
+  { label: 'Nomor Telepon', value: CATEGORY_TYPES.PHONE },
+  { label: 'Email', value: CATEGORY_TYPES.EMAIL }
+]
 
-// Pantau perubahan layanan untuk mereset nilai form
-watch(selectedService, () => {
-  formData.category = '';
-  formData.description = '';
-  formData.source = '';
-  formData.email = '';
-  Object.keys(validationErrors).forEach(key => {
-    validationErrors[key] = false;
-  });
-});
+const infrastructureCategories = [
+  { label: 'Jalan Rusak', value: 'Jalan' },
+  { label: 'Lampu Penerangan', value: 'Lampu' },
+  { label: 'Saluran Air', value: 'Saluran Air' },
+  { label: 'Fasilitas Umum', value: 'Fasilitas Umum' },
+  { label: 'Lainnya', value: 'Lainnya' }
+]
 
-// Handler pemilihan layanan
-const selectService = (value) => {
-  selectedService.value = value;
-  formData.category = '';
-};
-
-// Handler upload file
-const handleFileUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file terlalu besar. Maksimal 5MB.');
-      return;
-    }
-    formData.evidence = file;
-  } else {
-    formData.evidence = null;
-  }
-};
-
-// Handler pengiriman form dengan cek login
-const handleSubmitReport = () => {
-  if (!userIsLoggedIn.value) {
-    showLoginModal.value = true;
-  } else {
-    submitReport();
-  }
-};
-
-// Handler pengiriman form
-const submitReport = () => {
-  Object.keys(validationErrors).forEach(key => {
-    validationErrors[key] = false;
-  });
-
-  let hasErrors = false;
-  if (!formData.category || formData.category.trim() === '') {
-    validationErrors.category = true;
-    hasErrors = true;
-  }
-
-  if (!formData.description || formData.description.trim() === '') {
-    validationErrors.description = true;
-    hasErrors = true;
-  }
-
-  if (!formData.location) {
-    validationErrors.location = true;
-    hasErrors = true;
-  }
-
-  if (!formData.region || formData.region.trim() === '') {
-    validationErrors.region = true;
-    hasErrors = true;
-  }
-
-  if (selectedService.value === 'Penipuan') {
-    if (formData.category === 'Email') {
-      if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        validationErrors.email = true;
-        hasErrors = true;
-      }
-    } else {
-      if (!formData.source || !formData.source.startsWith('+') || formData.source.length < 9) {
-        validationErrors.source = true;
-        hasErrors = true;
-      }
-    }
-  }
-
-  if (hasErrors) {
-    const firstError = document.querySelector('.is-invalid, .border-danger');
-    if (firstError) {
-      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    return;
-  }
-
-  const dataToSubmit = new FormData();
-  dataToSubmit.append('category', formData.category);
-  dataToSubmit.append('description', formData.description);
-  if (formData.evidence) {
-    dataToSubmit.append('evidence', formData.evidence);
-  }
-  dataToSubmit.append('source', formData.source);
-  dataToSubmit.append('location[lat]', formData.location.lat);
-  dataToSubmit.append('location[lng]', formData.location.lng);
-  dataToSubmit.append('address', formData.address);
-  dataToSubmit.append('service', selectedService.value);
-  dataToSubmit.append('region', formData.region);
-  if (formData.email) {
-    dataToSubmit.append('email', formData.email);
-  }
-
-  Inertia.post('/pelaporan/create', dataToSubmit, {
-    onSuccess: () => {
-      // Reset formData
-      Object.assign(formData, {
-        category: '',
-        description: '',
-        evidence: null,
-        location: null,
-        address: '',
-        source: '',
-        region: '',
-        email: '',
-      });
-      // Panggil resetForm dari child component
-      if (reportForm.value) {
-        reportForm.value.resetForm();
-      }
-      showSuccessModal.value = true;
-    },
-    onError: (errors) => {
-      console.error('Error pengiriman:', errors);
-      alert('Gagal mengirim laporan. Silakan coba lagi.');
-    }
-  });
-};
-
-// Handler geolokasi
-const getCurrentLocation = async () => {
-  if (navigator.geolocation) {
-    formData.address = 'Mendapatkan alamat...';
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const userLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        formData.location = userLocation;
-
-        const { fullAddress, region } = await reverseGeocode(userLocation.lat, userLocation.lng);
-
-        formData.address = fullAddress;
-        formData.region = region || '';
-
-        validationErrors.location = false;
-      },
-      (error) => {
-        let message;
-        switch(error.code) {
-          case error.PERMISSION_DENIED:
-            message = "Akses lokasi ditolak oleh pengguna.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            message = "Informasi lokasi tidak tersedia.";
-            break;
-          case error.TIMEOUT:
-            message = "Waktu permintaan lokasi habis.";
-            break;
-          default:
-            message = "Terjadi kesalahan saat mendapatkan lokasi.";
-        }
-        alert(message);
-        formData.address = '';
-        formData.region = '';
-      },
-      { enableHighAccuracy: true }
-    );
-  } else {
-    alert("Browser Anda tidak mendukung Geolocation.");
-  }
-};
-
-// Reverse geocoding menggunakan Nominatim API
-async function reverseGeocode(lat, lng) {
-  try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
-    if (!response.ok) {
-      throw new Error('Gagal mendapatkan alamat');
-    }
-    const data = await response.json();
-
-    const fullAddress = data.display_name || 'Alamat tidak ditemukan';
-    const region = data.address?.state || data.address?.city || data.address?.county || '';
-
-    return { fullAddress, region };
-  } catch (error) {
-    console.error('Error saat reverse geocoding:', error);
-    return { fullAddress: 'Alamat tidak tersedia', region: '' };
+const serviceInfo = {
+  [SERVICE_TYPES.FRAUD]: {
+    badge: 'Platform Pelaporan',
+    title: 'Pelaporan Penipuan',
+    description: 'Laporkan nomor HP, email, atau akun yang terindikasi mencurigakan untuk verifikasi lebih lanjut.',
+    icon: 'bi bi-shield-check',
+    formTitle: 'Formulir Pelaporan Penipuan',
+    descriptionPlaceholder: 'Ceritakan bagaimana kejadian yang mencurigakan terjadi dan modus yang digunakan...'
+  },
+  [SERVICE_TYPES.INFRASTRUCTURE]: {
+    badge: 'Lapor Infrastruktur',
+    title: 'Pelaporan Infrastruktur',
+    description: 'Laporkan fasilitas umum dan infrastruktur yang rusak untuk perbaikan yang lebih cepat.',
+    icon: 'bi bi-building-gear',
+    formTitle: 'Formulir Pelaporan Infrastruktur',
+    descriptionPlaceholder: 'Jelaskan detail kerusakan dan dampaknya terhadap lingkungan...'
   }
 }
 
-// Validasi deskripsi
-const validateDescription = () => {
-  if (formData.description.length > 1500) {
-    formData.description = formData.description.substring(0, 1500);
-    const textarea = document.querySelector('.custom-textarea');
-    if (textarea) {
-      textarea.classList.add('border-danger');
-      setTimeout(() => {
-        textarea.classList.remove('border-danger');
-      }, 800);
+// Computed
+const currentCategories = computed(() =>
+  selectedService.value === SERVICE_TYPES.FRAUD ? fraudCategories : infrastructureCategories
+)
+
+const isFormValid = computed(() => {
+  const baseValidation = validateBaseForm()
+  
+  if (selectedService.value === SERVICE_TYPES.FRAUD) {
+    return baseValidation && validateFraudSpecificFields()
+  }
+  
+  return baseValidation
+})
+
+// Validation functions
+function validateBaseForm() {
+  return (
+    isFieldValid(formData.category) &&
+    isFieldValid(formData.description) &&
+    formData.description.length <= VALIDATION_CONSTANTS.MAX_DESCRIPTION_LENGTH &&
+    formData.location !== null &&
+    isFieldValid(formData.region)
+  )
+}
+
+function validateFraudSpecificFields() {
+  if (formData.category === CATEGORY_TYPES.EMAIL) {
+    return formData.email && VALIDATION_CONSTANTS.EMAIL_REGEX.test(formData.email)
+  }
+  
+  return (
+    formData.source &&
+    formData.source.startsWith(VALIDATION_CONSTANTS.PHONE_PREFIX) &&
+    formData.source.length >= VALIDATION_CONSTANTS.MIN_PHONE_LENGTH
+  )
+}
+
+function isFieldValid(field) {
+  return field && field.trim() !== ''
+}
+
+// Watchers
+watch(selectedService, () => {
+  resetFormData()
+  clearValidationErrors()
+})
+
+// Event handlers
+function handleServiceSelection(value) {
+  selectedService.value = value
+  formData.category = ''
+}
+
+function handleFileUpload(event) {
+  const file = event.target.files[0]
+  
+  if (!file) {
+    formData.evidence = null
+    return
+  }
+  
+  if (file.size > VALIDATION_CONSTANTS.MAX_FILE_SIZE) {
+    showAlert('Ukuran file terlalu besar. Maksimal 5MB.')
+    return
+  }
+  
+  formData.evidence = file
+}
+
+function handleReportSubmission() {
+  if (!userIsLoggedIn.value) {
+    showLoginModal.value = true
+    return
+  }
+  
+  submitReport()
+}
+
+function handleDescriptionValidation() {
+  if (formData.description.length > VALIDATION_CONSTANTS.MAX_DESCRIPTION_LENGTH) {
+    formData.description = formData.description.substring(0, VALIDATION_CONSTANTS.MAX_DESCRIPTION_LENGTH)
+    highlightTextareaError()
+  }
+}
+
+function handleLocationRequest() {
+  if (!navigator.geolocation) {
+    showAlert('Browser Anda tidak mendukung Geolocation.')
+    return
+  }
+  
+  getCurrentLocation()
+}
+
+// Core business logic
+function submitReport() {
+  clearValidationErrors()
+  
+  if (!validateFormData()) {
+    scrollToFirstError()
+    return
+  }
+  
+  const formDataToSubmit = prepareFormData()
+  
+  Inertia.post('/pelaporan/create', formDataToSubmit, {
+    onSuccess: handleSubmitSuccess,
+    onError: handleSubmitError
+  })
+}
+
+function validateFormData() {
+  const validators = [
+    () => validateField('category', formData.category),
+    () => validateField('description', formData.description),
+    () => validateField('location', formData.location),
+    () => validateField('region', formData.region),
+    () => validateServiceSpecificFields()
+  ]
+  
+  return validators.every(validator => validator())
+}
+
+function validateField(fieldName, value) {
+  const isValid = fieldName === 'location' ? value !== null : isFieldValid(value)
+  validationErrors[fieldName] = !isValid
+  return isValid
+}
+
+function validateServiceSpecificFields() {
+  if (selectedService.value !== SERVICE_TYPES.FRAUD) {
+    return true
+  }
+  
+  if (formData.category === CATEGORY_TYPES.EMAIL) {
+    const isValid = formData.email && VALIDATION_CONSTANTS.EMAIL_REGEX.test(formData.email)
+    validationErrors.email = !isValid
+    return isValid
+  }
+  
+  const isValid = (
+    formData.source &&
+    formData.source.startsWith(VALIDATION_CONSTANTS.PHONE_PREFIX) &&
+    formData.source.length >= VALIDATION_CONSTANTS.MIN_PHONE_LENGTH
+  )
+  validationErrors.source = !isValid
+  return isValid
+}
+
+function prepareFormData() {
+  const dataToSubmit = new FormData()
+  
+  const fields = [
+    'category',
+    'description',
+    'source',
+    'address',
+    'region',
+    'email'
+  ]
+  
+  fields.forEach(field => {
+    if (formData[field]) {
+      dataToSubmit.append(field, formData[field])
+    }
+  })
+  
+  if (formData.evidence) {
+    dataToSubmit.append('evidence', formData.evidence)
+  }
+  
+  if (formData.location) {
+    dataToSubmit.append('location[lat]', formData.location.lat)
+    dataToSubmit.append('location[lng]', formData.location.lng)
+  }
+  
+  dataToSubmit.append('service', selectedService.value)
+  
+  return dataToSubmit
+}
+
+function getCurrentLocation() {
+  formData.address = 'Mendapatkan alamat...'
+  
+  navigator.geolocation.getCurrentPosition(
+    handleLocationSuccess,
+    handleLocationError,
+    { enableHighAccuracy: true }
+  )
+}
+
+async function handleLocationSuccess(position) {
+  const userLocation = {
+    lat: position.coords.latitude,
+    lng: position.coords.longitude
+  }
+  
+  formData.location = userLocation
+  
+  try {
+    const { fullAddress, region } = await reverseGeocode(userLocation.lat, userLocation.lng)
+    formData.address = fullAddress
+    formData.region = region || ''
+    validationErrors.location = false
+  } catch (error) {
+    console.error('Reverse geocoding error:', error)
+    formData.address = 'Alamat tidak tersedia'
+    formData.region = ''
+  }
+}
+
+function handleLocationError(error) {
+  const errorMessages = {
+    [error.PERMISSION_DENIED]: 'Akses lokasi ditolak oleh pengguna.',
+    [error.POSITION_UNAVAILABLE]: 'Informasi lokasi tidak tersedia.',
+    [error.TIMEOUT]: 'Waktu permintaan lokasi habis.',
+    default: 'Terjadi kesalahan saat mendapatkan lokasi.'
+  }
+  
+  const message = errorMessages[error.code] || errorMessages.default
+  showAlert(message)
+  
+  formData.address = ''
+  formData.region = ''
+}
+
+async function reverseGeocode(lat, lng) {
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+  
+  try {
+    const response = await fetch(url)
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch address')
+    }
+    
+    const data = await response.json()
+    
+    return {
+      fullAddress: data.display_name || 'Alamat tidak ditemukan',
+      region: data.address?.state || data.address?.city || data.address?.county || ''
+    }
+  } catch (error) {
+    console.error('Reverse geocoding error:', error)
+    return {
+      fullAddress: 'Alamat tidak tersedia',
+      region: ''
     }
   }
-};
+}
+
+// Success and error handlers
+function handleSubmitSuccess() {
+  resetFormData()
+  
+  if (reportForm.value?.resetForm) {
+    reportForm.value.resetForm()
+  }
+  
+  showSuccessModal.value = true
+}
+
+function handleSubmitError(errors) {
+  console.error('Submit error:', errors)
+  showAlert('Gagal mengirim laporan. Silakan coba lagi.')
+}
+
+// Utility functions
+function resetFormData() {
+  Object.assign(formData, {
+    category: '',
+    description: '',
+    evidence: null,
+    location: null,
+    address: '',
+    source: '',
+    region: '',
+    email: ''
+  })
+}
+
+function clearValidationErrors() {
+  Object.keys(validationErrors).forEach(key => {
+    validationErrors[key] = false
+  })
+}
+
+function scrollToFirstError() {
+  const firstError = document.querySelector('.is-invalid, .border-danger')
+  firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+function highlightTextareaError() {
+  const textarea = document.querySelector('.custom-textarea')
+  
+  if (!textarea) return
+  
+  textarea.classList.add('border-danger')
+  setTimeout(() => {
+    textarea.classList.remove('border-danger')
+  }, VALIDATION_CONSTANTS.BORDER_HIGHLIGHT_DURATION)
+}
+
+function showAlert(message) {
+  alert(message)
+}
+
+function closeSuccessModal() {
+  showSuccessModal.value = false
+}
 </script>
 
 <style scoped>
