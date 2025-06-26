@@ -158,8 +158,8 @@
                     class="dropdown-item"
                     :class="{ active: $page.url === '/verifikasi' }"
                   >
-                    <i class="bi bi-check-square-fill me-2"></i>
-                    Verifikasi
+                    <i class="bi bi-person-vcard me-2"></i>
+                    Verifikasi Data
                   </Link>
                 </li>
                 <li>
@@ -296,8 +296,8 @@
                   Pelaporan
                 </Link>
                 <Link href="/verifikasi" class="nav-link" @click="closeMobileNav">
-                  <i class="bi bi-check-square-fill me-2"></i>
-                  Verifikasi
+                  <i class="bi bi-person-vcard me-2"></i>
+                  Verifikasi Data
                 </Link>
                 <Link href="/LaporMap" class="nav-link" @click="closeMobileNav">
                   <i class="bi bi-geo-alt-fill me-2"></i>
