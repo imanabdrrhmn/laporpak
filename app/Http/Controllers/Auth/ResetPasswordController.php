@@ -21,8 +21,13 @@ class ResetPasswordController extends Controller
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $via = $request->filled('email') ? 'email' : 'phone';
-        $identifier = $request->input($via);
+        if ($request->filled('email')) {
+            $via = 'email';
+            $identifier = $request->email;
+        } else {
+            $via = 'phone'; 
+            $identifier = $request->no_hp;
+        }
 
         $tokenData = DB::table('password_reset_tokens')
             ->where('identifier', $identifier)
@@ -34,12 +39,11 @@ class ResetPasswordController extends Controller
         }
 
         if (Carbon::now()->gt(Carbon::parse($tokenData->expires_at))) {
+            DB::table('password_reset_tokens')->where('identifier', $identifier)->delete();
             return back()->withErrors(['token' => 'Token telah kedaluwarsa']);
         }
 
-        $user = $via === 'email'
-            ? User::where('email', $identifier)->first()
-            : User::where('no_hp', $identifier)->first();
+        $user = User::where($via === 'email' ? 'email' : 'no_hp', $identifier)->first();
 
         if (!$user) {
             return back()->withErrors(['user' => 'Pengguna tidak ditemukan']);
