@@ -27,7 +27,7 @@
               <div class="col-md-8">
                 <div class="animate__animated" data-animation="animate__fadeInRight">
                   <p class="text-muted mb-3">
-                    <strong>LaporPak</strong> adalah platform digital yang dirancang untuk memudahkan masyarakat dalam melaporkan berbagai bentuk penipuan, khususnya yang dilakukan melalui nomor telepon. Tidak hanya terbatas pada kasus penipuan, <strong>LaporPak</strong> juga memungkinkan masyarakat untuk melaporkan kerusakan infrastruktur dan permasalahan layanan publik lainnya. Dengan sistem yang mudah digunakan dan responsif, setiap laporan yang masuk akan membantu membangun lingkungan yang lebih aman, transparan, dan berdaya guna bagi semua pihak.
+                    <strong>LaporPak</strong> adalah platform digital yang dirancang untuk memudahkan masyarakat dalam melaporkan berbagai bentuk penipuan, khususnya yang dilakukan melalui nomor telepon. Tidak hanya terbatas pada kasus penipuan, <strong>LaporPak</strong> juga memungkinkan masyarakat untuk melaporkan kerusakan infrastruktur. Dengan sistem yang mudah digunakan dan responsif, setiap laporan yang masuk akan membantu membangun lingkungan yang lebih aman, transparan, dan berdaya guna bagi semua pihak.
                   </p>
                   <p class="text-muted">
                     Kami berkomitmen menciptakan lingkungan yang aman, baik online maupun offline. LaporPak menyediakan platform transparan untuk berbagi informasi, meningkatkan kesadaran tentang penipuan, dan membangun komunitas yang saling mendukung.

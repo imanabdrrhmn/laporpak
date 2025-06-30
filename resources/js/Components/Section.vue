@@ -6,7 +6,7 @@
                 <div class="col-lg-6 col-md-12">
                     <h2 class="fw-bold fs-2 mb-4 text-center text-lg-start">Apa itu LaporPak?</h2>
                     <p class="text-dark fs-5 mb-4 text-center text-lg-start">
-                        LaporPak adalah platform digital yang mendorong partisipasi masyarakat dalam melaporkan masalah infrastruktur, layanan publik, dan penipuan melalui nomor HP. Suara masyarakat diubah menjadi data berharga untuk mendukung kinerja pemerintah dan perusahaan.
+                        LaporPak adalah platform digital yang mendorong partisipasi masyarakat dalam melaporkan masalah infrastruktur dan penipuan melalui nomor HP. Suara masyarakat diubah menjadi data berharga untuk mendukung kinerja pemerintah dan perusahaan.
                     </p>
                     <div class="text-center text-lg-start">
                         <a href="/tentang-kami" class="btn btn-primary px-4 py-2 mt-2">Selengkapnya</a>

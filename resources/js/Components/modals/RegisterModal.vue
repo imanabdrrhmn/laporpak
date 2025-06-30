@@ -160,6 +160,15 @@
                 </div>
               </div>
 
+              <!-- Terms and Privacy Policy Agreement -->
+              <p class="small text-muted text-center mb-3">
+                Dengan mendaftar, Anda menyetujui 
+                <Link href="/terms-of-service" class="text-primary">Persyaratan Layanan</Link> 
+                dan 
+                <Link href="/privacy-policy" class="text-primary">Kebijakan Privasi</Link>, 
+                termasuk Penggunaan Kuki.
+              </p>
+
               <button 
                 type="submit" 
                 class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3"
@@ -185,7 +194,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { useForm, Link } from '@inertiajs/vue3'
 
 const props = defineProps({ visible: Boolean })
 const emit = defineEmits(['update:visible', 'switch-to-login'])
@@ -495,6 +504,16 @@ function handleRegister() {
   margin: auto;
   width: 100%;
   padding: 0 15px;
+}
+
+/* Terms Agreement Styling */
+.text-primary {
+  color: #2563EB !important;
+  text-decoration: none;
+}
+
+.text-primary:hover {
+  text-decoration: underline !important;
 }
 
 /* Phone input group styling */
