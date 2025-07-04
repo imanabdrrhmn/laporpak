@@ -69,62 +69,65 @@
               </div>
             </div>
             
+            <!-- Ganti blok input telepon lama dengan yang baru -->
             <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category !== 'Email' && formData.category">
-              <label for="source" class="form-label mb-2">Nomor Telepon</label>
-              <div class="input-group">
-                <div class="country-select-wrapper">
-                  <div class="dropdown" ref="countryDropdown">
-                    <div class="searchable-country-select">
-                      <div class="selected-country" @click="toggleDropdown">
-                        <span :class="`fi fi-${selectedCountry.iso2.toLowerCase()} me-2`" class="flag-icon"></span>
-                        +{{ selectedCountry.dialCode }}
-                        <i class="bi bi-chevron-down ms-1"></i>
-                      </div>
-                      <div class="dropdown-menu-custom" v-show="showDropdown">
-                        <div class="search-input-wrapper">
-                          <input
-                            type="text"
-                            class="form-control search-input"
-                            placeholder="Cari kode negara... (contoh: 62)"
-                            v-model="countrySearch"
-                            @input="filterCountries"
-                            ref="searchInput"
-                          />
-                          <i class="bi bi-search search-icon"></i>
-                        </div>
-                        <ul class="country-list">
-                          <li v-for="country in filteredCountries" :key="country.iso2">
-                            <a
-                              class="country-item"
-                              href="#"
-                              @click.prevent="selectCountry(country)"
-                            >
-                              <span :class="`fi fi-${country.iso2.toLowerCase()} me-2`" class="flag-icon"></span>
-                              <span class="country-code">+{{ country.dialCode }}</span>
-                            </a>
-                          </li>
-                          <li v-if="filteredCountries.length === 0" class="no-results">
-                            Kode negara tidak ditemukan
-                          </li>
-                        </ul>
-                      </div>
+              <label for="phone" class="form-label mb-2">Nomor Telepon</label>
+              <div class="integrated-phone-input">
+                <!-- Country Dropdown terintegrasi dalam input -->
+                <div class="phone-input-wrapper" ref="phoneInputWrapper">
+                  <div class="country-selector" @click="toggleDropdown" ref="countrySelector">
+                    <span :class="`fi fi-${selectedCountry.iso2.toLowerCase()}`" class="flag-icon"></span>
+                    <span class="dial-code">+{{ selectedCountry.dialCode }}</span>
+                    <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': showDropdown }"></i>
+                  </div>
+                  <input
+                    id="phone"
+                    v-model="localPhoneNumber"
+                    type="tel"
+                    class="phone-number-input"
+                    :class="{'is-invalid': validationErrors.source}"
+                    placeholder="Masukkan nomor telepon"
+                    @input="onPhoneInput"
+                    @keypress="onPhoneKeypress"
+                    @focus="onPhoneFocus"
+                    @blur="onPhoneBlur"
+                    required
+                  />
+                  <div class="country-dropdown-menu" v-show="showDropdown" ref="dropdownMenu">
+                    <div class="search-wrapper">
+                      <input
+                        type="text"
+                        class="country-search-input"
+                        placeholder="Cari kode negara"
+                        v-model="countrySearch"
+                        @input="filterCountries"
+                        ref="searchInput"
+                      />
+                      <i class="bi bi-search search-icon"></i>
                     </div>
+                    <ul class="countries-list">
+                      <li v-for="country in filteredCountries" :key="country.iso2">
+                        <button
+                          type="button"
+                          class="country-option"
+                          @click="selectCountry(country)"
+                        >
+                          <span :class="`fi fi-${country.iso2.toLowerCase()}`" class="flag-icon"></span>
+                          <span class="country-info">
+                            <span class="country-name">{{ country.name }}</span>
+                            <span class="country-dial-code">+{{ country.dialCode }}</span>
+                          </span>
+                        </button>
+                      </li>
+                      <li v-if="filteredCountries.length === 0" class="no-results">
+                        Kode negara tidak ditemukan
+                      </li>
+                    </ul>
                   </div>
                 </div>
-                <input
-                  id="source"
-                  v-model="localPhoneNumber"
-                  type="tel"
-                  class="form-control"
-                  :class="{'is-invalid': validationErrors.source}"
-                  placeholder="Masukkan nomor telepon"
-                  @input="onPhoneInput"
-                  @keypress="onPhoneKeypress"
-                  required
-                />
-              </div>
-              <div v-if="validationErrors.source" class="invalid-feedback">
-                Nomor telepon tidak valid
+                <div v-if="validationErrors.source" class="invalid-feedback">
+                  Nomor telepon tidak valid
+                </div>
               </div>
             </div>
             
@@ -277,6 +280,7 @@
   const filteredCountries = ref([]);
   const searchInput = ref(null);
   const countryDropdown = ref(null);
+  const phoneInputWrapper = ref(null);
 
   // Fungsi pemrosesan gambar
   const isProcessingImage = ref(false);
@@ -418,7 +422,7 @@
     emit('submit-report');
   };
 
-  // Fungsi filter negara - FIXED
+  // Fungsi filter negara
   const filterCountries = () => {
     const search = countrySearch.value.toLowerCase();
     if (!search) {
@@ -432,7 +436,7 @@
     );
   };
 
-  // FIXED: Toggle dropdown dengan proper event handling
+  // Toggle dropdown dengan proper event handling
   const toggleDropdown = async (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -443,7 +447,6 @@
       countrySearch.value = '';
       filteredCountries.value = sortedCountries.value;
       
-      // Pastikan dropdown muncul dengan benar
       await nextTick();
       if (searchInput.value) {
         searchInput.value.focus();
@@ -451,7 +454,7 @@
     }
   };
 
-  // FIXED: Select country dengan proper event handling
+  // Select country dengan proper event handling
   const selectCountry = (country, event) => {
     if (event) {
       event.preventDefault();
@@ -469,7 +472,7 @@
     }
   };
 
-  // FIXED: Handle click outside dengan proper event handling
+  // Handle click outside dengan proper event handling
   const handleClickOutside = (event) => {
     if (countryDropdown.value && !countryDropdown.value.contains(event.target)) {
       showDropdown.value = false;
@@ -531,6 +534,19 @@
     validatePhoneNumber();
   };
 
+  const onPhoneFocus = () => {
+    // Do nothing, just prevent dropdown from closing
+  };
+
+  const onPhoneBlur = () => {
+    // Close dropdown if clicked outside
+    setTimeout(() => {
+      if (phoneInputWrapper.value && !phoneInputWrapper.value.contains(document.activeElement)) {
+        showDropdown.value = false;
+      }
+    }, 100);
+  };
+
   // Form ref untuk reset
   const formRef = ref(null);
 
@@ -564,6 +580,7 @@
   border-radius: 6px;
   position: relative;
   z-index: 2;
+  height: 48px; /* Fixed height untuk konsistensi */
 }
 
 .form-control:focus,
@@ -578,9 +595,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
-  padding: clamp(0.5rem, 2vw, 0.75rem);
-  height: auto;
+  font-size: 1rem;
+  padding: 0.75rem;
+  height: 48px; /* Fixed height yang sama */
   overflow-x: hidden;
   word-wrap: break-word;
   position: relative;
@@ -593,22 +610,23 @@
   display: flex;
   align-items: center;
   z-index: 100;
+  flex-shrink: 0;
 }
 
 .flag-icon {
-  width: clamp(16px, 2vw, 18px);
-  height: clamp(12px, 1.5vw, 14px);
+  width: 18px;
+  height: 14px;
   border-radius: 2px;
   display: inline-block;
   background-size: cover;
   background-position: center;
   flex-shrink: 0;
+  margin-right: 0 !important; /* Remove any margin */
 }
 
 .searchable-country-select {
   position: relative;
-  min-width: clamp(80px, 10vw, 100px);
-  max-width: clamp(100px, 15vw, 120px);
+  width: 120px; /* Increased width untuk desktop */
   z-index: 100;
 }
 
@@ -617,8 +635,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: system-ui, -apple-system, sans-serif;
-  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.5rem, 2vw, 1rem);
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  padding: 0.75rem; /* Same padding as form controls */
+  font-size: 1rem; /* Same font size */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -630,6 +648,11 @@
   position: relative;
   z-index: 100;
   white-space: nowrap;
+  height: 48px; /* Same height as form controls */
+  line-height: 1;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 0.25rem; /* REDUCED: Smaller gap between elements */
 }
 
 .selected-country:hover {
@@ -646,9 +669,9 @@
 /* Dropdown Menu - Critical Z-index Fix */
 .dropdown-menu-custom {
   position: absolute;
-  top: calc(100% + 1px);
+  top: 100%;
   left: 0;
-  right: 0;
+  right: auto;
   background: white;
   border: 1px solid #ced4da;
   border-radius: 6px;
@@ -656,7 +679,7 @@
   z-index: 99999 !important;
   max-height: 280px;
   overflow: hidden;
-  min-width: 250px;
+  min-width: 280px;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
@@ -664,15 +687,9 @@
 /* Mobile specific positioning */
 @media (max-width: 575.98px) {
   .dropdown-menu-custom {
-    left: -100px;
+    left: -10px;
     min-width: 280px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dropdown-menu-custom {
-    left: -150px;
-    min-width: 300px;
+    transform: translateX(0) !important;
   }
 }
 
@@ -734,7 +751,7 @@
   text-decoration: none;
   color: #212529;
   font-size: 0.875rem;
-  gap: 0.15rem; /* Perkecil gap antara flag dan kode negara */
+  gap: 0.25rem; /* REDUCED: Much smaller gap between flag and country code */
   transition: background-color 0.15s ease;
   justify-content: flex-start;
   cursor: pointer;
@@ -745,14 +762,20 @@
   background: transparent;
 }
 
+.country-item:hover {
+  background-color: #f8f9fa;
+}
+
 .country-item .flag-icon {
-  margin-right: 2px; /* Perkecil jarak antara flag dan kode negara */
+  margin-right: 0 !important; /* REMOVED: No extra margin */
+  flex-shrink: 0;
 }
 
 .country-code {
   color: #212529;
   font-weight: 500;
-  margin-left: 0; /* Pastikan tidak ada margin kiri */
+  margin-left: 0;
+  white-space: nowrap;
 }
 
 .no-results {
@@ -763,28 +786,94 @@
   font-size: 0.875rem;
 }
 
-/* Input Group Fixes */
+/* Input Group Fixes - IMPORTANT */
 .input-group {
   position: relative;
   z-index: 50;
   display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
 }
 
 .input-group .country-select-wrapper {
-  flex: 0 0 auto;
+  flex: 0 0 120px; /* Fixed width untuk consistency */
   z-index: 100;
 }
 
 .input-group .form-control {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  position: relative;
-  z-index: 50;
+  border-top-left-radius: 6px !important;
+  border-bottom-left-radius: 6px !important;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
   flex: 1;
+  min-width: 0;
+  border-left: 1px solid #ced4da !important;
+  border-color: #ced4da !important;
+  margin-left: 0 !important;
+  height: 48px; /* Same height as country selector */
+  padding: 0.75rem; /* Same padding */
+  font-size: 1rem; /* Same font size */
+  box-sizing: border-box;
 }
 
-.input-group .form-control:focus {
-  z-index: 60;
+/* FIXED: Custom File Input - Complete styling */
+.custom-file-input {
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.custom-file-input .form-control {
+  border-top-left-radius: 6px !important;
+  border-bottom-left-radius: 6px !important;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+  flex: 1;
+  min-width: 0;
+  border-left: 1px solid #ced4da !important; /* Tampilkan border kiri kembali */
+  border-color: #ced4da !important; /* Pastikan warna border sama */
+  margin-left: 0 !important; /* Hilangkan margin negatif dari .input-group */
+}
+
+.custom-file-input .form-control:disabled {
+  background-color: #e9ecef;
+  opacity: 0.65;
+}
+
+.custom-file-input .form-control:focus {
+  z-index: 10;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* FIXED: Input group text styling */
+.custom-file-input .input-group-text {
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-left: none;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  height: 48px;
+  min-width: 48px;
+  position: relative;
+  z-index: 2;
+}
+
+.custom-file-input .input-group-text:hover {
+  background-color: #e9ecef;
 }
 
 /* Textarea and other form elements */
@@ -798,6 +887,7 @@
   position: relative;
   z-index: 2;
   resize: vertical;
+  font-size: 1rem;
 }
 
 .custom-textarea:focus {
@@ -809,27 +899,6 @@
 .custom-textarea.border-danger {
   border-color: #dc3545 !important;
   animation: shake 0.5s linear;
-}
-
-.custom-file-input {
-  border-radius: 6px;
-  overflow: hidden;
-  position: relative;
-  z-index: 2;
-}
-
-.custom-file-input .form-control {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.custom-file-input .form-control:disabled {
-  background-color: #e9ecef;
-  opacity: 0.65;
-}
-
-.custom-file-input .form-control:focus {
-  z-index: 10;
 }
 
 .image-preview {
@@ -964,20 +1033,20 @@
   animation: btn-wave 2s infinite;
 }
 
-/* Media Queries */
+/* Media Queries for Responsive Design */
 @media (min-width: 576px) {
   .form-container {
     max-width: 90%;
     padding: 2rem;
     margin: 0 auto;
   }
-  .selected-country {
-    font-size: clamp(0.85rem, 2.2vw, 0.95rem);
-    padding: clamp(0.5rem, 2vw, 0.75rem);
-  }
+  
   .searchable-country-select {
-    min-width: clamp(80px, 10vw, 100px);
-    max-width: clamp(100px, 15vw, 120px);
+    width: 130px;
+  }
+  
+  .input-group .country-select-wrapper {
+    flex: 0 0 130px;
   }
 }
 
@@ -986,13 +1055,18 @@
     max-width: 85%;
     padding: 2.5rem;
   }
-  .selected-country {
-    font-size: clamp(0.9rem, 2.2vw, 1rem);
-    padding: clamp(0.6rem, 2vw, 0.8rem);
+  
+  .searchable-country-select {
+    width: 140px;
   }
+  
+  .input-group .country-select-wrapper {
+    flex: 0 0 140px;
+  }
+  
   .dropdown-menu-custom {
     left: 0;
-    min-width: 220px;
+    min-width: 280px;
   }
 }
 
@@ -1001,9 +1075,13 @@
     max-width: 580px;
     padding: 3rem;
   }
-  .selected-country {
-    font-size: clamp(0.95rem, 2.2vw, 1.05rem);
-    padding: clamp(0.65rem, 2vw, 0.85rem);
+  
+  .searchable-country-select {
+    width: 150px;
+  }
+  
+  .input-group .country-select-wrapper {
+    flex: 0 0 150px;
   }
 }
 
@@ -1011,13 +1089,13 @@
   .form-container {
     max-width: 620px;
   }
-  .selected-country {
-    font-size: clamp(1rem, 2.2vw, 1.1rem);
-    padding: clamp(0.7rem, 2vw, 0.9rem);
-  }
+  
   .searchable-country-select {
-    min-width: clamp(90px, 10vw, 110px);
-    max-width: clamp(110px, 15vw, 130px);
+    width: 160px;
+  }
+  
+  .input-group .country-select-wrapper {
+    flex: 0 0 160px;
   }
 }
 
@@ -1025,31 +1103,84 @@
   .form-container {
     max-width: 680px;
   }
-  .selected-country {
-    font-size: clamp(1.05rem, 2.2vw, 1.15rem);
-    padding: clamp(0.75rem, 2vw, 1rem);
-  }
+  
   .searchable-country-select {
-    min-width: clamp(100px, 10vw, 120px);
-    max-width: clamp(120px, 15vw, 140px);
+    width: 170px;
+  }
+  
+  .input-group .country-select-wrapper {
+    flex: 0 0 170px;
   }
 }
 
+/* Mobile Optimizations */
 @media (max-width: 575.98px) {
   .form-container {
     padding: 1.5rem;
   }
+  
+  .form-control,
+  .form-select,
   .selected-country {
-    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
-    padding: clamp(0.3rem, 2vw, 0.5rem);
+    height: 44px;
+    font-size: 0.9rem;
+    padding: 0.6rem;
   }
+  
+  .selected-country {
+    padding: 0.6rem 0.5rem;
+    gap: 0.15rem; /* REDUCED: Even smaller gap on mobile */
+  }
+  
   .searchable-country-select {
-    min-width: clamp(60px, 10vw, 80px);
-    max-width: clamp(80px, 15vw, 100px);
+    width: 100px;
   }
+  
   .flag-icon {
-    width: clamp(14px, 2vw, 16px);
-    height: clamp(10px, 1.5vw, 12px);
+    width: 16px;
+    height: 12px;
+  }
+  
+  .input-group .country-select-wrapper {
+    flex: 0 0 100px;
+  }
+  
+  .input-group .form-control {
+    height: 44px;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  .custom-file-input .input-group-text {
+    height: 44px;
+    min-width: 44px;
+    padding: 0.6rem;
+  }
+  
+  .dropdown-menu-custom {
+    left: -10px;
+    min-width: 280px;
+  }
+  
+  .country-item {
+    gap: 0.15rem; 
+  }
+}
+
+/* Additional Mobile Touch Improvements */
+@media (hover: none) and (pointer: coarse) {
+  .country-item {
+    padding: 0.75rem;
+    min-height: 44px;
+  }
+  
+  .selected-country {
+    min-height: 44px;
+  }
+  
+  .form-control,
+  .form-select {
+    min-height: 44px;
   }
 }
 
@@ -1086,15 +1217,347 @@ input, select, textarea, button {
   will-change: transform;
 }
 
-/* Additional mobile touch improvements */
-@media (hover: none) and (pointer: coarse) {
-  .country-item {
-    padding: 0.75rem;
-    min-height: 44px;
+/* Integrated Phone Input Styles */
+.integrated-phone-input {
+  position: relative;
+  width: 100%;
+}
+
+.phone-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: white;
+  transition: all 0.2s ease;
+  height: 48px;
+  overflow: visible;
+}
+
+.phone-input-wrapper:hover {
+  border-color: #adb5bd;
+}
+
+.phone-input-wrapper:focus-within {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.phone-input-wrapper.is-invalid {
+  border-color: #dc3545;
+}
+
+.phone-input-wrapper.is-invalid:focus-within {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.country-selector {
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  cursor: pointer;
+  min-width: 100px;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease;
+  user-select: none;
+  position: relative;
+  z-index: 10;
+}
+
+.country-selector:hover {
+  background-color: #e9ecef;
+}
+
+.flag-icon {
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+  display: inline-block;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.dial-code {
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.dropdown-arrow {
+  font-size: 0.75rem;
+  color: #6c757d;
+  transition: transform 0.2s ease;
+  margin-left: auto;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.phone-number-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0 0.75rem;
+  font-size: 1rem;
+  background: transparent;
+  color: #495057;
+  height: 100%;
+  min-width: 0;
+}
+
+.phone-number-input::placeholder {
+  color: #6c757d;
+  opacity: 0.7;
+}
+
+.phone-number-input:focus {
+  outline: none;
+}
+
+.country-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 300px;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+/* Custom scrollbar for country dropdown, match with .custom-select */
+.country-dropdown-menu .countries-list {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+.country-dropdown-menu .countries-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.country-dropdown-menu .countries-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.country-dropdown-menu .countries-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.country-dropdown-menu .countries-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.search-wrapper {
+  position: relative;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.country-search-input {
+  width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+  background: #fff; /* Set background to white */
+  color: #212529; /* Pastikan warna teks gelap */
+}
+
+/* White scrollbar for country-search-input */
+.country-search-input::-webkit-scrollbar {
+  width: 6px;
+  background: #fff;
+}
+.country-search-input::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+.country-search-input::-webkit-scrollbar-track {
+  background: #fff;
+}
+
+.country-search-input {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #fff;
+}
+
+.search-icon {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.countries-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.country-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 0.75rem;
+  transition: background-color 0.15s ease;
+}
+
+.country-option:hover {
+  background-color: #f8f9fa;
+}
+
+.country-option:focus {
+  outline: none;
+  background-color: #e7f3ff;
+}
+
+.country-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.country-name {
+  font-size: 0.875rem;
+  color: #212529;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.country-dial-code {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+.no-results {
+  padding: 1rem 0.75rem;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #dc3545;
+}
+
+@media (max-width: 575.98px) {
+  .country-selector {
+    min-width: 85px;
+    padding: 0 0.5rem;
+    gap: 0.25rem;
   }
-  
-  .selected-country {
-    min-height: 44px;
+  .dial-code {
+    font-size: 0.8rem;
+  }
+  .flag-icon {
+    width: 18px;
+    height: 13px;
+  }
+  .country-dropdown-menu {
+    left: -10px;
+    right: -10px;
+  }
+  .phone-input-wrapper {
+    height: 44px;
+  }
+  .phone-number-input {
+    font-size: 0.9rem;
+    padding: 0 0.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .country-selector {
+    min-width: 110px;
+  }
+  .country-dropdown-menu {
+    max-height: 320px;
+  }
+}
+
+@media (min-width: 992px) {
+  .country-selector {
+    min-width: 120px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .country-option {
+    padding: 1rem 0.75rem;
+    min-height: 48px;
+  }
+  .phone-input-wrapper {
+    min-height: 48px;
+  }
+}
+
+.phone-input-wrapper:focus-within .country-selector {
+  background-color: #e7f3ff;
+}
+
+.country-selector,
+.phone-number-input,
+.country-option {
+  transition: all 0.2s ease;
+}
+
+@media (prefers-contrast: high) {
+  .phone-input-wrapper {
+    border-width: 2px;
+  }
+  .country-selector {
+    border-right-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-arrow,
+  .country-dropdown-menu,
+  .country-selector,
+  .phone-number-input,
+  .country-option {
+    transition: none;
+  }
+  .country-dropdown-menu {
+    animation: none;
   }
 }
 </style>

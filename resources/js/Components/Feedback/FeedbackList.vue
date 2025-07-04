@@ -137,13 +137,20 @@ const truncateText = (text, maxLength) => {
 
 <style scoped>
 :root {
-  --badge-colors: {
-    pelaporan: { bg: #FFD1D1, text: #B91C1C };
-    verifikasi: { bg: #FFF3CD, text: #856404 };
-    umum: { bg: #D1FAE5, text: #065F46 };
-    cari-laporan: { bg: #BFDBFE, text: #1E40AF };
-    purple: { bg: #E9D5FF, text: #7E22CE };
-  }
+  --badge-pelaporan-bg: #FFD1D1;
+  --badge-pelaporan-text: #B91C1C;
+
+  --badge-verifikasi-bg: #FFF3CD;
+  --badge-verifikasi-text: #856404;
+
+  --badge-umum-bg: #D1FAE5;
+  --badge-umum-text: #065F46;
+
+  --badge-cari-laporan-bg: #BFDBFE;
+  --badge-cari-laporan-text: #1E40AF;
+
+  --badge-purple-bg: #E9D5FF;
+  --badge-purple-text: #7E22CE;
 }
 
 .feedback-container {

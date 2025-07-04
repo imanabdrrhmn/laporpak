@@ -7,11 +7,13 @@
           <div class="logo d-flex align-items-center flex-wrap">
             <img src="/logo.svg" alt="LaporPak Logo" class="me-2">
             <span>LaporPak</span>
+            <!--
             <div class="social-icons ms-auto ms-sm-3 mt-2 mt-sm-0">
               <a href="#" class="me-2"><i class="bi bi-facebook"></i></a>
               <a href="#" class="me-2"><i class="bi bi-linkedin"></i></a>
               <a href="#"><i class="bi bi-instagram"></i></a>
             </div>
+            -->
           </div>
           <p class="company-desc">
             LaporPak hadir untuk memberdayakan masyarakat agar saling menjaga dan
@@ -59,7 +61,7 @@
       <div class="footer-bottom-content">
         <p class="mb-0">© 2025 Sistem Anti-Penipuan. Semua hak dilindungi.</p>
         <div class="footer-links">
-          <Link href="/privacy-policy">Kebijakan Privasi</Link>
+          <a href="/privacy-policy">Kebijakan Privasi</a>
           <a href="#">Syarat & Ketentuan</a>
           <a href="#">Bantuan</a>
         </div>

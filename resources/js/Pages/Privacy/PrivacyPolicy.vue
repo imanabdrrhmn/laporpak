@@ -133,9 +133,7 @@ a:hover {
   color: #6b7280;
   margin-bottom: 2rem;
 }
-</style>{
-  text-decoration: underline;
-}
+
 .effective-date {
   font-style: italic;
   color: #6b7280;
