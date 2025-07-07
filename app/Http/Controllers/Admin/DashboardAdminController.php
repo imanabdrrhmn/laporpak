@@ -71,7 +71,7 @@ class DashboardAdminController extends Controller
         $laporanTerverifikasiThisPeriod = $this->getVerifiedReportCount($dateRanges->currentStart, $dateRanges->currentEnd);
         $laporanTerverifikasiLastPeriod = $this->getVerifiedReportCount($dateRanges->previousStart, $dateRanges->previousEnd);
         $laporanTerverifikasiPercentage = $this->calcPercentageChange($laporanTerverifikasiThisPeriod, $laporanTerverifikasiLastPeriod);
-        $totalLaporanTerverifikasi = Report::whereIn('status', ['published', 'approved'])->count();
+        $totalLaporanTerverifikasi = Report::whereIn('status', ['published', 'approved', 'solved'])->count();
 
         $totalPenggunaThisPeriod = $this->getUserCount($dateRanges->currentStart, $dateRanges->currentEnd);
         $totalPenggunaLastPeriod = $this->getUserCount($dateRanges->previousStart, $dateRanges->previousEnd);
@@ -143,7 +143,7 @@ class DashboardAdminController extends Controller
 
     private function getVerifiedReportCount(CarbonImmutable $start, CarbonImmutable $end)
     {
-        return Report::whereIn('status', ['published', 'approved'])
+        return Report::whereIn('status', ['published', 'approved', 'solved'])
             ->whereBetween('created_at', [$start, $end])
             ->count();
     }

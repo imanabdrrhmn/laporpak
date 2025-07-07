@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Auth;
 // Home Page
 Route::get('/', function () {
     $feedbacks = Feedback::with('user')->latest()->take(10)->get();
-    $verifiedReports = Report::whereIn('status', ['published', 'approved'])->count();
+    $verifiedReports = Report::whereIn('status', ['published', 'approved', 'solved'])->count();
     $totalReports = Report::count();
     $fraudReports = Report::where('service', 'Penipuan')->count();
 

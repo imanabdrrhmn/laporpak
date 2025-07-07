@@ -13,7 +13,7 @@ class LaporMapController extends Controller
 {
     public function index(Request $request)
     {
-        $reportCount = Report::where('status', 'published')->count();
+        $reportCount = Report::whereIn('status', ['published', 'solved'])->count();
 
         $locationCount = $this->countDistinctLocations();
 
@@ -27,7 +27,7 @@ class LaporMapController extends Controller
 
         $region = $request->query('region');
 
-        $regions = Report::where('status', 'published')
+        $regions = Report::whereIn('status', ['published', 'solved'])
             ->select('region')
             ->whereNotNull('region')
             ->distinct()
@@ -37,7 +37,7 @@ class LaporMapController extends Controller
         $locationItems = $this->getLocationItems($region);
 
         $reportStats = [
-            'verifiedReports' => Report::whereIn('status', ['published', 'approved'])->count(),
+            'verifiedReports' => Report::whereIn('status', ['published', 'approved','solved'])->count(),
             'totalReports' => Report::count(),
             'fraudReports' => Report::where('service', 'Penipuan')->count(),
         ];
@@ -58,7 +58,7 @@ class LaporMapController extends Controller
 
     private function countDistinctLocations()
     {
-        return Report::where('status', 'published')
+        return Report::whereIn('status', ['published', 'solved'])
                      ->select('latitude', 'longitude')
                      ->distinct()
                      ->count();
@@ -66,7 +66,7 @@ class LaporMapController extends Controller
 
     private function getLocationItems($region = null)
     {
-        $query = Report::where('status', 'published')->select(
+        $query = Report::whereIn('status', ['published', 'solved'])->select(
             DB::raw('latitude'),
             DB::raw('longitude'),
             DB::raw('region'), 
@@ -120,7 +120,7 @@ class LaporMapController extends Controller
 
     private function getMaxReports()
     {
-        $max = Report::where('status', 'published')
+        $max = Report::whereIn('status', ['published', 'solved'])
                     ->select(DB::raw('COUNT(*) as count'))
                     ->groupBy('latitude', 'longitude')
                     ->orderByDesc('count')

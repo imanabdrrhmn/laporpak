@@ -35,7 +35,7 @@ class ReportController extends Controller
     public function create(Request $request)
     {
         $feedbacks = Feedback::where('kategori', 'Pelaporan')->with('user')->latest()->take(10)->get();
-        $verifiedReports = Report::whereIn('status', ['published', 'approved'])->count();
+        $verifiedReports = Report::whereIn('status', ['published', 'approved', 'solved'])->count();
         $totalReports = Report::count();
         $fraudReports = Report::where('service', 'Penipuan')->count();
 
@@ -136,15 +136,15 @@ class ReportController extends Controller
                             ->take(8) 
                             ->get();
 
-        $publishedReportsQuery = Report::where('status', 'published');
+        $publishedReportsQuery = Report::whereIn('status', ['published', 'solved']);
 
         $reportStats = [
-            'verifiedReports' => Report::whereIn('status', ['published', 'approved'])->count(),
+            'verifiedReports' => Report::whereIn('status', ['published', 'approved', 'solved'])->count(),
             'totalReports' => Report::count(),
             'fraudReports' => Report::where('service', 'Penipuan')->count(),
         ];
 
-        $initialCategories = Report::where('status', 'published')
+        $initialCategories = Report::where('status', ['published', 'solved'])
                                 ->whereNotNull('category')
                                 ->where('category', '!=', '')
                                 ->distinct()
@@ -183,7 +183,7 @@ class ReportController extends Controller
         $perPage = (int) $request->input('perPage', 12);
 
         $reportsQueryBuilder = Report::with('user')
-            ->where('status', 'published');
+            ->whereIn('status', ['published', 'solved']);
         if (auth()->check()) {
         $userId = auth()->id();
         $reportsQueryBuilder->withExists(['flags as has_been_flagged_by_user' => function ($query) use ($userId) {
