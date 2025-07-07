@@ -38,7 +38,6 @@
     />
     <Feedback :feedbacks="feedbacks" />
     
-    <!-- Modals -->
     <SuccessModal
       :show="showSuccessModal"
       @close="closeSuccessModal"
@@ -73,6 +72,8 @@ const VALIDATION_CONSTANTS = {
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
   MIN_PHONE_LENGTH: 9,
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  // PERBAIKAN: Menambahkan Regex untuk validasi URL
+  URL_REGEX: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
   PHONE_PREFIX: '+',
   BORDER_HIGHLIGHT_DURATION: 800
 }
@@ -83,8 +84,10 @@ const SERVICE_TYPES = {
 }
 
 const CATEGORY_TYPES = {
-  PHONE: 'Nomor Hp',
-  EMAIL: 'Email'
+  // PERBAIKAN: Menggunakan 'Nomor Telepon' agar konsisten dengan label
+  PHONE: 'Nomor Telepon',
+  EMAIL: 'Email',
+  URL: 'Tautan'
 }
 
 // Props from Inertia
@@ -114,9 +117,9 @@ const formData = reactive({
   evidence: null,
   location: null,
   address: '',
-  source: '',
+  source: '', // Untuk Nomor Telepon dan URL
   region: '',
-  email: ''
+  email: '' // Khusus untuk Email
 })
 
 // Validation errors
@@ -145,7 +148,8 @@ const services = [
 
 const fraudCategories = [
   { label: 'Nomor Telepon', value: CATEGORY_TYPES.PHONE },
-  { label: 'Email', value: CATEGORY_TYPES.EMAIL }
+  { label: 'Email', value: CATEGORY_TYPES.EMAIL },
+  { label: 'Tautan', value: CATEGORY_TYPES.URL },
 ]
 
 const infrastructureCategories = [
@@ -160,7 +164,7 @@ const serviceInfo = {
   [SERVICE_TYPES.FRAUD]: {
     badge: 'Platform Pelaporan',
     title: 'Pelaporan Penipuan',
-    description: 'Laporkan nomor HP, email, atau akun yang terindikasi mencurigakan untuk verifikasi lebih lanjut.',
+    description: 'Laporkan nomor HP, email, atau tautan yang terindikasi mencurigakan untuk verifikasi lebih lanjut.',
     icon: 'bi bi-shield-check',
     formTitle: 'Formulir Pelaporan Penipuan',
     descriptionPlaceholder: 'Ceritakan bagaimana kejadian yang mencurigakan terjadi dan modus yang digunakan...'
@@ -184,7 +188,8 @@ const isFormValid = computed(() => {
   const baseValidation = validateBaseForm()
   
   if (selectedService.value === SERVICE_TYPES.FRAUD) {
-    return baseValidation && validateFraudSpecificFields()
+    // PERBAIKAN: Menggunakan fungsi validasi yang sudah disempurnakan
+    return baseValidation && validateServiceSpecificFields()
   }
   
   return baseValidation
@@ -201,20 +206,14 @@ function validateBaseForm() {
   )
 }
 
+// PERBAIKAN: Logika ini tidak lagi digunakan, digantikan oleh 'validateServiceSpecificFields' yang lebih lengkap
 function validateFraudSpecificFields() {
-  if (formData.category === CATEGORY_TYPES.EMAIL) {
-    return formData.email && VALIDATION_CONSTANTS.EMAIL_REGEX.test(formData.email)
-  }
-  
-  return (
-    formData.source &&
-    formData.source.startsWith(VALIDATION_CONSTANTS.PHONE_PREFIX) &&
-    formData.source.length >= VALIDATION_CONSTANTS.MIN_PHONE_LENGTH
-  )
+  return validateServiceSpecificFields();
 }
 
 function isFieldValid(field) {
-  return field && field.trim() !== ''
+  // Mengonversi ke String untuk menangani nilai null/undefined dengan aman
+  return field && String(field).trim() !== ''
 }
 
 // Watchers
@@ -239,6 +238,7 @@ function handleFileUpload(event) {
   
   if (file.size > VALIDATION_CONSTANTS.MAX_FILE_SIZE) {
     showAlert('Ukuran file terlalu besar. Maksimal 5MB.')
+    event.target.value = '' // Reset input file
     return
   }
   
@@ -288,53 +288,67 @@ function submitReport() {
 }
 
 function validateFormData() {
-  const validators = [
-    () => validateField('category', formData.category),
-    () => validateField('description', formData.description),
-    () => validateField('location', formData.location),
-    () => validateField('region', formData.region),
-    () => validateServiceSpecificFields()
-  ]
-  
-  return validators.every(validator => validator())
+  // Validasi semua field secara bersamaan
+  const isCategoryValid = validateField('category', formData.category);
+  const isDescriptionValid = validateField('description', formData.description);
+  const isLocationValid = validateField('location', formData.location);
+  const isRegionValid = validateField('region', formData.region);
+  const areSpecificFieldsValid = validateServiceSpecificFields();
+
+  return isCategoryValid && isDescriptionValid && isLocationValid && isRegionValid && areSpecificFieldsValid;
 }
 
 function validateField(fieldName, value) {
   const isValid = fieldName === 'location' ? value !== null : isFieldValid(value)
-  validationErrors[fieldName] = !isValid
+  if (fieldName !== 'source' && fieldName !== 'email') {
+    validationErrors[fieldName] = !isValid
+  }
   return isValid
 }
 
+// PERBAIKAN: Logika validasi utama yang menangani semua kategori penipuan
 function validateServiceSpecificFields() {
   if (selectedService.value !== SERVICE_TYPES.FRAUD) {
-    return true
+    return true;
   }
   
-  if (formData.category === CATEGORY_TYPES.EMAIL) {
-    const isValid = formData.email && VALIDATION_CONSTANTS.EMAIL_REGEX.test(formData.email)
-    validationErrors.email = !isValid
-    return isValid
+  let isValid = true;
+
+  switch (formData.category) {
+    case CATEGORY_TYPES.PHONE:
+      isValid = (
+        isFieldValid(formData.source) &&
+        formData.source.startsWith(VALIDATION_CONSTANTS.PHONE_PREFIX) &&
+        formData.source.length >= VALIDATION_CONSTANTS.MIN_PHONE_LENGTH
+      );
+      validationErrors.source = !isValid;
+      break;
+      
+    case CATEGORY_TYPES.EMAIL:
+      isValid = isFieldValid(formData.email) && VALIDATION_CONSTANTS.EMAIL_REGEX.test(formData.email);
+      validationErrors.email = !isValid;
+      break;
+
+    case CATEGORY_TYPES.URL:
+      isValid = isFieldValid(formData.source) && VALIDATION_CONSTANTS.URL_REGEX.test(formData.source);
+      validationErrors.source = !isValid;
+      break;
+
+    default:
+      // Jika layanan adalah Penipuan tapi tidak ada kategori yang dipilih, maka tidak valid.
+      isValid = false;
+      validationErrors.category = true;
   }
   
-  const isValid = (
-    formData.source &&
-    formData.source.startsWith(VALIDATION_CONSTANTS.PHONE_PREFIX) &&
-    formData.source.length >= VALIDATION_CONSTANTS.MIN_PHONE_LENGTH
-  )
-  validationErrors.source = !isValid
-  return isValid
+  return isValid;
 }
+
 
 function prepareFormData() {
   const dataToSubmit = new FormData()
   
   const fields = [
-    'category',
-    'description',
-    'source',
-    'address',
-    'region',
-    'email'
+    'category', 'description', 'source', 'address', 'region', 'email'
   ]
   
   fields.forEach(field => {
@@ -382,7 +396,7 @@ async function handleLocationSuccess(position) {
     validationErrors.location = false
   } catch (error) {
     console.error('Reverse geocoding error:', error)
-    formData.address = 'Alamat tidak tersedia'
+    formData.address = 'Gagal mendapatkan alamat'
     formData.region = ''
   }
 }
@@ -407,23 +421,17 @@ async function reverseGeocode(lat, lng) {
   
   try {
     const response = await fetch(url)
-    
     if (!response.ok) {
       throw new Error('Failed to fetch address')
     }
-    
     const data = await response.json()
-    
     return {
       fullAddress: data.display_name || 'Alamat tidak ditemukan',
       region: data.address?.state || data.address?.city || data.address?.county || ''
     }
   } catch (error) {
     console.error('Reverse geocoding error:', error)
-    return {
-      fullAddress: 'Alamat tidak tersedia',
-      region: ''
-    }
+    return { fullAddress: 'Alamat tidak tersedia', region: '' }
   }
 }
 
@@ -440,7 +448,7 @@ function handleSubmitSuccess() {
 
 function handleSubmitError(errors) {
   console.error('Submit error:', errors)
-  showAlert('Gagal mengirim laporan. Silakan coba lagi.')
+  showAlert('Gagal mengirim laporan. Silakan periksa kembali data Anda.')
 }
 
 // Utility functions
@@ -470,7 +478,6 @@ function scrollToFirstError() {
 
 function highlightTextareaError() {
   const textarea = document.querySelector('.custom-textarea')
-  
   if (!textarea) return
   
   textarea.classList.add('border-danger')
@@ -503,7 +510,7 @@ function closeSuccessModal() {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(#grid)"/></svg>');
   opacity: 0.3;
 }
 

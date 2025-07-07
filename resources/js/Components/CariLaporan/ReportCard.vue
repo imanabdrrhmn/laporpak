@@ -192,7 +192,7 @@ export default {
     
     // Content
     reportTitle() {
-      return this.report.source || this.report.title || 'Laporan Tanpa Judul';
+      return this.report.source || this.report.category || 'Laporan Tanpa Judul';
     },
     
     truncatedDescription() {

@@ -1,563 +1,521 @@
 <template>
-    <div class="col-lg-6 d-flex align-items-center justify-content-end p-3 p-md-2 bg-light">
-      <!-- Flag Icons CSS Library -->
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css" />
-      <div class="form-container p-3 p-sm-4 p-lg-5 w-100">
-        <h5 class="text-start fw-bold mb-3">
-          <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-          {{ serviceInfo[selectedService].formTitle }}
-        </h5>
-        <div class="service-tabs mb-4">
-          <div class="d-flex gap-2 flex-wrap">
-            <button
-              v-for="service in services"
-              :key="service.value"
-              type="button"
-              class="btn flex-fill position-relative service-btn py-2"
-              :class="selectedService === service.value ? 'btn-primary text-white' : 'btn-outline-secondary'"
-              @click="$emit('select-service', service.value)"
-            >
-              <i :class="service.icon + ' me-2'"></i>
-              {{ service.label }}
-              <span v-if="selectedService === service.value" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                <span class="visually-hidden">Selected</span>
-              </span>
-            </button>
-          </div>
+  <div class="col-lg-6 d-flex align-items-center justify-content-end p-3 p-md-2 bg-light">
+    <link 
+      rel="stylesheet" 
+      href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css" 
+    />
+    <div class="form-container p-3 p-sm-4 p-lg-5 w-100">
+      <h5 class="text-start fw-bold mb-3">
+        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+        {{ serviceInfo[selectedService].formTitle }}
+      </h5>
+
+      <div class="service-tabs mb-4">
+        <div class="d-flex gap-2 flex-wrap">
+          <button
+            v-for="service in services"
+            :key="service.value"
+            type="button"
+            class="btn flex-fill position-relative service-btn py-2"
+            :class="selectedService === service.value ? 'btn-primary text-white' : 'btn-outline-secondary'"
+            @click="$emit('select-service', service.value)"
+          >
+            <i :class="service.icon + ' me-2'"></i>
+            {{ service.label }}
+            <span v-if="selectedService === service.value" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+              <span class="visually-hidden">Selected</span>
+            </span>
+          </button>
         </div>
-        <form @submit.prevent="submitForm" ref="formRef">
-          <div class="row g-3">
-            <div class="col-12">
-              <label for="category" class="form-label mb-2">Kategori</label>
-              <select
-                id="category"
-                v-model="formData.category"
-                class="form-select custom-select"
-                required
-                :class="{'is-invalid': validationErrors.category}"
-                @change="validationErrors.category = false"
-                aria-label="Kategori"
-              >
-                <option disabled value="">Pilih Kategori</option>
-                <option
-                  v-for="category in currentCategories"
-                  :key="category.value"
-                  :value="category.value"
-                >
-                  {{ category.label }}
-                </option>
-              </select>
-              <div v-if="validationErrors.category" class="invalid-feedback">
-                Kategori harus dipilih
-              </div>
+      </div>
+
+      <form ref="formRef" @submit.prevent="submitForm">
+        <div class="row g-3">
+          <div class="col-12">
+            <label for="category" class="form-label mb-2">Kategori</label>
+            <select
+              id="category"
+              v-model="formData.category"
+              class="form-select custom-select"
+              :class="{'is-invalid': validationErrors.category}"
+              aria-label="Kategori"
+              required
+              @change="validationErrors.category = false"
+            >
+              <option disabled value="">Pilih Kategori</option>
+              <option v-for="category in currentCategories" :key="category.value" :value="category.value">
+                {{ category.label }}
+              </option>
+            </select>
+            <div v-if="validationErrors.category" class="invalid-feedback">
+              Kategori harus dipilih
             </div>
-            
-            <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category === 'Email' && formData.category">
-              <label for="email" class="form-label mb-2">Alamat Email</label>
-              <input
-                id="email"
-                v-model="formData.email"
-                type="email"
-                class="form-control"
-                :class="{'is-invalid': validationErrors.email}"
-                placeholder="Masukkan alamat email"
-                @input="validateEmail"
-                required
-              />
-              <div v-if="validationErrors.email" class="invalid-feedback">
-                Alamat email tidak valid
-              </div>
+          </div>
+
+          <div v-if="selectedService === 'Penipuan' && formData.category === 'Email'" class="col-12">
+            <label for="email" class="form-label mb-2">Alamat Email</label>
+            <input
+              id="email"
+              v-model="formData.email"
+              type="email"
+              class="form-control"
+              :class="{'is-invalid': validationErrors.email}"
+              placeholder="Masukkan alamat email"
+              required
+              @input="validateEmail"
+            />
+            <div v-if="validationErrors.email" class="invalid-feedback">
+              Alamat email tidak valid
             </div>
-            
-            <!-- Ganti blok input telepon lama dengan yang baru -->
-            <div class="col-12" v-if="selectedService === 'Penipuan' && formData.category !== 'Email' && formData.category">
-              <label for="phone" class="form-label mb-2">Nomor Telepon</label>
-              <div class="integrated-phone-input">
-                <!-- Country Dropdown terintegrasi dalam input -->
-                <div class="phone-input-wrapper" ref="phoneInputWrapper">
-                  <div class="country-selector" @click="toggleDropdown" ref="countrySelector">
-                    <span :class="`fi fi-${selectedCountry.iso2.toLowerCase()}`" class="flag-icon"></span>
-                    <span class="dial-code">+{{ selectedCountry.dialCode }}</span>
-                    <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': showDropdown }"></i>
-                  </div>
-                  <input
-                    id="phone"
-                    v-model="localPhoneNumber"
-                    type="tel"
-                    class="phone-number-input"
-                    :class="{'is-invalid': validationErrors.source}"
-                    placeholder="Masukkan nomor telepon"
-                    @input="onPhoneInput"
-                    @keypress="onPhoneKeypress"
-                    @focus="onPhoneFocus"
-                    @blur="onPhoneBlur"
-                    required
-                  />
-                  <div class="country-dropdown-menu" v-show="showDropdown" ref="dropdownMenu">
-                    <div class="search-wrapper">
-                      <input
-                        type="text"
-                        class="country-search-input"
-                        placeholder="Cari kode negara"
-                        v-model="countrySearch"
-                        @input="filterCountries"
-                        ref="searchInput"
-                      />
-                      <i class="bi bi-search search-icon"></i>
-                    </div>
-                    <ul class="countries-list">
-                      <li v-for="country in filteredCountries" :key="country.iso2">
-                        <button
-                          type="button"
-                          class="country-option"
-                          @click="selectCountry(country)"
-                        >
-                          <span :class="`fi fi-${country.iso2.toLowerCase()}`" class="flag-icon"></span>
-                          <span class="country-info">
-                            <span class="country-name">{{ country.name }}</span>
-                            <span class="country-dial-code">+{{ country.dialCode }}</span>
-                          </span>
-                        </button>
-                      </li>
-                      <li v-if="filteredCountries.length === 0" class="no-results">
-                        Kode negara tidak ditemukan
-                      </li>
-                    </ul>
-                  </div>
+          </div>
+
+          <div v-if="selectedService === 'Penipuan' && formData.category === 'Nomor Telepon'" class="col-12">
+            <label for="phone" class="form-label mb-2">Nomor Telepon</label>
+            <div class="integrated-phone-input">
+              <div ref="phoneInputWrapper" class="phone-input-wrapper" :class="{'is-invalid': validationErrors.source}">
+                <div ref="countrySelector" class="country-selector" @click="toggleDropdown">
+                  <span :class="`fi fi-${selectedCountry.iso2.toLowerCase()}`" class="flag-icon"></span>
+                  <span class="dial-code">+{{ selectedCountry.dialCode }}</span>
+                  <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': showDropdown }"></i>
                 </div>
-                <div v-if="validationErrors.source" class="invalid-feedback">
-                  Nomor telepon tidak valid
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-12">
-              <label for="evidence" class="form-label mb-2">Bukti</label>
-              <div class="input-group custom-file-input">
                 <input
-                  id="evidence"
-                  type="file"
-                  class="form-control"
-                  accept="image/jpeg,image/jpg,image/png"
-                  @change="handleFileUpload"
-                  :disabled="isProcessingImage"
-                  aria-label="Bukti"
-                  ref="fileInput"
+                  id="phone"
+                  v-model="localPhoneNumber"
+                  type="tel"
+                  class="phone-number-input"
+                  placeholder="Masukkan nomor telepon"
+                  required
+                  @input="onPhoneInput"
+                  @keypress="onPhoneKeypress"
+                  @focus="onPhoneFocus"
+                  @blur="onPhoneBlur"
                 />
-                <span class="input-group-text py-0 px-2">
-                  <i class="bi bi-image text-primary" v-if="!isProcessingImage"></i>
-                  <div class="spinner-border spinner-border-sm text-primary" role="status" v-else>
-                    <span class="visually-hidden">Loading...</span>
+                <div v-show="showDropdown" ref="dropdownMenu" class="country-dropdown-menu">
+                  <div class="search-wrapper">
+                    <input ref="searchInput" v-model="countrySearch" type="text" class="country-search-input" placeholder="Cari kode negara" @input="filterCountries" />
+                    <i class="bi bi-search search-icon"></i>
                   </div>
-                </span>
-              </div>
-              <div class="form-text">
-                <div class="d-flex justify-content-between align-items-center">
-                  <span>Format: JPEG, PNG (Max: 5MB)</span>
-                  <span v-if="isProcessingImage" class="text-primary">
-                    <small>Memproses gambar...</small>
-                  </span>
-                  <span v-if="uploadedFile && !isProcessingImage" class="text-success">
-                    <small><i class="bi bi-check-circle me-1"></i>Siap dikirim</small>
-                  </span>
+                  <ul class="countries-list">
+                    <li v-for="country in filteredCountries" :key="country.iso2">
+                      <button type="button" class="country-option" @click="selectCountry(country)">
+                        <span :class="`fi fi-${country.iso2.toLowerCase()}`" class="flag-icon"></span>
+                        <span class="country-info">
+                          <span class="country-name">{{ country.name }}</span>
+                          <span class="country-dial-code">+{{ country.dialCode }}</span>
+                        </span>
+                      </button>
+                    </li>
+                    <li v-if="filteredCountries.length === 0" class="no-results">
+                      Kode negara tidak ditemukan
+                    </li>
+                  </ul>
                 </div>
               </div>
-              <!-- Preview gambar yang sudah dikonversi -->
-              <div v-if="previewUrl" class="mt-3">
-                <div class="image-preview">
-                  <img :src="previewUrl" alt="Preview" class="img-fluid rounded" style="max-height: 200px; max-width: 100%;">
-                  <button type="button" class="btn btn-sm btn-outline-danger mt-2" @click="removeImage">
-                    <i class="bi bi-trash me-1"></i>Hapus Gambar
-                  </button>
-                </div>
+              <div v-if="validationErrors.source" class="invalid-feedback">
+                Nomor telepon tidak valid
               </div>
             </div>
-            
-            <div class="col-12">
-              <label for="description" class="form-label mb-2">Deskripsi Kejadian</label>
-              <textarea
-                id="description"
-                v-model="formData.description"
-                class="form-control custom-textarea"
-                :class="{'is-invalid': validationErrors.description}"
-                :placeholder="serviceInfo[selectedService].descriptionPlaceholder"
-                rows="4"
-                required
-                maxlength="1500"
-                @input="$emit('validate-description')"
-                @focus="validationErrors.description = false"
-                aria-label="Deskripsi"
-              ></textarea>
-              <div class="form-text d-flex justify-content-between">
-                <span v-if="validationErrors.description" class="text-danger">
-                  Deskripsi harus diisi
-                </span>
-                <span :class="{'text-danger': formData.description.length > 1500}">
-                  {{ formData.description.length }}/1500
-                </span>
-              </div>
+          </div>
+
+          <div v-if="selectedService === 'Penipuan' && formData.category === 'Tautan'" class="col-12">
+            <label for="url" class="form-label mb-2">Tautan / URL</label>
+            <input
+              id="url"
+              v-model="formData.source"
+              type="url"
+              class="form-control"
+              :class="{'is-invalid': validationErrors.source}"
+              placeholder="https://contoh-link-berbahaya.com"
+              required
+              @input="validateUrl"
+            />
+            <div v-if="validationErrors.source" class="invalid-feedback">
+              Tautan / URL tidak valid
             </div>
-            
-            <div class="col-12">
-              <label for="region" class="form-label mb-2">Wilayah</label>
-              <select
-                id="region"
-                v-model="formData.region"
-                class="form-select custom-select"
-                required
-                :class="{ 'is-invalid': validationErrors.region }"
-                @change="validationErrors.region = false"
-                aria-label="Provinsi"
-              >
-                <option disabled value="">Pilih Wilayah</option>
-                <option
-                  v-for="province in provinces"
-                  :key="province"
-                  :value="province"
-                  placeholder="Pilih Wilayah"
-                >
-                  {{ province }}
-                </option>
-              </select>
-              <div v-if="validationErrors.region" class="invalid-feedback">
-                Wilayah harus dipilih
-              </div>
-            </div>
-            
-            <div class="col-12">
-              <MapContainer
-                :form-data="formData"
-                :validation-errors="validationErrors"
-                :selected-service="selectedService"
-                @update:location="formData.location = $event"
-                @update:address="formData.address = $event"
-                @get-current-location="$emit('get-current-location')"
+          </div>
+
+          <div class="col-12">
+            <label for="evidence" class="form-label mb-2">Bukti</label>
+            <div class="input-group custom-file-input">
+              <input
+                id="evidence"
+                ref="fileInput"
+                type="file"
+                class="form-control"
+                accept="image/jpeg,image/jpg,image/png"
+                :disabled="isProcessingImage"
+                aria-label="Bukti"
+                @change="handleFileUpload"
               />
+              <span class="input-group-text py-0 px-2">
+                <i v-if="!isProcessingImage" class="bi bi-image text-primary"></i>
+                <div v-else class="spinner-border spinner-border-sm text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </span>
             </div>
-            
-            <div class="col-12">
-              <div class="d-grid">
-                <button
-                  type="submit"
-                  class="btn btn-primary position-relative overflow-hidden submit-btn py-3"
-                  :disabled="!isFormValid || isProcessingImage"
-                >
-                  <span class="btn-animation"></span>
-                  <i class="bi bi-send me-2"></i> 
-                  {{ isProcessingImage ? 'Memproses...' : 'Kirim Laporan' }}
+            <div class="form-text">
+              <div class="d-flex justify-content-between align-items-center">
+                <span>Format: JPEG, PNG (Max: 5MB)</span>
+                <span v-if="isProcessingImage" class="text-primary">
+                  <small>Memproses gambar...</small>
+                </span>
+                <span v-if="uploadedFile && !isProcessingImage" class="text-success">
+                  <small><i class="bi bi-check-circle me-1"></i>Siap dikirim</small>
+                </span>
+              </div>
+            </div>
+            <div v-if="previewUrl" class="mt-3">
+              <div class="image-preview">
+                <img :src="previewUrl" alt="Preview" class="img-fluid rounded" style="max-height: 200px; max-width: 100%;">
+                <button type="button" class="btn btn-sm btn-outline-danger mt-2" @click="removeImage">
+                  <i class="bi bi-trash me-1"></i>Hapus Gambar
                 </button>
               </div>
             </div>
           </div>
-        </form>
-      </div>
+
+          <div class="col-12">
+            <label for="description" class="form-label mb-2">Deskripsi Kejadian</label>
+            <textarea
+              id="description"
+              v-model="formData.description"
+              class="form-control custom-textarea"
+              :class="{'is-invalid': validationErrors.description}"
+              :placeholder="serviceInfo[selectedService].descriptionPlaceholder"
+              rows="4"
+              maxlength="1500"
+              required
+              aria-label="Deskripsi"
+              @input="$emit('validate-description')"
+              @focus="validationErrors.description = false"
+            ></textarea>
+            <div class="form-text d-flex justify-content-between">
+              <span v-if="validationErrors.description" class="text-danger">
+                Deskripsi harus diisi
+              </span>
+              <span :class="{'text-danger': formData.description.length > 1500}">
+                {{ formData.description.length }}/1500
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label for="region" class="form-label mb-2">Wilayah</label>
+            <select
+              id="region"
+              v-model="formData.region"
+              class="form-select custom-select"
+              :class="{ 'is-invalid': validationErrors.region }"
+              aria-label="Provinsi"
+              required
+              @change="validationErrors.region = false"
+            >
+              <option disabled value="">Pilih Wilayah</option>
+              <option v-for="province in provinces" :key="province" :value="province" placeholder="Pilih Wilayah">
+                {{ province }}
+              </option>
+            </select>
+            <div v-if="validationErrors.region" class="invalid-feedback">
+              Wilayah harus dipilih
+            </div>
+          </div>
+
+          <div class="col-12">
+            <MapContainer
+              :form-data="formData"
+              :validation-errors="validationErrors"
+              :selected-service="selectedService"
+              @update:location="formData.location = $event"
+              @update:address="formData.address = $event"
+              @get-current-location="$emit('get-current-location')"
+            />
+          </div>
+
+          <div class="col-12">
+            <div class="d-grid">
+              <button
+                type="submit"
+                class="btn btn-primary position-relative overflow-hidden submit-btn py-3"
+                :disabled="!isFormValid || isProcessingImage"
+              >
+                <span class="btn-animation"></span>
+                <i class="bi bi-send me-2"></i> 
+                {{ isProcessingImage ? 'Memproses...' : 'Kirim Laporan' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
-  </template>
+  </div>
+</template>
 
-  <script setup>
-  import MapContainer from './MapContainer.vue';
-  import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
-  import { allCountries } from 'country-telephone-data';
+<script setup>
+import MapContainer from './MapContainer.vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { allCountries } from 'country-telephone-data';
 
-  const props = defineProps({
-    selectedService: String,
-    services: Array,
-    serviceInfo: Object,
-    currentCategories: Array,
-    formData: Object,
-    validationErrors: Object,
-    isFormValid: Boolean,
-    provinces: Array,
+// Props & Emits
+const props = defineProps({
+  selectedService: String,
+  services: Array,
+  serviceInfo: Object,
+  currentCategories: Array,
+  formData: Object,
+  validationErrors: Object,
+  isFormValid: Boolean,
+  provinces: Array,
+});
+
+const emit = defineEmits([
+  'select-service',
+  'submit-report',
+  'file-upload',
+  'validate-description',
+  'get-current-location'
+]);
+
+// State
+const formRef = ref(null);
+const isProcessingImage = ref(false);
+const uploadedFile = ref(null);
+const previewUrl = ref('');
+const fileInput = ref(null);
+
+// State untuk Input Telepon
+const selectedCountry = ref(allCountries.find(c => c.iso2 === 'id') || allCountries[0]);
+const localPhoneNumber = ref('');
+const showDropdown = ref(false);
+const countrySearch = ref('');
+const filteredCountries = ref([]);
+const searchInput = ref(null);
+const phoneInputWrapper = ref(null);
+const dropdownMenu = ref(null);
+
+const sortedCountries = computed(() => {
+  return [...allCountries].sort((a, b) => {
+    if (a.iso2 === 'id') return -1;
+    if (b.iso2 === 'id') return 1;
+    return a.name.localeCompare(b.name);
   });
+});
 
-  const emit = defineEmits(['select-service', 'submit-report', 'file-upload', 'validate-description', 'get-current-location']);
+// Watcher untuk membersihkan input saat kategori berubah
+watch(() => props.formData.category, () => {
+  props.formData.source = '';
+  props.formData.email = '';
+  localPhoneNumber.value = '';
+  props.validationErrors.source = false;
+  props.validationErrors.email = false;
+});
 
-  // Fungsi country code
-  const selectedCountry = ref(allCountries.find(c => c.iso2 === 'id') || allCountries[0]);
-  const localPhoneNumber = ref('');
-  const showDropdown = ref(false);
-  const countrySearch = ref('');
-  const filteredCountries = ref([]);
-  const searchInput = ref(null);
-  const countryDropdown = ref(null);
-  const phoneInputWrapper = ref(null);
+// Fungsi Konversi Gambar
+const convertToWebP = (file, quality = 0.8) => {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
 
-  // Fungsi pemrosesan gambar
-  const isProcessingImage = ref(false);
-  const uploadedFile = ref(null);
-  const previewUrl = ref('');
-  const fileInput = ref(null);
-
-  const sortedCountries = computed(() => {
-    return allCountries.sort((a, b) => {
-      if (a.iso2 === 'id') return -1;
-      if (b.iso2 === 'id') return 1;
-      return a.name.localeCompare(b.name);
-    });
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const webpFile = new File(
+              [blob],
+              file.name.replace(/\.(jpg|jpeg|png)$/i, '.webp'),
+              { type: 'image/webp' }
+            );
+            resolve(webpFile);
+          } else {
+            reject(new Error('Gagal mengkonversi gambar'));
+          }
+        },
+        'image/webp',
+        quality
+      );
+    };
+    img.onerror = () => reject(new Error('Gagal memuat gambar'));
+    img.src = URL.createObjectURL(file);
   });
+};
 
-  // Fungsi konversi gambar ke WebP
-  const convertToWebP = (file, quality = 0.8) => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        
-        ctx.drawImage(img, 0, 0);
-        
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const webpFile = new File(
-                [blob], 
-                file.name.replace(/\.(jpg|jpeg|png)$/i, '.webp'), 
-                { type: 'image/webp' }
-              );
-              resolve(webpFile);
-            } else {
-              reject(new Error('Gagal mengkonversi gambar'));
-            }
-          },
-          'image/webp',
-          quality
-        );
-      };
-      
-      img.onerror = () => reject(new Error('Gagal memuat gambar'));
-      img.src = URL.createObjectURL(file);
-    });
-  };
+// Fungsi Handler untuk Upload & Gambar
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
 
-  // Handler upload file dan konversi
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    if (!allowedTypes.includes(file.type)) {
-      alert('Format file tidak didukung. Gunakan JPEG atau PNG.');
-      resetFileInput();
-      return;
-    }
-    
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      alert('Ukuran file terlalu besar. Maksimal 5MB.');
-      resetFileInput();
-      return;
-    }
-    
-    try {
-      isProcessingImage.value = true;
-      
-      const webpFile = await convertToWebP(file, 0.8);
-      
-      previewUrl.value = URL.createObjectURL(webpFile);
-      
-      uploadedFile.value = webpFile;
-      
-      emit('file-upload', { 
-        target: { 
-          files: [webpFile] 
-        } 
-      });
-      
-    } catch (error) {
-      console.error('Error converting image:', error);
-      alert('Gagal memproses gambar. Silakan coba lagi.');
-      resetFileInput();
-    } finally {
-      isProcessingImage.value = false;
-    }
-  };
-
-  // Hapus gambar yang diupload
-  const removeImage = () => {
-    uploadedFile.value = null;
-    if (previewUrl.value) {
-      URL.revokeObjectURL(previewUrl.value);
-      previewUrl.value = '';
-    }
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  if (!allowedTypes.includes(file.type)) {
+    alert('Format file tidak didukung. Gunakan JPEG atau PNG.');
     resetFileInput();
-    
-    emit('file-upload', { target: { files: [] } });
-  };
+    return;
+  }
 
-  // Reset input file
-  const resetFileInput = () => {
-    if (fileInput.value) {
-      fileInput.value.value = '';
-    }
-  };
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) {
+    alert('Ukuran file terlalu besar. Maksimal 5MB.');
+    resetFileInput();
+    return;
+  }
 
-  // Fungsi reset form
-  const resetForm = () => {
-    Object.keys(props.formData).forEach((key) => {
-      props.formData[key] = '';
-    });
-    localPhoneNumber.value = '';
-    selectedCountry.value = allCountries.find(c => c.iso2 === 'id') || allCountries[0];
+  try {
+    isProcessingImage.value = true;
+    const webpFile = await convertToWebP(file, 0.8);
+    previewUrl.value = URL.createObjectURL(webpFile);
+    uploadedFile.value = webpFile;
+    emit('file-upload', { target: { files: [webpFile] } });
+  } catch (error) {
+    console.error('Error converting image:', error);
+    alert('Gagal memproses gambar. Silakan coba lagi.');
+    resetFileInput();
+  } finally {
+    isProcessingImage.value = false;
+  }
+};
+
+const removeImage = () => {
+  uploadedFile.value = null;
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value);
+    previewUrl.value = '';
+  }
+  resetFileInput();
+  emit('file-upload', { target: { files: [] } });
+};
+
+const resetFileInput = () => {
+  if (fileInput.value) fileInput.value.value = '';
+};
+
+// Fungsi Telepon & Dropdown Negara
+const filterCountries = () => {
+  const search = countrySearch.value.toLowerCase();
+  if (!search) {
+    filteredCountries.value = sortedCountries.value;
+    return;
+  }
+  filteredCountries.value = sortedCountries.value.filter(country =>
+    country.dialCode.includes(search) || country.name.toLowerCase().includes(search)
+  );
+};
+
+const toggleDropdown = async (event) => {
+  event.stopPropagation();
+  showDropdown.value = !showDropdown.value;
+  if (showDropdown.value) {
     countrySearch.value = '';
     filteredCountries.value = sortedCountries.value;
+    await nextTick();
+    if (searchInput.value) searchInput.value.focus();
+  }
+};
+
+const selectCountry = (country) => {
+  selectedCountry.value = country;
+  showDropdown.value = false;
+  validatePhoneNumber();
+};
+
+const handleClickOutside = (event) => {
+  if (phoneInputWrapper.value && !phoneInputWrapper.value.contains(event.target)) {
     showDropdown.value = false;
-    removeImage();
-    Object.keys(props.validationErrors).forEach((key) => {
-      props.validationErrors[key] = false;
-    });
-    if (formRef.value) {
-      formRef.value.reset();
-    }
-  };
+  }
+};
 
-  // Fungsi submit form
-  const submitForm = () => {
-    if (isProcessingImage.value) {
-      alert('Tunggu hingga proses gambar selesai.');
-      return;
-    }
-    emit('submit-report');
-  };
+// Fungsi Validasi Input
+const validatePhoneNumber = () => {
+  const phoneNumber = localPhoneNumber.value.replace(/\D/g, '');
+  if (!phoneNumber) {
+    props.validationErrors.source = true;
+    props.formData.source = '';
+    return;
+  }
+  const isValid = phoneNumber.length >= 8 && phoneNumber.length <= 15;
+  if (isValid) {
+    props.formData.source = `+${selectedCountry.value.dialCode}${phoneNumber}`;
+    props.validationErrors.source = false;
+  } else {
+    props.validationErrors.source = true;
+  }
+};
 
-  // Fungsi filter negara
-  const filterCountries = () => {
-    const search = countrySearch.value.toLowerCase();
-    if (!search) {
-      filteredCountries.value = sortedCountries.value;
-      return;
-    }
-    
-    filteredCountries.value = sortedCountries.value.filter(country => 
-      country.dialCode.includes(search) ||
-      country.name.toLowerCase().includes(search)
-    );
-  };
+const validateEmail = () => {
+  const email = props.formData.email;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  props.validationErrors.email = !emailRegex.test(email);
+};
 
-  // Toggle dropdown dengan proper event handling
-  const toggleDropdown = async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    showDropdown.value = !showDropdown.value;
-    
-    if (showDropdown.value) {
-      countrySearch.value = '';
-      filteredCountries.value = sortedCountries.value;
-      
-      await nextTick();
-      if (searchInput.value) {
-        searchInput.value.focus();
-      }
-    }
-  };
+const validateUrl = () => {
+  const url = props.formData.source;
+  const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+  props.validationErrors.source = !urlRegex.test(url);
+};
 
-  // Select country dengan proper event handling
-  const selectCountry = (country, event) => {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    
-    selectedCountry.value = country;
-    showDropdown.value = false;
-    countrySearch.value = '';
-    
-    if (!localPhoneNumber.value.trim()) {
-      props.validationErrors.source = false;
-    } else {
-      validatePhoneNumber();
-    }
-  };
+// Event Handler untuk Input Telepon
+const onPhoneKeypress = (e) => {
+  if (!/[\d]/.test(e.key)) e.preventDefault();
+};
 
-  // Handle click outside dengan proper event handling
-  const handleClickOutside = (event) => {
-    if (countryDropdown.value && !countryDropdown.value.contains(event.target)) {
-      showDropdown.value = false;
-    }
-  };
+const onPhoneInput = (e) => {
+  const sanitizedValue = e.target.value.replace(/\D/g, '');
+  e.target.value = sanitizedValue;
+  localPhoneNumber.value = sanitizedValue;
+  validatePhoneNumber();
+};
 
-  onMounted(() => {
-    filteredCountries.value = sortedCountries.value;
-    document.addEventListener('click', handleClickOutside);
+const onPhoneFocus = () => {
+  // Biarkan kosong untuk menjaga dropdown tetap terbuka
+};
+
+const onPhoneBlur = () => {
+  validatePhoneNumber();
+};
+
+// Fungsi Form
+const submitForm = () => {
+  if (isProcessingImage.value) {
+    alert('Tunggu hingga proses gambar selesai.');
+    return;
+  }
+  emit('submit-report');
+};
+
+const resetForm = () => {
+  if (formRef.value) formRef.value.reset();
+  Object.keys(props.formData).forEach((key) => {
+    props.formData[key] = (key === 'category' ? '' : props.formData[key]);
   });
-
-  onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside);
-    if (previewUrl.value) {
-      URL.revokeObjectURL(previewUrl.value);
-    }
+  localPhoneNumber.value = '';
+  selectedCountry.value = allCountries.find(c => c.iso2 === 'id') || allCountries[0];
+  countrySearch.value = '';
+  filteredCountries.value = sortedCountries.value;
+  showDropdown.value = false;
+  removeImage();
+  Object.keys(props.validationErrors).forEach((key) => {
+    props.validationErrors[key] = false;
   });
+};
 
-  const validatePhoneNumber = () => {
-    const phoneNumber = localPhoneNumber.value.replace(/\D/g, '');
-    
-    if (!phoneNumber) {
-      props.validationErrors.source = false;
-      props.formData.source = '';
-      return;
-    }
-    
-    const isValid = phoneNumber.length >= 8 && phoneNumber.length <= 15;
-    
-    if (isValid) {
-      props.formData.source = `+${selectedCountry.value.dialCode}${phoneNumber}`;
-      props.validationErrors.source = false;
-    } else {
-      props.validationErrors.source = true;
-    }
-  };
+// Lifecycle Hooks
+onMounted(() => {
+  filteredCountries.value = sortedCountries.value;
+  document.addEventListener('click', handleClickOutside);
+});
 
-  const validateEmail = () => {
-    const email = props.formData.email;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
+});
 
-    if (emailRegex.test(email)) {
-      props.validationErrors.email = false;
-      props.formData.source = email; 
-    } else {
-      props.validationErrors.email = true;
-    }
-  };
-
-  const onPhoneKeypress = (e) => {
-    if (!/[\d]/.test(e.key)) {
-      e.preventDefault();
-    }
-  };
-
-  const onPhoneInput = (e) => {
-    e.target.value = e.target.value.replace(/\D/g, '');
-    localPhoneNumber.value = e.target.value;
-    validatePhoneNumber();
-  };
-
-  const onPhoneFocus = () => {
-    // Do nothing, just prevent dropdown from closing
-  };
-
-  const onPhoneBlur = () => {
-    // Close dropdown if clicked outside
-    setTimeout(() => {
-      if (phoneInputWrapper.value && !phoneInputWrapper.value.contains(document.activeElement)) {
-        showDropdown.value = false;
-      }
-    }, 100);
-  };
-
-  // Form ref untuk reset
-  const formRef = ref(null);
-
-  // Ekspos formRef dan resetForm ke parent
-  defineExpose({
-    formRef,
-    resetForm
-  });
-  </script>
+defineExpose({ formRef, resetForm });
+</script>
 
 <style scoped>
+/* SEMUA STYLE ANDA TETAP DI SINI, TIDAK ADA YANG DIUBAH */
 .bg-light {
   background: transparent !important;
 }
@@ -580,7 +538,8 @@
   border-radius: 6px;
   position: relative;
   z-index: 2;
-  height: 48px; /* Fixed height untuk konsistensi */
+  height: 48px;
+  /* Fixed height untuk konsistensi */
 }
 
 .form-control:focus,
@@ -597,7 +556,8 @@
   width: 100%;
   font-size: 1rem;
   padding: 0.75rem;
-  height: 48px; /* Fixed height yang sama */
+  height: 48px;
+  /* Fixed height yang sama */
   overflow-x: hidden;
   word-wrap: break-word;
   position: relative;
@@ -621,12 +581,14 @@
   background-size: cover;
   background-position: center;
   flex-shrink: 0;
-  margin-right: 0 !important; /* Remove any margin */
+  margin-right: 0 !important;
+  /* Remove any margin */
 }
 
 .searchable-country-select {
   position: relative;
-  width: 120px; /* Increased width untuk desktop */
+  width: 120px;
+  /* Increased width untuk desktop */
   z-index: 100;
 }
 
@@ -635,8 +597,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: system-ui, -apple-system, sans-serif;
-  padding: 0.75rem; /* Same padding as form controls */
-  font-size: 1rem; /* Same font size */
+  padding: 0.75rem;
+  /* Same padding as form controls */
+  font-size: 1rem;
+  /* Same font size */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -648,11 +612,13 @@
   position: relative;
   z-index: 100;
   white-space: nowrap;
-  height: 48px; /* Same height as form controls */
+  height: 48px;
+  /* Same height as form controls */
   line-height: 1;
   width: 100%;
   box-sizing: border-box;
-  gap: 0.25rem; /* REDUCED: Smaller gap between elements */
+  gap: 0.25rem;
+  /* REDUCED: Smaller gap between elements */
 }
 
 .selected-country:hover {
@@ -751,7 +717,8 @@
   text-decoration: none;
   color: #212529;
   font-size: 0.875rem;
-  gap: 0.25rem; /* REDUCED: Much smaller gap between flag and country code */
+  gap: 0.25rem;
+  /* REDUCED: Much smaller gap between flag and country code */
   transition: background-color 0.15s ease;
   justify-content: flex-start;
   cursor: pointer;
@@ -767,7 +734,8 @@
 }
 
 .country-item .flag-icon {
-  margin-right: 0 !important; /* REMOVED: No extra margin */
+  margin-right: 0 !important;
+  /* REMOVED: No extra margin */
   flex-shrink: 0;
 }
 
@@ -797,7 +765,8 @@
 }
 
 .input-group .country-select-wrapper {
-  flex: 0 0 120px; /* Fixed width untuk consistency */
+  flex: 0 0 120px;
+  /* Fixed width untuk consistency */
   z-index: 100;
 }
 
@@ -812,9 +781,12 @@
   border-left: 1px solid #ced4da !important;
   border-color: #ced4da !important;
   margin-left: 0 !important;
-  height: 48px; /* Same height as country selector */
-  padding: 0.75rem; /* Same padding */
-  font-size: 1rem; /* Same font size */
+  height: 48px;
+  /* Same height as country selector */
+  padding: 0.75rem;
+  /* Same padding */
+  font-size: 1rem;
+  /* Same font size */
   box-sizing: border-box;
 }
 
@@ -837,9 +809,12 @@
   border-right: none;
   flex: 1;
   min-width: 0;
-  border-left: 1px solid #ced4da !important; /* Tampilkan border kiri kembali */
-  border-color: #ced4da !important; /* Pastikan warna border sama */
-  margin-left: 0 !important; /* Hilangkan margin negatif dari .input-group */
+  border-left: 1px solid #ced4da !important;
+  /* Tampilkan border kiri kembali */
+  border-color: #ced4da !important;
+  /* Pastikan warna border sama */
+  margin-left: 0 !important;
+  /* Hilangkan margin negatif dari .input-group */
 }
 
 .custom-file-input .form-control:disabled {
@@ -1009,17 +984,33 @@
 
 /* Animations */
 @keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-5px); }
-  40% { transform: translateX(5px); }
-  60% { transform: translateX(-3px); }
-  80% { transform: translateX(3px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 @keyframes btn-wave {
-  0% { transform: translateX(-100%) rotate(45deg); }
-  100% { transform: translateX(100%) rotate(45deg); }
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
 }
 
 .btn-animation {
@@ -1028,7 +1019,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
   transform: translateX(-100%);
   animation: btn-wave 2s infinite;
 }
@@ -1040,11 +1031,9 @@
     padding: 2rem;
     margin: 0 auto;
   }
-  
   .searchable-country-select {
     width: 130px;
   }
-  
   .input-group .country-select-wrapper {
     flex: 0 0 130px;
   }
@@ -1055,15 +1044,12 @@
     max-width: 85%;
     padding: 2.5rem;
   }
-  
   .searchable-country-select {
     width: 140px;
   }
-  
   .input-group .country-select-wrapper {
     flex: 0 0 140px;
   }
-  
   .dropdown-menu-custom {
     left: 0;
     min-width: 280px;
@@ -1075,11 +1061,9 @@
     max-width: 580px;
     padding: 3rem;
   }
-  
   .searchable-country-select {
     width: 150px;
   }
-  
   .input-group .country-select-wrapper {
     flex: 0 0 150px;
   }
@@ -1089,11 +1073,9 @@
   .form-container {
     max-width: 620px;
   }
-  
   .searchable-country-select {
     width: 160px;
   }
-  
   .input-group .country-select-wrapper {
     flex: 0 0 160px;
   }
@@ -1103,11 +1085,9 @@
   .form-container {
     max-width: 680px;
   }
-  
   .searchable-country-select {
     width: 170px;
   }
-  
   .input-group .country-select-wrapper {
     flex: 0 0 170px;
   }
@@ -1118,7 +1098,6 @@
   .form-container {
     padding: 1.5rem;
   }
-  
   .form-control,
   .form-select,
   .selected-country {
@@ -1126,44 +1105,37 @@
     font-size: 0.9rem;
     padding: 0.6rem;
   }
-  
   .selected-country {
     padding: 0.6rem 0.5rem;
-    gap: 0.15rem; /* REDUCED: Even smaller gap on mobile */
+    gap: 0.15rem;
+    /* REDUCED: Even smaller gap on mobile */
   }
-  
   .searchable-country-select {
     width: 100px;
   }
-  
   .flag-icon {
     width: 16px;
     height: 12px;
   }
-  
   .input-group .country-select-wrapper {
     flex: 0 0 100px;
   }
-  
   .input-group .form-control {
     height: 44px;
     padding: 0.6rem;
     font-size: 0.9rem;
   }
-  
   .custom-file-input .input-group-text {
     height: 44px;
     min-width: 44px;
     padding: 0.6rem;
   }
-  
   .dropdown-menu-custom {
     left: -10px;
     min-width: 280px;
   }
-  
   .country-item {
-    gap: 0.15rem; 
+    gap: 0.15rem;
   }
 }
 
@@ -1173,11 +1145,9 @@
     padding: 0.75rem;
     min-height: 44px;
   }
-  
   .selected-country {
     min-height: 44px;
   }
-  
   .form-control,
   .form-select {
     min-height: 44px;
@@ -1189,7 +1159,10 @@
   box-sizing: border-box;
 }
 
-input, select, textarea, button {
+input,
+select,
+textarea,
+button {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -1259,7 +1232,6 @@ input, select, textarea, button {
   padding: 0 0.75rem;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
-
   background-color: #f8f9fa;
   border-right: 1px solid #dee2e6;
   cursor: pointer;
@@ -1378,8 +1350,10 @@ input, select, textarea, button {
   font-size: 0.875rem;
   outline: none;
   transition: border-color 0.2s ease;
-  background: #fff; /* Set background to white */
-  color: #212529; /* Pastikan warna teks gelap */
+  background: #fff;
+  /* Set background to white */
+  color: #212529;
+  /* Pastikan warna teks gelap */
 }
 
 /* White scrollbar for country-search-input */
@@ -1387,10 +1361,12 @@ input, select, textarea, button {
   width: 6px;
   background: #fff;
 }
+
 .country-search-input::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 3px;
 }
+
 .country-search-input::-webkit-scrollbar-track {
   background: #fff;
 }
