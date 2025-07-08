@@ -18,8 +18,8 @@ class TopUpRejectedMail extends Mailable
     {
         $this->user = $user;
         $this->topUp = $topUp;
-        
-        // Convert logo to base64
+
+        // Convert logo image to base64
         $this->logoBase64 = $this->getLogoBase64();
     }
 
@@ -31,13 +31,13 @@ class TopUpRejectedMail extends Mailable
 
     private function getLogoBase64()
     {
-        $logoPath = public_path('images/Logo-LaporPak.svg');
-        
+        $logoPath = public_path('images/Logo-LaporPak.png'); // Pastikan logo ada di public/images/
+
         if (file_exists($logoPath)) {
             $logoData = file_get_contents($logoPath);
             return 'data:image/svg+xml;base64,' . base64_encode($logoData);
         }
-        
+
         return null;
     }
 }

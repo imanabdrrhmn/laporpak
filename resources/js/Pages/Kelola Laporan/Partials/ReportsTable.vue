@@ -685,4 +685,10 @@ defineEmits(['openDetailModal']);
     font-size: 13px;
   }
 }
+
+/* Tambahkan jarak antara garis atas dan cards-container */
+.cards-container {
+  margin-top: 28px;
+  margin-bottom: 28px;
+}
 </style>

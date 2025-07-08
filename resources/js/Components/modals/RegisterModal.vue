@@ -603,9 +603,14 @@ function handleRegister() {
   color: #6c757d;
   font-size: 16px;
   z-index: 4;
+  transition: all 0.2s ease;
 }
 
-/* Remove input group styles since we're not using them anymore */
+.toggle-password-icon:hover {
+  color: #2563EB;
+}
+
+/* Form floating labels - FIXED VERSION */
 .form-floating {
   position: relative;
 }
@@ -614,11 +619,18 @@ function handleRegister() {
   height: 56px;
 }
 
-/* Tambahan CSS agar label lebih ke bawah */
+/* ✅ PERBAIKAN: Biarkan Bootstrap menangani positioning label */
 .form-floating > label {
   padding: 0.75rem 1rem;
-  top: 55%;
-  transform: translateY(-50%);
+  transition: all 0.2s ease-in-out;
+  /* Hapus top: 55% dan transform: translateY(-50%) */
+}
+
+/* Pastikan label bergerak dengan benar saat focus atau berisi nilai */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  transform: scale(0.85) translateY(-0.5rem);
+  color: #2563EB;
 }
 
 /* Toggle button styling */
@@ -678,12 +690,6 @@ function handleRegister() {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.form-floating > label {
-  padding: 0.75rem 1rem;
-  top: 55%;
-  transform: translateY(-50%);
-}
-
 /* Submit button */
 .btn-primary {
   background-color: #2563EB;
@@ -705,15 +711,6 @@ function handleRegister() {
 .btn-primary:disabled {
   background-color: #93c5fd;
   box-shadow: none;
-}
-
-/* Animasi dan efek */
-.toggle-password-icon {
-  transition: all 0.2s ease;
-}
-
-.toggle-password-icon:hover {
-  color: #2563EB;
 }
 
 /* Custom close button */

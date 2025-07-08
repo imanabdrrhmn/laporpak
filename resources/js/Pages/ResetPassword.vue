@@ -1,5 +1,7 @@
 <template>
   <AppLayout>
+    <head title="Reset Password" />
+
     <div class="container py-5" style="max-width: 480px;">
       <h3 class="mb-4 text-center">Reset Password</h3>
 
@@ -47,7 +49,7 @@
               tabindex="-1"
               :aria-label="passwordVisible ? 'Sembunyikan password' : 'Tampilkan password'"
             >
-              <i :class="passwordVisible ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+              <i :class="passwordVisible ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
             </button>
           </div>
           <div class="invalid-feedback d-block">{{ form.errors.password }}</div>

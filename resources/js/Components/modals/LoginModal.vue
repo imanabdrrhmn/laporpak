@@ -332,6 +332,15 @@ function handleLogin() {
 
 .form-floating > label {
   padding: 0.75rem 1rem;
+  /* Tambahkan transisi agar smooth */
+  transition: all 0.2s ease-in-out;
+}
+
+/* Tambahkan agar label jadi biru saat floating/focus */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  color: #2563EB;
+  transform: scale(0.85) translateY(-0.5rem);
 }
 
 .form-floating > .form-control {

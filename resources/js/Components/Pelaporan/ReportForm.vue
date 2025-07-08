@@ -127,7 +127,8 @@
               :class="{'is-invalid': validationErrors.source}"
               placeholder="https://contoh-link-berbahaya.com"
               required
-              @input="validateUrl"
+              @input="onUrlInput"
+              @blur="onUrlBlur"
             />
             <div v-if="validationErrors.source" class="invalid-feedback">
               Tautan / URL tidak valid
@@ -293,6 +294,9 @@ const searchInput = ref(null);
 const phoneInputWrapper = ref(null);
 const dropdownMenu = ref(null);
 
+// Flag untuk mencegah duplikasi
+const isUrlUpdating = ref(false);
+
 const sortedCountries = computed(() => {
   return [...allCountries].sort((a, b) => {
     if (a.iso2 === 'id') return -1;
@@ -302,12 +306,28 @@ const sortedCountries = computed(() => {
 });
 
 // Watcher untuk membersihkan input saat kategori berubah
-watch(() => props.formData.category, () => {
-  props.formData.source = '';
-  props.formData.email = '';
-  localPhoneNumber.value = '';
-  props.validationErrors.source = false;
-  props.validationErrors.email = false;
+watch(() => props.formData.category, (newCategory, oldCategory) => {
+  if (newCategory !== oldCategory) {
+    // Reset semua input field
+    props.formData.source = '';
+    props.formData.email = '';
+    localPhoneNumber.value = '';
+    
+    // Reset semua validation errors
+    props.validationErrors.source = false;
+    props.validationErrors.email = false;
+    
+    // Reset flag
+    isUrlUpdating.value = false;
+  }
+});
+
+// Watcher untuk field source (URL) untuk mencegah duplikasi
+watch(() => props.formData.source, (newValue) => {
+  if (props.formData.category === 'Tautan' && newValue && !isUrlUpdating.value) {
+    // Jika ada perubahan dan bukan dari fungsi validateUrl
+    validateUrl();
+  }
 });
 
 // Fungsi Konversi Gambar
@@ -426,38 +446,127 @@ const handleClickOutside = (event) => {
   }
 };
 
-// Fungsi Validasi Input
+// Fungsi Validasi Input - DIPERBAIKI
 const validatePhoneNumber = () => {
   const phoneNumber = localPhoneNumber.value.replace(/\D/g, '');
-  if (!phoneNumber) {
+  if (!phoneNumber || phoneNumber.length === 0) {
     props.validationErrors.source = true;
     props.formData.source = '';
     return;
   }
+  
   const isValid = phoneNumber.length >= 8 && phoneNumber.length <= 15;
   if (isValid) {
     props.formData.source = `+${selectedCountry.value.dialCode}${phoneNumber}`;
     props.validationErrors.source = false;
   } else {
     props.validationErrors.source = true;
+    props.formData.source = '';
   }
 };
 
 const validateEmail = () => {
   const email = props.formData.email;
+  if (!email || email.trim() === '') {
+    props.validationErrors.email = true;
+    return;
+  }
+  
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  props.validationErrors.email = !emailRegex.test(email);
+  const isValid = emailRegex.test(email.trim());
+  props.validationErrors.email = !isValid;
 };
 
+// Fungsi Validasi URL yang DIPERBAIKI
 const validateUrl = () => {
   const url = props.formData.source;
-  const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-  props.validationErrors.source = !urlRegex.test(url);
+  
+  // Set flag untuk mencegah loop
+  isUrlUpdating.value = true;
+  
+  try {
+    // Jika URL kosong, set invalid
+    if (!url || url.trim() === '') {
+      props.validationErrors.source = true;
+      return;
+    }
+    
+    let urlToValidate = url.trim();
+    
+    // Cek apakah URL sudah memiliki protokol
+    if (!urlToValidate.match(/^https?:\/\//i)) {
+      urlToValidate = 'https://' + urlToValidate;
+    }
+    
+    // Gunakan URL constructor untuk validasi
+    const urlObject = new URL(urlToValidate);
+    
+    // Validasi hostname
+    if (!urlObject.hostname || urlObject.hostname.length < 1) {
+      props.validationErrors.source = true;
+      return;
+    }
+    
+    // Validasi domain (harus ada titik atau localhost)
+    if (!urlObject.hostname.includes('.') && urlObject.hostname !== 'localhost') {
+      props.validationErrors.source = true;
+      return;
+    }
+    
+    // Validasi protokol
+    if (!['http:', 'https:'].includes(urlObject.protocol)) {
+      props.validationErrors.source = true;
+      return;
+    }
+    
+    // Validasi berhasil
+    props.validationErrors.source = false;
+    
+    // Update formData hanya jika berbeda untuk mencegah duplikasi
+    if (props.formData.source !== urlToValidate) {
+      props.formData.source = urlToValidate;
+    }
+    
+  } catch (error) {
+    // Fallback dengan regex jika URL constructor gagal
+    try {
+      let urlToValidate = url.trim();
+      
+      // Tambahkan protokol jika tidak ada
+      if (!urlToValidate.match(/^https?:\/\//i)) {
+        urlToValidate = 'https://' + urlToValidate;
+      }
+      
+      // Regex untuk validasi URL yang lebih fleksibel
+      const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.\-~:?#\[\]@!$&'()*+,;=%]*)*\/?$/i;
+      const isValid = urlRegex.test(urlToValidate);
+      
+      if (isValid) {
+        props.validationErrors.source = false;
+        if (props.formData.source !== urlToValidate) {
+          props.formData.source = urlToValidate;
+        }
+      } else {
+        props.validationErrors.source = true;
+      }
+      
+    } catch (regexError) {
+      props.validationErrors.source = true;
+    }
+  } finally {
+    // Reset flag setelah validasi selesai
+    setTimeout(() => {
+      isUrlUpdating.value = false;
+    }, 100);
+  }
 };
 
 // Event Handler untuk Input Telepon
 const onPhoneKeypress = (e) => {
-  if (!/[\d]/.test(e.key)) e.preventDefault();
+  // Hanya izinkan angka
+  if (!/[\d]/.test(e.key)) {
+    e.preventDefault();
+  }
 };
 
 const onPhoneInput = (e) => {
@@ -468,11 +577,34 @@ const onPhoneInput = (e) => {
 };
 
 const onPhoneFocus = () => {
-  // Biarkan kosong untuk menjaga dropdown tetap terbuka
+  // Kosongkan untuk menjaga dropdown tetap terbuka
 };
 
 const onPhoneBlur = () => {
-  validatePhoneNumber();
+  // Delay validasi untuk mencegah conflict dengan dropdown
+  setTimeout(() => {
+    validatePhoneNumber();
+  }, 100);
+};
+
+// Event Handler untuk Input URL - DIPERBAIKI
+const onUrlInput = (e) => {
+  const value = e.target.value;
+  
+  // Update formData langsung tanpa validasi untuk mencegah duplikasi
+  if (!isUrlUpdating.value) {
+    props.formData.source = value;
+    
+    // Validasi dengan delay untuk performa
+    setTimeout(() => {
+      validateUrl();
+    }, 300);
+  }
+};
+
+const onUrlBlur = () => {
+  // Validasi langsung saat blur
+  validateUrl();
 };
 
 // Fungsi Form
@@ -481,23 +613,57 @@ const submitForm = () => {
     alert('Tunggu hingga proses gambar selesai.');
     return;
   }
+  
+  // Validasi final sebelum submit
+  if (props.formData.category === 'Tautan') {
+    validateUrl();
+    if (props.validationErrors.source) {
+      return;
+    }
+  } else if (props.formData.category === 'Email') {
+    validateEmail();
+    if (props.validationErrors.email) {
+      return;
+    }
+  } else if (props.formData.category === 'Nomor Telepon') {
+    validatePhoneNumber();
+    if (props.validationErrors.source) {
+      return;
+    }
+  }
+  
   emit('submit-report');
 };
 
 const resetForm = () => {
   if (formRef.value) formRef.value.reset();
+  
+  // Reset semua data form
   Object.keys(props.formData).forEach((key) => {
-    props.formData[key] = (key === 'category' ? '' : props.formData[key]);
+    if (key === 'category') {
+      props.formData[key] = '';
+    } else {
+      props.formData[key] = '';
+    }
   });
+  
+  // Reset state telepon
   localPhoneNumber.value = '';
   selectedCountry.value = allCountries.find(c => c.iso2 === 'id') || allCountries[0];
   countrySearch.value = '';
   filteredCountries.value = sortedCountries.value;
   showDropdown.value = false;
+  
+  // Reset gambar
   removeImage();
+  
+  // Reset validasi
   Object.keys(props.validationErrors).forEach((key) => {
     props.validationErrors[key] = false;
   });
+  
+  // Reset flag
+  isUrlUpdating.value = false;
 };
 
 // Lifecycle Hooks
@@ -508,10 +674,21 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
-  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value);
+  }
 });
 
-defineExpose({ formRef, resetForm });
+// Expose functions untuk parent component
+defineExpose({ 
+  formRef, 
+  resetForm, 
+  validateUrl, 
+  validateEmail, 
+  validatePhoneNumber,
+  onUrlInput,
+  onUrlBlur
+});
 </script>
 
 <style scoped>
