@@ -1,6 +1,6 @@
 # 📢 Lapor Pak - Sistem Pelaporan & Verifikasi Digital
 
-**Lapor Pak** adalah platform web untuk pelaporan penipuan dan verifikasi informasi berbasis query. Proyek ini memungkinkan pengguna melaporkan kasus penipuan melalui berbagai saluran (email, WhatsApp, SMS), serta melakukan verifikasi data melalui mekanisme top-up dan query berbayar.
+**Lapor Pak** adalah platform web untuk pelaporan penipuan dan verifikasi informasi berbasis query. Proyek ini memungkinkan pengguna melaporkan kasus penipuan melalui berbagai saluran (email, WhatsApp, SMS), serta melakukan verifikasi data melalui mekanisme top-up dan query berbayar.s
 
 ---
 
