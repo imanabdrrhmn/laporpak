@@ -177,25 +177,34 @@ const getStatusBadgeClass = (status) => {
     max-height: 65vh;
     overflow-y: auto;
     scrollbar-width: thin;
+    scrollbar-color: white #f1f1f1;
 }
 
-/* Custom scrollbar styles */
+/* Clean White Scrollbar */
 .modal-body::-webkit-scrollbar {
     width: 8px;
 }
 
 .modal-body::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: white;
     border-radius: 4px;
+    border: 1px solid #e9ecef;
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-    background: #0d6efd;
+    background: white;
     border-radius: 4px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover {
-    background: #0b5ed7;
+    background: #f8f9fa;
+    border-color: #ced4da;
+}
+
+.modal-body::-webkit-scrollbar-corner {
+    background: white;
 }
 
 .table {
@@ -339,6 +348,15 @@ const getStatusBadgeClass = (status) => {
     .table td {
         padding: 0.75rem;
         font-size: 0.9rem;
+    }
+    
+    /* Mobile scrollbar adjustments */
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .modal-body::-webkit-scrollbar-thumb {
+        border-radius: 4px;
     }
 }
 </style>

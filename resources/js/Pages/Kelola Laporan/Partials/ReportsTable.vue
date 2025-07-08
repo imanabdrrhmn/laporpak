@@ -37,9 +37,38 @@
           <td>
             <span class="category-badge">{{ item.category }}</span>
           </td>
-          <td>{{ item.source || 'SMS' }}</td>
+          <td class="source-cell">
+            <div class="source-wrapper">
+              <span class="source-text" :class="{ 'is-url': isUrl(item.source) }" :title="item.source">
+                {{ formatSource(item.source) }}
+              </span>
+              <button 
+                v-if="item.source && item.source.length > 30" 
+                class="btn btn-link btn-sm copy-btn p-0 ms-1"
+                @click="copyToClipboard(item.source)"
+                title="Copy full source"
+              >
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </td>
           <td class="description-cell">
-            {{ truncateText(item.description, 150) }}
+            <div class="description-wrapper">
+              <span class="description-text" :title="item.description">
+                {{ truncateText(item.description, 120) }}
+              </span>
+              <button 
+                v-if="item.description && item.description.length > 120" 
+                class="btn btn-link btn-sm expand-btn p-0 ms-1"
+                @click="toggleDescription(index)"
+                :title="expandedDescriptions[index] ? 'Show less' : 'Show more'"
+              >
+                <i :class="expandedDescriptions[index] ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+              </button>
+            </div>
+            <div v-if="expandedDescriptions[index]" class="expanded-description mt-2">
+              {{ item.description }}
+            </div>
           </td>
           <td>
             <span class="status-badge" :class="getStatusClass(item.status)">
@@ -73,7 +102,22 @@
             <span class="category-badge">{{ item.category }}</span>
           </td>
           <td class="description-cell">
-            {{ truncateText(item.description, 150) }}
+            <div class="description-wrapper">
+              <span class="description-text" :title="item.description">
+                {{ truncateText(item.description, 120) }}
+              </span>
+              <button 
+                v-if="item.description && item.description.length > 120" 
+                class="btn btn-link btn-sm expand-btn p-0 ms-1"
+                @click="toggleDescription(index)"
+                :title="expandedDescriptions[index] ? 'Show less' : 'Show more'"
+              >
+                <i :class="expandedDescriptions[index] ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+              </button>
+            </div>
+            <div v-if="expandedDescriptions[index]" class="expanded-description mt-2">
+              {{ item.description }}
+            </div>
           </td>
           <td>
             <span class="status-badge" :class="getStatusClass(item.status)">
@@ -104,10 +148,25 @@
           <td class="ps-4 fw-medium">{{ index + 1 }}</td>
           <td>{{ formatDate(item.tanggal) }}</td>
           <td class="description-cell">
-            {{ truncateText(item.data, 150) }}
+            <div class="description-wrapper">
+              <span class="description-text" :title="item.data">
+                {{ truncateText(item.data, 120) }}
+              </span>
+              <button 
+                v-if="item.data && item.data.length > 120" 
+                class="btn btn-link btn-sm expand-btn p-0 ms-1"
+                @click="toggleDescription(index)"
+                :title="expandedDescriptions[index] ? 'Show less' : 'Show more'"
+              >
+                <i :class="expandedDescriptions[index] ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+              </button>
+            </div>
+            <div v-if="expandedDescriptions[index]" class="expanded-description mt-2">
+              {{ item.data }}
+            </div>
           </td>
           <td class="description-cell">
-            <span class="query-text">{{ truncateText(item.query, 150) }}</span>
+            <span class="query-text">{{ truncateText(item.query, 100) }}</span>
           </td>
           <td>
             <span class="status-badge" :class="getStatusClass(item.hasil)">
@@ -148,12 +207,39 @@
           
           <div class="card-info">
             <div class="category-badge">{{ item.category }}</div>
-            <div :class="isUrl(item.source) ? 'url-text' : 'source-text'">
-              {{ item.source || 'SMS' }}
+          </div>
+          
+          <!-- Mobile Source with better handling -->
+          <div class="mobile-source-wrapper">
+            <div class="mobile-source-label">Sumber:</div>
+            <div class="mobile-source-content">
+              <span class="mobile-source-text" :class="{ 'is-url': isUrl(item.source) }">
+                {{ formatSource(item.source, 40) }}
+              </span>
+              <button 
+                v-if="item.source && item.source.length > 40" 
+                class="btn btn-link btn-sm copy-btn p-0 ms-1"
+                @click="copyToClipboard(item.source)"
+                title="Copy full source"
+              >
+                <i class="fas fa-copy"></i>
+              </button>
             </div>
           </div>
           
-          <p class="card-description">{{ truncateText(item.description, 80) }}</p>
+          <div class="card-description-wrapper">
+            <p class="card-description">{{ truncateText(item.description, 80) }}</p>
+            <button 
+              v-if="item.description && item.description.length > 80" 
+              class="btn btn-link btn-sm expand-btn p-0"
+              @click="toggleMobileDescription(index)"
+            >
+              {{ expandedMobileDescriptions[index] ? 'Show less' : 'Show more' }}
+            </button>
+            <div v-if="expandedMobileDescriptions[index]" class="expanded-mobile-description mt-2">
+              {{ item.description }}
+            </div>
+          </div>
           
           <div class="card-bottom">
             <span class="status-badge" :class="getStatusClass(item.status)">
@@ -183,7 +269,19 @@
             <div class="category-badge">{{ item.category }}</div>
           </div>
           
-          <p class="card-description">{{ truncateText(item.description, 80) }}</p>
+          <div class="card-description-wrapper">
+            <p class="card-description">{{ truncateText(item.description, 80) }}</p>
+            <button 
+              v-if="item.description && item.description.length > 80" 
+              class="btn btn-link btn-sm expand-btn p-0"
+              @click="toggleMobileDescription(index)"
+            >
+              {{ expandedMobileDescriptions[index] ? 'Show less' : 'Show more' }}
+            </button>
+            <div v-if="expandedMobileDescriptions[index]" class="expanded-mobile-description mt-2">
+              {{ item.description }}
+            </div>
+          </div>
           
           <div class="card-bottom">
             <span class="status-badge" :class="getStatusClass(item.status)">
@@ -209,7 +307,19 @@
             <span class="card-date">{{ formatDate(item.tanggal) }}</span>
           </div>
           
-          <p class="card-description">{{ truncateText(item.data, 60) }}</p>
+          <div class="card-description-wrapper">
+            <p class="card-description">{{ truncateText(item.data, 60) }}</p>
+            <button 
+              v-if="item.data && item.data.length > 60" 
+              class="btn btn-link btn-sm expand-btn p-0"
+              @click="toggleMobileDescription(index)"
+            >
+              {{ expandedMobileDescriptions[index] ? 'Show less' : 'Show more' }}
+            </button>
+            <div v-if="expandedMobileDescriptions[index]" class="expanded-mobile-description mt-2">
+              {{ item.data }}
+            </div>
+          </div>
           
           <div class="query-simple">{{ truncateText(item.query, 50) }}</div>
           
@@ -239,6 +349,8 @@
 </template>
 
 <script setup>
+import { ref, reactive } from 'vue'
+
 defineProps({
   selectedTab: String,
   displayedData: Array,
@@ -248,31 +360,63 @@ defineProps({
   getStatusTextClass: Function,
 });
 
+// Reactive states for expanded descriptions
+const expandedDescriptions = reactive({})
+const expandedMobileDescriptions = reactive({})
+
 // Function to check if text is URL
 const isUrl = (text) => {
   if (!text) return false;
-  return text.startsWith('http://') || text.startsWith('https://') || text.includes('www.') || text.length > 30;
+  return text.startsWith('http://') || text.startsWith('https://') || text.includes('www.') || text.includes('@');
 };
 
-// Function to truncate URL
-const truncateUrl = (url, maxLength = 30) => {
-  if (!url || url.length <= maxLength) return url;
+// Function to format source text
+const formatSource = (source, maxLength = 30) => {
+  if (!source) return 'SMS';
   
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    const parts = url.split('/');
-    const domain = parts[2];
-    const path = parts.slice(3).join('/');
-    
-    if (domain.length > maxLength - 3) {
-      return domain.substring(0, maxLength - 3) + '...';
-    }
-    
-    if (path && (domain + '/' + path).length > maxLength) {
-      return domain + '/...' + path.substring(path.length - (maxLength - domain.length - 6));
+  if (source.length <= maxLength) return source;
+  
+  // Handle URLs
+  if (isUrl(source)) {
+    if (source.includes('@')) {
+      // Email
+      const [local, domain] = source.split('@');
+      if (local.length > 10) {
+        return `${local.substring(0, 8)}...@${domain}`;
+      }
+      return source;
+    } else {
+      // URL
+      try {
+        const url = new URL(source.startsWith('http') ? source : `https://${source}`);
+        return url.hostname + (url.pathname !== '/' ? '/...' : '');
+      } catch {
+        return source.substring(0, maxLength - 3) + '...';
+      }
     }
   }
   
-  return url.substring(0, maxLength - 3) + '...';
+  return source.substring(0, maxLength - 3) + '...';
+};
+
+// Function to toggle description expansion
+const toggleDescription = (index) => {
+  expandedDescriptions[index] = !expandedDescriptions[index];
+};
+
+const toggleMobileDescription = (index) => {
+  expandedMobileDescriptions[index] = !expandedMobileDescriptions[index];
+};
+
+// Function to copy text to clipboard
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    // You can add toast notification here
+    console.log('Copied to clipboard:', text);
+  } catch (err) {
+    console.error('Failed to copy:', err);
+  }
 };
 
 defineEmits(['openDetailModal']);
@@ -315,11 +459,90 @@ defineEmits(['openDetailModal']);
   vertical-align: middle;
 }
 
+/* Enhanced source cell styling */
+.source-cell {
+  max-width: 200px;
+  position: relative;
+}
+
+.source-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.source-text {
+  font-size: 12px;
+  color: #6c757d;
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.source-text.is-url {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  color: #0d6efd;
+}
+
+/* Enhanced description cell styling */
 .description-cell {
-  max-width: 250px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: 300px;
+  position: relative;
+}
+
+.description-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.description-text {
+  flex: 1;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
+
+.expanded-description {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #495057;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Button styles */
+.copy-btn, .expand-btn {
+  color: #6c757d;
+  font-size: 12px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.copy-btn:hover, .expand-btn:hover {
+  color: #0d6efd;
+}
+
+.copy-btn:focus, .expand-btn:focus {
+  box-shadow: none;
+  outline: none;
 }
 
 /* Desktop Empty State */
@@ -382,7 +605,7 @@ defineEmits(['openDetailModal']);
   .mobile-card {
     margin: 0;
     height: 100%;
-    min-height: 180px;
+    min-height: 220px;
   }
 
   .card-content {
@@ -391,8 +614,8 @@ defineEmits(['openDetailModal']);
 
   .card-description {
     font-size: 14px;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 
   .card-number {
@@ -416,10 +639,6 @@ defineEmits(['openDetailModal']);
     font-size: 12px;
     padding: 8px 16px;
   }
-
-  .source-text, .url-text, .email-text {
-    font-size: 12px;
-  }
 }
 
 /* Mobile card layout (below 768px) */
@@ -429,7 +648,7 @@ defineEmits(['openDetailModal']);
   }
 
   .mobile-card {
-    min-height: 160px;
+    min-height: 200px;
   }
 
   .card-description {
@@ -444,7 +663,7 @@ defineEmits(['openDetailModal']);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  min-height: 160px;
+  min-height: 180px;
   display: flex;
   flex-direction: column;
 }
@@ -488,40 +707,56 @@ defineEmits(['openDetailModal']);
   flex-wrap: wrap;
 }
 
-.source-text {
-  font-size: 11px;
-  color: #6c757d;
+/* Mobile source styling */
+.mobile-source-wrapper {
+  margin-bottom: 12px;
+  padding: 8px 12px;
   background: #f8f9fa;
-  padding: 2px 6px;
-  border-radius: 4px;
-  word-break: break-all;
-  overflow-wrap: break-word;
-  max-width: 100%;
-  line-height: 1.2;
-  white-space: normal;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
 }
 
-.url-text, .email-text {
-  font-size: 11px;
+.mobile-source-label {
+  font-size: 10px;
   color: #6c757d;
-  background: #f8f9fa;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-source-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobile-source-text {
+  font-size: 12px;
+  color: #495057;
   word-break: break-all;
   overflow-wrap: break-word;
-  max-width: 100%;
-  line-height: 1.2;
-  white-space: normal;
-  display: block;
-  margin-top: 4px;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.mobile-source-text.is-url {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  color: #0d6efd;
+}
+
+/* Mobile description wrapper */
+.card-description-wrapper {
+  flex: 1;
+  margin-bottom: 12px;
 }
 
 .card-description {
   font-size: 13px;
   color: #212529;
-  line-height: 1.3;
-  margin: 0 0 8px 0;
-  flex: 1;
+  line-height: 1.4;
+  margin: 0;
   word-break: break-word;
   overflow-wrap: break-word;
   display: -webkit-box;
@@ -529,6 +764,19 @@ defineEmits(['openDetailModal']);
   line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.expanded-mobile-description {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #495057;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 .query-simple {
@@ -675,7 +923,7 @@ defineEmits(['openDetailModal']);
   .mobile-card {
     margin: 0 -8px;
     border-radius: 8px;
-    min-height: 140px;
+    min-height: 180px;
   }
   
   .card-content {
@@ -696,8 +944,12 @@ defineEmits(['openDetailModal']);
     line-clamp: 2;
   }
 
-  .source-text, .url-text, .email-text {
-    font-size: 10px;
+  .mobile-source-text {
+    font-size: 11px;
+  }
+
+  .mobile-source-label {
+    font-size: 9px;
   }
 
   .category-badge,
@@ -714,6 +966,114 @@ defineEmits(['openDetailModal']);
   .detail-btn {
     font-size: 10px;
     padding: 4px 8px;
+  }
+
+  .expanded-mobile-description {
+    font-size: 12px;
+    max-height: 120px;
+  }
+}
+
+/* Tooltip styles for truncated text */
+.source-text[title]:hover,
+.description-text[title]:hover {
+  cursor: help;
+}
+
+/* Scrollbar styling for expanded descriptions */
+.expanded-description::-webkit-scrollbar,
+.expanded-mobile-description::-webkit-scrollbar {
+  width: 4px;
+}
+
+.expanded-description::-webkit-scrollbar-track,
+.expanded-mobile-description::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.expanded-description::-webkit-scrollbar-thumb,
+.expanded-mobile-description::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.expanded-description::-webkit-scrollbar-thumb:hover,
+.expanded-mobile-description::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animation for expand/collapse */
+.expanded-description,
+.expanded-mobile-description {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading state styles (optional) */
+.loading-text {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  height: 1em;
+  margin: 2px 0;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Enhanced table row hover effect */
+.table-row:hover .source-text,
+.table-row:hover .description-text {
+  background-color: #e3f2fd;
+}
+
+/* Focus styles for accessibility */
+.copy-btn:focus,
+.expand-btn:focus,
+.detail-btn:focus {
+  outline: 2px solid #0d6efd;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .copy-btn,
+  .expand-btn,
+  .detail-btn {
+    display: none;
+  }
+  
+  .expanded-description,
+  .expanded-mobile-description {
+    display: block !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  .mobile-cards {
+    display: none;
+  }
+  
+  .table-responsive {
+    display: block !important;
   }
 }
 </style>
