@@ -35,7 +35,7 @@
           @click="$emit('update:selectedTab', 'verifikasi')"
         >
           <i class="fas fa-check-circle me-2 me-md-3"></i>
-          <span class="fw-medium menu-text">Verifikasi</span>
+          <span class="fw-medium menu-text">Verifikasi Data</span>
           <i class="fas fa-chevron-right ms-auto chevron-icon"></i>
         </button>
       </div>

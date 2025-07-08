@@ -73,9 +73,9 @@ Route::get('/pelaporan', [ReportController::class, 'create'])->name('laporan.cre
 Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
 
 //Public Populasi
-Route::get('/Populasi', function () {
-    return Inertia::render('Populasi/CekPopulasi');
-})->name('populasi');
+// Route::get('/Populasi', function () {
+//     return Inertia::render('Populasi/CekPopulasi');
+// })->name('populasi');
 
 
 

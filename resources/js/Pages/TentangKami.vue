@@ -154,7 +154,7 @@
                         <i class="bi bi-geo-alt me-3 contact-icon fs-4 animate__animated" data-animation="animate__bounceIn" data-delay="0.7s"></i>
                         <span>Jakarta Barat, Jl. Ahmad Yani</span>
                       </div>
-                      <div class="d-flex justify-content-start gap-3 mt-4">
+                      <!-- <div class="d-flex justify-content-start gap-3 mt-4">
                         <a
                           href="https://twitter.com/laporpak"
                           class="text-muted animate__animated"
@@ -179,7 +179,7 @@
                         >
                           <i class="bi bi-linkedin fs-4"></i>
                         </a>
-                      </div>
+                      </div> -->
                     </div>
                   </div>
                 </div>
@@ -231,7 +231,7 @@ const services = ref([
     colClass: 'col-md-6' 
   },
   { 
-    title: 'Visualisasi Populasi Penduduk Indonesia', 
+    title: 'Visualisasi Populasi Penduduk Indonesia (Coming Soon)', 
     icon: 'bi bi-bar-chart-line', 
     colClass: 'col-md-6' 
   },

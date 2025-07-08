@@ -183,14 +183,16 @@
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/Populasi"
-                    class="dropdown-item"
-                    :class="{ active: $page.url === '/CekPopulasi' }"
+                  <span
+                    class="dropdown-item disabled"
+                    style="cursor: not-allowed;"
+                    @click.prevent
+                    aria-disabled="true"
                   >
                     <i class="bi bi-people me-2"></i>
                     Cek Populasi
-                  </Link>
+                    <span class="badge bg-warning text-dark ms-2">Coming Soon</span>
+                  </span>
                 </li>
               </ul>
             </li>
@@ -307,10 +309,16 @@
                   <i class="bi bi-search me-2"></i>
                   Cari Laporan
                 </Link>
-                <Link href="/Populasi" class="nav-link" @click="closeMobileNav">
+                <span
+                  class="nav-link disabled"
+                  style="cursor: not-allowed;"
+                  @click.prevent
+                  aria-disabled="true"
+                >
                   <i class="bi bi-people me-2"></i>
                   Cek Populasi
-                </Link>
+                  <span class="badge bg-warning text-dark ms-2">Coming Soon</span>
+                </span>
               </div>
             </div>
           </li>
@@ -626,6 +634,19 @@ export default {
 .dropdown-divider {
   margin: 0.5rem 0;
   border-color: #dee2e6;
+}
+
+/* Disabled Item Styles */
+.dropdown-item.disabled,
+.nav-link.disabled {
+  color: #6c757d !important;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.badge.bg-warning {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
 }
 
 /* Desktop Navigation */

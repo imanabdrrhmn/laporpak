@@ -4,11 +4,11 @@
     <div class="container">
       <div class="row align-items-center">
         <div class="col-lg-6 hero-content">
-          <h1 class="display-4 fw-bold mb-3 text-start hero-title">
+          <h1 class="display-4 fw-bold mb-3 hero-title">
             Peta Interaktif Laporan Penipuan
           </h1>
-          <div class="line-separator"></div>
-          <p class="lead mt-4 text-start hero-description">
+          <div class="highlight-bar"></div>
+          <p class="lead mt-4 hero-description">
             Temukan informasi terkini tentang lokasi penipuan yang dilaporkan oleh masyarakat.
             Bantu kami melindungi komunitas dengan berbagi informasi.
           </p>
@@ -142,17 +142,25 @@ const mapPins = computed(() => [
   opacity: 0.3;
 }
 
-.line-separator {
+.highlight-bar {
   height: 5px;
-  width: 60px;
-  background: linear-gradient(to right, #ffb74d, #f57c00);
-  margin-bottom: 15px;
-  border-radius: 3px;
+  background-color: #ffc107;
+  border-radius: 2px;
+  width: clamp(120px, 60vw, 400px);
+  margin: 0; /* Changed from 'margin: 0 auto' to align left */
 }
 
 .hero-content {
+  text-align: left; /* Changed from center to left for desktop */
   padding-right: 15px;
-  text-align: center;
+}
+
+.hero-title {
+  text-align: left !important; /* Changed from center to left for desktop */
+}
+
+.hero-description {
+  text-align: left !important; /* Changed from center to left for desktop */
 }
 
 .map-container {
@@ -224,7 +232,7 @@ const mapPins = computed(() => [
   animation: fadeInLeft var(--animation-duration) ease forwards;
 }
 
-.line-separator {
+.highlight-bar {
   animation: fadeInLeft var(--animation-duration) 0.1s ease forwards;
   opacity: 0;
 }
@@ -290,17 +298,29 @@ const mapPins = computed(() => [
   }
 }
 
-/* Media queries yang dioptimalkan */
+/* Media queries yang dioptimalkan untuk mobile dan tablet */
 @media (max-width: 992px) {
   .hero-content {
     padding-bottom: 30px;
+    text-align: center; /* Back to center for mobile/tablet */
   }
-  .line-separator {
-    margin: 0 auto 15px;
+  
+  .hero-title {
+    text-align: center !important; /* Back to center for mobile/tablet */
   }
+  
+  .hero-description {
+    text-align: center !important; /* Back to center for mobile/tablet */
+  }
+  
+  .highlight-bar {
+    margin: 0 auto 15px; /* Back to center for mobile/tablet */
+  }
+  
   .stats {
     margin-bottom: 30px;
   }
+  
   .map-container {
     margin-bottom: 20px;
   }
@@ -309,23 +329,27 @@ const mapPins = computed(() => [
 @media (max-width: 768px) {
   .hero-section {
     padding: 40px 0;
-    min-height: 40vh;
+    min-height: 60vh;
   }
-  .hero-content h1 {
+  
+  .hero-title {
     font-size: 1.8rem;
+    text-align: center !important;
   }
-  .hero-content p.lead {
+  
+  .hero-description {
     font-size: 1rem;
+    text-align: center !important;
   }
+  
   .stat-item {
-    padding: 8px;
-  }
-  .stat-number {
     font-size: 1.5rem;
   }
+  
   .stat-label {
     font-size: 0.7rem;
   }
+  
   .map-pin {
     font-size: 18px;
   }
@@ -334,26 +358,36 @@ const mapPins = computed(() => [
 @media (max-width: 576px) {
   .hero-section {
     padding: 30px 0;
-    min-height: 35vh;
+    min-height: 60vh;
   }
-  .hero-content h1 {
+  
+  .hero-title {
     font-size: 1.5rem;
+    text-align: center !important;
   }
-  .hero-content p.lead {
+  
+  .hero-description {
     font-size: 0.9rem;
+    text-align: center !important;
   }
-  .line-separator {
-    width: 50px;
+  
+  .highlight-bar {
+    width: clamp(100px, 50vw, 300px);
+    margin: 0 auto;
   }
+  
   .stat-item {
     margin-bottom: 10px;
   }
+  
   .stat-number {
     font-size: 1.2rem;
   }
+  
   .stat-label {
     font-size: 0.65rem;
   }
+  
   .map-pin {
     font-size: 16px;
   }
@@ -361,39 +395,45 @@ const mapPins = computed(() => [
 
 /* Reduced motion untuk accessibility */
 @media (prefers-reduced-motion: reduce) {
+  .hero-section *,
   .hero-title,
-  .line-separator,
+  .highlight-bar,
   .hero-description,
   .hero-stats,
   .hero-map {
-    animation: none;
+    animation: none !important;
     opacity: 1;
   }
   
   .map-pin.pulse {
-    animation: none;
+    animation: none !important;
   }
   
   .stat-item:hover,
   .map-container:hover .map-image {
-    transform: none;
+    transform: none !important;
   }
 }
 
-/* Print styles */
+/* Print styles untuk printing */
 @media print {
   .hero-section {
-    background: white !important;
+    background: none !important;
     color: black !important;
-    padding: 20px 0;
+    padding: 20px !important;
   }
   
-  .hero-section::before {
-    display: none;
+  .hero-section::before,
+  .hero-overlay {
+    display: none !important;
   }
   
   .map-pin.pulse {
-    animation: none;
+    animation: none !important;
+  }
+  
+  .highlight-bar {
+    background-color: #000 !important;
   }
 }
 </style>

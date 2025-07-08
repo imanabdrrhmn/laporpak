@@ -1,6 +1,6 @@
 <template>
-  <!-- Desktop View - Table -->
-  <div class="table-responsive d-none d-xxxl-block">
+  <!-- Desktop View - Table (1400px and above) -->
+  <div class="table-responsive d-none d-xl-block">
     <table class="table table-hover align-middle mb-0">
       <thead>
         <tr v-if="selectedTab === 'penipuan'">
@@ -135,8 +135,8 @@
     </table>
   </div>
 
-  <!-- Tablet/Mobile View - Cards -->
-  <div class="mobile-cards d-block d-xxxl-none">
+  <!-- iPad/Mobile View - Cards (Below 1400px) -->
+  <div class="mobile-cards d-block d-xl-none">
     <!-- Penipuan Cards -->
     <div v-if="selectedTab === 'penipuan'" class="cards-container">
       <div v-for="(item, index) in displayedData" :key="index" class="mobile-card">
@@ -148,7 +148,9 @@
           
           <div class="card-info">
             <div class="category-badge">{{ item.category }}</div>
-            <div class="source-text">{{ item.source || 'SMS' }}</div>
+            <div :class="isUrl(item.source) ? 'url-text' : 'source-text'">
+              {{ item.source || 'SMS' }}
+            </div>
           </div>
           
           <p class="card-description">{{ truncateText(item.description, 80) }}</p>
@@ -226,7 +228,7 @@
       </div>
     </div>
 
-    <!-- Empty State for Mobile -->
+    <!-- Empty State for Cards -->
     <div v-if="displayedData.length === 0" class="mobile-empty-state">
       <i class="fas fa-folder-open"></i>
       <p v-if="selectedTab === 'penipuan'">Tidak ada laporan penipuan</p>
@@ -243,14 +245,41 @@ defineProps({
   formatDate: Function,
   truncateText: Function,
   getStatusClass: Function,
-  getStatusTextClass: Function, // Added this prop
+  getStatusTextClass: Function,
 });
+
+// Function to check if text is URL
+const isUrl = (text) => {
+  if (!text) return false;
+  return text.startsWith('http://') || text.startsWith('https://') || text.includes('www.') || text.length > 30;
+};
+
+// Function to truncate URL
+const truncateUrl = (url, maxLength = 30) => {
+  if (!url || url.length <= maxLength) return url;
+  
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    const parts = url.split('/');
+    const domain = parts[2];
+    const path = parts.slice(3).join('/');
+    
+    if (domain.length > maxLength - 3) {
+      return domain.substring(0, maxLength - 3) + '...';
+    }
+    
+    if (path && (domain + '/' + path).length > maxLength) {
+      return domain + '/...' + path.substring(path.length - (maxLength - domain.length - 6));
+    }
+  }
+  
+  return url.substring(0, maxLength - 3) + '...';
+};
 
 defineEmits(['openDetailModal']);
 </script>
 
 <style scoped>
-/* Original Table Styles (Desktop/Tablet) */
+/* Desktop Table Styles */
 .table-header {
   background-color: #0d6efd !important;
   color: white;
@@ -293,132 +322,39 @@ defineEmits(['openDetailModal']);
   text-overflow: ellipsis;
 }
 
-/* Nest Hub and large tablet card layout */
-@media (min-width: 992px) and (max-width: 1599.98px) {
-  .cards-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    padding: 0 16px;
-  }
-
-  .mobile-card {
-    margin: 0;
-    height: 100%;
-    min-height: 160px;
-  }
-
-  .card-content {
-    padding: 16px;
-  }
-
-  .card-description {
-    font-size: 14px;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-  }
-
-  .card-number {
-    font-size: 15px;
-  }
-
-  .card-date {
-    font-size: 13px;
-  }
-
-  .category-badge,
-  .status-badge {
-    font-size: 12px;
-    padding: 4px 10px;
-  }
-
-  .query-simple {
-    font-size: 12px;
-    padding: 8px 12px;
-  }
-
-  .detail-btn {
-    font-size: 13px;
-    padding: 8px 16px;
-  }
+/* Desktop Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
 }
 
-/* iPad/iPad Pro card layout */
-@media (min-width: 768px) and (max-width: 1399.98px) {
-  .cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 20px;
-    padding: 0 12px;
-  }
-
-  .mobile-card {
-    margin: 0;
-    height: 100%;
-  }
-
-  .card-content {
-    height: 100%;
-  }
-
-  .card-description {
-    font-size: 14px;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-  }
-
-  .card-number {
-    font-size: 14px;
-  }
-
-  .card-date {
-    font-size: 12px;
-  }
-
-  .category-badge,
-  .status-badge {
-    font-size: 11px;
-  }
-
-  .query-simple {
-    font-size: 11px;
-  }
-
-  .detail-btn {
-    font-size: 12px;
-    padding: 8px 16px;
-  }
+.empty-state i {
+  font-size: 2.5rem;
+  opacity: 0.5;
+  display: block;
+  margin-bottom: 12px;
 }
 
-/* Tablet-specific card adjustments */
-@media (min-width: 768px) and (max-width: 991.98px) {
-  .cards-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 0 8px;
-  }
-
-  .mobile-card {
-    margin: 0;
-    height: 100%;
-  }
-
-  .card-content {
-    height: 100%;
-  }
-
-  .card-description {
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-  }
+.empty-state p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
 }
 
-/* Adjust mobile cards for smaller screens */
-@media (max-width: 767.98px) {
-  .cards-container {
-    padding: 0 8px;
-  }
+/* Query Text for Desktop Table */
+.query-text {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  background: #f8f9fa;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 /* Mobile Cards Styles */
@@ -430,6 +366,76 @@ defineEmits(['openDetailModal']);
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 28px;
+  margin-bottom: 28px;
+}
+
+/* iPad card layout (768px to 1399px) */
+@media (min-width: 768px) and (max-width: 1399.98px) {
+  .cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 0 12px;
+  }
+
+  .mobile-card {
+    margin: 0;
+    height: 100%;
+    min-height: 180px;
+  }
+
+  .card-content {
+    height: 100%;
+  }
+
+  .card-description {
+    font-size: 14px;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+
+  .card-number {
+    font-size: 14px;
+  }
+
+  .card-date {
+    font-size: 12px;
+  }
+
+  .category-badge,
+  .status-badge {
+    font-size: 11px;
+  }
+
+  .query-simple {
+    font-size: 11px;
+  }
+
+  .detail-btn {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+
+  .source-text, .url-text, .email-text {
+    font-size: 12px;
+  }
+}
+
+/* Mobile card layout (below 768px) */
+@media (max-width: 767.98px) {
+  .cards-container {
+    padding: 0 8px;
+  }
+
+  .mobile-card {
+    min-height: 160px;
+  }
+
+  .card-description {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
 }
 
 .mobile-card {
@@ -438,7 +444,9 @@ defineEmits(['openDetailModal']);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  min-height: 140px; /* Konsisten ukuran card */
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
 }
 
 .mobile-card:hover {
@@ -450,6 +458,7 @@ defineEmits(['openDetailModal']);
   display: flex;
   flex-direction: column;
   height: 100%;
+  flex: 1;
 }
 
 .card-header-simple {
@@ -457,6 +466,7 @@ defineEmits(['openDetailModal']);
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .card-number {
@@ -472,9 +482,10 @@ defineEmits(['openDetailModal']);
 
 .card-info {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .source-text {
@@ -483,6 +494,26 @@ defineEmits(['openDetailModal']);
   background: #f8f9fa;
   padding: 2px 6px;
   border-radius: 4px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.url-text, .email-text {
+  font-size: 11px;
+  color: #6c757d;
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  line-height: 1.2;
+  white-space: normal;
+  display: block;
+  margin-top: 4px;
 }
 
 .card-description {
@@ -491,9 +522,11 @@ defineEmits(['openDetailModal']);
   line-height: 1.3;
   margin: 0 0 8px 0;
   flex: 1;
+  word-break: break-word;
+  overflow-wrap: break-word;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -507,9 +540,16 @@ defineEmits(['openDetailModal']);
   border-radius: 4px;
   margin-bottom: 8px;
   border: 1px solid #dee2e6;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.2;
+  max-height: 4em;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .card-bottom {
@@ -517,6 +557,8 @@ defineEmits(['openDetailModal']);
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
+  flex-shrink: 0;
+  gap: 8px;
 }
 
 /* Category Badge */
@@ -528,6 +570,9 @@ defineEmits(['openDetailModal']);
   font-size: 10px;
   font-weight: 600;
   display: inline-block;
+  word-break: break-word;
+  max-width: 100%;
+  flex-shrink: 0;
 }
 
 /* Status Badge */
@@ -538,6 +583,8 @@ defineEmits(['openDetailModal']);
   font-weight: 600;
   text-transform: capitalize;
   display: inline-block;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .status-badge.pending {
@@ -575,20 +622,6 @@ defineEmits(['openDetailModal']);
   color: #333;
 }
 
-/* Query Text Desktop */
-.query-text {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 11px;
-  background: #f8f9fa;
-  padding: 4px 6px;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
-  color: #495057;
-  display: inline-block;
-  max-width: 100%;
-  word-break: break-all;
-}
-
 /* Detail Button */
 .detail-btn {
   background: #0d6efd;
@@ -600,6 +633,7 @@ defineEmits(['openDetailModal']);
   transition: all 0.2s ease;
   box-shadow: none;
   color: white;
+  flex-shrink: 0;
 }
 
 .detail-btn:hover {
@@ -636,59 +670,50 @@ defineEmits(['openDetailModal']);
   font-weight: 500;
 }
 
-/* Desktop Empty State */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: #6c757d;
-}
-
-.empty-state i {
-  font-size: 2.5rem;
-  opacity: 0.5;
-  display: block;
-  margin-bottom: 12px;
-}
-
-.empty-state p {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
-}
-
 /* Responsive adjustments for very small screens */
 @media (max-width: 360px) {
   .mobile-card {
     margin: 0 -8px;
     border-radius: 8px;
+    min-height: 140px;
   }
   
-  .card-header {
-    padding: 10px 12px;
-  }
-  
-  .card-body {
+  .card-content {
     padding: 12px;
   }
   
-  .card-footer {
-    padding: 10px 12px;
+  .card-number {
+    font-size: 12px;
   }
   
-  .card-label {
-    min-width: 60px;
-    font-size: 11px;
+  .card-date {
+    font-size: 10px;
   }
   
-  .card-description,
-  .card-value {
-    font-size: 13px;
+  .card-description {
+    font-size: 12px;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
-}
 
-/* Tambahkan jarak antara garis atas dan cards-container */
-.cards-container {
-  margin-top: 28px;
-  margin-bottom: 28px;
+  .source-text, .url-text, .email-text {
+    font-size: 10px;
+  }
+
+  .category-badge,
+  .status-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .query-simple {
+    font-size: 9px;
+    padding: 4px 6px;
+  }
+
+  .detail-btn {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
 }
 </style>
